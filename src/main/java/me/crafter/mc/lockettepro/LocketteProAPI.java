@@ -4,11 +4,8 @@ import org.bukkit.Effect;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
-import org.bukkit.material.MaterialData;
-import org.bukkit.material.Openable;
 
 public class LocketteProAPI {
 
@@ -19,13 +16,13 @@ public class LocketteProAPI {
 		if (block == null) return false;
 		switch (block.getType()){
 		// Double Doors
-		case WOODEN_DOOR:
+		case OAK_DOOR:
 		case SPRUCE_DOOR:
 		case BIRCH_DOOR:
 		case JUNGLE_DOOR:
 		case ACACIA_DOOR:
 		case DARK_OAK_DOOR:
-		case IRON_DOOR_BLOCK:
+		case IRON_DOOR:
 			Block[] doors = getDoors(block);
 			if (doors == null) return false;
 			for (BlockFace doorface : newsfaces){
@@ -64,13 +61,13 @@ public class LocketteProAPI {
 	public static boolean isOwner(Block block, Player player){
 		switch (block.getType()){
 		// Double Doors
-		case WOODEN_DOOR:
+		case OAK_DOOR:
 		case SPRUCE_DOOR:
 		case BIRCH_DOOR:
 		case JUNGLE_DOOR:
 		case ACACIA_DOOR:
 		case DARK_OAK_DOOR:
-		case IRON_DOOR_BLOCK:
+		case IRON_DOOR:
 			Block[] doors = getDoors(block);
 			if (doors == null) return false;
 			for (BlockFace doorface : newsfaces){
@@ -109,13 +106,13 @@ public class LocketteProAPI {
 	public static boolean isUser(Block block, Player player){
 		switch (block.getType()){
 		// Double Doors
-		case WOODEN_DOOR:
+		case OAK_DOOR:
 		case SPRUCE_DOOR:
 		case BIRCH_DOOR:
 		case JUNGLE_DOOR:
 		case ACACIA_DOOR:
 		case DARK_OAK_DOOR:
-		case IRON_DOOR_BLOCK:
+		case IRON_DOOR:
 			Block[] doors = getDoors(block);
 			if (doors == null) return false;
 			for (BlockFace doorface : newsfaces){
@@ -213,7 +210,6 @@ public class LocketteProAPI {
 		switch (material){
 		case SIGN:
 		case WALL_SIGN:
-		case SIGN_POST:
 			return false;
 		default:
 			break;
@@ -243,13 +239,13 @@ public class LocketteProAPI {
 	public static boolean isUpDownAlsoLockableBlock(Block block){
 		if (Config.isLockable(block.getType())){
 			switch (block.getType()){
-			case WOODEN_DOOR:
+			case OAK_DOOR:
 			case SPRUCE_DOOR:
 			case BIRCH_DOOR:
 			case JUNGLE_DOOR:
 			case ACACIA_DOOR:
 			case DARK_OAK_DOOR:
-			case IRON_DOOR_BLOCK:
+			case IRON_DOOR:
 				return true;
 			default:
 				return false;
@@ -261,23 +257,23 @@ public class LocketteProAPI {
 	public static boolean mayInterfere(Block block, Player player){
 		// if LEFT may interfere RIGHT
 		switch (block.getType()){
-		case WOODEN_DOOR:
+		case OAK_DOOR:
 		case SPRUCE_DOOR:
 		case BIRCH_DOOR:
 		case JUNGLE_DOOR:
 		case ACACIA_DOOR:
 		case DARK_OAK_DOOR:
-		case IRON_DOOR_BLOCK:
+		case IRON_DOOR:
 			for (BlockFace blockface : newsfaces){
 				Block newblock = block.getRelative(blockface);
 				switch (newblock.getType()){
-				case WOODEN_DOOR:
+				case OAK_DOOR:
 				case SPRUCE_DOOR:
 				case BIRCH_DOOR:
 				case JUNGLE_DOOR:
 				case ACACIA_DOOR:
 				case DARK_OAK_DOOR:
-				case IRON_DOOR_BLOCK:
+				case IRON_DOOR:
 					if (isLocked(newblock) && !isOwner(newblock, player)){
 						return true;
 					}
@@ -307,7 +303,7 @@ public class LocketteProAPI {
 		case CHEST:
 		case TRAPPED_CHEST:
 		case WALL_SIGN:
-		case SIGN_POST:
+		case SIGN:
 			for (BlockFace blockface : allfaces){
 				Block newblock = block.getRelative(blockface);
 				switch (newblock.getType()){
@@ -522,13 +518,13 @@ public class LocketteProAPI {
 	
 	public static boolean isDoubleDoorBlock(Block block){
 		switch (block.getType()){
-		case WOODEN_DOOR:
+			case OAK_DOOR:
 		case SPRUCE_DOOR:
 		case BIRCH_DOOR:
 		case JUNGLE_DOOR:
 		case ACACIA_DOOR:
 		case DARK_OAK_DOOR:
-		case IRON_DOOR_BLOCK:
+		case IRON_DOOR:
 			return true;
 		default:
 			return false;
@@ -537,8 +533,12 @@ public class LocketteProAPI {
 	
 	public static boolean isSingleDoorBlock(Block block){
 		switch (block.getType()){
-		case FENCE_GATE:
-		case TRAP_DOOR:
+		case OAK_FENCE_GATE:
+		case SPRUCE_FENCE_GATE:
+		case BIRCH_FENCE_GATE:
+		case JUNGLE_FENCE:
+		case ACACIA_DOOR: 
+		case DARK_OAK_DOOR:
 		case IRON_TRAPDOOR:
 			return true;
 		default:
@@ -558,22 +558,18 @@ public class LocketteProAPI {
 			return block;
 		}
 	}
-	
-	public static void toggleDoor(Block block, boolean open){
-		BlockState doorstate = block.getState();
-		Openable openablestate = (Openable)doorstate.getData();
+
+	public static void toggleDoor(Block block, boolean open) {
+		org.bukkit.block.data.Openable openablestate = (org.bukkit.block.data.Openable) block.getBlockData();
 		openablestate.setOpen(open);
-		doorstate.setData((MaterialData)openablestate);
-		doorstate.update();
+		block.setBlockData(openablestate);
 		block.getWorld().playEffect(block.getLocation(), Effect.DOOR_TOGGLE, 0);
 	}
-	
-	public static void toggleDoor(Block block){
-		BlockState doorstate = block.getState();
-		Openable openablestate = (Openable)doorstate.getData();
+
+	public static void toggleDoor(Block block) {
+		org.bukkit.block.data.Openable openablestate = (org.bukkit.block.data.Openable) block.getBlockData();
 		openablestate.setOpen(!openablestate.isOpen());
-		doorstate.setData((MaterialData)openablestate);
-		doorstate.update();
+		block.setBlockData(openablestate);
 		block.getWorld().playEffect(block.getLocation(), Effect.DOOR_TOGGLE, 0);
 	}
 	

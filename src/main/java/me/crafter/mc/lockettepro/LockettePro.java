@@ -15,7 +15,7 @@ public class LockettePro extends JavaPlugin {
 	private static Plugin plugin;
 	private boolean debug = false;
 	private static Version version = Version.UNKNOWN;
-	private static boolean needcheckhand = false;
+	private static boolean needcheckhand = true;
 
 	public void onEnable(){
     	plugin = this;
@@ -36,7 +36,7 @@ public class LockettePro extends JavaPlugin {
     	} catch (Exception ex){
     		version = Version.UNKNOWN;
     	}
-    	switch (version){
+    	/*switch (version){
 		case v1_9_R1:
 		case v1_9_R2:
 		case v1_10_R1:
@@ -51,7 +51,7 @@ public class LockettePro extends JavaPlugin {
 		default:
 			needcheckhand = false;
 			break;
-    	}
+    	}*/
     	// If UUID is not enabled, UUID listener won't register
     	if (Config.isUuidEnabled() || Config.isLockExpire()){
 			if (Bukkit.getPluginManager().getPlugin("ProtocolLib") != null){

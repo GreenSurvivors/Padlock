@@ -113,7 +113,7 @@ public class Dependency {
 			try {
 				if (TownyUniverse.getDataSource().getWorld(block.getWorld().getName()).isUsingTowny()){
 					// In town only residents can
-					if (!PlayerCacheUtil.getCachePermission(player, block.getLocation(), block.getTypeId(), (byte) 0, ActionType.BUILD)) return true;
+					if (!PlayerCacheUtil.getCachePermission(player, block.getLocation(), block.getType(), ActionType.BUILD)) return true;
 					// Wilderness permissions
 					if (TownyUniverse.isWilderness(block)){ // It is wilderness here
 						if (!player.hasPermission("lockettepro.towny.wilds")) return true;

@@ -18,7 +18,6 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.material.Openable;
 
 public class BlockPlayerListener implements Listener {
 
@@ -32,7 +31,7 @@ public class BlockPlayerListener implements Listener {
 		Action action = event.getAction();
 		Player player = event.getPlayer();
 		// Check action correctness
-		if (action == Action.RIGHT_CLICK_BLOCK && player.getItemInHand().getType() == Material.SIGN){
+		if (action == Action.RIGHT_CLICK_BLOCK && player.getInventory().getItemInMainHand().getType() == Material.SIGN){
 			// Check quick lock action correctness
 			if (!((event.getPlayer().isSneaking() && Config.getQuickProtectAction() == (byte)2) ||
 					(!event.getPlayer().isSneaking() && Config.getQuickProtectAction() == (byte)1))) return;
@@ -257,12 +256,12 @@ public class BlockPlayerListener implements Listener {
 					if ((LocketteProAPI.isDoubleDoorBlock(block) || LocketteProAPI.isSingleDoorBlock(block)) && LocketteProAPI.isLocked(block)){
 						Block doorblock = LocketteProAPI.getBottomDoorBlock(block);
 						BlockState doorstate = doorblock.getState();
-						Openable openablestate = (Openable)doorstate.getData();
+						org.bukkit.block.data.Openable openablestate = (org.bukkit.block.data.Openable ) doorblock.getBlockData();
 						boolean shouldopen = !openablestate.isOpen(); // Move to here
 						int closetime = LocketteProAPI.getTimerDoor(doorblock);
 						List<Block> doors = new ArrayList<Block>();
 						doors.add(doorblock);
-						if (doorblock.getType() == Material.IRON_DOOR_BLOCK || doorblock.getType() == Material.IRON_TRAPDOOR){
+						if (doorblock.getType() == Material.IRON_DOOR || doorblock.getType() == Material.IRON_TRAPDOOR){
 							LocketteProAPI.toggleDoor(doorblock, shouldopen);
 						}
 						for (BlockFace blockface : LocketteProAPI.newsfaces){

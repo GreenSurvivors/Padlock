@@ -1,17 +1,17 @@
 package me.crafter.mc.lockettepro;
 
+import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.configuration.file.FileConfiguration;
+import org.bukkit.configuration.file.YamlConfiguration;
+import org.bukkit.plugin.Plugin;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
-
-import org.bukkit.ChatColor;
-import org.bukkit.Material;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
-import org.bukkit.plugin.Plugin;
 
 public class Config {
 
@@ -138,15 +138,20 @@ public class Config {
 				int materialid = Integer.parseInt(unprocesseditem);
 				// Hit here without error means yes it is
 				if (add){
-					lockables.add(Material.getMaterial(materialid));
+					lockables.add(Material.getMaterial(unprocesseditem,true));
 				} else {
-					lockables.remove(Material.getMaterial(materialid));
+					lockables.remove(Material.getMaterial(unprocesseditem,true));
 				}
 			} catch (Exception ex){
 				// It is not really a number...
 				Material material = Material.getMaterial(unprocesseditem);
+				if (material == null) {
+					material = Material.getMaterial(unprocesseditem, true);
+				}
 				if (material == null){
 					plugin.getLogger().info(unprocesseditem + " is not an item!");
+				}else if (!material.isBlock()){
+					plugin.getLogger().info(unprocesseditem + " is not a block!");
 				} else {
 					if (add){
 						lockables.add(material);
@@ -180,7 +185,7 @@ public class Config {
 		String[] timer_signs = {"[Timer:@]", "[timer:@]"};
 		config.addDefault("timer-signs", timer_signs);
 		String[] lockables = {"CHEST","TRAPPED_CHEST","FURNACE","BURNING_FURNACE","HOPPER","BREWING_STAND","DIAMOND_BLOCK",
-				"WOODEN_DOOR","SPRUCE_DOOR","BIRCH_DOOR","JUNGLE_DOOR","ACACIA_DOOR","DARK_OAK_DOOR","IRON_DOOR_BLOCK"};
+				"OAK_DOOR","SPRUCE_DOOR","BIRCH_DOOR","JUNGLE_DOOR","ACACIA_DOOR","DARK_OAK_DOOR","IRON_DOOR"};
 		config.addDefault("lockables", lockables);
 		String[] protection_exempt = {"nothing"};
 		config.addDefault("protection-exempt", protection_exempt);

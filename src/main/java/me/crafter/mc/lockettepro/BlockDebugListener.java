@@ -34,7 +34,7 @@ public class BlockDebugListener implements Listener {
 				p.sendMessage(" - now     : " + (int)(System.currentTimeMillis()/1000));
 			}
 			
-			p.sendMessage("Block: " + b.getType().toString() + " " + b.getTypeId() + ":" + b.getData());
+			p.sendMessage("Block: " + b.getType().toString() + " " + b.getData());
 			
 			if (b.getType() == Material.WALL_SIGN){
 				for (String line : ((Sign)b.getState()).getLines()){

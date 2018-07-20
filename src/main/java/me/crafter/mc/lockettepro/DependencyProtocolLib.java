@@ -1,10 +1,5 @@
 package me.crafter.mc.lockettepro;
 
-import java.util.List;
-
-import org.bukkit.Bukkit;
-import org.bukkit.plugin.Plugin;
-
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.ListenerPriority;
@@ -14,39 +9,22 @@ import com.comphenix.protocol.events.PacketEvent;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
+import org.bukkit.Bukkit;
+import org.bukkit.plugin.Plugin;
+
+import java.util.List;
 
 public class DependencyProtocolLib {
 
 	public static void setUpProtocolLib(Plugin plugin){
 		switch (LockettePro.getBukkitVersion()){
-		case v1_8_R1:
-		case v1_8_R2:
-		case v1_8_R3:
-			addUpdateSignListener(plugin);
-			break;
-		case v1_9_R1:
-			addUpdateSignListener(plugin);
-			addTileEntityDataListener(plugin);
-			break;
-		case v1_9_R2:
-			addTileEntityDataListener(plugin);
-			addMapChunkListener(plugin);
-			break;
-		case v1_10_R1:
-			addTileEntityDataListener(plugin);
-			addMapChunkListener(plugin);
-			break;
-		case v1_11_R1:
-			addTileEntityDataListener(plugin);
-			addMapChunkListener(plugin);
-			break;
-		case v1_12_R1:
+		case v1_13_R1:
 			addTileEntityDataListener(plugin);
 			addMapChunkListener(plugin);
 			break;
 		case UNKNOWN:
 		default:
-			addUpdateSignListener(plugin);
+			//addUpdateSignListener(plugin);
 			addTileEntityDataListener(plugin);
 			addMapChunkListener(plugin);
 			break;

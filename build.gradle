@@ -1,0 +1,57 @@
+apply plugin: 'java'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    jcenter()
+
+    maven {
+        name 'Spigot'
+        url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
+    }
+
+    maven {
+        name 'Sonatype'
+        url 'https://oss.sonatype.org/content/groups/public'
+    }
+    
+    maven {
+        name 'sk89q'
+        url 'http://maven.sk89q.com/artifactory/repo/'
+    }
+    
+    maven {
+        name 'vault-repo'
+        url 'http://nexus.hc.to/content/repositories/pub_releases'
+    }
+    
+    maven {
+        name 'dmulloy2'
+        url 'http://repo.dmulloy2.net/content/groups/public/'
+    }
+}
+
+dependencies {
+    compile 'org.bukkit:bukkit:1.13-pre7-R0.1-SNAPSHOT'
+    compile ('net.milkbowl.vault:VaultAPI:1.6') {
+        transitive = false
+    }
+    compile ('com.sk89q:worldguard:6.1') {
+        transitive = false
+    }
+    compile ('com.comphenix.protocol:ProtocolLib-API:4.4.0-SNAPSHOT') {
+        //transitive = false
+    }
+    compile files('lib/Residence4.7.8.2.jar')
+    compile files('lib/askyblock.jar')
+    compile files('lib/PlotSquared.jar')
+    compile files('lib/SimpleClans.jar')
+    compile files('lib/Factions.jar')
+    compile files('lib/MassiveCore.jar')
+    compile files('lib/Towny.jar')
+    compile files('lib/GriefPrevention.jar')
+}
+compileJava {
+    options.compilerArgs += ["-Xlint:deprecation"]
+}

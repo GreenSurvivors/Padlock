@@ -17,8 +17,12 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
+import org.bukkit.block.data.MultipleFacing;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
@@ -34,30 +38,14 @@ public class Utils {
 	private static Set<Player> notified = new HashSet<Player>();
 		
 	// Helper functions
-	@SuppressWarnings("deprecation")
 	public static Block putSignOn(Block block, BlockFace blockface, String line1, String line2){
 		Block newsign = block.getRelative(blockface);
 		newsign.setType(Material.WALL_SIGN);
-		byte data = 0;
-		// So this part is pretty much a Bukkit bug:
-		// Signs' rotation is not correct with bukkit's set facing, below is the workaround.
-		switch (blockface){
-		case NORTH:
-			data = 2;
-			break;
-		case EAST:
-			data = 5;
-			break;
-		case WEST:
-			data = 4;
-			break;
-		case SOUTH:
-			data = 3;
-			break;
-		default:
-			return null;
+		BlockData data = newsign.getBlockData();
+		if(data instanceof Directional){
+			((Directional) data).setFacing(blockface);
+			newsign.setBlockData(data,true);
 		}
-		newsign.setData(data, true);
 		updateSign(newsign);
 		Sign sign = (Sign)newsign.getState();
 		sign.setLine(0, line1);
@@ -74,10 +62,10 @@ public class Utils {
 	
 	public static void removeASign(Player player){
 		if (player.getGameMode() == GameMode.CREATIVE) return;
-		if (player.getItemInHand().getAmount() == 1){
-			player.setItemInHand(null);
+		if (player.getInventory().getItemInMainHand().getAmount() == 1){
+			player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
 		} else {
-			player.getItemInHand().setAmount(player.getItemInHand().getAmount() - 1);
+			player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
 		}
 	}
 	
