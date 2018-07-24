@@ -6,7 +6,6 @@ import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
-import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 import org.bukkit.Bukkit;
@@ -24,7 +23,6 @@ public class DependencyProtocolLib {
 			break;
 		case UNKNOWN:
 		default:
-			//addUpdateSignListener(plugin);
 			addTileEntityDataListener(plugin);
 			addMapChunkListener(plugin);
 			break;
@@ -39,25 +37,6 @@ public class DependencyProtocolLib {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-	}
-	
-	public static void addUpdateSignListener(Plugin plugin){
-		ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(plugin, ListenerPriority.LOW, PacketType.Play.Server.UPDATE_SIGN) {
-			@Override
-			public void onPacketSending(PacketEvent event) {
-				PacketContainer packet = event.getPacket();
-				WrappedChatComponent[] lines = packet.getChatComponentArrays().read(0);
-				String[] liness = new String[4];
-				for (int i = 0; i < 4; i++){
-					liness[i] = lines[i].getJson();
-				}
-				SignSendEvent signsendevent = new SignSendEvent(event.getPlayer(), liness);
-				Bukkit.getPluginManager().callEvent(signsendevent);
-				if (signsendevent.isModified()){
-					packet.getChatComponentArrays().write(0, signsendevent.getLinesWrappedChatComponent());
-				}
-			}
-		});
 	}
 	
 	public static void addTileEntityDataListener(Plugin plugin){
@@ -90,8 +69,7 @@ public class DependencyProtocolLib {
 				List<?> tileentitydatas = packet.getSpecificModifier(List.class).read(0);
 				for (Object tileentitydata : tileentitydatas) {
 					NbtCompound nbtcompound = NbtFactory.fromNMSCompound(tileentitydata);
-					if (nbtcompound == null || nbtcompound.getString("id") == null) continue;
-					if (!(nbtcompound.getString("id").equals("Sign") || nbtcompound.getString("id").equals("minecraft:sign"))) continue;
+					if (!"minecraft:sign".equals(nbtcompound.getString("id"))) continue;
 					String[] liness = new String[4];
 					for (int i = 0; i < 4; i++){
 						liness[i] = nbtcompound.getString("Text" + (i+1));

@@ -1,8 +1,5 @@
 package me.crafter.mc.lockettepro;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
@@ -18,6 +15,9 @@ import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class BlockPlayerListener implements Listener {
 
@@ -222,6 +222,16 @@ public class BlockPlayerListener implements Listener {
 			Utils.sendMessages(player, Config.getLang("block-is-locked"));
 			event.setCancelled(true);
 			Utils.playAccessDenyEffect(player, block);
+			if (block.getType() == Material.CHEST || block.getType() == Material.TRAPPED_CHEST) {
+				// re-send chest block data to client
+				// temp fix chest rendering issue
+				player.sendBlockChange(block.getLocation(), block.getBlockData());
+				BlockFace face = LocketteProAPI.getRelativeChestFace(block);
+				if (face != null) {
+					Block block1 = block.getRelative(face);
+					player.sendBlockChange(block1.getLocation(), block1.getBlockData());
+				}
+			}
 		}
 	}
 

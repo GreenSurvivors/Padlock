@@ -36,22 +36,6 @@ public class LockettePro extends JavaPlugin {
     	} catch (Exception ex){
     		version = Version.UNKNOWN;
     	}
-    	/*switch (version){
-		case v1_9_R1:
-		case v1_9_R2:
-		case v1_10_R1:
-		case v1_11_R1:
-		case v1_12_R1:
-		case UNKNOWN: // 1.13...+
-			needcheckhand = true;
-			break;
-		case v1_8_R1:
-		case v1_8_R2:
-		case v1_8_R3:
-		default:
-			needcheckhand = false;
-			break;
-    	}*/
     	// If UUID is not enabled, UUID listener won't register
     	if (Config.isUuidEnabled() || Config.isLockExpire()){
 			if (Bukkit.getPluginManager().getPlugin("ProtocolLib") != null){
@@ -97,7 +81,11 @@ public class LockettePro extends JavaPlugin {
     			switch (args[0]){
     			case "reload":
     				if (sender.hasPermission("lockettepro.reload")){
-    					Config.reload();
+                        DependencyProtocolLib.cleanUpProtocolLib(this);
+                        Config.reload();
+                        if (Config.isUuidEnabled() && Bukkit.getPluginManager().getPlugin("ProtocolLib") != null) {
+                            DependencyProtocolLib.setUpProtocolLib(this);
+                        }
     					Utils.sendMessages(sender, Config.getLang("config-reloaded"));
     				} else {
     					Utils.sendMessages(sender, Config.getLang("no-permission"));

@@ -45,7 +45,6 @@ public class Config {
 		reload();
 	}
 	
-	@SuppressWarnings("deprecation") // Material ID support
 	public static void reload(){
 		initDefaultConfig();
 		initAdditionalFiles();
@@ -134,30 +133,19 @@ public class Config {
 				add = false;
 				unprocesseditem = unprocesseditem.substring(1);
 			}
-			try { // Is it a number?
-				int materialid = Integer.parseInt(unprocesseditem);
-				// Hit here without error means yes it is
-				if (add){
-					lockables.add(Material.getMaterial(unprocesseditem,true));
+			Material material = Material.getMaterial(unprocesseditem);
+			if (material == null) {
+				material = Material.getMaterial(unprocesseditem, true);
+			}
+			if (material == null) {
+				plugin.getLogger().info(unprocesseditem + " is not an item!");
+			} else if (!material.isBlock()) {
+				plugin.getLogger().info(unprocesseditem + " is not a block!");
+			} else {
+				if (add) {
+					lockables.add(material);
 				} else {
-					lockables.remove(Material.getMaterial(unprocesseditem,true));
-				}
-			} catch (Exception ex){
-				// It is not really a number...
-				Material material = Material.getMaterial(unprocesseditem);
-				if (material == null) {
-					material = Material.getMaterial(unprocesseditem, true);
-				}
-				if (material == null){
-					plugin.getLogger().info(unprocesseditem + " is not an item!");
-				}else if (!material.isBlock()){
-					plugin.getLogger().info(unprocesseditem + " is not a block!");
-				} else {
-					if (add){
-						lockables.add(material);
-					} else {
-						lockables.remove(material);
-					}
+					lockables.remove(material);
 				}
 			}
 		}

@@ -5,6 +5,7 @@ import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.type.Chest;
 import org.bukkit.entity.Player;
 
 public class LocketteProAPI {
@@ -43,11 +44,10 @@ public class LocketteProAPI {
 		case CHEST:
 		case TRAPPED_CHEST:
 			// Check second chest sign
-			for (BlockFace chestface : newsfaces){
+			BlockFace chestface = getRelativeChestFace(block);
+			if (chestface != null) {
 				Block relativechest = block.getRelative(chestface);
-				if (relativechest.getType() == block.getType()){
-					if (isLockedSingleBlock(relativechest, chestface.getOppositeFace())) return true;
-				}
+				if (isLockedSingleBlock(relativechest, chestface.getOppositeFace())) return true;
 			}
 			// Don't break here
 		// Everything else (First block of container check goes here)
@@ -88,11 +88,10 @@ public class LocketteProAPI {
 		case CHEST:
 		case TRAPPED_CHEST:
 			// Check second chest sign
-			for (BlockFace chestface : newsfaces){
+			BlockFace chestface = getRelativeChestFace(block);
+			if (chestface != null) {
 				Block relativechest = block.getRelative(chestface);
-				if (relativechest.getType() == block.getType()){
-					if (isOwnerSingleBlock(relativechest, chestface.getOppositeFace(), player)) return true;
-				}
+				if (isOwnerSingleBlock(relativechest, chestface.getOppositeFace(), player)) return true;
 			}
 			// Don't break here
 		// Everything else (First block of container check goes here)
@@ -133,11 +132,10 @@ public class LocketteProAPI {
 		case CHEST:
 		case TRAPPED_CHEST:
 			// Check second chest sign
-			for (BlockFace chestface : newsfaces){
+			BlockFace chestface = getRelativeChestFace(block);
+			if (chestface != null) {
 				Block relativechest = block.getRelative(chestface);
-				if (relativechest.getType() == block.getType()){
-					if (isUserSingleBlock(relativechest, chestface.getOppositeFace(), player)) return true;
-				}
+				if (isUserSingleBlock(relativechest, chestface.getOppositeFace(), player)) return true;
 			}
 			// Don't break here
 		// Everything else (First block of container check goes here)
@@ -572,5 +570,32 @@ public class LocketteProAPI {
 		block.setBlockData(openablestate);
 		block.getWorld().playEffect(block.getLocation(), Effect.DOOR_TOGGLE, 0);
 	}
-	
+
+	public static BlockFace getRelativeChestFace(Block block) {
+		Chest chest = (Chest) block.getBlockData();
+		BlockFace face = chest.getFacing();
+		BlockFace relativeFace = null;
+		if (chest.getType() == Chest.Type.LEFT) {
+			if (face == BlockFace.NORTH) {
+				relativeFace = BlockFace.EAST;
+			} else if (face == BlockFace.SOUTH) {
+				relativeFace = BlockFace.WEST;
+			} else if (face == BlockFace.WEST) {
+				relativeFace = BlockFace.NORTH;
+			} else if (face == BlockFace.EAST) {
+				relativeFace = BlockFace.SOUTH;
+			}
+		} else if (chest.getType() == Chest.Type.RIGHT) {
+			if (face == BlockFace.NORTH) {
+				relativeFace = BlockFace.WEST;
+			} else if (face == BlockFace.SOUTH) {
+				relativeFace = BlockFace.EAST;
+			} else if (face == BlockFace.WEST) {
+				relativeFace = BlockFace.SOUTH;
+			} else if (face == BlockFace.EAST) {
+				relativeFace = BlockFace.NORTH;
+			}
+		}
+		return relativeFace;
+	}
 }
