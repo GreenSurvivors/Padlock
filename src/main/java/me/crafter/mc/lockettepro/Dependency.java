@@ -1,17 +1,5 @@
 package me.crafter.mc.lockettepro;
 
-import java.lang.reflect.Method;
-import java.util.UUID;
-
-import org.bukkit.Bukkit;
-import org.bukkit.Location;
-import org.bukkit.Material;
-import org.bukkit.block.Block;
-import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.scoreboard.Team;
-
 import com.bekvon.bukkit.residence.Residence;
 import com.bekvon.bukkit.residence.protection.FlagPermissions;
 import com.intellectualcrafters.plot.api.PlotAPI;
@@ -29,14 +17,26 @@ import com.palmergames.bukkit.towny.utils.PlayerCacheUtil;
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
 import com.wasteofplastic.askyblock.ASkyBlockAPI;
 import com.wasteofplastic.askyblock.Island;
-
 import me.ryanhamshire.GriefPrevention.Claim;
 import me.ryanhamshire.GriefPrevention.GriefPrevention;
+import net.coreprotect.CoreProtect;
+import net.coreprotect.CoreProtectAPI;
 import net.milkbowl.vault.permission.Permission;
 import net.sacredlabyrinth.phaed.simpleclans.Clan;
 import net.sacredlabyrinth.phaed.simpleclans.ClanPlayer;
 import net.sacredlabyrinth.phaed.simpleclans.SimpleClans;
 import net.sacredlabyrinth.phaed.simpleclans.managers.ClanManager;
+import org.bukkit.Bukkit;
+import org.bukkit.Location;
+import org.bukkit.Material;
+import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.scoreboard.Team;
+
+import java.lang.reflect.Method;
+import java.util.UUID;
 
 public class Dependency {
 	
@@ -52,7 +52,8 @@ public class Dependency {
 	protected static Plugin simpleclans = null;
 	protected static ClanManager clanmanager = null;
 	protected static Plugin griefprevention = null;
-	
+	private static CoreProtectAPI coreProtectAPI;
+
 	public Dependency(Plugin plugin){
 		// WorldGuard
 		Plugin worldguardplugin = plugin.getServer().getPluginManager().getPlugin("WorldGuard");
@@ -87,12 +88,22 @@ public class Dependency {
 	    }
 	    // GreifPrevention
 	    griefprevention = plugin.getServer().getPluginManager().getPlugin("GriefPrevention");
+
+		if (Bukkit.getPluginManager().getPlugin("CoreProtect") != null && CoreProtect.getInstance().getAPI().APIVersion() == 6) {
+			coreProtectAPI = CoreProtect.getInstance().getAPI();
+			if (!coreProtectAPI.isEnabled()) {
+				coreProtectAPI = null;
+				plugin.getLogger().warning("CoreProtect API is not enabled!");
+			}
+		}
 	}
 	
 	@SuppressWarnings("deprecation")
 	public static boolean isProtectedFrom(Block block, Player player){
-		if (worldguard != null){
-			if (!worldguard.canBuild(player, block)) return true;
+		if (worldguard != null) {
+			if (!worldguard.createProtectionQuery().testBlockPlace(player, block.getLocation(), block.getType())) {
+				return true;
+			}
 		}
 		if (residence != null){
 			try { // 1st try
@@ -234,4 +245,10 @@ public class Dependency {
 		return false;
 	}
 
+
+    public static void logPlacement(Player player, Block block) {
+        if (coreProtectAPI != null && coreProtectAPI.isEnabled()) {
+            coreProtectAPI.logPlacement(player.getName(), block.getLocation(), block.getType(), block.getBlockData());
+        }
+    }
 }

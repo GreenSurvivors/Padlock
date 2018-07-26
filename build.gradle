@@ -37,9 +37,11 @@ dependencies {
     compile ('net.milkbowl.vault:VaultAPI:1.6') {
         transitive = false
     }
+    /*
     compile ('com.sk89q:worldguard:6.1') {
         transitive = false
     }
+    */
     compile ('com.comphenix.protocol:ProtocolLib-API:4.4.0-SNAPSHOT') {
         //transitive = false
     }
@@ -51,6 +53,8 @@ dependencies {
     compile files('lib/MassiveCore.jar')
     compile files('lib/Towny.jar')
     compile files('lib/GriefPrevention.jar')
+    compile files('lib/worldguard-legacy-7.0.0-SNAPSHOT-dist.jar')
+    compile files('lib/CoreProtect-2.15.0.jar')
 }
 compileJava {
     options.compilerArgs += ["-Xlint:deprecation"]

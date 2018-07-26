@@ -1,6 +1,7 @@
 package me.crafter.mc.lockettepro;
 
 import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -32,6 +33,9 @@ public class BlockPlayerListener implements Listener {
 		Player player = event.getPlayer();
 		// Check action correctness
 		if (action == Action.RIGHT_CLICK_BLOCK && player.getInventory().getItemInMainHand().getType() == Material.SIGN){
+			if (player.getGameMode().equals(GameMode.SPECTATOR)) {
+				return;
+			}
 			// Check quick lock action correctness
 			if (!((event.getPlayer().isSneaking() && Config.getQuickProtectAction() == (byte)2) ||
 					(!event.getPlayer().isSneaking() && Config.getQuickProtectAction() == (byte)1))) return;
@@ -73,16 +77,19 @@ public class BlockPlayerListener implements Listener {
 								Utils.updateLineWithTime(newsign, false); // set created to now
 							}
 						}
+                        Dependency.logPlacement(player, newsign);
 					} else if (!locked && LocketteProAPI.isOwnerUpDownLockedDoor(block, player)){
 						// Not locked, (is locked door nearby), is owner of locked door nearby
 						Utils.removeASign(player);
 						Utils.sendMessages(player, Config.getLang("additional-sign-added-quick"));
 						Utils.putSignOn(block, blockface, Config.getDefaultAdditionalString(), "");
+                        Dependency.logPlacement(player, block.getRelative(blockface));
 					} else if (LocketteProAPI.isOwner(block, player)){
 						// Locked, (not locked door nearby), is owner of locked block
 						Utils.removeASign(player);
 						Utils.putSignOn(block, blockface, Config.getDefaultAdditionalString(), "");
 						Utils.sendMessages(player, Config.getLang("additional-sign-added-quick"));
+                        Dependency.logPlacement(player, block.getRelative(blockface));
 					} else {
 						// Cannot lock this block
 						Utils.sendMessages(player, Config.getLang("cannot-lock-quick"));
