@@ -45,7 +45,7 @@ dependencies {
     compile ('com.comphenix.protocol:ProtocolLib-API:4.4.0-SNAPSHOT') {
         //transitive = false
     }
-    compile files('lib/Residence4.7.8.2.jar')
+    compile files('lib/Residence4.8.0.1Experimental.jar')
     compile files('lib/askyblock.jar')
     compile files('lib/PlotSquared.jar')
     compile files('lib/SimpleClans.jar')
