@@ -229,16 +229,6 @@ public class BlockPlayerListener implements Listener {
 			Utils.sendMessages(player, Config.getLang("block-is-locked"));
 			event.setCancelled(true);
 			Utils.playAccessDenyEffect(player, block);
-			if (block.getType() == Material.CHEST || block.getType() == Material.TRAPPED_CHEST) {
-				// re-send chest block data to client
-				// temp fix chest rendering issue
-				player.sendBlockChange(block.getLocation(), block.getBlockData());
-				BlockFace face = LocketteProAPI.getRelativeChestFace(block);
-				if (face != null) {
-					Block block1 = block.getRelative(face);
-					player.sendBlockChange(block1.getLocation(), block1.getBlockData());
-				}
-			}
 		}
 	}
 
