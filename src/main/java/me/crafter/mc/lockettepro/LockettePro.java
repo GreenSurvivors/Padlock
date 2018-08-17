@@ -221,6 +221,10 @@ public class LockettePro extends JavaPlugin {
         					linked = true;
             				player.sendMessage(" - PlotSquared: " + Dependency.plotsquared.getDescription().getVersion());
         				}
+						if (Bukkit.getPluginManager().getPlugin("CoreProtect") != null) {
+							linked = true;
+							player.sendMessage(" - CoreProtect: " + Bukkit.getPluginManager().getPlugin("CoreProtect").getDescription().getVersion());
+						}
         				if (!linked){
         					player.sendMessage(" - none");
         				}
