@@ -5,7 +5,6 @@ import org.bukkit.GameMode;
 import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
-import org.bukkit.block.BlockState;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -14,8 +13,12 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.player.PlayerBucketEmptyEvent;
+import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.metadata.FixedMetadataValue;
+import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -262,7 +265,6 @@ public class BlockPlayerListener implements Listener {
 				if (action == Action.RIGHT_CLICK_BLOCK){
 					if ((LocketteProAPI.isDoubleDoorBlock(block) || LocketteProAPI.isSingleDoorBlock(block)) && LocketteProAPI.isLocked(block)){
 						Block doorblock = LocketteProAPI.getBottomDoorBlock(block);
-						BlockState doorstate = doorblock.getState();
 						org.bukkit.block.data.Openable openablestate = (org.bukkit.block.data.Openable ) doorblock.getBlockData();
 						boolean shouldopen = !openablestate.isOpen(); // Move to here
 						int closetime = LocketteProAPI.getTimerDoor(doorblock);
@@ -278,7 +280,15 @@ public class BlockPlayerListener implements Listener {
 								LocketteProAPI.toggleDoor(relative, shouldopen);
 							}
 						}
-						if (closetime > 0){
+						if (closetime > 0) {
+							for (Block door : doors) {
+								if (door.hasMetadata("lockettepro.toggle")) {
+									return;
+								}
+							}
+							for (Block door : doors) {
+								door.setMetadata("lockettepro.toggle", new FixedMetadataValue(LockettePro.getPlugin(), true));
+							}
 							Bukkit.getScheduler().runTaskLater(LockettePro.getPlugin(), new DoorToggleTask(doors), closetime*20);
 						}
 					}
@@ -324,4 +334,29 @@ public class BlockPlayerListener implements Listener {
 		}
 	}
 
+	@EventHandler(priority = EventPriority.HIGH)
+	public void onBucketEmpty(PlayerBucketEmptyEvent event) {
+		Player player = event.getPlayer();
+		Block block = event.getBlockClicked().getRelative(event.getBlockFace());
+		if (LocketteProAPI.isProtected(block) && !(LocketteProAPI.isOwner(block, player) || LocketteProAPI.isOwnerOfSign(block, player))) {
+			event.setCancelled(true);
+			new BukkitRunnable() {
+				@Override
+				public void run() {
+					if (!player.isDead()) {
+						player.updateInventory();
+					}
+				}
+			}.runTaskLater(LockettePro.getPlugin(), 1L);
+		}
+	}
+
+	@EventHandler(priority = EventPriority.HIGH)
+	public void onBucketUse(PlayerBucketFillEvent event) {
+		Player player = event.getPlayer();
+		Block block = event.getBlockClicked().getRelative(event.getBlockFace());
+		if (LocketteProAPI.isProtected(block) && !(LocketteProAPI.isOwner(block, player) || LocketteProAPI.isOwnerOfSign(block, player))) {
+			event.setCancelled(true);
+		}
+	}
 }

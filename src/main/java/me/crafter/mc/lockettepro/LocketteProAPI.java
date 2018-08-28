@@ -2,8 +2,10 @@ package me.crafter.mc.lockettepro;
 
 import org.bukkit.Effect;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.type.Chest;
 import org.bukkit.entity.Player;
@@ -253,6 +255,14 @@ public class LocketteProAPI {
 	}
 	
 	public static boolean mayInterfere(Block block, Player player){
+		if (block.getState() instanceof Container) {
+			for (BlockFace blockface : allfaces) {
+				Block newblock = block.getRelative(blockface);
+				if (isLocked(newblock) && !isOwner(newblock, player)) {
+					return true;
+				}
+			}
+		}
 		// if LEFT may interfere RIGHT
 		switch (block.getType()){
 		case OAK_DOOR:
@@ -515,18 +525,7 @@ public class LocketteProAPI {
 	}
 	
 	public static boolean isDoubleDoorBlock(Block block){
-		switch (block.getType()){
-			case OAK_DOOR:
-		case SPRUCE_DOOR:
-		case BIRCH_DOOR:
-		case JUNGLE_DOOR:
-		case ACACIA_DOOR:
-		case DARK_OAK_DOOR:
-		case IRON_DOOR:
-			return true;
-		default:
-			return false;
-		}
+		return Tag.DOORS.isTagged(block.getType());
 	}
 	
 	public static boolean isSingleDoorBlock(Block block){

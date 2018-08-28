@@ -21,6 +21,10 @@ public class DependencyProtocolLib {
 			addTileEntityDataListener(plugin);
 			addMapChunkListener(plugin);
 			break;
+		case v1_13_R2:
+			addTileEntityDataListener(plugin);
+			addMapChunkListener(plugin);
+			break;
 		case UNKNOWN:
 		default:
 			addTileEntityDataListener(plugin);

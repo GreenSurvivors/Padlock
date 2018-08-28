@@ -81,8 +81,10 @@ public class LockettePro extends JavaPlugin {
     			switch (args[0]){
     			case "reload":
     				if (sender.hasPermission("lockettepro.reload")){
-                        DependencyProtocolLib.cleanUpProtocolLib(this);
-                        Config.reload();
+    					if(Bukkit.getPluginManager().getPlugin("ProtocolLib") != null) {
+							DependencyProtocolLib.cleanUpProtocolLib(this);
+						}
+						Config.reload();
                         if (Config.isUuidEnabled() && Bukkit.getPluginManager().getPlugin("ProtocolLib") != null) {
                             DependencyProtocolLib.setUpProtocolLib(this);
                         }

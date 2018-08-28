@@ -1,8 +1,8 @@
 package me.crafter.mc.lockettepro;
 
-import java.util.List;
-
 import org.bukkit.block.Block;
+
+import java.util.List;
 
 public class DoorToggleTask implements Runnable{
 
@@ -14,6 +14,9 @@ public class DoorToggleTask implements Runnable{
 	
 	@Override
 	public void run() {
+		for (Block door : doors) {
+			door.removeMetadata("lockettepro.toggle", LockettePro.getPlugin());
+		}
 		for (Block door : doors){
 			if (LocketteProAPI.isDoubleDoorBlock(door)){
 				Block doorbottom = LocketteProAPI.getBottomDoorBlock(door);
