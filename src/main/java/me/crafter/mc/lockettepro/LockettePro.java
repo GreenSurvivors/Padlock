@@ -8,7 +8,6 @@ import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
-//import org.mcstats.MetricsLite;
 
 public class LockettePro extends JavaPlugin {
 
@@ -45,12 +44,6 @@ public class LockettePro extends JavaPlugin {
 				plugin.getLogger().info("UUID & expiracy support requires ProtocolLib, or else signs will be ugly!");
 			}
     	}
-    	// Metrics
-    	// mcstats sucks
-//    	try {
-//    		MetricsLite metrics = new MetricsLite(this);
-//	        metrics.start();
-//    	} catch (Exception ex){}
     }
 	
     public void onDisable(){
