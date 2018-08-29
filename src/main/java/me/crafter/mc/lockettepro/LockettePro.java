@@ -35,12 +35,11 @@ public class LockettePro extends JavaPlugin {
         	version = Version.valueOf(versionname);
     	} catch (Exception ex){
     		version = Version.UNKNOWN;
-    	}
+		}
     	// If UUID is not enabled, UUID listener won't register
     	if (Config.isUuidEnabled() || Config.isLockExpire()){
 			if (Bukkit.getPluginManager().getPlugin("ProtocolLib") != null){
 	    		DependencyProtocolLib.setUpProtocolLib(this);
-	        	getServer().getPluginManager().registerEvents(new SignSendListener(), this);
 			} else {
 				plugin.getLogger().info("ProtocolLib is not found!");
 				plugin.getLogger().info("UUID & expiracy support requires ProtocolLib, or else signs will be ugly!");

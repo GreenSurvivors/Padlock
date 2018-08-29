@@ -1,16 +1,8 @@
 package me.crafter.mc.lockettepro;
 
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.URL;
-import java.net.URLConnection;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -19,16 +11,17 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
-import org.bukkit.block.data.MultipleFacing;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
 
-import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.net.URL;
+import java.net.URLConnection;
+import java.util.*;
 
 public class Utils {
 	
@@ -300,16 +293,19 @@ public class Utils {
 		String json = rawline.getJson();
 		return getSignLineFromUnknown(json);
 	}
-	
-	public static String getSignLineFromUnknown(String json){
-		try { // 1.8-
-			JsonObject line = new JsonParser().parse(json).getAsJsonObject();
-			return line.get("extra").getAsJsonArray().get(0).getAsString();
-		} catch (Exception ex){}
+
+	public static String getSignLineFromUnknown(String json) {
 		try { // 1.9+
-			JsonObject line = new JsonParser().parse(json).getAsJsonObject();
-			return line.get("extra").getAsJsonArray().get(0).getAsJsonObject().get("text").getAsString();
-		} catch (Exception ex){}
+			if (json.length() > 33) {
+				JsonObject line = new JsonParser().parse(json).getAsJsonObject();
+				if (line.has("extra")) {
+					return line.get("extra").getAsJsonArray().get(0).getAsJsonObject().get("text").getAsString();
+				}
+			}
+			return "";
+		} catch (Exception ex) {
+			ex.printStackTrace();
+		}
 		return json;
 	}
 	

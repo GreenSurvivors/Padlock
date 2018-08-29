@@ -6,9 +6,11 @@ import com.comphenix.protocol.events.ListenerPriority;
 import com.comphenix.protocol.events.PacketAdapter;
 import com.comphenix.protocol.events.PacketContainer;
 import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 import org.bukkit.Bukkit;
+import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.util.List;
@@ -50,17 +52,7 @@ public class DependencyProtocolLib {
 				PacketContainer packet = event.getPacket();
 				if (packet.getIntegers().read(0) != 9) return;
 				NbtCompound nbtcompound = (NbtCompound) packet.getNbtModifier().read(0);
-				String[] liness = new String[4];
-				for (int i = 0; i < 4; i++){
-					liness[i] = nbtcompound.getString("Text" + (i+1));
-				}
-				SignSendEvent signsendevent = new SignSendEvent(event.getPlayer(), liness);
-				Bukkit.getPluginManager().callEvent(signsendevent);
-				if (signsendevent.isModified()){
-					for (int i = 0; i < 4; i++){
-						nbtcompound.put("Text" + (i+1), signsendevent.getLine(i));
-					}
-				}
+				onSignSend(event.getPlayer(), nbtcompound);
 			}
 		});
 	}
@@ -74,22 +66,30 @@ public class DependencyProtocolLib {
 				for (Object tileentitydata : tileentitydatas) {
 					NbtCompound nbtcompound = NbtFactory.fromNMSCompound(tileentitydata);
 					if (!"minecraft:sign".equals(nbtcompound.getString("id"))) continue;
-					String[] liness = new String[4];
-					for (int i = 0; i < 4; i++){
-						liness[i] = nbtcompound.getString("Text" + (i+1));
-					}
-					SignSendEvent signsendevent = new SignSendEvent(event.getPlayer(), liness);
-					Bukkit.getPluginManager().callEvent(signsendevent);
-					if (signsendevent.isModified()){
-						for (int i = 0; i < 4; i++){
-							nbtcompound.put("Text" + (i+1), signsendevent.getLine(i));
-						}
-					}
+					onSignSend(event.getPlayer(), nbtcompound);
 				}
 			}
 		});
 	}
-	
-	
+
+	public static void onSignSend(Player player, NbtCompound nbtcompound) {
+		String raw_line1 = nbtcompound.getString("Text1");
+		if (LocketteProAPI.isLockStringOrAdditionalString(Utils.getSignLineFromUnknown(raw_line1))) {
+			// Private line
+			String line1 = Utils.getSignLineFromUnknown(nbtcompound.getString("Text1"));
+			if (LocketteProAPI.isLineExpired(line1)) {
+				nbtcompound.put("Text1", WrappedChatComponent.fromText(Config.getLockExpireString()).getJson());
+			} else {
+				nbtcompound.put("Text1", WrappedChatComponent.fromText(Utils.StripSharpSign(line1)).getJson());
+			}
+			// Other line
+			for (int i = 2; i <= 4; i++) {
+				String line = Utils.getSignLineFromUnknown(nbtcompound.getString("Text" + i));
+				if (Utils.isUsernameUuidLine(line)) {
+					nbtcompound.put("Text" + i, WrappedChatComponent.fromText(Utils.getUsernameFromLine(line)).getJson());
+				}
+			}
+		}
+	}
 	
 }
