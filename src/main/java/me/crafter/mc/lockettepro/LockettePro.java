@@ -9,6 +9,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class LockettePro extends JavaPlugin {
 
 	private static Plugin plugin;
@@ -63,6 +66,30 @@ public class LockettePro extends JavaPlugin {
     public static Version getBukkitVersion(){
     	return version;
     }
+
+	@Override
+	public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
+		List<String> commands = new ArrayList<>();
+		commands.add("reload");
+		commands.add("version");
+		commands.add("1");
+		commands.add("2");
+		commands.add("3");
+		commands.add("4");
+		commands.add("uuid");
+		commands.add("update");
+		commands.add("debug");
+		if (args != null && args.length == 1) {
+			List<String> list = new ArrayList<>();
+			for (String s : commands) {
+				if (s.startsWith(args[0])) {
+					list.add(s);
+				}
+			}
+			return list;
+		}
+		return null;
+	}
 
     public boolean onCommand(CommandSender sender, Command cmd, String commandLabel, final String[] args){
     	if (cmd.getName().equals("lockettepro")){
