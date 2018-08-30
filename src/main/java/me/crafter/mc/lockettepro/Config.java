@@ -134,13 +134,8 @@ public class Config {
                 unprocesseditem = unprocesseditem.substring(1);
             }
             Material material = Material.getMaterial(unprocesseditem);
-            if (material == null) {
-                material = Material.getMaterial(unprocesseditem, true);
-            }
-            if (material == null) {
-                plugin.getLogger().info(unprocesseditem + " is not an item!");
-            } else if (!material.isBlock()) {
-                plugin.getLogger().info(unprocesseditem + " is not a block!");
+            if (material == null || !material.isBlock()) {
+                plugin.getLogger().warning(unprocesseditem + " is not a block!");
             } else {
                 if (add) {
                     lockables.add(material);
