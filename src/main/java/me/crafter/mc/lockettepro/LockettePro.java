@@ -2,6 +2,8 @@ package me.crafter.mc.lockettepro;
 
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
+import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -20,6 +22,26 @@ public class LockettePro extends JavaPlugin {
     private static boolean needcheckhand = true;
 
     public void onEnable(){
+        // Version
+        String versionname = "v" + Bukkit.getServer().getClass().getPackage().getName().split("v")[1];
+        try {
+            version = Version.valueOf(versionname);
+        } catch (Exception ex) {
+            version = Version.UNKNOWN;
+            getLogger().warning("===================================");
+            getLogger().warning("Unsupported server version: " + Bukkit.getBukkitVersion());
+            try {
+                Tag.ANVIL.getValues();
+                Material.TRIDENT.isItem();
+            } catch (Exception e) {
+                setEnabled(false);
+                getLogger().warning("This plugin is not compatible with your server version!");
+            }
+            getLogger().warning("===================================");
+            if (!isEnabled()) {
+                return;
+            }
+        }
         plugin = this;
         // Read config
         new Config(this);
@@ -31,13 +53,6 @@ public class LockettePro extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BlockInventoryMoveListener(), this);
         // Dependency
         new Dependency(this);
-        // Version
-        String versionname = "v" + Bukkit.getServer().getClass().getPackage().getName().split("v")[1];
-        try {
-            version = Version.valueOf(versionname);
-        } catch (Exception ex){
-            version = Version.UNKNOWN;
-        }
         // If UUID is not enabled, UUID listener won't register
         if (Config.isUuidEnabled() || Config.isLockExpire()){
             if (Bukkit.getPluginManager().getPlugin("ProtocolLib") != null){
@@ -119,6 +134,67 @@ public class LockettePro extends JavaPlugin {
                         Utils.sendMessages(sender, Config.getLang("no-permission"));
                     }
                     return true;
+                    case "debug":
+                        // This is not the author debug, this prints out info
+                        if (sender.hasPermission("lockettepro.debug")) {
+                            sender.sendMessage("LockettePro Debug Message");
+                            // Basic
+                            sender.sendMessage("LockettePro: " + getDescription().getVersion());
+                            // Version
+                            sender.sendMessage("Bukkit: " + "v" + Bukkit.getServer().getClass().getPackage().getName().split("v")[1] + " / LockettePro: " + version);
+                            sender.sendMessage("Server version: " + Bukkit.getVersion());
+                            // Config
+                            sender.sendMessage("UUID: " + Config.isUuidEnabled());
+                            sender.sendMessage("Expire: " + Config.isLockExpire() + " " + (Config.isLockExpire() ? Config.getLockExpireDays() : ""));
+                            // ProtocolLib
+                            sender.sendMessage("ProtocolLib info:");
+                            if (Bukkit.getPluginManager().getPlugin("ProtocolLib") == null) {
+                                sender.sendMessage(" - ProtocolLib missing");
+                            } else {
+                                sender.sendMessage(" - ProtocolLib: " + Bukkit.getPluginManager().getPlugin("ProtocolLib").getDescription().getVersion());
+                            }
+                            // Other
+                            sender.sendMessage("Linked plugins:");
+                            boolean linked = false;
+                            if (Dependency.worldguard != null) {
+                                linked = true;
+                                sender.sendMessage(" - Worldguard: " + Dependency.worldguard.getDescription().getVersion());
+                            }
+                            if (Dependency.residence != null) {
+                                linked = true;
+                                sender.sendMessage(" - Residence: " + Dependency.residence.getDescription().getVersion());
+                            }
+                            if (Dependency.towny != null) {
+                                linked = true;
+                                sender.sendMessage(" - Towny: " + Dependency.towny.getDescription().getVersion());
+                            }
+                            if (Dependency.factions != null) {
+                                linked = true;
+                                sender.sendMessage(" - Factions: " + Dependency.factions.getDescription().getVersion());
+                            }
+                            if (Dependency.vault != null) {
+                                linked = true;
+                                sender.sendMessage(" - Vault: " + Dependency.vault.getDescription().getVersion());
+                            }
+                            if (Dependency.askyblock != null) {
+                                linked = true;
+                                sender.sendMessage(" - ASkyBlock: " + Dependency.askyblock.getDescription().getVersion());
+                            }
+                            if (Dependency.plotsquared != null) {
+                                linked = true;
+                                sender.sendMessage(" - PlotSquared: " + Dependency.plotsquared.getDescription().getVersion());
+                            }
+                            if (Bukkit.getPluginManager().getPlugin("CoreProtect") != null) {
+                                linked = true;
+                                sender.sendMessage(" - CoreProtect: " + Bukkit.getPluginManager().getPlugin("CoreProtect").getDescription().getVersion());
+                            }
+                            if (!linked) {
+                                sender.sendMessage(" - none");
+                            }
+                        } else {
+                            Utils.sendMessages(sender, Config.getLang("no-permission"));
+                        }
+                        return true;
                 }
                 // The following commands requires player
                 if (!(sender instanceof Player)){
@@ -191,65 +267,6 @@ public class LockettePro extends JavaPlugin {
                         }
                     } else {
                         Utils.sendMessages(player, Config.getLang("no-permission"));
-                    }
-                    break;
-                case "debug":
-                    // This is not the author debug, this prints out info
-                    if (player.hasPermission("lockettepro.debug")){
-                        player.sendMessage("LockettePro Debug Message");
-                        // Basic
-                        player.sendMessage("LockettePro: " + getDescription().getVersion());
-                        // Version
-                        player.sendMessage("Bukkit: " + "v" + Bukkit.getServer().getClass().getPackage().getName().split("v")[1] + " / LockettePro: " + version);
-                        // Config
-                        player.sendMessage("UUID: " + Config.isUuidEnabled());
-                        player.sendMessage("Expire: " + Config.isLockExpire() + " " + (Config.isLockExpire() ? Config.getLockExpireDays() : ""));
-                        // ProtocolLib
-                        player.sendMessage("ProtocolLib info:");
-                        if (Bukkit.getPluginManager().getPlugin("ProtocolLib") == null){
-                            player.sendMessage(" - ProtocolLib missing");
-                        } else {
-                            player.sendMessage(" - ProtocolLib: " + Bukkit.getPluginManager().getPlugin("ProtocolLib").getDescription().getVersion());
-                        }
-                        // Other
-                        player.sendMessage("Linked plugins:");
-                        boolean linked = false;
-                        if (Dependency.worldguard != null){
-                            linked = true;
-                            player.sendMessage(" - Worldguard: " + Dependency.worldguard.getDescription().getVersion());
-                        }
-                        if (Dependency.residence != null){
-                            linked = true;
-                            player.sendMessage(" - Residence: " + Dependency.residence.getDescription().getVersion());
-                        }
-                        if (Dependency.towny != null){
-                            linked = true;
-                            player.sendMessage(" - Towny: " + Dependency.towny.getDescription().getVersion());
-                        }
-                        if (Dependency.factions != null){
-                            linked = true;
-                            player.sendMessage(" - Factions: " + Dependency.factions.getDescription().getVersion());
-                        }
-                        if (Dependency.vault != null){
-                            linked = true;
-                            player.sendMessage(" - Vault: " + Dependency.vault.getDescription().getVersion());
-                        }
-                        if (Dependency.askyblock != null){
-                            linked = true;
-                            player.sendMessage(" - ASkyBlock: " + Dependency.askyblock.getDescription().getVersion());
-                        }
-                        if (Dependency.plotsquared != null){
-                            linked = true;
-                            player.sendMessage(" - PlotSquared: " + Dependency.plotsquared.getDescription().getVersion());
-                        }
-                        if (Bukkit.getPluginManager().getPlugin("CoreProtect") != null) {
-                            linked = true;
-                            player.sendMessage(" - CoreProtect: " + Bukkit.getPluginManager().getPlugin("CoreProtect").getDescription().getVersion());
-                        }
-                        if (!linked){
-                            player.sendMessage(" - none");
-                        }
-                        break;
                     }
                     break;
                 case "force":
