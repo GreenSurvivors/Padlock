@@ -459,7 +459,7 @@ public class LocketteProAPI {
     }
 
     public static Block getAttachedBlock(Block sign){ // Requires isSign
-        return sign.getRelative(((org.bukkit.material.Sign)sign.getState().getData()).getFacing().getOppositeFace());
+        return sign.getRelative(((org.bukkit.block.data.type.WallSign) sign.getBlockData()).getFacing().getOppositeFace());
     }
     
     public static int getTimerOnSigns(Block block){

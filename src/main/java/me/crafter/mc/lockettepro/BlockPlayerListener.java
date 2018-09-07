@@ -52,7 +52,8 @@ public class BlockPlayerListener implements Listener {
                 if (Dependency.isProtectedFrom(block, player)) return; // blockwise
                 if (Dependency.isProtectedFrom(block.getRelative(event.getBlockFace()), player)) return; // signwise
                 // Check whether locking location is obstructed
-                if (block.getRelative(blockface).getType() != Material.AIR) return;
+                Block signLoc = block.getRelative(blockface);
+                if (!signLoc.isEmpty()) return;
                 // Check whether this block is lockable
                 if (LocketteProAPI.isLockable(block)){
                     // Is this block already locked?
@@ -128,6 +129,7 @@ public class BlockPlayerListener implements Listener {
         }
         if (LocketteProAPI.isLockString(topline) || LocketteProAPI.isAdditionalString(topline)){
             Block block = LocketteProAPI.getAttachedBlock(event.getBlock());
+            Bukkit.broadcastMessage(block.toString());
             if (LocketteProAPI.isLockable(block)){
                 if (Dependency.isProtectedFrom(block, player)){ // External check here
                     event.setLine(0, Config.getLang("sign-error"));
