@@ -129,7 +129,6 @@ public class BlockPlayerListener implements Listener {
         }
         if (LocketteProAPI.isLockString(topline) || LocketteProAPI.isAdditionalString(topline)){
             Block block = LocketteProAPI.getAttachedBlock(event.getBlock());
-            Bukkit.broadcastMessage(block.toString());
             if (LocketteProAPI.isLockable(block)){
                 if (Dependency.isProtectedFrom(block, player)){ // External check here
                     event.setLine(0, Config.getLang("sign-error"));
