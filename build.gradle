@@ -20,12 +20,12 @@ repositories {
         name 'sk89q'
         url 'http://maven.sk89q.com/artifactory/repo/'
     }
-    
+
     maven {
         name 'vault-repo'
         url 'http://nexus.hc.to/content/repositories/pub_releases'
     }
-    
+
     maven {
         name 'dmulloy2'
         url 'http://repo.dmulloy2.net/content/groups/public/'
@@ -33,27 +33,24 @@ repositories {
 }
 
 dependencies {
-    compile 'org.bukkit:bukkit:1.13.1-R0.1-SNAPSHOT'
-    compile ('net.milkbowl.vault:VaultAPI:1.6') {
+    compile 'org.bukkit:bukkit:1.13.2-R0.1-SNAPSHOT'
+    compile('net.milkbowl.vault:VaultAPI:1.7') {
         transitive = false
     }
-    /*
-    compile ('com.sk89q:worldguard:6.1') {
+    compile('com.sk89q.worldguard:worldguard-legacy:7.0.0-SNAPSHOT') {
         transitive = false
     }
-    */
-    compile ('com.comphenix.protocol:ProtocolLib-API:4.4.0-SNAPSHOT') {
+    compile('com.comphenix.protocol:ProtocolLib-API:4.4.0-SNAPSHOT') {
         //transitive = false
     }
-    compile files('lib/Residence4.8.0.1Experimental.jar')
+    compile files('lib/Residence4.8.3.0.jar')
     compile files('lib/askyblock.jar')
-    compile files('lib/PlotSquared.jar')
+    compile files('lib/PlotSquared-Bukkit-18.11.05-ae2869a-2051.jar')
     compile files('lib/SimpleClans.jar')
     compile files('lib/Factions.jar')
     compile files('lib/MassiveCore.jar')
     compile files('lib/Towny.jar')
     compile files('lib/GriefPrevention.jar')
-    compile files('lib/worldguard-legacy-7.0.0-SNAPSHOT-dist.jar')
     compile files('lib/CoreProtect-2.15.0.jar')
 }
 compileJava {
