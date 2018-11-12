@@ -19,10 +19,6 @@ public class DependencyProtocolLib {
 
     public static void setUpProtocolLib(Plugin plugin){
         switch (LockettePro.getBukkitVersion()){
-        case v1_13_R1:
-            addTileEntityDataListener(plugin);
-            addMapChunkListener(plugin);
-            break;
         case v1_13_R2:
             addTileEntityDataListener(plugin);
             addMapChunkListener(plugin);

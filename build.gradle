@@ -3,6 +3,14 @@ apply plugin: 'java'
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
+version = "2.9.%s-1.13.2"
+
+if (System.getenv("TRAVIS_BUILD_NUMBER") != null) {
+    project.version = String.format(project.version, System.getenv("TRAVIS_BUILD_NUMBER"))
+} else {
+    project.version = String.format(project.version, "0")
+}
+
 repositories {
     jcenter()
 
@@ -15,7 +23,7 @@ repositories {
         name 'Sonatype'
         url 'https://oss.sonatype.org/content/groups/public'
     }
-    
+
     maven {
         name 'sk89q'
         url 'http://maven.sk89q.com/artifactory/repo/'
@@ -43,16 +51,11 @@ dependencies {
     compile('com.comphenix.protocol:ProtocolLib-API:4.4.0-SNAPSHOT') {
         //transitive = false
     }
-    compile files('lib/Residence4.8.3.0.jar')
-    compile files('lib/askyblock.jar')
-    compile files('lib/PlotSquared-Bukkit-18.11.05-ae2869a-2051.jar')
-    compile files('lib/SimpleClans.jar')
-    compile files('lib/Factions.jar')
-    compile files('lib/MassiveCore.jar')
-    compile files('lib/Towny.jar')
-    compile files('lib/GriefPrevention.jar')
-    compile files('lib/CoreProtect-2.15.0.jar')
+    compile files('lib/CoreProtect-2.15.1-API-v6.jar')
 }
 compileJava {
     options.compilerArgs += ["-Xlint:deprecation"]
+}
+processResources {
+    expand version: project.version
 }

@@ -160,29 +160,9 @@ public class LockettePro extends JavaPlugin {
                                 linked = true;
                                 sender.sendMessage(" - Worldguard: " + Dependency.worldguard.getDescription().getVersion());
                             }
-                            if (Dependency.residence != null) {
-                                linked = true;
-                                sender.sendMessage(" - Residence: " + Dependency.residence.getDescription().getVersion());
-                            }
-                            if (Dependency.towny != null) {
-                                linked = true;
-                                sender.sendMessage(" - Towny: " + Dependency.towny.getDescription().getVersion());
-                            }
-                            if (Dependency.factions != null) {
-                                linked = true;
-                                sender.sendMessage(" - Factions: " + Dependency.factions.getDescription().getVersion());
-                            }
                             if (Dependency.vault != null) {
                                 linked = true;
                                 sender.sendMessage(" - Vault: " + Dependency.vault.getDescription().getVersion());
-                            }
-                            if (Dependency.askyblock != null) {
-                                linked = true;
-                                sender.sendMessage(" - ASkyBlock: " + Dependency.askyblock.getDescription().getVersion());
-                            }
-                            if (Dependency.plotsquared != null) {
-                                linked = true;
-                                sender.sendMessage(" - PlotSquared: " + Dependency.plotsquared.getDescription().getVersion());
                             }
                             if (Bukkit.getPluginManager().getPlugin("CoreProtect") != null) {
                                 linked = true;

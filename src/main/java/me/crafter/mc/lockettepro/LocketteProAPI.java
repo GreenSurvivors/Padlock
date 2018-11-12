@@ -397,14 +397,11 @@ public class LocketteProAPI {
                 return true;
             }
         }
-        // For Towny & Vault & Scoreboard
-        for (int i = 1; i < 4; i ++){
-            if (Dependency.isTownyTownOrNationOf(lines[i], player)) return true;
-            if (Dependency.isPermissionGroupOf(lines[i], player)) return true;	
+        // For Vault & Scoreboard
+        for (int i = 1; i < 4; i++) {
+            if (Dependency.isPermissionGroupOf(lines[i], player)) return true;
             if (Dependency.isScoreboardTeamOf(lines[i], player)) return true;
-            if (Dependency.isSimpleClanOf(lines[i], player)) return true;
         }
-        
         return false;
     }
     
