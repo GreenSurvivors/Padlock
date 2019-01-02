@@ -7,6 +7,9 @@ import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.BlockData;
+import org.bukkit.block.data.Directional;
+import org.bukkit.block.data.Waterlogged;
 import org.bukkit.block.data.type.Chest;
 import org.bukkit.entity.Player;
 
@@ -157,7 +160,7 @@ public class LocketteProAPI {
             if (blockface == exempt) continue;
             Block relativeblock = block.getRelative(blockface);
             // Find [Private] sign?
-            if (isLockSign(relativeblock) && (((org.bukkit.material.Sign)relativeblock.getState().getData()).getFacing() == blockface)){
+            if (isLockSign(relativeblock) && getFacing(relativeblock) == blockface){
                 // Found [Private] sign, is expire turned on and expired? (relativeblock is now sign)
                 if (Config.isLockExpire() && LocketteProAPI.isSignExpired(relativeblock)) {
                     continue; // Private sign but expired... But impossible to have 2 [Private] signs anyway?
@@ -172,7 +175,7 @@ public class LocketteProAPI {
         for (BlockFace blockface : newsfaces){
             if (blockface == exempt) continue;
             Block relativeblock = block.getRelative(blockface);
-            if (isLockSign(relativeblock) && (((org.bukkit.material.Sign)relativeblock.getState().getData()).getFacing() == blockface)){
+            if (isLockSign(relativeblock) && getFacing(relativeblock) == blockface){
                 if (isOwnerOnSign(relativeblock, player)){
                     return true;
                 }
@@ -185,7 +188,7 @@ public class LocketteProAPI {
         for (BlockFace blockface : newsfaces){
             if (blockface == exempt) continue;
             Block relativeblock = block.getRelative(blockface);
-            if (isLockSignOrAdditionalSign(relativeblock) && (((org.bukkit.material.Sign)relativeblock.getState().getData()).getFacing() == blockface)){
+            if (isLockSignOrAdditionalSign(relativeblock) && getFacing(relativeblock) == blockface){
                 if (isUserOnSign(relativeblock, player)){
                     return true;
                 }
@@ -456,7 +459,8 @@ public class LocketteProAPI {
     }
 
     public static Block getAttachedBlock(Block sign){ // Requires isSign
-        return sign.getRelative(((org.bukkit.material.Sign) sign.getState().getData()).getFacing().getOppositeFace());
+        BlockFace facing = getFacing(sign);
+        return sign.getRelative(facing.getOppositeFace());
     }
     
     public static int getTimerOnSigns(Block block){
@@ -569,7 +573,7 @@ public class LocketteProAPI {
 
     public static BlockFace getRelativeChestFace(Block block) {
         Chest chest = (Chest) block.getBlockData();
-        BlockFace face = chest.getFacing();
+        BlockFace face = getFacing(block);
         BlockFace relativeFace = null;
         if (chest.getType() == Chest.Type.LEFT) {
             if (face == BlockFace.NORTH) {
@@ -593,5 +597,25 @@ public class LocketteProAPI {
             }
         }
         return relativeFace;
+    }
+
+    public static BlockFace getFacing(Block block) {
+        BlockData data = block.getBlockData();
+        BlockFace f = null;
+        if (data instanceof Directional && data instanceof Waterlogged && ((Waterlogged) data).isWaterlogged()) {
+            String str = ((Directional) data).toString();
+            if (str.contains("facing=west")) {
+                f = BlockFace.WEST;
+            } else if (str.contains("facing=east")) {
+                f = BlockFace.EAST;
+            } else if (str.contains("facing=south")) {
+                f = BlockFace.SOUTH;
+            } else if (str.contains("facing=north")) {
+                f = BlockFace.NORTH;
+            }
+        } else if (data instanceof Directional) {
+            f = ((Directional) data).getFacing();
+        }
+        return f;
     }
 }
