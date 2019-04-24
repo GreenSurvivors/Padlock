@@ -1,11 +1,15 @@
 package me.crafter.mc.lockettepro;
 
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
+import com.google.common.cache.CacheBuilder;
+import com.google.common.cache.CacheLoader;
+import com.google.common.cache.LoadingCache;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
@@ -21,19 +25,33 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 
 public class Utils {
-    
+
     public static final String usernamepattern = "^[a-zA-Z0-9_]*$";
-    
-    private static Map<Player, Block> selectedsign = new HashMap<Player, Block>();
-    private static Set<Player> notified = new HashSet<Player>();
-        
+    private static LoadingCache<UUID, Block> selectedsign = CacheBuilder.newBuilder()
+            .expireAfterAccess(30, TimeUnit.SECONDS)
+            .build(new CacheLoader<UUID, Block>() {
+                public Block load(UUID key) {
+                    return null;
+                }
+            });
+    private static Set<UUID> notified = new HashSet<>();
+
     // Helper functions
-    public static Block putSignOn(Block block, BlockFace blockface, String line1, String line2){
+    public static Block putSignOn(Block block, BlockFace blockface, String line1, String line2, Material material) {
         Block newsign = block.getRelative(blockface);
-        newsign.setType(Material.WALL_SIGN);
+        Material blockType = Material.getMaterial(material.name().replace("_SIGN", "_WALL_SIGN"));
+        if (blockType != null && Tag.WALL_SIGNS.isTagged(blockType)) {
+            newsign.setType(blockType);
+        } else {
+            newsign.setType(Material.OAK_WALL_SIGN);
+        }
         BlockData data = newsign.getBlockData();
         if(data instanceof Directional){
             ((Directional) data).setFacing(blockface);
@@ -65,13 +83,18 @@ public class Utils {
     public static void updateSign(Block block){
         ((Sign)block.getState()).update();
     }
-    
-    public static Block getSelectedSign(Player player){
-        return selectedsign.get(player);
+
+    public static Block getSelectedSign(Player player) {
+        Block b = selectedsign.getIfPresent(player.getUniqueId());
+        if (b != null && !player.getWorld().getName().equals(b.getWorld().getName())) {
+            selectedsign.invalidate(player.getUniqueId());
+            return null;
+        }
+        return b;
     }
     
     public static void selectSign(Player player, Block block){
-        selectedsign.put(player, block);
+        selectedsign.put(player.getUniqueId(), block);
     }
     
     public static void playLockEffect(Player player, Block block){
@@ -90,10 +113,10 @@ public class Utils {
     }
 
     public static boolean shouldNotify(Player player){
-        if (notified.contains(player)){
+        if (notified.contains(player.getUniqueId())){
             return false;
         } else {
-            notified.add(player);
+            notified.add(player.getUniqueId());
             return true;
         }
     }

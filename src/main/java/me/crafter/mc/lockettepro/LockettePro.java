@@ -3,7 +3,6 @@ package me.crafter.mc.lockettepro;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
-import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -31,8 +30,7 @@ public class LockettePro extends JavaPlugin {
             getLogger().warning("===================================");
             getLogger().warning("Unsupported server version: " + Bukkit.getBukkitVersion());
             try {
-                Tag.ANVIL.getValues();
-                Material.TRIDENT.isItem();
+                Material.BARREL.isItem();
             } catch (Exception e) {
                 setEnabled(false);
                 getLogger().warning("This plugin is not compatible with your server version!");

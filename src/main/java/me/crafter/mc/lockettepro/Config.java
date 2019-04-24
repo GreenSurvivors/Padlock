@@ -2,6 +2,7 @@ package me.crafter.mc.lockettepro;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
@@ -144,7 +145,8 @@ public class Config {
                 }
             }
         }
-        lockables.remove(Material.WALL_SIGN);
+        lockables.removeAll(Tag.SIGNS.getValues());
+        lockables.remove(Material.SCAFFOLDING);
     }
 
     public static void initDefaultConfig(){

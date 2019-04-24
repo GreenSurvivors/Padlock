@@ -1,8 +1,6 @@
 package me.crafter.mc.lockettepro;
 
-import org.bukkit.Effect;
-import org.bukkit.Material;
-import org.bukkit.Tag;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Container;
@@ -210,12 +208,8 @@ public class LocketteProAPI {
     public static boolean isLockable(Block block){
         Material material = block.getType();
         //Bad blocks
-        switch (material){
-        case SIGN:
-        case WALL_SIGN:
+        if(Tag.SIGNS.isTagged(material)){
             return false;
-        default:
-            break;
         }
         if (Config.isLockable(material)){ // Directly lockable
             return true;
@@ -313,8 +307,12 @@ public class LocketteProAPI {
             // End temp workaround bad code for checking up and down signs
         case CHEST:
         case TRAPPED_CHEST:
-        case WALL_SIGN:
-        case SIGN:
+        case OAK_WALL_SIGN:
+        case SPRUCE_SIGN:
+        case BIRCH_SIGN:
+        case JUNGLE_SIGN:
+        case ACACIA_SIGN: 
+        case DARK_OAK_SIGN:
             for (BlockFace blockface : allfaces){
                 Block newblock = block.getRelative(blockface);
                 switch (newblock.getType()){
@@ -356,7 +354,7 @@ public class LocketteProAPI {
     }
     
     public static boolean isSign(Block block){
-        return block.getType() == Material.WALL_SIGN;
+        return Tag.WALL_SIGNS.isTagged(block.getType());
     }
     
     public static boolean isLockSign(Block block){

@@ -1,7 +1,7 @@
 package me.crafter.mc.lockettepro;
 
 import org.bukkit.ChatColor;
-import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
@@ -36,7 +36,7 @@ public class BlockDebugListener implements Listener {
             
             p.sendMessage("Block: " + b.getType().toString() + " " + b.getData());
             
-            if (b.getType() == Material.WALL_SIGN){
+            if (Tag.WALL_SIGNS.isTagged(b.getType())){
                 for (String line : ((Sign)b.getState()).getLines()){
                     p.sendMessage(ChatColor.GREEN + line);
                 }

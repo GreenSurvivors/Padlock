@@ -3,6 +3,7 @@ package me.crafter.mc.lockettepro;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -35,7 +36,7 @@ public class BlockPlayerListener implements Listener {
         Action action = event.getAction();
         Player player = event.getPlayer();
         // Check action correctness
-        if (action == Action.RIGHT_CLICK_BLOCK && player.getInventory().getItemInMainHand().getType() == Material.SIGN){
+        if (action == Action.RIGHT_CLICK_BLOCK && Tag.SIGNS.isTagged(player.getInventory().getItemInMainHand().getType())) {
             if (player.getGameMode().equals(GameMode.SPECTATOR)) {
                 return;
             }
@@ -67,15 +68,15 @@ public class BlockPlayerListener implements Listener {
                         // Send message
                         Utils.sendMessages(player, Config.getLang("locked-quick"));
                         // Put sign on
-                        Block newsign = Utils.putSignOn(block, blockface, Config.getDefaultPrivateString(), player.getName());
+                        Block newsign = Utils.putSignOn(block, blockface, Config.getDefaultPrivateString(), player.getName(), player.getInventory().getItemInMainHand().getType());
                         Utils.resetCache(block);
                         // Cleanups - UUID
                         if (Config.isUuidEnabled()){
                             Utils.updateLineByPlayer(newsign, 1, player);
                         }
                         // Cleanups - Expiracy
-                        if (Config.isLockExpire()){
-                            if (player.hasPermission("lockettepro.noexpire")){
+                        if (Config.isLockExpire()) {
+                            if (player.hasPermission("lockettepro.noexpire")) {
                                 Utils.updateLineWithTime(newsign, true); // set created to -1 (no expire)
                             } else {
                                 Utils.updateLineWithTime(newsign, false); // set created to now
@@ -86,12 +87,12 @@ public class BlockPlayerListener implements Listener {
                         // Not locked, (is locked door nearby), is owner of locked door nearby
                         Utils.removeASign(player);
                         Utils.sendMessages(player, Config.getLang("additional-sign-added-quick"));
-                        Utils.putSignOn(block, blockface, Config.getDefaultAdditionalString(), "");
+                        Utils.putSignOn(block, blockface, Config.getDefaultAdditionalString(), "", player.getInventory().getItemInMainHand().getType());
                         Dependency.logPlacement(player, block.getRelative(blockface));
-                    } else if (LocketteProAPI.isOwner(block, player)){
+                    } else if (LocketteProAPI.isOwner(block, player)) {
                         // Locked, (not locked door nearby), is owner of locked block
                         Utils.removeASign(player);
-                        Utils.putSignOn(block, blockface, Config.getDefaultAdditionalString(), "");
+                        Utils.putSignOn(block, blockface, Config.getDefaultAdditionalString(), "", player.getInventory().getItemInMainHand().getType());
                         Utils.sendMessages(player, Config.getLang("additional-sign-added-quick"));
                         Dependency.logPlacement(player, block.getRelative(blockface));
                     } else {
@@ -106,7 +107,7 @@ public class BlockPlayerListener implements Listener {
     // Manual protection
     @EventHandler(priority = EventPriority.NORMAL)
     public void onManualLock(SignChangeEvent event){
-        if (event.getBlock().getType() != Material.WALL_SIGN) return;
+        if (!Tag.WALL_SIGNS.isTagged(event.getBlock().getType())) return;
         String topline = event.getLine(0);
         Player player = event.getPlayer();
         /*  Issue #46 - Old version of Minecraft trim signs in unexpected way.
@@ -177,7 +178,7 @@ public class BlockPlayerListener implements Listener {
     // Player select sign
     @EventHandler(priority = EventPriority.LOW)
     public void playerSelectSign(PlayerInteractEvent event){
-        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.getClickedBlock().getType() == Material.WALL_SIGN){
+        if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.hasBlock() && Tag.WALL_SIGNS.isTagged(event.getClickedBlock().getType())) {
             Block block = event.getClickedBlock();
             Player player = event.getPlayer();
             if (!player.hasPermission("lockettepro.edit")) return;
