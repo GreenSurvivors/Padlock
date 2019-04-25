@@ -6,10 +6,7 @@ import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
-import org.bukkit.Tag;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
@@ -59,6 +56,9 @@ public class Utils {
         }
         updateSign(newsign);
         Sign sign = (Sign)newsign.getState();
+        if (newsign.getType() == Material.DARK_OAK_WALL_SIGN) {
+            sign.setColor(DyeColor.WHITE);
+        }
         sign.setLine(0, line1);
         sign.setLine(1, line2);
         sign.update();

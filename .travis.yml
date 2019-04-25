@@ -10,7 +10,7 @@ deploy:
   provider: releases
   api_key: $GITHUB_KEY
   file:
-    - build/libs/LockettePro-2.9.${TRAVIS_BUILD_NUMBER}-1.14-pre5.jar
+    - build/libs/LockettePro-2.9.${TRAVIS_BUILD_NUMBER}-1.14.jar
   on:
     tags: false
   skip_cleanup: true
