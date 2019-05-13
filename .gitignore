@@ -15,5 +15,6 @@ local.properties
 .loadpath
 .idea/
 *.iml
+.gradle
 build
 out

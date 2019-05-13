@@ -1,61 +1,59 @@
-apply plugin: 'java'
+apply plugin: 'java-library'
+apply plugin: 'maven-publish'
+
+// Suppiled by Jenkins
+ext.buildNumber = System.env.BUILD_NUMBER == null ? "x"                : "$System.env.BUILD_NUMBER"
+ext.mavenDirectory = System.env.MAVEN_DIR == null ? "$projectDir/repo" : "$System.env.MAVEN_DIR"
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 
-version = "2.9.%s-1.14"
-
-if (System.getenv("TRAVIS_BUILD_NUMBER") != null) {
-    project.version = String.format(project.version, System.getenv("TRAVIS_BUILD_NUMBER"))
-} else {
-    project.version = String.format(project.version, "0")
-}
+// differet version convension from Nyaa plugins
+group = "me.crafter.mc"
+archivesBaseName = "LockettePro"
+version = "2.9.${buildNumber}-1.14"
 
 repositories {
     jcenter()
-
-    maven {
-        name 'Spigot'
-        url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'
-    }
-
-    maven {
-        name 'Sonatype'
-        url 'https://oss.sonatype.org/content/groups/public'
-    }
-
-    maven {
-        name 'sk89q'
-        url 'http://maven.sk89q.com/artifactory/repo/'
-    }
-
-    maven {
-        name 'vault-repo'
-        url 'http://nexus.hc.to/content/repositories/pub_releases'
-    }
-
-    maven {
-        name 'dmulloy2'
-        url 'http://repo.dmulloy2.net/content/groups/public/'
-    }
+    maven {name 'Spigot';     url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'}
+    maven {name 'Sonatype';   url 'https://oss.sonatype.org/content/groups/public'}
+    maven {name 'sk89q';      url 'http://maven.sk89q.com/artifactory/repo/'}
+    maven {name 'vault-repo'; url 'http://nexus.hc.to/content/repositories/pub_releases'}
+    maven {name 'dmulloy2';   url 'http://repo.dmulloy2.net/content/groups/public/'}
+    maven {name 'playpro';    url 'https://maven.playpro.com/'}
 }
 
 dependencies {
-    compile 'org.bukkit:bukkit:1.14-R0.1-SNAPSHOT'
-    compile('net.milkbowl.vault:VaultAPI:1.7') {
-        transitive = false
-    }
-    compile('com.sk89q.worldguard:worldguard-legacy:7.0.0-SNAPSHOT') {
-        transitive = false
-    }
-    compile('com.comphenix.protocol:ProtocolLib-API:4.4.0-SNAPSHOT') {
-        //transitive = false
-    }
-    compile files('lib/CoreProtect-2.15.1-API-v6.jar')
+    compileOnly 'org.bukkit:bukkit:1.14-R0.1-SNAPSHOT'
+    compileOnly('net.milkbowl.vault:VaultAPI:1.7') { transitive = false }
+    compileOnly('com.sk89q.worldguard:worldguard-legacy:7.0.0-SNAPSHOT') { transitive = false }
+    compileOnly('com.comphenix.protocol:ProtocolLib-API:4.4.0-SNAPSHOT') { transitive = false }
+    compileOnly('net.coreprotect:coreprotect:2.16.3') { transitive = false }
 }
 compileJava {
     options.compilerArgs += ["-Xlint:deprecation"]
 }
 processResources {
     expand version: project.version
+}
+
+// maven publications
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from sourceSets.main.java.srcDirs
+}
+publishing {
+    publications {
+        mavenJava(MavenPublication) {
+            artifact sourcesJar
+            artifactId "lockettepro"
+            version "2.9-SNAPSHOT"
+            from components.java
+        }
+    }
+    repositories {
+        maven {
+            url "$mavenDirectory"
+        }
+    }
 }
