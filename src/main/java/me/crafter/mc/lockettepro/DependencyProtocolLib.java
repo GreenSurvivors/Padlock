@@ -18,22 +18,15 @@ import java.util.List;
 public class DependencyProtocolLib {
 
     public static void setUpProtocolLib(Plugin plugin){
-        switch (LockettePro.getBukkitVersion()){
-        case v1_14_R1:
+        if (Config.protocollib) {
             addTileEntityDataListener(plugin);
             addMapChunkListener(plugin);
-            break;
-        case UNKNOWN:
-        default:
-            addTileEntityDataListener(plugin);
-            addMapChunkListener(plugin);
-            break;
         }
     }
     
     public static void cleanUpProtocolLib(Plugin plugin){
         try {
-            if (Bukkit.getPluginManager().getPlugin("ProtocolLib") != null){
+            if (Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")){
                 ProtocolLibrary.getProtocolManager().removePacketListeners(plugin);
             }
         } catch (Exception e) {

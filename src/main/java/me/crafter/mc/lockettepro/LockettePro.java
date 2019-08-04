@@ -17,28 +17,19 @@ public class LockettePro extends JavaPlugin {
 
     private static Plugin plugin;
     private boolean debug = false;
-    private static Version version = Version.UNKNOWN;
     private static boolean needcheckhand = true;
 
     public void onEnable(){
         // Version
-        String versionname = "v" + Bukkit.getServer().getClass().getPackage().getName().split("v")[1];
         try {
-            version = Version.valueOf(versionname);
-        } catch (Exception ex) {
-            version = Version.UNKNOWN;
-            getLogger().warning("===================================");
-            getLogger().warning("Unsupported server version: " + Bukkit.getBukkitVersion());
-            try {
-                Material.BARREL.isItem();
-            } catch (Exception e) {
-                setEnabled(false);
-                getLogger().warning("This plugin is not compatible with your server version!");
-            }
-            getLogger().warning("===================================");
-            if (!isEnabled()) {
-                return;
-            }
+            Material.BARREL.isItem();
+        } catch (Exception e) {
+            setEnabled(false);
+            getLogger().warning("This plugin is not compatible with your server version!");
+        }
+        getLogger().warning("===================================");
+        if (!isEnabled()) {
+            return;
         }
         plugin = this;
         // Read config
@@ -53,7 +44,7 @@ public class LockettePro extends JavaPlugin {
         new Dependency(this);
         // If UUID is not enabled, UUID listener won't register
         if (Config.isUuidEnabled() || Config.isLockExpire()){
-            if (Bukkit.getPluginManager().getPlugin("ProtocolLib") != null){
+            if (Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")){
                 DependencyProtocolLib.setUpProtocolLib(this);
             } else {
                 plugin.getLogger().info("ProtocolLib is not found!");
@@ -76,10 +67,6 @@ public class LockettePro extends JavaPlugin {
         return needcheckhand;
     }
     
-    public static Version getBukkitVersion(){
-        return version;
-    }
-
     @Override
     public List<String> onTabComplete(CommandSender sender, Command command, String alias, String[] args) {
         List<String> commands = new ArrayList<>();
@@ -139,7 +126,7 @@ public class LockettePro extends JavaPlugin {
                             // Basic
                             sender.sendMessage("LockettePro: " + getDescription().getVersion());
                             // Version
-                            sender.sendMessage("Bukkit: " + "v" + Bukkit.getServer().getClass().getPackage().getName().split("v")[1] + " / LockettePro: " + version);
+                            sender.sendMessage("Bukkit: " + "v" + Bukkit.getServer().getClass().getPackage().getName().split("v")[1]);
                             sender.sendMessage("Server version: " + Bukkit.getVersion());
                             // Config
                             sender.sendMessage("UUID: " + Config.isUuidEnabled());

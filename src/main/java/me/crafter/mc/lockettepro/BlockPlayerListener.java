@@ -27,9 +27,8 @@ import java.util.List;
 public class BlockPlayerListener implements Listener {
 
     // Quick protect for chests
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onPlayerQuickLockChest(PlayerInteractEvent event){
-        if (event.isCancelled()) return;
         // Check quick lock enabled
         if (Config.getQuickProtectAction() == (byte)0) return;
         // Get player and action info

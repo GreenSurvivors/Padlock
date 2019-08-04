@@ -37,6 +37,9 @@ public class Config {
     private static byte blockhopperminecart = 0;
     private static boolean lockexpire = false;
     private static double lockexpiredays = 60D;
+    public static boolean protocollib = false;
+    public static boolean worldguard = false;
+    public static boolean coreprotect = false;
     private static long lockdefaultcreatetime = -1L;
     private static String lockexpirestring = "";
     private static Set<String> protectionexempt = new HashSet<String>();
@@ -51,6 +54,9 @@ public class Config {
         initAdditionalFiles();
         config = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "config.yml"));
         uuid = config.getBoolean("enable-uuid-support", false);
+        protocollib = config.getBoolean("protocollib", true);
+        worldguard = config.getBoolean("worldguard", true);
+        coreprotect = config.getBoolean("coreprotect", true);
         langfilename = config.getString("language-file-name", "lang.yml");
         lang = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), langfilename));
         String enablequickprotectstring = config.getString("enable-quick-protect", "true");

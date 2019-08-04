@@ -21,7 +21,7 @@ public class Dependency {
     public Dependency(Plugin plugin) {
         // WorldGuard
         Plugin worldguardplugin = plugin.getServer().getPluginManager().getPlugin("WorldGuard");
-        if (worldguardplugin == null || !(worldguardplugin instanceof WorldGuardPlugin)) {
+        if (!Config.worldguard || !(worldguardplugin instanceof WorldGuardPlugin)) {
             worldguard = null;
         } else {
             worldguard = (WorldGuardPlugin) worldguardplugin;
@@ -33,7 +33,7 @@ public class Dependency {
             permission = rsp.getProvider();
         }
 
-        if (Bukkit.getPluginManager().getPlugin("CoreProtect") != null && CoreProtect.getInstance().getAPI().APIVersion() == 6) {
+        if (Config.coreprotect && Bukkit.getPluginManager().getPlugin("CoreProtect") != null && CoreProtect.getInstance().getAPI().APIVersion() == 6) {
             coreProtectAPI = CoreProtect.getInstance().getAPI();
             if (!coreProtectAPI.isEnabled()) {
                 coreProtectAPI = null;
