@@ -4,6 +4,7 @@ apply plugin: 'maven-publish'
 // Suppiled by Jenkins
 ext.buildNumber = System.env.BUILD_NUMBER == null ? "x"                : "$System.env.BUILD_NUMBER"
 ext.mavenDirectory = System.env.MAVEN_DIR == null ? "$projectDir/repo" : "$System.env.MAVEN_DIR"
+ext.jdDirectory = System.env.JAVADOCS_DIR == null ? null               : "$System.env.JAVADOCS_DIR"
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
@@ -18,9 +19,9 @@ repositories {
     maven {name 'Spigot';     url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'}
     maven {name 'Sonatype';   url 'https://oss.sonatype.org/content/groups/public'}
     maven {name 'sk89q';      url 'http://maven.sk89q.com/artifactory/repo/'}
+    maven {name 'playpro';    url 'https://maven.playpro.com/'}
     maven {name 'vault-repo'; url 'https://jitpack.io'}
     maven {name 'dmulloy2';   url 'http://repo.dmulloy2.net/content/groups/public/'}
-    maven {name 'playpro';    url 'https://maven.playpro.com/'}
 }
 
 dependencies {
