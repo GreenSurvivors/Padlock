@@ -12,7 +12,7 @@ targetCompatibility = 1.8
 // differet version convension from Nyaa plugins
 group = "me.crafter.mc"
 archivesBaseName = "LockettePro"
-version = "2.9.${buildNumber}-1.14.4"
+version = "2.9.${buildNumber}-1.15.1"
 
 repositories {
     jcenter()
@@ -25,10 +25,13 @@ repositories {
 }
 
 dependencies {
-    compileOnly 'org.spigotmc:spigot-api:1.14.4-R0.1-SNAPSHOT'
+    compileOnly 'org.spigotmc:spigot-api:1.15.1-R0.1-SNAPSHOT'
     compileOnly('net.milkbowl.vault:VaultAPI:1.7') { transitive = false }
-    compileOnly('com.sk89q.worldguard:worldguard-bukkit:7.0.1-SNAPSHOT') { transitive = false }
-    compileOnly('com.comphenix.protocol:ProtocolLib-API:4.4.0') { transitive = false }
+    compileOnly('com.sk89q.worldguard:worldguard-bukkit:7.0.2-SNAPSHOT') { transitive = false }
+    // FIXME: ProtocolLib-API is not available for 4.5.0
+    //compileOnly('com.comphenix.protocol:ProtocolLib-API:4.4.0') { transitive = false }
+    compileOnly('com.comphenix.protocol:ProtocolLib:4.5.0') { transitive = false }
+    // Note: the repo maven.playpro.com is not updated to match the version on spigotmc
     compileOnly('net.coreprotect:coreprotect:2.16.3') { transitive = false }
 }
 compileJava {
