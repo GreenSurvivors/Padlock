@@ -141,6 +141,9 @@ public class LocketteProAPI {
                 if (isUserSingleBlock(relativechest, chestface.getOppositeFace(), player)) return true;
             }
             // Don't break here
+
+            case LECTERN:
+                return true; //Lecterns can be used, but not stolen from
         // Everything else (First block of container check goes here)
         default:
             if (isUserSingleBlock(block, null, player)) return true; 

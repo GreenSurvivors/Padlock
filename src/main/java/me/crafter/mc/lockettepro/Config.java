@@ -176,11 +176,10 @@ public class Config {
         String[] timer_signs = {"[Timer:@]", "[timer:@]"};
         config.addDefault("timer-signs", timer_signs);
         String[] lockables = {"CHEST","TRAPPED_CHEST","FURNACE","BURNING_FURNACE","HOPPER","BREWING_STAND","DIAMOND_BLOCK",
-                "OAK_DOOR","SPRUCE_DOOR","BIRCH_DOOR","JUNGLE_DOOR","ACACIA_DOOR","DARK_OAK_DOOR","IRON_DOOR"};
+                "OAK_DOOR","SPRUCE_DOOR","BIRCH_DOOR","JUNGLE_DOOR","ACACIA_DOOR","DARK_OAK_DOOR","IRON_DOOR", "LECTERN"};
         config.addDefault("lockables", lockables);
         String[] protection_exempt = {"nothing"};
         config.addDefault("protection-exempt", protection_exempt);
-
         config.addDefault("lock-expire", false);
         config.addDefault("lock-expire-days", 999.9D);
         config.addDefault("lock-default-create-time-unix", -1L);
