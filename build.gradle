@@ -12,7 +12,7 @@ targetCompatibility = 1.8
 // differet version convension from Nyaa plugins
 group = "me.crafter.mc"
 archivesBaseName = "LockettePro"
-version = "2.9.${buildNumber}-1.15.1"
+version = "2.9.${buildNumber}-mc1.15.1"
 
 repositories {
     jcenter()
