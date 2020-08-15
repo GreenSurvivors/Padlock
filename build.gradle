@@ -12,7 +12,7 @@ targetCompatibility = 1.8
 // differet version convension from Nyaa plugins
 group = "me.crafter.mc"
 archivesBaseName = "LockettePro"
-version = "2.9.${buildNumber}-mc1.15.1"
+version = "2.10.${buildNumber}-mc1.16.1"
 
 repositories {
     jcenter()
@@ -32,7 +32,7 @@ dependencies {
     //compileOnly('com.comphenix.protocol:ProtocolLib-API:4.4.0') { transitive = false }
     compileOnly('com.comphenix.protocol:ProtocolLib:4.5.0') { transitive = false }
     // Note: the repo maven.playpro.com is not updated to match the version on spigotmc
-    compileOnly('net.coreprotect:coreprotect:2.16.3') { transitive = false }
+    compileOnly('net.coreprotect:coreprotect:19.1') { transitive = false }
 }
 compileJava {
     options.compilerArgs += ["-Xlint:deprecation"]
