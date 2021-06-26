@@ -319,11 +319,13 @@ public class Utils {
 
     public static String getSignLineFromUnknown(String json) {
         try { // 1.9+
-            if (json.length() > 33) {
-                JsonObject line = new JsonParser().parse(json).getAsJsonObject();
-                if (line.has("extra")) {
-                    return line.get("extra").getAsJsonArray().get(0).getAsJsonObject().get("text").getAsString();
-                }
+            // "Performance optimierung, dass nicht jeder Scheiß geparsed wird." -Schpammer
+            if (json.length() < 15) {
+                return json;
+            }
+            JsonObject line = new JsonParser().parse(json).getAsJsonObject();
+            if (line.has("text")) {
+                return line.get("text").getAsString();
             }
             return "";
         } catch (Exception ex) {
