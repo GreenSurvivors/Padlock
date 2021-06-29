@@ -319,13 +319,18 @@ public class Utils {
 
     public static String getSignLineFromUnknown(String json) {
         try { // 1.9+
-            // "Performance optimierung, dass nicht jeder Scheiß geparsed wird." -Schpammer
-            if (json.length() < 15) {
-                return json;
+            // Spigot or not?
+            if (!json.contains("extra")) {
+                // It's a Paper sign! (Paper does not create signs with "extra" in NBT)
+                JsonObject line = new JsonParser().parse(json).getAsJsonObject();
+                if (line.has("text")) {
+                    return line.get("text").getAsString();
+                }
             }
+            // It's Spigot sign! (Spigot does create signs with "extra" in NBT)
             JsonObject line = new JsonParser().parse(json).getAsJsonObject();
-            if (line.has("text")) {
-                return line.get("text").getAsString();
+            if (line.has("extra")) {
+                return line.get("extra").getAsJsonArray().get(0).getAsJsonObject().get("text").getAsString();
             }
             return "";
         } catch (Exception ex) {
