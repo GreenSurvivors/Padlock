@@ -35,7 +35,7 @@ public class BlockPlayerListener implements Listener {
         Action action = event.getAction();
         Player player = event.getPlayer();
         // Check action correctness
-        if (action == Action.RIGHT_CLICK_BLOCK && Tag.SIGNS.isTagged(player.getInventory().getItemInMainHand().getType())) {
+        if (action == Action.RIGHT_CLICK_BLOCK && Tag.SIGNS.isTagged(event.getMaterial())) {
             if (player.getGameMode().equals(GameMode.SPECTATOR)) {
                 return;
             }
@@ -67,7 +67,7 @@ public class BlockPlayerListener implements Listener {
                         // Send message
                         Utils.sendMessages(player, Config.getLang("locked-quick"));
                         // Put sign on
-                        Block newsign = Utils.putSignOn(block, blockface, Config.getDefaultPrivateString(), player.getName(), player.getInventory().getItemInMainHand().getType());
+                        Block newsign = Utils.putSignOn(block, blockface, Config.getDefaultPrivateString(), player.getName(), event.getMaterial());
                         Utils.resetCache(block);
                         // Cleanups - UUID
                         if (Config.isUuidEnabled()){
@@ -86,12 +86,12 @@ public class BlockPlayerListener implements Listener {
                         // Not locked, (is locked door nearby), is owner of locked door nearby
                         Utils.removeASign(player);
                         Utils.sendMessages(player, Config.getLang("additional-sign-added-quick"));
-                        Utils.putSignOn(block, blockface, Config.getDefaultAdditionalString(), "", player.getInventory().getItemInMainHand().getType());
+                        Utils.putSignOn(block, blockface, Config.getDefaultAdditionalString(), "", event.getMaterial());
                         Dependency.logPlacement(player, block.getRelative(blockface));
                     } else if (LocketteProAPI.isOwner(block, player)) {
                         // Locked, (not locked door nearby), is owner of locked block
                         Utils.removeASign(player);
-                        Utils.putSignOn(block, blockface, Config.getDefaultAdditionalString(), "", player.getInventory().getItemInMainHand().getType());
+                        Utils.putSignOn(block, blockface, Config.getDefaultAdditionalString(), "", event.getMaterial());
                         Utils.sendMessages(player, Config.getLang("additional-sign-added-quick"));
                         Dependency.logPlacement(player, block.getRelative(blockface));
                     } else {

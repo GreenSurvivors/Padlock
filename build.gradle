@@ -3,7 +3,7 @@ apply plugin: 'maven-publish'
 
 // Suppiled by Jenkins
 ext.majorVersion = 2
-ext.minorVersion = 11
+ext.minorVersion = 12
 ext.minecraftVersion = "1.16.5"
 ext.buildNumber = System.env.BUILD_NUMBER == null ? "x"                : "$System.env.BUILD_NUMBER"
 ext.mavenDirectory = System.env.MAVEN_DIR == null ? "$projectDir/repo" : "$System.env.MAVEN_DIR"
