@@ -33,14 +33,15 @@ import java.util.concurrent.TimeUnit;
 public class Utils {
 
     public static final String usernamepattern = "^[a-zA-Z0-9_]*$";
-    private static LoadingCache<UUID, Block> selectedsign = CacheBuilder.newBuilder()
+
+    private static final LoadingCache<UUID, Block> selectedsign = CacheBuilder.newBuilder()
             .expireAfterAccess(30, TimeUnit.SECONDS)
-            .build(new CacheLoader<UUID, Block>() {
+            .build(new CacheLoader<>() {
                 public Block load(UUID key) {
                     return null;
                 }
             });
-    private static Set<UUID> notified = new HashSet<>();
+    private static final Set<UUID> notified = new HashSet<>();
 
     // Helper functions
     public static Block putSignOn(Block block, BlockFace blockface, String line1, String line2, Material material) {
@@ -83,7 +84,7 @@ public class Utils {
     }
 
     public static void updateSign(Block block) {
-        ((Sign) block.getState()).update();
+        block.getState().update();
     }
 
     public static Block getSelectedSign(Player player) {
@@ -127,9 +128,7 @@ public class Utils {
         List<MetadataValue> metadatas = block.getMetadata("expires");
         if (!metadatas.isEmpty()) {
             long expires = metadatas.get(0).asLong();
-            if (expires > System.currentTimeMillis()) {
-                return true;
-            }
+            return expires > System.currentTimeMillis();
         }
         return false;
     }
@@ -167,30 +166,22 @@ public class Utils {
     public static void updateUuidByUsername(final Block block, final int line) {
         Sign sign = (Sign) block.getState();
         final String original = sign.getLine(line);
-        Bukkit.getScheduler().runTaskAsynchronously(LockettePro.getPlugin(), new Runnable() {
-            @Override
-            public void run() {
-                String username = original;
-                if (username.contains("#")) {
-                    username = username.split("#")[0];
-                }
-                if (!isUserName(username)) return;
-                String uuid = null;
-                Player user = Bukkit.getPlayerExact(username);
-                if (user != null) { // User is online
-                    uuid = user.getUniqueId().toString();
-                } else { // User is not online, fetch string
-                    uuid = getUuidByUsernameFromMojang(username);
-                }
-                if (uuid != null) {
-                    final String towrite = username + "#" + uuid;
-                    Bukkit.getScheduler().runTask(LockettePro.getPlugin(), new Runnable() {
-                        @Override
-                        public void run() {
-                            setSignLine(block, line, towrite);
-                        }
-                    });
-                }
+        Bukkit.getScheduler().runTaskAsynchronously(LockettePro.getPlugin(), () -> {
+            String username = original;
+            if (username.contains("#")) {
+                username = username.split("#")[0];
+            }
+            if (!isUserName(username)) return;
+            String uuid = null;
+            Player user = Bukkit.getPlayerExact(username);
+            if (user != null) { // User is online
+                uuid = user.getUniqueId().toString();
+            } else { // User is not online, fetch string
+                uuid = getUuidByUsernameFromMojang(username);
+            }
+            if (uuid != null) {
+                final String towrite = username + "#" + uuid;
+                Bukkit.getScheduler().runTask(LockettePro.getPlugin(), () -> setSignLine(block, line, towrite));
             }
         });
     }
@@ -200,15 +191,15 @@ public class Utils {
         String original = sign.getLine(line);
         if (isUsernameUuidLine(original)) {
             String uuid = getUuidFromLine(original);
+            if (uuid == null) return;
             Player player = Bukkit.getPlayer(UUID.fromString(uuid));
-            if (player != null) {
-                setSignLine(block, line, player.getName() + "#" + uuid);
-            }
+            if (player == null) return;
+            setSignLine(block, line, player.getName() + "#" + uuid);
         }
     }
 
     public static void updateLineByPlayer(Block block, int line, Player player) {
-        setSignLine(block, line, player.getName() + "#" + player.getUniqueId().toString());
+        setSignLine(block, line, player.getName() + "#" + player.getUniqueId());
     }
 
     public static void updateLineWithTime(Block block, boolean noexpire) {
@@ -222,11 +213,7 @@ public class Utils {
     }
 
     public static boolean isUserName(String text) {
-        if (text.length() < 17 && text.length() > 2 && text.matches(usernamepattern)) {
-            return true;
-        } else {
-            return false;
-        }
+        return text.length() < 17 && text.length() > 2 && text.matches(usernamepattern);
     }
 
     // Warning: don't use this in a sync way
@@ -238,7 +225,7 @@ public class Utils {
             connection.setReadTimeout(8000);
             BufferedReader in = new BufferedReader(new InputStreamReader(connection.getInputStream()));
             String inputLine;
-            StringBuffer response = new StringBuffer();
+            StringBuilder response = new StringBuilder();
             while ((inputLine = in.readLine()) != null) {
                 response.append(inputLine);
             }
@@ -246,7 +233,7 @@ public class Utils {
             JsonObject json = new JsonParser().parse(responsestring).getAsJsonObject();
             String rawuuid = json.get("id").getAsString();
             return rawuuid.substring(0, 8) + "-" + rawuuid.substring(8, 12) + "-" + rawuuid.substring(12, 16) + "-" + rawuuid.substring(16, 20) + "-" + rawuuid.substring(20);
-        } catch (Exception ex) {
+        } catch (Exception ignored) {
         }
         return null;
     }
@@ -254,9 +241,7 @@ public class Utils {
     public static boolean isUsernameUuidLine(String text) {
         if (text.contains("#")) {
             String[] splitted = text.split("#", 2);
-            if (splitted[1].length() == 36) {
-                return true;
-            }
+            return splitted[1].length() == 36;
         }
         return false;
     }
@@ -264,9 +249,7 @@ public class Utils {
     public static boolean isPrivateTimeLine(String text) {
         if (text.contains("#")) {
             String[] splitted = text.split("#", 2);
-            if (splitted[1].startsWith("created:")) {
-                return true;
-            }
+            return splitted[1].startsWith("created:");
         }
         return false;
     }
@@ -323,7 +306,7 @@ public class Utils {
     public static String getSignLineFromUnknown(String json) {
         JsonObject line = getJsonObjectOrNull(json);
         if (line == null) return json;
-        StringBuffer result = new StringBuffer();
+        StringBuilder result = new StringBuilder();
         if (line.has("text")) {
             result.append(line.get("text").getAsString());
         }
