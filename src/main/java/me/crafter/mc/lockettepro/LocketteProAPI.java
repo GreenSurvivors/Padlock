@@ -148,7 +148,10 @@ public class LocketteProAPI {
                 }
                 // Don't break here
                 // Everything else (First block of container check goes here)
-            default:
+           case LECTERN:
+           return true; //Lecterns can be used, but not stolen from
+           // Everything else (First block of container check goes here)
+           default:
                 if (isUserSingleBlock(block, null, player)) return true;
                 break;
         }
