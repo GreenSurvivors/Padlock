@@ -9,10 +9,11 @@ import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.RegisteredServiceProvider;
+import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Team;
 
 public class Dependency {
-    
+
     protected static WorldGuardPlugin worldguard = null;
     protected static Plugin vault = null;
     protected static Permission permission = null;
@@ -41,32 +42,33 @@ public class Dependency {
             }
         }
     }
-    
-    public static boolean isProtectedFrom(Block block, Player player){
+
+    public static boolean isProtectedFrom(Block block, Player player) {
         if (worldguard != null) {
-            if (!worldguard.createProtectionQuery().testBlockPlace(player, block.getLocation(), block.getType())) {
-                return true;
+            return !worldguard.createProtectionQuery().testBlockPlace(player, block.getLocation(), block.getType());
+        }
+        return false;
+    }
+
+    public static boolean isPermissionGroupOf(String line, Player player) {
+        if (vault != null) {
+            try {
+                String[] groups = permission.getPlayerGroups(player);
+                for (String group : groups) {
+                    if (line.equals("[" + group + "]")) return true;
+                }
+            } catch (Exception ignored) {
             }
         }
         return false;
     }
-        
-    public static boolean isPermissionGroupOf(String line, Player player){
-        if (vault != null){
-            try {
-                String[] groups = permission.getPlayerGroups(player);
-                for (String group : groups){
-                    if (line.equals("[" + group + "]")) return true;
-                }
-            } catch (Exception e){}
-        }
-        return false;
-    }
-    
-    public static boolean isScoreboardTeamOf(String line, Player player){
-        Team team = Bukkit.getScoreboardManager().getMainScoreboard().getEntryTeam(player.getName());
-        if (team != null){
-            if (line.equals("[" + team.getName() + "]")) return true;
+
+    public static boolean isScoreboardTeamOf(String line, Player player) {
+        ScoreboardManager scoreboardManager = Bukkit.getScoreboardManager();
+        if (scoreboardManager == null) return false;
+        Team team = scoreboardManager.getMainScoreboard().getEntryTeam(player.getName());
+        if (team != null) {
+            return line.equals("[" + team.getName() + "]");
         }
         return false;
     }

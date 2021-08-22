@@ -14,40 +14,44 @@ import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.util.List;
+import java.util.logging.Logger;
 
 public class DependencyProtocolLib {
 
-    public static void setUpProtocolLib(Plugin plugin){
+    public static void setUpProtocolLib(Plugin plugin) {
         if (Config.protocollib) {
             addTileEntityDataListener(plugin);
             addMapChunkListener(plugin);
         }
     }
-    
-    public static void cleanUpProtocolLib(Plugin plugin){
+
+    public static void cleanUpProtocolLib(Plugin plugin) {
         try {
-            if (Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")){
+            if (Bukkit.getPluginManager().isPluginEnabled("ProtocolLib")) {
                 ProtocolLibrary.getProtocolManager().removePacketListeners(plugin);
             }
         } catch (Exception e) {
             e.printStackTrace();
         }
     }
-    
-    public static void addTileEntityDataListener(Plugin plugin){
+
+    public static void addTileEntityDataListener(Plugin plugin) {
         ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(plugin, ListenerPriority.LOW, PacketType.Play.Server.TILE_ENTITY_DATA) {
+            //PacketPlayOutTileEntityData -> ClientboundBlockEntityDataPacket
             @Override
             public void onPacketSending(PacketEvent event) {
                 PacketContainer packet = event.getPacket();
                 if (packet.getIntegers().read(0) != 9) return;
                 NbtCompound nbtcompound = (NbtCompound) packet.getNbtModifier().read(0);
                 onSignSend(event.getPlayer(), nbtcompound);
+                packet.getNbtModifier().write(0, nbtcompound);
             }
         });
     }
-    
-    public static void addMapChunkListener(Plugin plugin){
+
+    public static void addMapChunkListener(Plugin plugin) {
         ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(plugin, ListenerPriority.LOW, PacketType.Play.Server.MAP_CHUNK) {
+            //PacketPlayOutMapChunk - > ClientboundLevelChunkPacket
             @Override
             public void onPacketSending(PacketEvent event) {
                 PacketContainer packet = event.getPacket();
@@ -57,12 +61,15 @@ public class DependencyProtocolLib {
                     if (!"minecraft:sign".equals(nbtcompound.getString("id"))) continue;
                     onSignSend(event.getPlayer(), nbtcompound);
                 }
+                packet.getSpecificModifier(List.class).write(0, tileentitydatas);
+
             }
         });
     }
 
     public static void onSignSend(Player player, NbtCompound nbtcompound) {
         String raw_line1 = nbtcompound.getString("Text1");
+        Logger.getAnonymousLogger().info(raw_line1);
         if (LocketteProAPI.isLockStringOrAdditionalString(Utils.getSignLineFromUnknown(raw_line1))) {
             // Private line
             String line1 = Utils.getSignLineFromUnknown(nbtcompound.getString("Text1"));
@@ -80,5 +87,5 @@ public class DependencyProtocolLib {
             }
         }
     }
-    
+
 }
