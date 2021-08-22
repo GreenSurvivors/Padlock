@@ -63,12 +63,14 @@ public class BlockPlayerListener implements Listener {
                     event.setCancelled(true);
                     // Check lock info info
                     if (!locked && !LocketteProAPI.isUpDownLockedDoor(block)) {
+                        // Get type
+                        Material signType = player.getInventory().getItemInMainHand().getType();
                         // Not locked, not a locked door nearby
                         Utils.removeASign(player);
                         // Send message
                         Utils.sendMessages(player, Config.getLang("locked-quick"));
                         // Put sign on
-                        Block newsign = Utils.putSignOn(block, blockface, Config.getDefaultPrivateString(), player.getName(), player.getInventory().getItemInMainHand().getType());
+                        Block newsign = Utils.putSignOn(block, blockface, Config.getDefaultPrivateString(), player.getName(), signType);
                         Utils.resetCache(block);
                         // Cleanups - UUID
                         if (Config.isUuidEnabled()) {
