@@ -12,14 +12,15 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
 public class BlockDebugListener implements Listener {
-    
+
     @SuppressWarnings("deprecation")
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onDebugClick(PlayerInteractEvent event){
+    public void onDebugClick(PlayerInteractEvent event) {
         Player p = event.getPlayer();
-        if (p.isSneaking() && event.getAction() == Action.LEFT_CLICK_BLOCK){
+        if (p.isSneaking() && event.getAction() == Action.LEFT_CLICK_BLOCK) {
             event.setCancelled(true);
             Block b = event.getClickedBlock();
+            if (b == null) return;
             p.sendMessage(ChatColor.GREEN + "===========================");
             p.sendMessage("isLockable: " + formatBoolean(LocketteProAPI.isLockable(b)));
             p.sendMessage("isLocked: " + formatBoolean(LocketteProAPI.isLocked(b)));
@@ -28,25 +29,25 @@ public class BlockDebugListener implements Listener {
             p.sendMessage(" - isOwner/UserSingle: " + formatBoolean(LocketteProAPI.isOwnerSingleBlock(b, null, p)) + ChatColor.RESET + "/" + formatBoolean(LocketteProAPI.isUserSingleBlock(b, null, p)));
             p.sendMessage("isLockedUpDownLockedDoor: " + formatBoolean(LocketteProAPI.isUpDownLockedDoor(b)));
             p.sendMessage(" - isOwner/UserSingle: " + formatBoolean(LocketteProAPI.isOwnerUpDownLockedDoor(b, p)) + ChatColor.RESET + "/" + formatBoolean(LocketteProAPI.isOwnerUpDownLockedDoor(b, p)));
-            if (LocketteProAPI.isLockSign(b)){
+            if (LocketteProAPI.isLockSign(b)) {
                 p.sendMessage("isSignExpired: " + formatBoolean(LocketteProAPI.isSignExpired(b)));
-                p.sendMessage(" - created: " + Utils.getCreatedFromLine(((Sign)b.getState()).getLine(0)));
-                p.sendMessage(" - now     : " + (int)(System.currentTimeMillis()/1000));
+                p.sendMessage(" - created: " + Utils.getCreatedFromLine(((Sign) b.getState()).getLine(0)));
+                p.sendMessage(" - now     : " + (int) (System.currentTimeMillis() / 1000));
             }
-            
-            p.sendMessage("Block: " + b.getType().toString() + " " + b.getData());
-            
-            if (Tag.WALL_SIGNS.isTagged(b.getType())){
-                for (String line : ((Sign)b.getState()).getLines()){
+
+            p.sendMessage("Block: " + b.getType() + " " + b.getData());
+
+            if (Tag.WALL_SIGNS.isTagged(b.getType())) {
+                for (String line : ((Sign) b.getState()).getLines()) {
                     p.sendMessage(ChatColor.GREEN + line);
                 }
             }
             p.sendMessage(p.getUniqueId().toString());
-        }	
+        }
     }
-    
-    public String formatBoolean(boolean tf){
-        if (tf){
+
+    public String formatBoolean(boolean tf) {
+        if (tf) {
             return ChatColor.GREEN + "true";
         } else {
             return ChatColor.RED + "false";

@@ -21,36 +21,28 @@ import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
 import org.bukkit.event.world.StructureGrowEvent;
 
-public class BlockEnvironmentListener implements Listener{
+public class BlockEnvironmentListener implements Listener {
 
     // Prevent explosion break block
     @EventHandler(priority = EventPriority.HIGH)
-    public void onEntityExplode(EntityExplodeEvent event){
+    public void onEntityExplode(EntityExplodeEvent event) {
         if (Config.isProtectionExempted("explosion")) return;
-        Iterator<Block> it = event.blockList().iterator();
-        while (it.hasNext()) {
-            Block block = it.next();
-            if (LocketteProAPI.isProtected(block)) it.remove();
-        }
+        event.blockList().removeIf(LocketteProAPI::isProtected);
     }
-    
+
     // Prevent bed break block
     @EventHandler(priority = EventPriority.HIGH)
-    public void onBlockExplode(BlockExplodeEvent event){
+    public void onBlockExplode(BlockExplodeEvent event) {
         if (Config.isProtectionExempted("explosion")) return;
-        Iterator<Block> it = event.blockList().iterator();
-        while (it.hasNext()) {
-            Block block = it.next();
-            if (LocketteProAPI.isProtected(block)) it.remove();
-        }
+        event.blockList().removeIf(LocketteProAPI::isProtected);
     }
-    
+
     // Prevent tree break block
     @EventHandler(priority = EventPriority.HIGH)
-    public void onStructureGrow(StructureGrowEvent event){
+    public void onStructureGrow(StructureGrowEvent event) {
         if (Config.isProtectionExempted("growth")) return;
-        for (BlockState blockstate : event.getBlocks()){
-            if (LocketteProAPI.isProtected(blockstate.getBlock())){
+        for (BlockState blockstate : event.getBlocks()) {
+            if (LocketteProAPI.isProtected(blockstate.getBlock())) {
                 event.setCancelled(true);
                 return;
             }
@@ -59,57 +51,57 @@ public class BlockEnvironmentListener implements Listener{
 
     // Prevent piston extend break lock
     @EventHandler(priority = EventPriority.HIGH)
-    public void onPistonExtend(BlockPistonExtendEvent event){
+    public void onPistonExtend(BlockPistonExtendEvent event) {
         if (Config.isProtectionExempted("piston")) return;
-        for (Block block : event.getBlocks()){
-            if (LocketteProAPI.isProtected(block)){
+        for (Block block : event.getBlocks()) {
+            if (LocketteProAPI.isProtected(block)) {
                 event.setCancelled(true);
                 return;
             }
         }
     }
-    
+
     // Prevent piston retract break lock
     @EventHandler(priority = EventPriority.HIGH)
-    public void onPistonRetract(BlockPistonRetractEvent event){
+    public void onPistonRetract(BlockPistonRetractEvent event) {
         if (Config.isProtectionExempted("piston")) return;
-        for (Block block : event.getBlocks()){
-            if (LocketteProAPI.isProtected(block)){
+        for (Block block : event.getBlocks()) {
+            if (LocketteProAPI.isProtected(block)) {
                 event.setCancelled(true);
                 return;
             }
         }
     }
-    
+
     // Prevent redstone current open doors
     @EventHandler(priority = EventPriority.HIGH)
-    public void onBlockRedstoneChange(BlockRedstoneEvent event){
+    public void onBlockRedstoneChange(BlockRedstoneEvent event) {
         if (Config.isProtectionExempted("redstone")) return;
-        if (LocketteProAPI.isProtected(event.getBlock())){
+        if (LocketteProAPI.isProtected(event.getBlock())) {
             event.setNewCurrent(event.getOldCurrent());
         }
     }
-    
+
     // Prevent villager open door
     @EventHandler(priority = EventPriority.HIGH)
-    public void onVillagerOpenDoor(EntityInteractEvent event){
+    public void onVillagerOpenDoor(EntityInteractEvent event) {
         if (Config.isProtectionExempted("villager")) return;
         // Explicitly to villager vs all doors
         if (event.getEntity() instanceof Villager &&
-                (LocketteProAPI.isSingleDoorBlock(event.getBlock()) || LocketteProAPI.isDoubleDoorBlock(event.getBlock())) && 
-                LocketteProAPI.isProtected(event.getBlock())){
+                (LocketteProAPI.isSingleDoorBlock(event.getBlock()) || LocketteProAPI.isDoubleDoorBlock(event.getBlock())) &&
+                LocketteProAPI.isProtected(event.getBlock())) {
             event.setCancelled(true);
         }
     }
-    
+
     // Prevent mob change block
     @EventHandler(priority = EventPriority.HIGH)
     public void onMobChangeBlock(EntityChangeBlockEvent event) {
         if ((event.getEntity() instanceof Enderman && !Config.isProtectionExempted("enderman")) ||// enderman pick up/place block
                 (event.getEntity() instanceof Wither && !Config.isProtectionExempted("wither")) ||// wither break block
                 (event.getEntity() instanceof Zombie && !Config.isProtectionExempted("zombie")) ||// zombie break door
-                (event.getEntity() instanceof Silverfish && !Config.isProtectionExempted("silverfish"))){
-            if (LocketteProAPI.isProtected(event.getBlock())){
+                (event.getEntity() instanceof Silverfish && !Config.isProtectionExempted("silverfish"))) {
+            if (LocketteProAPI.isProtected(event.getBlock())) {
                 event.setCancelled(true);
             }
         }// ignore other reason (boat break lily pad, arrow ignite tnt, etc)
