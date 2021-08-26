@@ -69,7 +69,6 @@ public class DependencyProtocolLib {
 
     public static void onSignSend(Player player, NbtCompound nbtcompound) {
         String raw_line1 = nbtcompound.getString("Text1");
-        Logger.getAnonymousLogger().info(raw_line1);
         if (LocketteProAPI.isLockStringOrAdditionalString(Utils.getSignLineFromUnknown(raw_line1))) {
             // Private line
             String line1 = Utils.getSignLineFromUnknown(nbtcompound.getString("Text1"));
