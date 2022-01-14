@@ -111,6 +111,9 @@ public class LocketteProAPI {
 
     public static boolean isUser(Block block, Player player) {
         switch (block.getType()) {
+            // LECTERN
+            case LECTERN:
+                return true; //Lecterns can be used, but not stolen from
             // Double Doors
             case OAK_DOOR:
             case SPRUCE_DOOR:
@@ -147,11 +150,7 @@ public class LocketteProAPI {
                     if (isUserSingleBlock(relativechest, chestface.getOppositeFace(), player)) return true;
                 }
                 // Don't break here
-                // Everything else (First block of container check goes here)
-           case LECTERN:
-           return true; //Lecterns can be used, but not stolen from
-           // Everything else (First block of container check goes here)
-           default:
+            default: // Everything else (First block of container check goes here)
                 if (isUserSingleBlock(block, null, player)) return true;
                 break;
         }
