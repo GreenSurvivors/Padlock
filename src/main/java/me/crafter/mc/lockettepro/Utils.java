@@ -172,7 +172,7 @@ public class Utils {
                 username = username.split("#")[0];
             }
             if (!isUserName(username)) return;
-            String uuid = null;
+            String uuid;
             Player user = Bukkit.getPlayerExact(username);
             if (user != null) { // User is online
                 uuid = user.getUniqueId().toString();
@@ -230,7 +230,7 @@ public class Utils {
                 response.append(inputLine);
             }
             String responsestring = response.toString();
-            JsonObject json = new JsonParser().parse(responsestring).getAsJsonObject();
+            JsonObject json = JsonParser.parseString(responsestring).getAsJsonObject();
             String rawuuid = json.get("id").getAsString();
             return rawuuid.substring(0, 8) + "-" + rawuuid.substring(8, 12) + "-" + rawuuid.substring(12, 16) + "-" + rawuuid.substring(16, 20) + "-" + rawuuid.substring(20);
         } catch (Exception ignored) {
@@ -326,7 +326,7 @@ public class Utils {
         if (i < 0) return null;
         if (json.indexOf("}", 1) < 0) return null;
         try {
-            return new JsonParser().parse(json).getAsJsonObject();
+            return JsonParser.parseString(json).getAsJsonObject();
         } catch (JsonParseException e) {
             return null;
         }

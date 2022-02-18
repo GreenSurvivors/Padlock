@@ -3,10 +3,10 @@ pipeline {
     stages {
         stage('Build') {
             tools {
-                jdk "jdk16"
+                jdk "jdk17"
             }
             steps {
-                sh 'gradle build publish'
+                sh './gradlew publish'
             }
         }
     }
