@@ -2,21 +2,19 @@ package me.crafter.mc.lockettepro;
 
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
-import com.comphenix.protocol.events.ListenerPriority;
-import com.comphenix.protocol.events.PacketAdapter;
-import com.comphenix.protocol.events.PacketContainer;
-import com.comphenix.protocol.events.PacketEvent;
+import com.comphenix.protocol.events.*;
+import com.comphenix.protocol.reflect.EquivalentConverter;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
-import com.comphenix.protocol.wrappers.nbt.NbtCompound;
-import com.comphenix.protocol.wrappers.nbt.NbtFactory;
 import org.bukkit.Bukkit;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
 
 import java.util.List;
-import java.util.logging.Logger;
 
 public class DependencyProtocolLib {
+
+    private static EquivalentConverter<InternalStructure> internalStructureConverter;
 
     public static void setUpProtocolLib(Plugin plugin) {
         if (Config.protocollib) {
@@ -40,51 +38,72 @@ public class DependencyProtocolLib {
             //PacketPlayOutTileEntityData -> ClientboundBlockEntityDataPacket
             @Override
             public void onPacketSending(PacketEvent event) {
-                PacketContainer packet = event.getPacket();
-                if (packet.getIntegers().read(0) != 9) return;
-                NbtCompound nbtcompound = (NbtCompound) packet.getNbtModifier().read(0);
-                onSignSend(event.getPlayer(), nbtcompound);
-                packet.getNbtModifier().write(0, nbtcompound);
+                var player = event.getPlayer();
+                var packet = event.getPacket();
+                var blockPos = packet.getBlockPositionModifier().read(0);
+                var block = player.getWorld().getBlockAt(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+                if (!(block.getState() instanceof Sign)) return;
+                var chatComponentArrays = packet.getChatComponentArrays();
+                chatComponentArrays.write(0, onSignSend(event.getPlayer(), chatComponentArrays.read(0)));
             }
         });
     }
 
     public static void addMapChunkListener(Plugin plugin) {
         ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(plugin, ListenerPriority.LOW, PacketType.Play.Server.MAP_CHUNK) {
-            //PacketPlayOutMapChunk - > ClientboundLevelChunkPacket
+            //PacketPlayOutMapChunk - > ClientboundLevelChunkPacket -> ClientboundLevelChunkWithLightPacket
             @Override
+            @SuppressWarnings("unchecked")
             public void onPacketSending(PacketEvent event) {
+                var player = event.getPlayer();
                 PacketContainer packet = event.getPacket();
-                List<?> tileentitydatas = packet.getSpecificModifier(List.class).read(0);
-                for (Object tileentitydata : tileentitydatas) {
-                    NbtCompound nbtcompound = NbtFactory.fromNMSCompound(tileentitydata);
-                    if (!"minecraft:sign".equals(nbtcompound.getString("id"))) continue;
-                    onSignSend(event.getPlayer(), nbtcompound);
+                if (internalStructureConverter == null) {
+                    try {
+                        var converterField = InternalStructure.class.getDeclaredField("CONVERTER");
+                        if (converterField.trySetAccessible()) {
+                            internalStructureConverter = (EquivalentConverter<InternalStructure>) converterField.get(null);
+                        }
+                    } catch (IllegalAccessException | NoSuchFieldException e) {
+                        return;
+                    }
                 }
-                packet.getSpecificModifier(List.class).write(0, tileentitydatas);
-
+                List<InternalStructure> chunkData = packet.getStructures().read(0).getLists(internalStructureConverter).read(0);
+                var chunkX = packet.getIntegers().read(0);
+                var chunkZ = packet.getIntegers().read(1);
+                var chunk = player.getWorld().getChunkAt(chunkX, chunkZ);
+                for (InternalStructure struct : chunkData) {
+                    var packedXZ = struct.getIntegers().read(0);
+                    var y = struct.getIntegers().read(1);
+                    var block = chunk.getBlock((packedXZ >> 4) & 15, y, ((packedXZ) & 15));
+                    if (!(block.getState() instanceof Sign)) return;
+                    var chatComponentArrays = struct.getChatComponentArrays();
+                    chatComponentArrays.write(0, onSignSend(event.getPlayer(), chatComponentArrays.read(0)));
+                }
             }
         });
     }
 
-    public static void onSignSend(Player player, NbtCompound nbtcompound) {
-        String raw_line1 = nbtcompound.getString("Text1");
+    public static WrappedChatComponent[] onSignSend(Player player, WrappedChatComponent[] chatComponent) {
+        if (chatComponent.length <= 0) return chatComponent;
+
+        String raw_line1 = chatComponent[0].getJson();
         if (LocketteProAPI.isLockStringOrAdditionalString(Utils.getSignLineFromUnknown(raw_line1))) {
             // Private line
-            String line1 = Utils.getSignLineFromUnknown(nbtcompound.getString("Text1"));
+            String line1 = Utils.getSignLineFromUnknown(chatComponent[0].getJson());
             if (LocketteProAPI.isLineExpired(line1)) {
-                nbtcompound.put("Text1", WrappedChatComponent.fromText(Config.getLockExpireString()).getJson());
+                chatComponent[0] = WrappedChatComponent.fromText(Config.getLockExpireString());
             } else {
-                nbtcompound.put("Text1", WrappedChatComponent.fromText(Utils.StripSharpSign(line1)).getJson());
+                chatComponent[0] = WrappedChatComponent.fromText(Utils.StripSharpSign(line1));
             }
             // Other line
-            for (int i = 2; i <= 4; i++) {
-                String line = Utils.getSignLineFromUnknown(nbtcompound.getString("Text" + i));
+            for (int i = 1; i < chatComponent.length; i++) {
+                String line = Utils.getSignLineFromUnknown(chatComponent[i].getJson());
                 if (Utils.isUsernameUuidLine(line)) {
-                    nbtcompound.put("Text" + i, WrappedChatComponent.fromText(Utils.getUsernameFromLine(line)).getJson());
+                    chatComponent[i] = WrappedChatComponent.fromText(Utils.getUsernameFromLine(line));
                 }
             }
         }
+        return chatComponent;
     }
 
 }
