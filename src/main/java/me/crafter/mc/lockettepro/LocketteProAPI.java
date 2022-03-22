@@ -36,7 +36,7 @@ public class LocketteProAPI {
             if (isLockedSingleBlock(doors[1], null)) return true;
             if (isLockedSingleBlock(doors[0], null)) return true;
             if (isLockedSingleBlock(doors[0].getRelative(BlockFace.DOWN), null)) return true;
-        } else if (block.getBlockData() instanceof DoubleChest) {
+        } else if (block.getBlockData() instanceof Chest) {
             // Check second chest sign
             BlockFace chestface = getRelativeChestFace(block);
             if (chestface != null) {
@@ -69,7 +69,7 @@ public class LocketteProAPI {
             if (isOwnerSingleBlock(doors[1], null, player)) return true;
             if (isOwnerSingleBlock(doors[0], null, player)) return true;
             if (isOwnerSingleBlock(doors[0].getRelative(BlockFace.DOWN), null, player)) return true;
-        } else if (block.getBlockData() instanceof DoubleChest) {
+        } else if (block.getBlockData() instanceof Chest) {
             // Check second chest sign
             BlockFace chestface = getRelativeChestFace(block);
             if (chestface != null) {
@@ -103,7 +103,7 @@ public class LocketteProAPI {
             if (isUserSingleBlock(doors[1], null, player)) return true;
             if (isUserSingleBlock(doors[0], null, player)) return true;
             if (isUserSingleBlock(doors[0].getRelative(BlockFace.DOWN), null, player)) return true;
-        } else if (block.getBlockData() instanceof DoubleChest) {
+        } else if (block.getBlockData() instanceof Chest) {
             // Check second chest sign
             BlockFace chestface = getRelativeChestFace(block);
             if (chestface != null) {
