@@ -3,7 +3,6 @@ package me.crafter.mc.lockettepro;
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.*;
-import com.comphenix.protocol.reflect.EquivalentConverter;
 import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Sign;
@@ -13,8 +12,6 @@ import org.bukkit.plugin.Plugin;
 import java.util.List;
 
 public class DependencyProtocolLib {
-
-    private static EquivalentConverter<InternalStructure> internalStructureConverter;
 
     public static void setUpProtocolLib(Plugin plugin) {
         if (Config.protocollib) {
@@ -53,21 +50,10 @@ public class DependencyProtocolLib {
         ProtocolLibrary.getProtocolManager().addPacketListener(new PacketAdapter(plugin, ListenerPriority.LOW, PacketType.Play.Server.MAP_CHUNK) {
             //PacketPlayOutMapChunk - > ClientboundLevelChunkPacket -> ClientboundLevelChunkWithLightPacket
             @Override
-            @SuppressWarnings("unchecked")
             public void onPacketSending(PacketEvent event) {
                 var player = event.getPlayer();
                 PacketContainer packet = event.getPacket();
-                if (internalStructureConverter == null) {
-                    try {
-                        var converterField = InternalStructure.class.getDeclaredField("CONVERTER");
-                        if (converterField.trySetAccessible()) {
-                            internalStructureConverter = (EquivalentConverter<InternalStructure>) converterField.get(null);
-                        }
-                    } catch (IllegalAccessException | NoSuchFieldException e) {
-                        return;
-                    }
-                }
-                List<InternalStructure> chunkData = packet.getStructures().read(0).getLists(internalStructureConverter).read(0);
+                List<InternalStructure> chunkData = packet.getStructures().read(0).getLists(InternalStructure.getConverter()).read(0);
                 var chunkX = packet.getIntegers().read(0);
                 var chunkZ = packet.getIntegers().read(1);
                 var chunk = player.getWorld().getChunkAt(chunkX, chunkZ);
@@ -84,7 +70,7 @@ public class DependencyProtocolLib {
     }
 
     public static WrappedChatComponent[] onSignSend(Player player, WrappedChatComponent[] chatComponent) {
-        if (chatComponent.length <= 0) return chatComponent;
+        if (chatComponent.length == 0) return chatComponent;
 
         String raw_line1 = chatComponent[0].getJson();
         if (LocketteProAPI.isLockStringOrAdditionalString(Utils.getSignLineFromUnknown(raw_line1))) {
