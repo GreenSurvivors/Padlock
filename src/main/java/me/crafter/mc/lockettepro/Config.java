@@ -155,8 +155,11 @@ public class Config {
         config.addDefault("everyone-signs", everyone_signs);
         String[] timer_signs = {"[Timer:@]", "[timer:@]"};
         config.addDefault("timer-signs", timer_signs);
-        String[] lockables = {"CHEST","TRAPPED_CHEST","FURNACE","BURNING_FURNACE","HOPPER","BREWING_STAND","DIAMOND_BLOCK",
-                "OAK_DOOR","SPRUCE_DOOR","BIRCH_DOOR","JUNGLE_DOOR","ACACIA_DOOR","DARK_OAK_DOOR","IRON_DOOR", "LECTERN"};
+        List<String> lockablesList = new ArrayList<>();
+        Tag.DOORS.getValues().stream().map(Material::name).forEach(lockablesList::add);
+        String[] lockables = {"CHEST","TRAPPED_CHEST","FURNACE","BURNING_FURNACE","HOPPER","BREWING_STAND","DIAMOND_BLOCK", "LECTERN"};
+        lockablesList.addAll(Arrays.asList(lockables));
+        lockables = lockablesList.toArray(String[]::new);
         config.addDefault("lockables", lockables);
         String[] protection_exempt = {"nothing"};
         config.addDefault("protection-exempt", protection_exempt);
