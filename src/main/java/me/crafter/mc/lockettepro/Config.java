@@ -157,9 +157,8 @@ public class Config {
         config.addDefault("timer-signs", timer_signs);
         List<String> lockablesList = new ArrayList<>();
         Tag.DOORS.getValues().stream().map(Material::name).forEach(lockablesList::add);
-        String[] lockables = {"CHEST","TRAPPED_CHEST","FURNACE","BURNING_FURNACE","HOPPER","BREWING_STAND","DIAMOND_BLOCK", "LECTERN"};
-        lockablesList.addAll(Arrays.asList(lockables));
-        lockables = lockablesList.toArray(String[]::new);
+        lockablesList.addAll(List.of("CHEST","TRAPPED_CHEST","FURNACE","BURNING_FURNACE","HOPPER","BREWING_STAND","DIAMOND_BLOCK", "LECTERN"));
+        String[] lockables = lockablesList.toArray(String[]::new);
         config.addDefault("lockables", lockables);
         String[] protection_exempt = {"nothing"};
         config.addDefault("protection-exempt", protection_exempt);
