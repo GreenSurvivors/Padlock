@@ -6,7 +6,7 @@ plugins {
 // Suppiled by Jenkins
 ext.majorVersion = 2
 ext.minorVersion = 13
-ext.minecraftVersion = "1.19.2"
+ext.minecraftVersion = "1.19.4"
 
 ext.buildNumber = System.env.BUILD_NUMBER == null ? "x"                : "$System.env.BUILD_NUMBER"
 ext.mavenDirectory = System.env.MAVEN_DIR == null ? "$projectDir/repo" : "$System.env.MAVEN_DIR"
@@ -20,7 +20,7 @@ group = "me.crafter.mc"
 archivesBaseName = "LockettePro-mc$minecraftVersion"
 version = "$majorVersion.$minorVersion.$buildNumber".toString()
 runServer {
-    minecraftVersion("1.19.2")
+    minecraftVersion("1.19.4")
 }
 
 // extra compile warnings
@@ -36,7 +36,7 @@ repositories {
     maven {name 'sk89q-repo'; url "https://maven.enginehub.org/repo/" }
     maven {name 'playpro';    url 'https://maven.playpro.com/'}
     maven {name 'vault-repo'; url 'https://jitpack.io'}
-    maven {name 'dmulloy2';   url 'https://repo.dmulloy2.net/content/groups/public/'}
+    maven {name 'dmulloy2';   url 'https://repo.dmulloy2.net/repository/public/'}
 }
 
 dependencies {
@@ -44,7 +44,7 @@ dependencies {
     compileOnly "org.spigotmc:spigot-api:$minecraftVersion-R0.1-SNAPSHOT"
     compileOnly ("com.github.MilkBowl:VaultAPI:1.7"){ transitive = false}
     compileOnly ('com.sk89q.worldguard:worldguard-bukkit:7.1.0-SNAPSHOT') { transitive = false }
-    compileOnly (group: "com.comphenix.protocol", name: "ProtocolLib", version: "5.0.0-SNAPSHOT"){ transitive = false}
+    compileOnly (group: "com.comphenix.protocol", name: "ProtocolLib", version: "5.0.0"){ transitive = false}
     compileOnly ('net.coreprotect:coreprotect:21.0'){ transitive = false}
 }
 

@@ -463,14 +463,12 @@ public class LocketteProAPI {
         org.bukkit.block.data.Openable openablestate = (org.bukkit.block.data.Openable) block.getBlockData();
         openablestate.setOpen(open);
         block.setBlockData(openablestate);
-        block.getWorld().playEffect(block.getLocation(), Effect.DOOR_TOGGLE, 0);
+        block.getWorld().playSound(block.getLocation(), open ? Sound.BLOCK_WOODEN_DOOR_OPEN : Sound.BLOCK_WOODEN_DOOR_CLOSE, 100,1);
     }
 
     public static void toggleDoor(Block block) {
         org.bukkit.block.data.Openable openablestate = (org.bukkit.block.data.Openable) block.getBlockData();
-        openablestate.setOpen(!openablestate.isOpen());
-        block.setBlockData(openablestate);
-        block.getWorld().playEffect(block.getLocation(), Effect.DOOR_TOGGLE, 0);
+        toggleDoor(block,!openablestate.isOpen());
     }
 
     public static BlockFace getRelativeChestFace(Block block) {
