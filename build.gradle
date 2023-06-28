@@ -17,7 +17,7 @@ targetCompatibility = 17
 
 // differet version convension from Nyaa plugins
 group = "me.crafter.mc"
-archivesBaseName = "LockettePro-mc$minecraftVersion"
+archivesBaseName = "LockettePro"
 version = "$majorVersion.$minorVersion-mc$minecraftVersion-$buildNumber".toString()
 runServer {
     minecraftVersion("1.20.1")
