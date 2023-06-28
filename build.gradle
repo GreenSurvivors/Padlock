@@ -6,9 +6,9 @@ plugins {
 // Suppiled by Jenkins
 ext.majorVersion = 2
 ext.minorVersion = 13
-ext.minecraftVersion = "1.19.4"
+ext.minecraftVersion = "1.20.1"
 
-ext.buildNumber = System.env.BUILD_NUMBER == null ? "x"                : "$System.env.BUILD_NUMBER"
+ext.buildNumber = System.env.BUILD_NUMBER == null ? "x"                : "build" + "$System.env.BUILD_NUMBER"
 ext.mavenDirectory = System.env.MAVEN_DIR == null ? "$projectDir/repo" : "$System.env.MAVEN_DIR"
 ext.jdDirectory = System.env.JAVADOCS_DIR == null ? null               : "$System.env.JAVADOCS_DIR"
 
@@ -18,9 +18,9 @@ targetCompatibility = 17
 // differet version convension from Nyaa plugins
 group = "me.crafter.mc"
 archivesBaseName = "LockettePro-mc$minecraftVersion"
-version = "$majorVersion.$minorVersion.$buildNumber".toString()
+version = "$majorVersion.$minorVersion-mc$minecraftVersion-$buildNumber".toString()
 runServer {
-    minecraftVersion("1.19.4")
+    minecraftVersion("1.20.1")
 }
 
 // extra compile warnings

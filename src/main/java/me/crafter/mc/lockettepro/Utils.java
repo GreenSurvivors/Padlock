@@ -13,6 +13,7 @@ import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
+import org.bukkit.block.sign.Side;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
@@ -60,17 +61,17 @@ public class Utils {
         updateSign(newsign);
         Sign sign = (Sign) newsign.getState();
         if (newsign.getType() == Material.DARK_OAK_WALL_SIGN) {
-            sign.setColor(DyeColor.WHITE);
+            sign.getSide(Side.FRONT).setColor(DyeColor.WHITE);
         }
-        sign.setLine(0, line1);
-        sign.setLine(1, line2);
+        sign.getSide(Side.FRONT).setLine(0, line1);
+        sign.getSide(Side.FRONT).setLine(1, line2);
         sign.update();
         return newsign;
     }
 
     public static void setSignLine(Block block, int line, String text) { // Requires isSign
         Sign sign = (Sign) block.getState();
-        sign.setLine(line, text);
+        sign.getSide(Side.FRONT).setLine(line, text);
         sign.update();
     }
 
@@ -165,7 +166,7 @@ public class Utils {
 
     public static void updateUuidByUsername(final Block block, final int line) {
         Sign sign = (Sign) block.getState();
-        final String original = sign.getLine(line);
+        final String original = sign.getSide(Side.FRONT).getLine(line);
         Bukkit.getScheduler().runTaskAsynchronously(LockettePro.getPlugin(), () -> {
             String username = original;
             if (username.contains("#")) {
@@ -188,7 +189,7 @@ public class Utils {
 
     public static void updateUsernameByUuid(Block block, int line) {
         Sign sign = (Sign) block.getState();
-        String original = sign.getLine(line);
+        String original = sign.getSide(Side.FRONT).getLine(line);
         if (isUsernameUuidLine(original)) {
             String uuid = getUuidFromLine(original);
             if (uuid == null) return;
@@ -205,9 +206,9 @@ public class Utils {
     public static void updateLineWithTime(Block block, boolean noexpire) {
         Sign sign = (Sign) block.getState();
         if (noexpire) {
-            sign.setLine(0, sign.getLine(0) + "#created:" + -1);
+            sign.getSide(Side.FRONT).setLine(0, sign.getSide(Side.FRONT).getLine(0) + "#created:" + -1);
         } else {
-            sign.setLine(0, sign.getLine(0) + "#created:" + (int) (System.currentTimeMillis() / 1000));
+            sign.getSide(Side.FRONT).setLine(0, sign.getSide(Side.FRONT).getLine(0) + "#created:" + (int) (System.currentTimeMillis() / 1000));
         }
         sign.update();
     }

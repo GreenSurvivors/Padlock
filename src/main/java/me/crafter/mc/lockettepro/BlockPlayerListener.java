@@ -1,9 +1,6 @@
 package me.crafter.mc.lockettepro;
 
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
-import org.bukkit.Tag;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.entity.Player;
@@ -224,6 +221,16 @@ public class BlockPlayerListener implements Listener {
                 Utils.playAccessDenyEffect(player, block);
             }
         }
+    }
+
+    //protect sign from being changed
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onAttemptChangeLockerSign(SignChangeEvent event){
+        Block block = event.getBlock();
+        if(LocketteProAPI.isLockSign(block)){
+            event.setCancelled(true);
+        }
+        block.getWorld().spawnParticle(Particle.SMOKE_NORMAL,block.getLocation(),5);
     }
 
     // Protect block from being destroyed
