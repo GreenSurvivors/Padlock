@@ -1,12 +1,14 @@
-apply plugin: 'java-library'
-apply plugin: 'maven-publish'
-
-// Supplied by Jenkins
+plugins {
+    id 'java-library'
+    id 'maven-publish'
+    id("xyz.jpenilla.run-paper") version "1.0.6"
+}
+// Suppiled by Jenkins
 ext.majorVersion = 2
 ext.minorVersion = 13
-ext.minecraftVersion = "1.19.3"
+ext.minecraftVersion = "1.20.1"
 
-ext.buildNumber = System.env.BUILD_NUMBER == null ? "x"                : "$System.env.BUILD_NUMBER"
+ext.buildNumber = System.env.BUILD_NUMBER == null ? "x"                : "build" + "$System.env.BUILD_NUMBER"
 ext.mavenDirectory = System.env.MAVEN_DIR == null ? "$projectDir/repo" : "$System.env.MAVEN_DIR"
 ext.jdDirectory = System.env.JAVADOCS_DIR == null ? null               : "$System.env.JAVADOCS_DIR"
 
@@ -15,8 +17,11 @@ targetCompatibility = 17
 
 // differet version convension from Nyaa plugins
 group = "me.crafter.mc"
-archivesBaseName = "LockettePro-mc$minecraftVersion"
+archivesBaseName = "LockettePro"
 version = "$majorVersion.$minorVersion.$buildNumber".toString()
+runServer {
+    minecraftVersion("1.20.1")
+}
 
 // extra compile warnings
 compileJava {
@@ -31,16 +36,16 @@ repositories {
     maven {name 'sk89q-repo'; url "https://maven.enginehub.org/repo/" }
     maven {name 'playpro';    url 'https://maven.playpro.com/'}
     maven {name 'vault-repo'; url 'https://jitpack.io'}
-    maven {name 'dmulloy2-repo';   url 'https://repo.dmulloy2.net/repository/public/'}
+    maven {name 'dmulloy2';   url 'https://repo.dmulloy2.net/repository/public/'}
 }
 
 dependencies {
-    implementation 'org.jetbrains:annotations:22.0.0'
+    implementation 'org.jetbrains:annotations:23.0.0'
     compileOnly "org.spigotmc:spigot-api:$minecraftVersion-R0.1-SNAPSHOT"
     compileOnly ("com.github.MilkBowl:VaultAPI:1.7"){ transitive = false}
-    compileOnly('com.sk89q.worldguard:worldguard-bukkit:7.0.8-SNAPSHOT') { transitive = false }
-    compileOnly (group: "com.comphenix.protocol", name: "ProtocolLib", version: "4.8.0"){ transitive = false}
-    compileOnly ('net.coreprotect:coreprotect:20.1'){ transitive = false}
+    compileOnly ('com.sk89q.worldguard:worldguard-bukkit:7.1.0-SNAPSHOT') { transitive = false }
+    compileOnly (group: "com.comphenix.protocol", name: "ProtocolLib", version: "5.0.0"){ transitive = false}
+    compileOnly ('net.coreprotect:coreprotect:21.0'){ transitive = false}
 }
 
 processResources {
