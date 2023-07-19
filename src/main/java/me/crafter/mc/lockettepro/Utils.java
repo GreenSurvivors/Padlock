@@ -65,6 +65,7 @@ public class Utils {
         }
         sign.getSide(Side.FRONT).setLine(0, line1);
         sign.getSide(Side.FRONT).setLine(1, line2);
+        sign.setWaxed(true);
         sign.update();
         return newsign;
     }
