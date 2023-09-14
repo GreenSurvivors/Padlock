@@ -1,6 +1,8 @@
 package me.crafter.mc.lockettepro;
 
-import org.bukkit.*;
+import org.bukkit.Material;
+import org.bukkit.Sound;
+import org.bukkit.Tag;
 import org.bukkit.block.*;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
@@ -462,7 +464,7 @@ public class LocketteProAPI {
         org.bukkit.block.data.Openable openablestate = (org.bukkit.block.data.Openable) block.getBlockData();
         openablestate.setOpen(open);
         block.setBlockData(openablestate);
-        block.getWorld().playSound(block.getLocation(), open ? Sound.BLOCK_WOODEN_DOOR_OPEN : Sound.BLOCK_WOODEN_DOOR_CLOSE, 100,1);
+        block.getWorld().playSound(block.getLocation(), open ? Sound.BLOCK_WOODEN_DOOR_OPEN : Sound.BLOCK_WOODEN_DOOR_CLOSE, 1, 1);
     }
 
     public static void toggleDoor(Block block) {

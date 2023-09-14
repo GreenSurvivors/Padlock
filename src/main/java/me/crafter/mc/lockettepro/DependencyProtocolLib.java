@@ -1,14 +1,12 @@
 package me.crafter.mc.lockettepro;
 
-import com.comphenix.protocol.reflect.EquivalentConverter;
-import com.comphenix.protocol.wrappers.nbt.NbtBase;
-
 import com.comphenix.protocol.PacketType;
 import com.comphenix.protocol.ProtocolLibrary;
 import com.comphenix.protocol.events.*;
+import com.comphenix.protocol.reflect.EquivalentConverter;
+import com.comphenix.protocol.wrappers.nbt.NbtBase;
 import com.comphenix.protocol.wrappers.nbt.NbtCompound;
 import com.comphenix.protocol.wrappers.nbt.NbtFactory;
-
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.Plugin;
 
@@ -16,6 +14,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.logging.Level;
 
 public class DependencyProtocolLib {
 
@@ -32,7 +32,7 @@ public class DependencyProtocolLib {
                 ProtocolLibrary.getProtocolManager().removePacketListeners(plugin);
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            plugin.getLogger().log(Level.WARNING, "exception in cleaning up protocol lib!", e);
         }
     }
 
@@ -40,11 +40,7 @@ public class DependencyProtocolLib {
         String[] rawLines = new String[4];
         for (int i = 0; i < 4; i++) {
             String line = compound.getString("Text" + (i + 1));
-            if (line == null) {
-                rawLines[i] = "";
-            } else {
-                rawLines[i] = line;
-            }
+            rawLines[i] = Objects.requireNonNullElse(line, "");
         }
         return rawLines;
     }
@@ -90,7 +86,7 @@ public class DependencyProtocolLib {
             field.setAccessible(true);
             converter = (EquivalentConverter<InternalStructure>) field.get(null);
         } catch (ReflectiveOperationException e) {
-            e.printStackTrace();
+            plugin.getLogger().log(Level.WARNING, "exception in adding chunk listener!", e);
         }
 
         EquivalentConverter<InternalStructure> finalConverter = converter;
@@ -155,7 +151,7 @@ public class DependencyProtocolLib {
                                     outgoingSignData.getHandle()
                             );
                         } catch (ReflectiveOperationException e) {
-                            e.printStackTrace();
+                            plugin.getLogger().log(Level.WARNING, "exception in chunk sending!", e);
                         }
 
                         InternalStructure newTileEntityInfo = finalConverter.getSpecific(constInstance);

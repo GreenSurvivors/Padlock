@@ -1,6 +1,9 @@
 package me.crafter.mc.lockettepro;
 
-import org.bukkit.*;
+import org.bukkit.Bukkit;
+import org.bukkit.GameMode;
+import org.bukkit.Material;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
@@ -17,13 +20,11 @@ import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerTakeLecternBookEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 public class BlockPlayerListener implements Listener {
 
@@ -105,7 +106,7 @@ public class BlockPlayerListener implements Listener {
     }
 
     // Manual protection
-    @EventHandler(priority = EventPriority.NORMAL)
+    @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
     public void onManualLock(SignChangeEvent event) {
         if (!Tag.WALL_SIGNS.isTagged(event.getBlock().getType())) return;
         String topline = event.getLine(0);
@@ -118,7 +119,7 @@ public class BlockPlayerListener implements Listener {
          *
          *  This will cause player without permission will be able to lock chests by
          *  adding a white space after the [private] word.
-         *  Currently this is fixed by using trimmed line in checking permission. Trimmed
+         *  Currently, this is fixed by using trimmed line in checking permission. Trimmed
          *  line should not be used anywhere else.
          */
         if (!player.hasPermission("lockettepro.lock")) {
@@ -140,6 +141,10 @@ public class BlockPlayerListener implements Listener {
                 boolean locked = LocketteProAPI.isLocked(block);
                 if (!locked && !LocketteProAPI.isUpDownLockedDoor(block)) {
                     if (LocketteProAPI.isLockString(topline)) {
+                        Sign sign = (Sign) event.getBlock().getState();
+                        sign.setWaxed(true);
+                        sign.update();
+
                         Utils.sendMessages(player, Config.getLang("locked-manual"));
                         if (!player.hasPermission("lockettepro.lockothers")) { // Player with permission can lock with another name
                             event.setLine(1, player.getName());
@@ -227,23 +232,30 @@ public class BlockPlayerListener implements Listener {
     }
 
     //protect sign from being changed
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
-    public void onAttemptChangeLockerSign(SignChangeEvent event){
+    @EventHandler(priority = EventPriority.LOW, ignoreCancelled = true)
+    public void onAttemptChangeLockerSign(SignChangeEvent event) {
         Block block = event.getBlock();
-        if(LocketteProAPI.isLockSign(block)||LocketteProAPI.isAdditionalSign(block)){
-            Sign sign = (Sign)block.getState();
+        if (LocketteProAPI.isLockSign(block) || LocketteProAPI.isAdditionalSign(block)) {
+            Sign sign = (Sign) block.getState();
             sign.setWaxed(true);
             sign.update();
             event.setCancelled(true);
+
+            // langua added this, however it doesn't seem on brant since
+            // a.) everything works as intended
+            // b.) smoke particles are used nowhere else
+            //block.getWorld().spawnParticle(Particle.SMOKE_NORMAL, block.getLocation(), 5);
         }
-        block.getWorld().spawnParticle(Particle.SMOKE_NORMAL,block.getLocation(),5);
     }
-    @EventHandler(priority = EventPriority.HIGH,ignoreCancelled = true)
-    public void onAttemptBreakWaxedLockerSign(PlayerInteractEvent event){
+
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    public void onAttemptBreakWaxedLockerSign(PlayerInteractEvent event) {
         Action action = event.getAction();
         Block block = event.getClickedBlock();
-        boolean isAxe = Objects.equals(event.getItem(), new ItemStack(Material.WOODEN_AXE)) || Objects.equals(event.getItem(), new ItemStack(Material.STONE_AXE)) || Objects.equals(event.getItem(), new ItemStack(Material.IRON_AXE)) || Objects.equals(event.getItem(), new ItemStack(Material.GOLDEN_AXE)) || Objects.equals(event.getItem(), new ItemStack(Material.DIAMOND_AXE)) || Objects.equals(event.getItem(), new ItemStack(Material.NETHERITE_AXE));
-        if(action == Action.RIGHT_CLICK_BLOCK&&(LocketteProAPI.isLockSign(block)||LocketteProAPI.isAdditionalSign(block))&&isAxe){
+
+        if (action == Action.RIGHT_CLICK_BLOCK &&
+                (LocketteProAPI.isLockSign(block) || LocketteProAPI.isAdditionalSign(block)) &&
+                event.getItem() != null && Tag.ITEMS_AXES.isTagged(event.getItem().getType())) {
             event.setCancelled(true);
         }
     }
@@ -383,10 +395,10 @@ public class BlockPlayerListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.HIGH)
-    public void onLecternTake(PlayerTakeLecternBookEvent event){
+    public void onLecternTake(PlayerTakeLecternBookEvent event) {
         Player player = event.getPlayer();
         Block block = event.getLectern().getBlock();
-        if(LocketteProAPI.isProtected(block) && !(LocketteProAPI.isOwner(block, player) || LocketteProAPI.isOwnerOfSign(block, player))){
+        if (LocketteProAPI.isProtected(block) && !(LocketteProAPI.isOwner(block, player) || LocketteProAPI.isOwnerOfSign(block, player))) {
             event.setCancelled(true);
         }
     }

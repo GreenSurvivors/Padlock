@@ -10,6 +10,7 @@ import org.bukkit.plugin.Plugin;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.logging.Level;
 
 public class Config {
 
@@ -171,7 +172,7 @@ public class Config {
         try {
             config.save(new File(plugin.getDataFolder(), "config.yml"));
         } catch (IOException e) {
-            e.printStackTrace();
+            plugin.getLogger().log(Level.SEVERE, "couldn't save config.yml", e);
         }
     }
 
