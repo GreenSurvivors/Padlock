@@ -142,10 +142,12 @@ public class LocketteProAPI {
         for (BlockFace blockface : newsfaces) {
             if (blockface == exempt) continue;
             Block relativeblock = block.getRelative(blockface);
-            if (isLockSign(relativeblock) && getFacing(relativeblock) == blockface) {
-                if (isOwnerOnSign(relativeblock, player)) {
+            if (isLockSign(relativeblock) && getFacing(relativeblock) == blockface && relativeblock.getState() instanceof Sign relativeSign) {
+                if (isOwnerOnSign(relativeSign, player)) {
                     return true;
                 }
+            } else {
+                LockettePro.getPlugin().getLogger().warning("maybe error here?" + relativeblock.getLocation() + ": " + relativeblock.getType().name());
             }
         }
         return false;
@@ -155,8 +157,8 @@ public class LocketteProAPI {
         for (BlockFace blockface : newsfaces) {
             if (blockface == exempt) continue;
             Block relativeblock = block.getRelative(blockface);
-            if (isLockSignOrAdditionalSign(relativeblock) && getFacing(relativeblock) == blockface) {
-                if (isUserOnSign(relativeblock, player)) {
+            if (isLockSignOrAdditionalSign(relativeblock) && getFacing(relativeblock) == blockface && relativeblock.getState() instanceof Sign relativeSign) {
+                if (isUserOnSign(relativeSign, player)) {
                     return true;
                 }
             }
@@ -272,7 +274,7 @@ public class LocketteProAPI {
         return false;
     }
 
-    public static boolean isSign(Block block) {
+    public static boolean isSign(Block block) { //todo why does this get called so often?
         return Tag.WALL_SIGNS.isTagged(block.getType());
     }
 
@@ -293,25 +295,20 @@ public class LocketteProAPI {
         }
     }
 
-    public static boolean isOwnerOnSign(Block block, Player player) { // Requires isLockSign
-        String[] lines = ((Sign) block.getState()).getSide(Side.FRONT).getLines();
-        if (Utils.isPlayerOnLine(player, lines[1])) {
-            if (Config.isUuidEnabled()) {
-                Utils.updateLineByPlayer(block, 1, player);
-            }
+    public static boolean isOwnerOnSign(Sign sign, Player player) { // Requires isLockSign
+        if (Utils.isPlayerOnLine(player, sign, 1)) {
+            Utils.updateLineByPlayer(sign, player, 1);
             return true;
         }
         return false;
     }
 
-    public static boolean isUserOnSign(Block block, Player player) { // Requires (isLockSign or isAdditionalSign)
-        String[] lines = ((Sign) block.getState()).getSide(Side.FRONT).getLines();
+    public static boolean isUserOnSign(Sign sign, Player player) { // Requires (isLockSign or isAdditionalSign)
+        String[] lines = sign.getSide(Side.FRONT).getLines();
         // Normal
         for (int i = 1; i < 4; i++) {
-            if (Utils.isPlayerOnLine(player, lines[i])) {
-                if (Config.isUuidEnabled()) {
-                    Utils.updateLineByPlayer(block, i, player);
-                }
+            if (Utils.isPlayerOnLine(player, sign, i)) {
+                Utils.updateLineByPlayer(sign, player, i);
                 return true;
             } else if (Config.isEveryoneSignString(lines[i])) {
                 return true;

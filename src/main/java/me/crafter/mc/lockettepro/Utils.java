@@ -4,9 +4,11 @@ import com.comphenix.protocol.wrappers.WrappedChatComponent;
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
 import com.google.common.cache.LoadingCache;
+import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
+import com.google.gson.reflect.TypeToken;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -19,21 +21,24 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.metadata.MetadataValue;
+import org.bukkit.persistence.PersistentDataAdapterContext;
+import org.bukkit.persistence.PersistentDataContainer;
+import org.bukkit.persistence.PersistentDataType;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.lang.reflect.Type;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Pattern;
 
 public class Utils {
-    public static final String usernamepattern = "^[a-zA-Z0-9_]*$";
-
+    private static final Pattern usernamePattern = Pattern.compile("^[a-zA-Z0-9_]*$");
+    private final static NamespacedKey storedUUIDKey = new NamespacedKey(LockettePro.getPlugin(), "UUIDs");
     private static final LoadingCache<UUID, Block> selectedsign = CacheBuilder.newBuilder()
             .expireAfterAccess(30, TimeUnit.SECONDS)
             .build(new CacheLoader<>() {
@@ -42,6 +47,7 @@ public class Utils {
                 }
             });
     private static final Set<UUID> notified = new HashSet<>();
+    private static final UUUIDListDataType uuidListData = new UUUIDListDataType();
 
     // Helper functions
     public static Block putSignOn(Block block, BlockFace blockface, String line1, String line2, Material material) {
@@ -69,8 +75,25 @@ public class Utils {
         return newsign;
     }
 
-    public static void setSignLine(Block block, int line, String text) { // Requires isSign
-        Sign sign = (Sign) block.getState();
+    private static void setUUID(@NotNull final Sign sign, int i, @NotNull final String uuid) {
+        PersistentDataContainer container = sign.getPersistentDataContainer();
+
+        Map<Integer, String> map = container.get(storedUUIDKey, uuidListData);
+        if (map == null) {
+            map = new HashMap<>(4);
+        }
+
+        map.put(i, uuid);
+
+        sign.getPersistentDataContainer().set(storedUUIDKey, uuidListData, map);
+        sign.update(); // update the block to make the UUID change effective
+    }
+
+    private static @Nullable Map<Integer, String> getUUIDs(@NotNull final Sign sign) {
+        return sign.getPersistentDataContainer().get(storedUUIDKey, uuidListData);
+    }
+
+    public static void setSignLine(Sign sign, int line, String text) {
         sign.getSide(Side.FRONT).setLine(line, text);
         sign.update();
     }
@@ -111,8 +134,8 @@ public class Utils {
 //		player.spigot().playEffect(block.getLocation().add(0.5, 0.5, 0.5), Effect.FLAME, 0, 0, 0.3F, 0.3F, 0.3F, 0.01F, 64, 64);
     }
 
-    public static void sendMessages(CommandSender sender, String messages) {
-        if (messages == null || messages.equals("")) return;
+    public static void sendMessages(@NotNull CommandSender sender, @Nullable String messages) {
+        if (messages == null || messages.isEmpty()) return;
         sender.sendMessage(messages);
     }
 
@@ -158,53 +181,68 @@ public class Utils {
         }
     }
 
-    public static void updateUuidOnSign(Block block) {
+    public static void updateUuidOnSign(@NotNull Sign sign) {
         for (int line = 1; line < 4; line++) {
-            updateUuidByUsername(block, line);
+            updateUuidByUsername(sign, line);
         }
     }
 
-    public static void updateUuidByUsername(final Block block, final int line) {
-        Sign sign = (Sign) block.getState();
+    public static void updateUuidByUsername(@NotNull Sign sign, int line) {
         final String original = sign.getSide(Side.FRONT).getLine(line);
         Bukkit.getScheduler().runTaskAsynchronously(LockettePro.getPlugin(), () -> {
-            String username = original;
-            if (username.contains("#")) {
-                username = username.split("#")[0];
+
+            //clean name of UUID
+            final String username;
+            if (original.contains("#")) {
+                username = original.split("#")[0];
+            } else {
+                username = original;
             }
+
             if (!isUserName(username)) return;
-            String uuid;
+            final String uuid;
             Player user = Bukkit.getPlayerExact(username);
             if (user != null) { // User is online
                 uuid = user.getUniqueId().toString();
             } else { // User is not online, fetch string
                 uuid = getUuidByUsernameFromMojang(username);
             }
+
             if (uuid != null) {
-                final String towrite = username + "#" + uuid;
-                Bukkit.getScheduler().runTask(LockettePro.getPlugin(), () -> setSignLine(block, line, towrite));
+                Bukkit.getScheduler().runTask(LockettePro.getPlugin(), () -> {
+                    setSignLine(sign, line, username);
+                    setUUID(sign, line, uuid);
+                });
             }
         });
     }
 
-    public static void updateUsernameByUuid(Block block, int line) {
-        Sign sign = (Sign) block.getState();
+    public static void updateUsernameByUuid(@NotNull Sign sign, int line) {
         String original = sign.getSide(Side.FRONT).getLine(line);
-        if (isUsernameUuidLine(original)) {
-            String uuid = getUuidFromLine(original);
-            if (uuid == null) return;
-            Player player = Bukkit.getPlayer(UUID.fromString(uuid));
-            if (player == null) return;
-            setSignLine(block, line, player.getName() + "#" + uuid);
+        String uuidStr = sign.getPersistentDataContainer().get(storedUUIDKey, PersistentDataType.STRING);
+
+        //if we didn't get any UUID from persistent data container, try legacy way of written on the sign
+        if (uuidStr == null) {
+            if (isUsernameUuidLine(original)) {
+                uuidStr = getUuidFromLine(original);
+            }
+        }
+
+        if (uuidStr != null) {
+            Player player = Bukkit.getPlayer(UUID.fromString(uuidStr));
+
+            if (player != null) {
+                setSignLine(sign, line, player.getName());
+            }
         }
     }
 
-    public static void updateLineByPlayer(Block block, int line, Player player) {
-        setSignLine(block, line, player.getName() + "#" + player.getUniqueId());
+    public static void updateLineByPlayer(@NotNull Sign sign, @NotNull Player player, int line) {
+        setSignLine(sign, line, player.getName());
+        setUUID(sign, line, player.getUniqueId().toString());
     }
 
-    public static void updateLineWithTime(Block block, boolean noexpire) {
-        Sign sign = (Sign) block.getState();
+    public static void updateLineWithTime(Sign sign, boolean noexpire) {
         if (noexpire) {
             sign.getSide(Side.FRONT).setLine(0, sign.getSide(Side.FRONT).getLine(0) + "#created:" + -1);
         } else {
@@ -214,7 +252,7 @@ public class Utils {
     }
 
     public static boolean isUserName(String text) {
-        return text.length() < 17 && text.length() > 2 && text.matches(usernamepattern);
+        return text.length() < 17 && text.length() > 2 && usernamePattern.matcher(text).matches();
     }
 
     // Warning: don't use this in a sync way
@@ -239,7 +277,13 @@ public class Utils {
         return null;
     }
 
-    public static boolean isUsernameUuidLine(String text) {
+    /**
+     * @param text to search a UUID in
+     * @return true if the text might contain a UUID
+     * @deprecated use {@link #getUUIDs(Sign)} instead
+     */
+    @Deprecated
+    public static boolean isUsernameUuidLine(@NotNull String text) {
         if (text.contains("#")) {
             String[] splitted = text.split("#", 2);
             return splitted[1].length() == 36;
@@ -247,7 +291,7 @@ public class Utils {
         return false;
     }
 
-    public static boolean isPrivateTimeLine(String text) {
+    public static boolean isPrivateTimeLine(@NotNull String text) {
         if (text.contains("#")) {
             String[] splitted = text.split("#", 2);
             return splitted[1].startsWith("created:");
@@ -263,7 +307,7 @@ public class Utils {
         }
     }
 
-    public static String getUsernameFromLine(String text) {
+    public static @NotNull String getUsernameFromLine(@NotNull String text) {
         if (isUsernameUuidLine(text)) {
             return text.split("#", 2)[0];
         } else {
@@ -271,7 +315,13 @@ public class Utils {
         }
     }
 
-    public static String getUuidFromLine(String text) {
+    /**
+     * @param text Text to try to get the UUID from
+     * @return legacy UUID as string, might be null if not found
+     * @deprecated use {@link #getUUIDs(Sign)} instead
+     */
+    @Deprecated
+    public static @Nullable String getUuidFromLine(@NotNull String text) {
         if (isUsernameUuidLine(text)) {
             return text.split("#", 2)[1];
         } else {
@@ -287,15 +337,20 @@ public class Utils {
         }
     }
 
-    public static boolean isPlayerOnLine(Player player, String text) {
-        if (Utils.isUsernameUuidLine(text)) {
-            if (Config.isUuidEnabled()) {
+    public static boolean isPlayerOnLine(@NotNull Player player, @NotNull Sign sign, int i) {
+        Map<Integer, String> uuidMap = getUUIDs(sign);
+
+        if (uuidMap == null) {
+
+            String text = sign.getSide(Side.FRONT).getLine(i);
+
+            if (Utils.isUsernameUuidLine(text)) {
                 return player.getUniqueId().toString().equals(getUuidFromLine(text));
             } else {
-                return player.getName().equals(getUsernameFromLine(text));
+                return text.equals(player.getName());
             }
         } else {
-            return text.equals(player.getName());
+            return player.getUniqueId().toString().equals(uuidMap.get(i));
         }
     }
 
@@ -330,6 +385,62 @@ public class Utils {
             return JsonParser.parseString(json).getAsJsonObject();
         } catch (JsonParseException e) {
             return null;
+        }
+    }
+
+    private static class UUUIDListDataType implements PersistentDataType<String, Map<Integer, String>> {
+        /**
+         * Returns the primitive data type of this tag.
+         *
+         * @return the class
+         */
+        @NotNull
+        @Override
+        public Class<String> getPrimitiveType() {
+            return String.class;
+        }
+
+        /**
+         * Returns the complex object type the primitive value resembles.
+         *
+         * @return the class type
+         */
+        @NotNull
+        @Override
+        public Class<Map<Integer, String>> getComplexType() {
+            return ((Class<Map<Integer, String>>) ((Class<?>) Map.class));
+        }
+
+        /**
+         * Returns the primitive data that resembles the complex object passed to
+         * this method.
+         *
+         * @param complex the complex object instance
+         * @param context the context this operation is running in
+         * @return the primitive value
+         */
+        @Override
+        public @NotNull String toPrimitive(@NotNull Map<Integer, String> complex, @NotNull PersistentDataAdapterContext context) {
+            Gson gson = new Gson();
+
+            return gson.toJson(complex);
+        }
+
+        /**
+         * Creates a complex object based of the passed primitive value
+         *
+         * @param primitive the primitive value
+         * @param context   the context this operation is running in
+         * @return the complex object instance
+         */
+        @NotNull
+        @Override
+        public Map<Integer, String> fromPrimitive(@NotNull String primitive, @NotNull PersistentDataAdapterContext context) {
+            Gson gson = new Gson();
+            Type type = new TypeToken<Map<Integer, String>>() {
+            }.getType();
+
+            return gson.fromJson(primitive, type);
         }
     }
 

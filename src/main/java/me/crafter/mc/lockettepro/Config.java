@@ -20,7 +20,6 @@ public class Config {
     private static FileConfiguration config;
     private static FileConfiguration lang;
     private static String langfilename = "lang.yml";
-    private static boolean uuid = false;
     private static Set<Material> lockables = new HashSet<>();
     private static Set<String> privatestrings = new HashSet<>();
     private static Set<String> additionalstrings = new HashSet<>();
@@ -50,7 +49,6 @@ public class Config {
         initDefaultConfig();
         initAdditionalFiles();
         config = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "config.yml"));
-        uuid = config.getBoolean("enable-uuid-support", false);
         protocollib = config.getBoolean("protocollib", true);
         worldguard = config.getBoolean("worldguard", true);
         coreprotect = config.getBoolean("coreprotect", true);
@@ -223,10 +221,6 @@ public class Config {
 
     public static String getLang(String path) {
         return ChatColor.translateAlternateColorCodes('&', lang.getString(path, ""));
-    }
-
-    public static boolean isUuidEnabled() {
-        return uuid;
     }
 
     public static boolean isLockable(Material material) {

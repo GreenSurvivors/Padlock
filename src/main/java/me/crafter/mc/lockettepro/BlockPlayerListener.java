@@ -75,13 +75,12 @@ public class BlockPlayerListener implements Listener {
                         Block newsign = Utils.putSignOn(block, blockface, Config.getDefaultPrivateString(), player.getName(), signType);
                         Utils.resetCache(block);
                         // Cleanups - UUID
-                        if (Config.isUuidEnabled()) {
-                            Utils.updateLineByPlayer(newsign, 1, player);
-                        }
+                        Utils.updateLineByPlayer((Sign) newsign.getState(), player, 1);
+
                         // Cleanups - Expiracy
                         if (Config.isLockExpire()) {
                             // set created to now
-                            Utils.updateLineWithTime(newsign, player.hasPermission("lockettepro.noexpire")); // set created to -1 (no expire) or now
+                            Utils.updateLineWithTime((Sign) newsign.getState(), player.hasPermission("lockettepro.noexpire")); // set created to -1 (no expire) or now
                         }
                         Dependency.logPlacement(player, newsign);
                     } else if (!locked && LocketteProAPI.isOwnerUpDownLockedDoor(block, player)) {
