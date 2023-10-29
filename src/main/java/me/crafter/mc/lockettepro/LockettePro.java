@@ -15,10 +15,17 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class LockettePro extends JavaPlugin {
-
     private static Plugin plugin;
-    private boolean debug = false;
-    private static boolean needcheckhand = true;
+    private static final boolean needcheckhand = true;
+    private final boolean debug = false;
+
+    public static Plugin getPlugin() {
+        return plugin;
+    }
+
+    public static boolean needCheckHand() {
+        return needcheckhand;
+    }
 
     public void onEnable() {
         // Version
@@ -58,14 +65,6 @@ public class LockettePro extends JavaPlugin {
         if (Config.isUuidEnabled() && Bukkit.getPluginManager().getPlugin("ProtocolLib") != null) {
             DependencyProtocolLib.cleanUpProtocolLib(this);
         }
-    }
-
-    public static Plugin getPlugin() {
-        return plugin;
-    }
-
-    public static boolean needCheckHand() {
-        return needcheckhand;
     }
 
     @Override
@@ -166,11 +165,10 @@ public class LockettePro extends JavaPlugin {
                     }
                 }
                 // The following commands requires player
-                if (!(sender instanceof Player)) {
+                if (!(sender instanceof Player player)) {
                     Utils.sendMessages(sender, Config.getLang("command-usage"));
                     return false;
                 }
-                Player player = (Player) sender;
                 switch (args[0]) {
                     case "1":
                     case "2":

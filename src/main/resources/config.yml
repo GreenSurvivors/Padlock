@@ -19,36 +19,36 @@ lock-default-create-time-unix: -1
 lock-expire-string: '&3[Expired]'
 
 private-signs:
-- '[Private]'
-- '[private]'
+  - '[Private]'
+  - '[private]'
 additional-signs:
-- '[More Users]'
-- '[more users]'
+  - '[More Users]'
+  - '[more users]'
 everyone-signs:
-- '[Everyone]'
-- '[everyone]'
+  - '[Everyone]'
+  - '[everyone]'
 timer-signs:
-- '[Timer:@]'
-- '[timer:@]'
+  - '[Timer:@]'
+  - '[timer:@]'
 # material name see: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
 # legacy block name and block id are not supported!
 lockables:
-- CHEST
-- TRAPPED_CHEST
-- BARREL
-- FURNACE
-- SMOKER
-- BLAST_FURNACE
-- HOPPER
-- BREWING_STAND
-- DIAMOND_BLOCK
-- OAK_DOOR
-- SPRUCE_DOOR
-- BIRCH_DOOR
-- JUNGLE_DOOR
-- ACACIA_DOOR
-- DARK_OAK_DOOR
-- IRON_DOOR
-- LECTERN
+  - CHEST
+  - TRAPPED_CHEST
+  - BARREL
+  - FURNACE
+  - SMOKER
+  - BLAST_FURNACE
+  - HOPPER
+  - BREWING_STAND
+  - DIAMOND_BLOCK
+  - OAK_DOOR
+  - SPRUCE_DOOR
+  - BIRCH_DOOR
+  - JUNGLE_DOOR
+  - ACACIA_DOOR
+  - DARK_OAK_DOOR
+  - IRON_DOOR
+  - LECTERN
 protection-exempt:
-- nothing
+  - nothing

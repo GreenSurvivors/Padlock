@@ -1,14 +1,8 @@
 package me.crafter.mc.lockettepro;
 
-import java.util.Iterator;
-
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
-import org.bukkit.entity.Enderman;
-import org.bukkit.entity.Silverfish;
-import org.bukkit.entity.Villager;
-import org.bukkit.entity.Wither;
-import org.bukkit.entity.Zombie;
+import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -106,5 +100,4 @@ public class BlockEnvironmentListener implements Listener {
             }
         }// ignore other reason (boat break lily pad, arrow ignite tnt, etc)
     }
-
 }

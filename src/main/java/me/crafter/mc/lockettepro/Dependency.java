@@ -13,7 +13,6 @@ import org.bukkit.scoreboard.ScoreboardManager;
 import org.bukkit.scoreboard.Team;
 
 public class Dependency {
-
     protected static WorldGuardPlugin worldguard = null;
     protected static Plugin vault = null;
     protected static Permission permission = null;

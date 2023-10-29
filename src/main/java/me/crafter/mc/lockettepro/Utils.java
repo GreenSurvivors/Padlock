@@ -32,7 +32,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 public class Utils {
-
     public static final String usernamepattern = "^[a-zA-Z0-9_]*$";
 
     private static final LoadingCache<UUID, Block> selectedsign = CacheBuilder.newBuilder()

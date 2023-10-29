@@ -13,7 +13,9 @@ import java.util.*;
 import java.util.logging.Level;
 
 public class Config {
-
+    public static boolean protocollib = false;
+    public static boolean worldguard = false;
+    public static boolean coreprotect = false;
     private static Plugin plugin;
     private static FileConfiguration config;
     private static FileConfiguration lang;
@@ -35,9 +37,6 @@ public class Config {
     private static byte blockhopperminecart = 0;
     private static boolean lockexpire = false;
     private static double lockexpiredays = 60D;
-    public static boolean protocollib = false;
-    public static boolean worldguard = false;
-    public static boolean coreprotect = false;
     private static long lockdefaultcreatetime = -1L;
     private static String lockexpirestring = "";
     private static Set<String> protectionexempt = new HashSet<>();
@@ -158,7 +157,7 @@ public class Config {
         config.addDefault("timer-signs", timer_signs);
         List<String> lockablesList = new ArrayList<>();
         Tag.DOORS.getValues().stream().map(Material::name).forEach(lockablesList::add);
-        lockablesList.addAll(List.of("CHEST","TRAPPED_CHEST","FURNACE","BURNING_FURNACE","HOPPER","BREWING_STAND","DIAMOND_BLOCK", "LECTERN"));
+        lockablesList.addAll(List.of("CHEST", "TRAPPED_CHEST", "FURNACE", "BURNING_FURNACE", "HOPPER", "BREWING_STAND", "DIAMOND_BLOCK", "LECTERN"));
         String[] lockables = lockablesList.toArray(String[]::new);
         config.addDefault("lockables", lockables);
         String[] protection_exempt = {"nothing"};

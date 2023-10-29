@@ -53,7 +53,7 @@ processResources {
 }
 
 // maven publications
-task sourcesJar(type: Jar) {
+tasks.register('sourcesJar', Jar) {
     archiveClassifier.set("sources")
     from sourceSets.main.java.srcDirs
 }

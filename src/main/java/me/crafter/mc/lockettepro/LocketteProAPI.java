@@ -229,13 +229,14 @@ public class LocketteProAPI {
                 return true;
             }
             // End temp workaround bad code for checking up and down signs
-        } if (Tag.SIGNS.isTagged(block.getType()) ||
-            block.getBlockData() instanceof Chest ||
-            block.getBlockData() instanceof DoubleChest) {
+        }
+        if (Tag.SIGNS.isTagged(block.getType()) ||
+                block.getBlockData() instanceof Chest ||
+                block.getBlockData() instanceof DoubleChest) {
             for (BlockFace blockface : allfaces) {
                 Block newblock = block.getRelative(blockface);
                 if (newblock.getBlockData() instanceof Chest ||
-                newblock.getBlockData() instanceof DoubleChest) {
+                        newblock.getBlockData() instanceof DoubleChest) {
                     if (isLockedSingleBlock(newblock, null) && !isOwnerSingleBlock(newblock, null, player)) {
                         return true;
                     }
@@ -469,7 +470,7 @@ public class LocketteProAPI {
 
     public static void toggleDoor(Block block) {
         org.bukkit.block.data.Openable openablestate = (org.bukkit.block.data.Openable) block.getBlockData();
-        toggleDoor(block,!openablestate.isOpen());
+        toggleDoor(block, !openablestate.isOpen());
     }
 
     public static BlockFace getRelativeChestFace(Block block) {
