@@ -1,22 +1,21 @@
-package me.crafter.mc.lockettepro;
+package me.crafter.mc.lockettepro.dependency;
 
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
+import me.crafter.mc.lockettepro.config.Config;
 import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
-import net.milkbowl.vault.permission.Permission;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.entity.Player;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.RegisteredServiceProvider;
-import org.bukkit.scoreboard.ScoreboardManager;
-import org.bukkit.scoreboard.Team;
 
 public class Dependency {
     protected static WorldGuardPlugin worldguard = null;
-    protected static Plugin vault = null;
-    protected static Permission permission = null;
-    private static CoreProtectAPI coreProtectAPI;
+    private static CoreProtectAPI coreProtectAPI; //todo
+
+    public static WorldGuardPlugin getWorldguard() {
+        return worldguard;
+    }
 
     public Dependency(Plugin plugin) {
         // WorldGuard
@@ -25,12 +24,6 @@ public class Dependency {
             worldguard = null;
         } else {
             worldguard = (WorldGuardPlugin) worldguardplugin;
-        }
-        // Vault
-        vault = plugin.getServer().getPluginManager().getPlugin("Vault");
-        if (vault != null) {
-            RegisteredServiceProvider<Permission> rsp = Bukkit.getServer().getServicesManager().getRegistration(Permission.class);
-            permission = rsp.getProvider();
         }
 
         if (Config.coreprotect && Bukkit.getPluginManager().getPlugin("CoreProtect") != null && CoreProtect.getInstance().getAPI().APIVersion() == 6) {
@@ -49,28 +42,6 @@ public class Dependency {
         return false;
     }
 
-    public static boolean isPermissionGroupOf(String line, Player player) {
-        if (vault != null) {
-            try {
-                String[] groups = permission.getPlayerGroups(player);
-                for (String group : groups) {
-                    if (line.equals("[" + group + "]")) return true;
-                }
-            } catch (Exception ignored) {
-            }
-        }
-        return false;
-    }
-
-    public static boolean isScoreboardTeamOf(String line, Player player) {
-        ScoreboardManager scoreboardManager = Bukkit.getScoreboardManager();
-        if (scoreboardManager == null) return false;
-        Team team = scoreboardManager.getMainScoreboard().getEntryTeam(player.getName());
-        if (team != null) {
-            return line.equals("[" + team.getName() + "]");
-        }
-        return false;
-    }
 
     public static void logPlacement(Player player, Block block) {
         if (coreProtectAPI != null && coreProtectAPI.isEnabled()) {

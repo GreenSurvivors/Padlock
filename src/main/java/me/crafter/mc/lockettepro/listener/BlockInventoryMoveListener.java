@@ -1,5 +1,9 @@
-package me.crafter.mc.lockettepro;
+package me.crafter.mc.lockettepro.listener;
 
+import me.crafter.mc.lockettepro.api.LocketteProAPI;
+import me.crafter.mc.lockettepro.config.Config;
+import me.crafter.mc.lockettepro.impl.Cache;
+import me.crafter.mc.lockettepro.impl.MiscUtils;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.DoubleChest;
@@ -53,14 +57,14 @@ public class BlockInventoryMoveListener implements Listener {
         if (inventoryholder instanceof BlockState) {
             Block block = ((BlockState) inventoryholder).getBlock();
             if (Config.isCacheEnabled()) { // Cache is enabled
-                if (Utils.hasValidCache(block)) {
-                    return Utils.getAccess(block);
+                if (Cache.hasValidCache(block)) {
+                    return MiscUtils.getAccess(block);
                 } else {
                     if (LocketteProAPI.isLocked(block)) {
-                        Utils.setCache(block, true);
+                        Cache.setCache(block, true);
                         return true;
                     } else {
-                        Utils.setCache(block, false);
+                        Cache.setCache(block, false);
                         return false;
                     }
                 }

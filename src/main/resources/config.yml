@@ -4,8 +4,6 @@
 
 language-file-name: 'lang.yml'
 enable-quick-protect: true
-enable-uuid-support: false
-protocollib: true
 worldguard: true
 coreprotect: true
 block-interfere-placement: true

@@ -1,5 +1,8 @@
-package me.crafter.mc.lockettepro;
+package me.crafter.mc.lockettepro.listener;
 
+import me.crafter.mc.lockettepro.api.LocketteProAPI;
+import me.crafter.mc.lockettepro.config.Config;
+import me.crafter.mc.lockettepro.impl.Doors;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.*;
@@ -82,7 +85,7 @@ public class BlockEnvironmentListener implements Listener {
         if (Config.isProtectionExempted("villager")) return;
         // Explicitly to villager vs all doors
         if (event.getEntity() instanceof Villager &&
-                (LocketteProAPI.isSingleDoorBlock(event.getBlock()) || LocketteProAPI.isDoubleDoorBlock(event.getBlock())) &&
+                (Doors.isSingleDoorBlock(event.getBlock()) || Doors.isDoubleDoorBlock(event.getBlock())) &&
                 LocketteProAPI.isProtected(event.getBlock())) {
             event.setCancelled(true);
         }

@@ -1,5 +1,7 @@
-package me.crafter.mc.lockettepro;
+package me.crafter.mc.lockettepro.listener;
 
+import me.crafter.mc.lockettepro.api.LocketteProAPI;
+import me.crafter.mc.lockettepro.impl.MiscUtils;
 import org.bukkit.ChatColor;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
@@ -24,14 +26,14 @@ public class BlockDebugListener implements Listener {
             p.sendMessage(ChatColor.GREEN + "===========================");
             p.sendMessage("isLockable: " + formatBoolean(LocketteProAPI.isLockable(b)));
             p.sendMessage("isLocked: " + formatBoolean(LocketteProAPI.isLocked(b)));
-            p.sendMessage(" - isOwner/User: " + formatBoolean(LocketteProAPI.isOwner(b, p)) + ChatColor.RESET + "/" + formatBoolean(LocketteProAPI.isUser(b, p)));
+            p.sendMessage(" - isOwner/User: " + formatBoolean(LocketteProAPI.isOwner(b, p)) + ChatColor.RESET + "/" + formatBoolean(LocketteProAPI.isMember(b, p)));
             p.sendMessage("isLockedSingle: " + formatBoolean(LocketteProAPI.isLockedSingleBlock(b, null)));
             p.sendMessage(" - isOwner/UserSingle: " + formatBoolean(LocketteProAPI.isOwnerSingleBlock(b, null, p)) + ChatColor.RESET + "/" + formatBoolean(LocketteProAPI.isUserSingleBlock(b, null, p)));
-            p.sendMessage("isLockedUpDownLockedDoor: " + formatBoolean(LocketteProAPI.isUpDownLockedDoor(b)));
+            p.sendMessage("isLockedUpDownLockedDoor: " + formatBoolean(LocketteProAPI.isUpDownOfLockedDoor(b)));
             p.sendMessage(" - isOwner/UserSingle: " + formatBoolean(LocketteProAPI.isOwnerUpDownLockedDoor(b, p)) + ChatColor.RESET + "/" + formatBoolean(LocketteProAPI.isOwnerUpDownLockedDoor(b, p)));
-            if (LocketteProAPI.isLockSign(b)) {
-                p.sendMessage("isSignExpired: " + formatBoolean(LocketteProAPI.isSignExpired(b)));
-                p.sendMessage(" - created: " + Utils.getCreatedFromLine(((Sign) b.getState()).getLine(0)));
+            if (b.getState() instanceof Sign sign && LocketteProAPI.isLockSign(sign)) {
+                p.sendMessage("isSignExpired: " + formatBoolean(LocketteProAPI.isSignExpired(sign)));
+                p.sendMessage(" - created: " + MiscUtils.getCreatedFromLine(((Sign) b.getState()).getLine(0)));
                 p.sendMessage(" - now     : " + (int) (System.currentTimeMillis() / 1000));
             }
 

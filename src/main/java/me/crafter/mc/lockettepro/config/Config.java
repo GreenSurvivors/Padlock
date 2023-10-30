@@ -1,4 +1,4 @@
-package me.crafter.mc.lockettepro;
+package me.crafter.mc.lockettepro.config;
 
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
@@ -12,14 +12,14 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 
-public class Config {
-    public static boolean protocollib = false;
+public class Config { //todo
     public static boolean worldguard = false;
     public static boolean coreprotect = false;
     private static Plugin plugin;
     private static FileConfiguration config;
     private static FileConfiguration lang;
     private static String langfilename = "lang.yml";
+    private static String invalidString = "[Invalid]"; //todo^2
     private static Set<Material> lockables = new HashSet<>();
     private static Set<String> privatestrings = new HashSet<>();
     private static Set<String> additionalstrings = new HashSet<>();
@@ -49,7 +49,6 @@ public class Config {
         initDefaultConfig();
         initAdditionalFiles();
         config = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "config.yml"));
-        protocollib = config.getBoolean("protocollib", true);
         worldguard = config.getBoolean("worldguard", true);
         coreprotect = config.getBoolean("coreprotect", true);
         langfilename = config.getString("language-file-name", "lang.yml");
@@ -138,7 +137,6 @@ public class Config {
         config = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "config.yml"));
         config.addDefault("language-file-name", "lang.yml");
         config.addDefault("enable-quick-protect", true);
-        config.addDefault("enable-uuid-support", false);
         config.addDefault("block-interfere-placement", true);
         config.addDefault("block-item-transfer-in", false);
         config.addDefault("block-item-transfer-out", true);
@@ -227,6 +225,10 @@ public class Config {
         return lockables.contains(material);
     }
 
+    public static String getInvalidString() {
+        return invalidString;
+    }
+
     public static boolean isPrivateSignString(String message) {
         return privatestrings.contains(message);
     }
@@ -283,5 +285,4 @@ public class Config {
     public static boolean isProtectionExempted(String against) {
         return protectionexempt.contains(against);
     }
-
 }
