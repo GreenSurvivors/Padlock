@@ -146,8 +146,6 @@ public class LocketteProAPI {
                 if (isOwnerOnSign(relativeSign, player)) {
                     return true;
                 }
-            } else {
-                LockettePro.getPlugin().getLogger().warning("maybe error here?" + relativeblock.getLocation() + ": " + relativeblock.getType().name());
             }
         }
         return false;
