@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import me.crafter.mc.lockettepro.LockettePro;
 import me.crafter.mc.lockettepro.config.Config;
+import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -77,8 +78,8 @@ public class MiscUtils {
 //		player.spigot().playEffect(block.getLocation().add(0.5, 0.5, 0.5), Effect.FLAME, 0, 0, 0.3F, 0.3F, 0.3F, 0.01F, 64, 64);
     }
 
-    public static void sendMessages(@NotNull CommandSender sender, @Nullable String messages) {
-        if (messages != null && !messages.isEmpty()) {
+    public static void sendMessages(@NotNull CommandSender sender, @Nullable Component messages) { //todo preparation for MessageManager
+        if (messages != null) {
             sender.sendMessage(messages);
         }
     }
@@ -170,7 +171,7 @@ public class MiscUtils {
         }
     }
 
-    public static long getCreatedFromLine(String text) {
+    public static long getCreatedFromLine(String text) { //todo
         if (isPrivateTimeLine(text)) {
             return Long.parseLong(text.split("#created:", 2)[1]);
         } else {

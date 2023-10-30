@@ -1,5 +1,6 @@
 package me.crafter.mc.lockettepro.command;
 
+import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.plugin.Plugin;
@@ -25,7 +26,7 @@ public abstract class SubCommand {
      */
     abstract protected @NotNull Set<String> getAlias();
 
-    abstract protected @NotNull String getHelpText();
+    abstract protected @NotNull Component getHelpText();
 
     /**
      * Executes the given command, returning its success.

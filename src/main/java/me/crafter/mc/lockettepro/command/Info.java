@@ -5,6 +5,7 @@ import me.crafter.mc.lockettepro.config.Config;
 import me.crafter.mc.lockettepro.impl.LockSign;
 import me.crafter.mc.lockettepro.impl.MiscUtils;
 import me.crafter.mc.lockettepro.impl.SignSelection;
+import net.kyori.adventure.text.Component;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
@@ -33,7 +34,7 @@ public class Info extends SubCommand {
     }
 
     @Override
-    protected @NotNull String getHelpText() {
+    protected @NotNull Component getHelpText() {
         return Config.getCmdHelp("info");
     }
 
@@ -59,42 +60,39 @@ public class Info extends SubCommand {
 
                             if (otherSign == null) {
                                 LocketteProAPI.setInvalid(sign);
-                                MiscUtils.sendMessages(player, Config.getLang("sign-need-reselect"));
+                                MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
                                 return true;
                             } else {
                                 sign = otherSign;
-                                MiscUtils.sendMessages(player, Config.getLang("sign-updated"));
+                                MiscUtils.sendMessages(player, Config.getLangComp("sign-updated"));
                             }
                         }
 
-                        StringBuilder builder = new StringBuilder();
-
-                        builder.append("owners: ");
+                        Component component = Config.getLangComp("cmd.info.owners");
                         for (String name : MiscUtils.getNamesFromUUIDStrSet(LockSign.getUUIDs(sign, true))) {
-                            builder.append(name);
-                            builder.append(", ");
+                            component = component.append(Component.text(name));
+                            component = component.append(Component.text(", "));
                         }
+                        component = component.append(Component.newline());
 
-                        builder.append("\n");
-
-                        builder.append("members: ");
+                        component = component.append(Config.getLangComp("cmd.info.owners"));
                         for (String name : MiscUtils.getNamesFromUUIDStrSet(LockSign.getUUIDs(sign, false))) {
-                            builder.append(name);
-                            builder.append(", ");
+                            component = component.append(Component.text(name));
+                            component = component.append(Component.text(", "));
                         }
 
-                        MiscUtils.sendMessages(sender, builder.toString());
+                        MiscUtils.sendMessages(sender, component);
                     } else {
-                        MiscUtils.sendMessages(player, Config.getLang("sign-need-reselect"));
+                        MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
                     }
                 } else {
-                    MiscUtils.sendMessages(player, Config.getLang("no-sign-selected"));
+                    MiscUtils.sendMessages(player, Config.getLangComp("no-sign-selected"));
                 }
             } else {
-                MiscUtils.sendMessages(sender, Config.getLang("no-permission"));
+                MiscUtils.sendMessages(sender, Config.getLangComp("no-permission"));
             }
         } else {
-            MiscUtils.sendMessages(sender, Config.getLang("not-player"));
+            MiscUtils.sendMessages(sender, Config.getLangComp("not-player"));
             return false;
         }
 

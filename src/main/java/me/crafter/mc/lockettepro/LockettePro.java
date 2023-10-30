@@ -41,6 +41,8 @@ public class LockettePro extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BlockInventoryMoveListener(), this);
 
 
+        this.getCommand("");
+
         //register command
         for (String commandStr : this.getDescription().getCommands().keySet()) {
             PluginCommand mainCommand = getCommand(commandStr);

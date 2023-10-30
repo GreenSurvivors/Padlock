@@ -3,6 +3,7 @@ package me.crafter.mc.lockettepro.command;
 import me.crafter.mc.lockettepro.config.Config;
 import me.crafter.mc.lockettepro.dependency.Dependency;
 import me.crafter.mc.lockettepro.impl.MiscUtils;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permissible;
@@ -29,7 +30,7 @@ public class Debug extends SubCommand {
     }
 
     @Override
-    protected @NotNull String getHelpText() {
+    protected @NotNull Component getHelpText() {
         return Config.getCmdHelp("debug");
     }
 
@@ -49,7 +50,7 @@ public class Debug extends SubCommand {
         if (sender.hasPermission("lockettepro.debug")) {
             sender.sendMessage("LockettePro Debug Message");
             // Basic
-            sender.sendMessage("LockettePro: " + plugin.getDescription().getVersion());
+            sender.sendMessage("LockettePro: " + plugin.getPluginMeta().getVersion());
             // Version
             sender.sendMessage("Server version: " + Bukkit.getVersion());
             sender.sendMessage("Expire: " + Config.isLockExpire() + " " + (Config.isLockExpire() ? Config.getLockExpireDays() : ""));
@@ -59,17 +60,19 @@ public class Debug extends SubCommand {
             boolean linked = false;
             if (Dependency.getWorldguard() != null) {
                 linked = true;
-                sender.sendMessage(" - Worldguard: " + Dependency.getWorldguard().getDescription().getVersion());
+                sender.sendMessage(" - Worldguard: " + Dependency.getWorldguard().getPluginMeta().getVersion());
             }
-            if (Bukkit.getPluginManager().getPlugin("CoreProtect") != null) {
+
+            Plugin coreProtect = Bukkit.getPluginManager().getPlugin("CoreProtect");
+            if (coreProtect != null) {
                 linked = true;
-                sender.sendMessage(" - CoreProtect: " + Bukkit.getPluginManager().getPlugin("CoreProtect").getDescription().getVersion());
+                sender.sendMessage(" - CoreProtect: " + coreProtect.getPluginMeta().getVersion()); //todo get co from Depencency
             }
             if (!linked) {
                 sender.sendMessage(" - none");
             }
         } else {
-            MiscUtils.sendMessages(sender, Config.getLang("no-permission"));
+            MiscUtils.sendMessages(sender, Config.getLangComp("no-permission"));
         }
 
         return true;

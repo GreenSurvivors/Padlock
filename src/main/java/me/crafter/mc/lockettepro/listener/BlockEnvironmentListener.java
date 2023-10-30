@@ -101,6 +101,6 @@ public class BlockEnvironmentListener implements Listener {
             if (LocketteProAPI.isProtected(event.getBlock())) {
                 event.setCancelled(true);
             }
-        }// ignore other reason (boat break lily pad, arrow ignite tnt, etc)
+        }// ignore other reason (boat break lily pad, arrow ignite tnt, etc.)
     }
 }

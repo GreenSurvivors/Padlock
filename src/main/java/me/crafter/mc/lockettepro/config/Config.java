@@ -1,5 +1,7 @@
 package me.crafter.mc.lockettepro.config;
 
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import org.bukkit.ChatColor;
 import org.bukkit.Material;
 import org.bukkit.Tag;
@@ -13,6 +15,7 @@ import java.io.IOException;
 import java.util.*;
 import java.util.logging.Level;
 
+//todo @Contract("_, !null -> !null")
 public class Config { //todo
     public static boolean worldguard = false;
     public static boolean coreprotect = false;
@@ -22,11 +25,10 @@ public class Config { //todo
     private static String langfilename = "lang.yml";
     private static String invalidString = "[Invalid]"; //todo^2
     private static Set<Material> lockables = new HashSet<>();
-    private static Set<String> privatestrings = new HashSet<>();
+    private static String privatestring = "[Private]";
     private static Set<String> additionalstrings = new HashSet<>();
     private static Set<String> everyonestrings = new HashSet<>();
     private static Set<String> timerstrings = new HashSet<>();
-    private static String defaultprivatestring = "[Private]";
     private static String defaultadditionalstring = "[More Users]";
     private static byte enablequickprotect = (byte) 1;
     private static boolean blockinterfereplacement = true;
@@ -66,16 +68,13 @@ public class Config { //todo
         blockitemtransferin = config.getBoolean("block-item-transfer-in", false);
         blockitemtransferout = config.getBoolean("block-item-transfer-out", true);
 
-        List<String> privatestringlist = config.getStringList("private-signs");
         List<String> additionalstringlist = config.getStringList("additional-signs");
         List<String> everyonestringlist = config.getStringList("everyone-signs");
         List<String> protectionexemptstringlist = config.getStringList("protection-exempt");
-        privatestrings = new HashSet<>(privatestringlist);
+        privatestring = config.getString("private-sign");
         additionalstrings = new HashSet<>(additionalstringlist);
         everyonestrings = new HashSet<>(everyonestringlist);
         protectionexempt = new HashSet<>(protectionexemptstringlist);
-        defaultprivatestring = privatestringlist.get(0);
-        defaultadditionalstring = additionalstringlist.get(0);
 
         List<String> timerstringlist = config.getStringList("timer-signs");
         List<String> timerstringlist2 = new ArrayList<>();
@@ -218,24 +217,29 @@ public class Config { //todo
         return lockexpirestring;
     }
 
-    public static @NotNull String getCmdHelp(String subCommand) {
-        return getLang("cmd.help." + subCommand);
+    public static @NotNull Component getCmdHelp(String subCommand) {
+        return getLangComp("cmd.help." + subCommand);
     }
 
-    public static @NotNull String getLang(String path) {
-        return ChatColor.translateAlternateColorCodes('&', lang.getString(path, "")); //todo getString could be null
+    public static @NotNull Component getLangComp(@NotNull String path) { // todo lang in minimessage format
+        return MiniMessage.miniMessage().deserialize(lang.getString(path, ""));
     }
 
     public static boolean isLockable(Material material) {
         return lockables.contains(material);
     }
 
-    public static String getInvalidString() {
-        return invalidString;
+    public static Component getInvalidString() {
+        return MiniMessage.miniMessage().deserialize(invalidString);
     }
 
+    public static boolean isPrivateSignComp(Component message) { //todo ignore casing
+        return MiniMessage.miniMessage().deserialize(privatestring).contains(message);
+    }
+
+    @Deprecated(forRemoval = true)
     public static boolean isPrivateSignString(String message) {
-        return privatestrings.contains(message);
+        return privatestring.contains(message);
     }
 
     public static boolean isAdditionalSignString(String message) {
@@ -271,8 +275,8 @@ public class Config { //todo
         return 0;
     }
 
-    public static String getDefaultPrivateString() {
-        return defaultprivatestring;
+    public static String getPrivateString() {
+        return privatestring;
     }
 
     public static String getDefaultAdditionalString() {

@@ -2,15 +2,16 @@ package me.crafter.mc.lockettepro.impl;
 
 import me.crafter.mc.lockettepro.api.LocketteProAPI;
 import me.crafter.mc.lockettepro.config.Config;
+import net.kyori.adventure.text.Component;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 
 public class ExpireSign { //todo update
     public static void updateLineWithTime(Sign sign, boolean noexpire) {
         if (noexpire) {
-            sign.getSide(Side.FRONT).setLine(0, sign.getSide(Side.FRONT).getLine(0) + "#created:" + -1);
+            sign.getSide(Side.FRONT).line(0, sign.getSide(Side.FRONT).line(0).append(Component.text("#created:" + -1)));
         } else {
-            sign.getSide(Side.FRONT).setLine(0, sign.getSide(Side.FRONT).getLine(0) + "#created:" + (int) (System.currentTimeMillis() / 1000));
+            sign.getSide(Side.FRONT).line(0, sign.getSide(Side.FRONT).line(0).append(Component.text("#created:" + (int) (System.currentTimeMillis() / 1000))));
         }
         sign.update();
     }
@@ -23,6 +24,7 @@ public class ExpireSign { //todo update
         }
     }
 
+    @Deprecated(forRemoval = true)
     private static boolean isLineExpired(String line) {
         long createdtime = MiscUtils.getCreatedFromLine(line);
         if (createdtime == -1L) return false; // No expire

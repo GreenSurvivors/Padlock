@@ -1,6 +1,7 @@
 package me.crafter.mc.lockettepro.command;
 
 import me.crafter.mc.lockettepro.config.Config;
+import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.plugin.Plugin;
@@ -26,7 +27,7 @@ public class RemoveOwner extends SubCommand {
     }
 
     @Override
-    protected @NotNull String getHelpText() {
+    protected @NotNull Component getHelpText() {
         return Config.getCmdHelp("removeowner");
     }
 
@@ -42,7 +43,7 @@ public class RemoveOwner extends SubCommand {
      */
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
-        return Command.onRemovePlayer(sender, args, false);
+        return Command.onRemovePlayer(sender, args, true);
     }
 
     /**

@@ -37,7 +37,6 @@ public class Command implements CommandExecutor, TabCompleter {
         SUBCOMMANDS.add(new Reload(plugin));
     }
 
-    @SuppressWarnings("deprecation") // we know what we are doing.
     protected static @Nullable OfflinePlayer getPlayerFromArgument(String arg) {
         if (MiscUtils.isUserName(arg)) { //check valid names
             return Bukkit.getOfflinePlayer(arg); //Utils.getUuidByUsernameFromMojang();
@@ -75,11 +74,11 @@ public class Command implements CommandExecutor, TabCompleter {
 
                                 if (otherSign == null) {
                                     LocketteProAPI.setInvalid(sign);
-                                    MiscUtils.sendMessages(player, Config.getLang("sign-need-reselect"));
+                                    MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
                                     return true;
                                 } else {
                                     sign = otherSign;
-                                    MiscUtils.sendMessages(player, Config.getLang("sign-updated"));
+                                    MiscUtils.sendMessages(player, Config.getLangComp("sign-updated"));
                                 }
                             }
 
@@ -90,35 +89,35 @@ public class Command implements CommandExecutor, TabCompleter {
                                         LockSign.addPlayer(sign, addOwner, offlinePlayer);
 
                                         if (addOwner) {
-                                            MiscUtils.sendMessages(player, Config.getLang("sign-added-owner"));
+                                            MiscUtils.sendMessages(player, Config.getLangComp("sign-added-owner"));
                                         } else {
-                                            MiscUtils.sendMessages(player, Config.getLang("sign-added-member"));
+                                            MiscUtils.sendMessages(player, Config.getLangComp("sign-added-member"));
                                         }
                                     } else {
-                                        MiscUtils.sendMessages(player, Config.getLang("sign-need-reselect"));
+                                        MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
                                     }
                                 } else {
-                                    MiscUtils.sendMessages(sender, Config.getLang("unknown-player"));
+                                    MiscUtils.sendMessages(sender, Config.getLangComp("unknown-player"));
                                 }
                             } else {
-                                MiscUtils.sendMessages(sender, Config.getLang("no-permission"));
+                                MiscUtils.sendMessages(sender, Config.getLangComp("no-permission"));
                             }
                         } else {
-                            MiscUtils.sendMessages(player, Config.getLang("sign-need-reselect"));
+                            MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
                         }
                     } else {
-                        MiscUtils.sendMessages(player, Config.getLang("no-sign-selected"));
+                        MiscUtils.sendMessages(player, Config.getLangComp("no-sign-selected"));
                     }
                 } else {
-                    MiscUtils.sendMessages(sender, Config.getLang("command-not-enough-args"));
+                    MiscUtils.sendMessages(sender, Config.getLangComp("command-not-enough-args"));
                 }
             } else {
-                MiscUtils.sendMessages(sender, Config.getLang("no-permission"));
+                MiscUtils.sendMessages(sender, Config.getLangComp("no-permission"));
             }
 
             return true;
         } else {
-            MiscUtils.sendMessages(sender, Config.getLang("not-player"));
+            MiscUtils.sendMessages(sender, Config.getLangComp("not-player"));
             return false;
         }
     }
@@ -147,11 +146,11 @@ public class Command implements CommandExecutor, TabCompleter {
 
                                 if (otherSign == null) {
                                     LocketteProAPI.setInvalid(sign);
-                                    MiscUtils.sendMessages(player, Config.getLang("sign-need-reselect"));
+                                    MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
                                     return true;
                                 } else {
                                     sign = otherSign;
-                                    MiscUtils.sendMessages(player, Config.getLang("sign-updated"));
+                                    MiscUtils.sendMessages(player, Config.getLangComp("sign-updated"));
                                 }
                             }
 
@@ -160,38 +159,38 @@ public class Command implements CommandExecutor, TabCompleter {
                                     if (LocketteProAPI.isLockSign(sign)) {
                                         if (LockSign.removePlayer(sign, removeOwner, offlinePlayer.getUniqueId())) {
                                             if (removeOwner) {
-                                                MiscUtils.sendMessages(player, Config.getLang("sign-removed-owner"));
+                                                MiscUtils.sendMessages(player, Config.getLangComp("sign-removed-owner"));
                                             } else {
-                                                MiscUtils.sendMessages(player, Config.getLang("sign-removed-member"));
+                                                MiscUtils.sendMessages(player, Config.getLangComp("sign-removed-member"));
                                             }
                                         } else {
-                                            MiscUtils.sendMessages(player, Config.getLang("sign-couldnt-remove"));
+                                            MiscUtils.sendMessages(player, Config.getLangComp("sign-couldnt-remove"));
                                         }
                                     } else {
-                                        MiscUtils.sendMessages(player, Config.getLang("sign-need-reselect"));
+                                        MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
                                     }
                                 } else {
-                                    MiscUtils.sendMessages(sender, Config.getLang("unknown-player")); //todo new lines
+                                    MiscUtils.sendMessages(sender, Config.getLangComp("unknown-player"));
                                 }
                             } else {
-                                MiscUtils.sendMessages(sender, Config.getLang("no-permission"));
+                                MiscUtils.sendMessages(sender, Config.getLangComp("no-permission"));
                             }
                         } else {
-                            MiscUtils.sendMessages(player, Config.getLang("sign-need-reselect"));
+                            MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
                         }
                     } else {
-                        MiscUtils.sendMessages(player, Config.getLang("no-sign-selected"));
+                        MiscUtils.sendMessages(player, Config.getLangComp("no-sign-selected"));
                     }
                 } else {
-                    MiscUtils.sendMessages(sender, Config.getLang("command-not-enough-args"));
+                    MiscUtils.sendMessages(sender, Config.getLangComp("command-not-enough-args"));
                 }
             } else {
-                MiscUtils.sendMessages(sender, Config.getLang("no-permission"));
+                MiscUtils.sendMessages(sender, Config.getLangComp("no-permission"));
             }
 
             return true;
         } else {
-            MiscUtils.sendMessages(sender, Config.getLang("not-player"));
+            MiscUtils.sendMessages(sender, Config.getLangComp("not-player"));
             return false;
         }
     }
@@ -252,7 +251,7 @@ public class Command implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender sender, org.bukkit.command.Command cmd, @NotNull String commandLabel, final String[] args) {
         if (cmd.getName().equals("lockettepro")) {
             if (args.length == 0) {
-                MiscUtils.sendMessages(sender, Config.getLang("command-usage"));
+                MiscUtils.sendMessages(sender, Config.getLangComp("command-usage"));
             } else {
                 SubCommand subCommand = getSubCommandFromString(sender, args[1]);
 
@@ -260,7 +259,7 @@ public class Command implements CommandExecutor, TabCompleter {
                     return subCommand.onCommand(sender, args);
                 }
 
-                MiscUtils.sendMessages(sender, Config.getLang("command-usage"));
+                MiscUtils.sendMessages(sender, Config.getLangComp("command-usage"));
                 return false;
             }
         }

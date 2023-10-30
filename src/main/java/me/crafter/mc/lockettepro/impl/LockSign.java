@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import me.crafter.mc.lockettepro.LockettePro;
 import me.crafter.mc.lockettepro.config.Config;
+import net.kyori.adventure.text.Component;
 import org.apache.commons.collections4.set.ListOrderedSet;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -45,10 +46,15 @@ public class LockSign {
     }
 
     public static void setInvalid(@NotNull Sign sign) {
-        sign.getSide(Side.FRONT).setLine(0, Config.getInvalidString());
+        sign.getSide(Side.FRONT).line(0, Config.getInvalidString());
         sign.update();
     }
 
+    public static boolean isLockComp(@NotNull Component line) {
+        return Config.isPrivateSignComp(line);
+    }
+
+    @Deprecated(forRemoval = true)
     public static boolean isLockString(@NotNull String line) {
         return Config.isPrivateSignString(line);
     }
@@ -59,7 +65,7 @@ public class LockSign {
     }
 
     public static boolean isLockSign(@NotNull Sign sign) {
-        return isLockString(sign.getSide(Side.FRONT).getLine(0));
+        return isLockComp(sign.getSide(Side.FRONT).line(0));
     }
 
     @Deprecated(forRemoval = true)
@@ -156,7 +162,7 @@ public class LockSign {
                 OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
 
                 if (player.getName() != null) {
-                    sign.getSide(Side.FRONT).setLine(1, player.getName());
+                    sign.getSide(Side.FRONT).line(1, Component.text(player.getName()));
                 } else {
                     LockettePro.getPlugin().getLogger().log(Level.WARNING, "broken UUID \"" + owners.get(0) + "\" (no Owner) in Lock-Sign at " + sign.getLocation());
                 }
@@ -176,7 +182,7 @@ public class LockSign {
                     OfflinePlayer player = Bukkit.getOfflinePlayer(uuid);
 
                     if (player.getName() != null) {
-                        sign.getSide(Side.FRONT).setLine(1, player.getName());
+                        sign.getSide(Side.FRONT).line(1, Component.text(player.getName()));
                     } else {
                         LockettePro.getPlugin().getLogger().log(Level.WARNING, "broken UUID \"" + members.get(i) + "\" (no Owner) in Lock-Sign at " + sign.getLocation());
                     }
@@ -231,7 +237,7 @@ public class LockSign {
                 Player player = Bukkit.getPlayer(UUID.fromString(firstOwner));
 
                 if (player != null) {
-                    sign.getSide(Side.FRONT).setLine(1, player.getName());
+                    sign.getSide(Side.FRONT).line(1, Component.text(player.getName()));
                 }
             }
         }
@@ -246,7 +252,7 @@ public class LockSign {
                     Player player = Bukkit.getPlayer(UUID.fromString(member));
 
                     if (player != null) {
-                        sign.getSide(Side.FRONT).setLine(i + 1, player.getName());
+                        sign.getSide(Side.FRONT).line(i + 1, Component.text(player.getName()));
                     }
                 }
             }
@@ -274,7 +280,7 @@ public class LockSign {
          */
         @NotNull
         @Override
-        public Class<ListOrderedSet<String>> getComplexType() {
+        public Class<ListOrderedSet<String>> getComplexType() { //todo this cast
             return ((Class<ListOrderedSet<String>>) ((Class<?>) ListOrderedSet.class));
         }
 

@@ -1,9 +1,11 @@
 package me.crafter.mc.lockettepro.api;
 
+import me.crafter.mc.lockettepro.LockettePro;
 import me.crafter.mc.lockettepro.config.Config;
 import me.crafter.mc.lockettepro.impl.Doors;
 import me.crafter.mc.lockettepro.impl.ExpireSign;
 import me.crafter.mc.lockettepro.impl.LockSign;
+import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Tag;
@@ -53,10 +55,10 @@ public class LocketteProAPI {
                         LockSign.updateLegacyUUIDs(lockSign);
                         return lockSign;
                     } else {
-                        //todo logging
+                        LockettePro.getPlugin().getLogger().warning("Couldn't find a Lock sign to update, but the door is locked.");
                     }
                 } else {
-                    //todo logging
+                    LockettePro.getPlugin().getLogger().warning("Couldn't get door parts, but data says there should be one. Is it half? " + attachedTo.getLocation().toString());
                 }
             } else if (data instanceof Chest) {
                 Sign lockSign = getLockSignChest(attachedTo);
@@ -626,7 +628,7 @@ public class LocketteProAPI {
         for (BlockFace blockface : cardinalFaces) {
             Block relative = block.getRelative(blockface);
             if (relative.getState() instanceof Sign sign) {
-                for (String line : sign.getSide(Side.FRONT).getLines()) {
+                for (String line : sign.getSide(Side.FRONT).getLines()) { //todo
                     int linetime = Config.getTimer(line);
                     if (linetime > 0) return linetime;
                 }
@@ -698,7 +700,12 @@ public class LocketteProAPI {
         return relativeFace;
     }
 
-    public static boolean isLockString(String line) {
+    @Deprecated
+    public static boolean isLockString(String line) { //todocomponent
         return LockSign.isLockString(line);
+    }
+
+    public static boolean isLockComp(Component line) { //todocomponent
+        return LockSign.isLockComp(line);
     }
 }

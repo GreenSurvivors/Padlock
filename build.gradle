@@ -1,6 +1,7 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
+    id("io.papermc.paperweight.userdev") version "1.5.9"
     id("xyz.jpenilla.run-paper") version "1.0.6"
 }
 // Suppiled by Jenkins
@@ -31,7 +32,7 @@ compileJava {
 
 repositories {
     mavenCentral()
-    maven { name 'Spigot'; url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+    maven { name 'Paper'; url 'https://repo.papermc.io/repository/maven-public/' }
     //todo paper not spigot
     maven { name 'sk89q-repo'; url "https://maven.enginehub.org/repo/" } //worldguard
     maven { name 'playpro'; url 'https://maven.playpro.com/' } //coreProtect
@@ -41,7 +42,7 @@ repositories {
 dependencies {
     implementation 'org.apache.commons:commons-collections4:4.4' //todo this in plugin.yml
     implementation 'org.jetbrains:annotations:23.0.0'
-    compileOnly "org.spigotmc:spigot-api:$minecraftVersion-R0.1-SNAPSHOT"
+    paperweight.paperDevBundle("1.20.2-R0.1-SNAPSHOT")
     compileOnly ('com.sk89q.worldguard:worldguard-bukkit:7.1.0-SNAPSHOT') { transitive = false }
     compileOnly ('net.coreprotect:coreprotect:21.0'){ transitive = false}
 }

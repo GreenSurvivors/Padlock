@@ -4,6 +4,7 @@ import me.crafter.mc.lockettepro.api.LocketteProAPI;
 import me.crafter.mc.lockettepro.config.Config;
 import me.crafter.mc.lockettepro.impl.MiscUtils;
 import me.crafter.mc.lockettepro.impl.SignSelection;
+import net.kyori.adventure.text.Component;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
@@ -32,7 +33,7 @@ public class UpdateSign extends SubCommand {
     }
 
     @Override
-    protected @NotNull String getHelpText() {
+    protected @NotNull Component getHelpText() {
         return Config.getCmdHelp("updatesign");
     }
 
@@ -54,34 +55,34 @@ public class UpdateSign extends SubCommand {
                 if (block != null) {
                     if (block instanceof Sign sign) {
                         if (LocketteProAPI.updateLegacySign(sign) != null) {
-                            MiscUtils.sendMessages(player, Config.getLang("sign-updated"));
+                            MiscUtils.sendMessages(player, Config.getLangComp("sign-updated"));
                         } else {
-                            MiscUtils.sendMessages(player, Config.getLang("sign-need-reselect"));
+                            MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
                         }
                     } else if (LocketteProAPI.isLocked(block)) { //something went wrong, try to recover
                         Sign sign = LocketteProAPI.getLockSign(block);
 
                         if (sign != null) {
                             if (LocketteProAPI.updateLegacySign(sign) != null) {
-                                MiscUtils.sendMessages(player, Config.getLang("sign-updated"));
+                                MiscUtils.sendMessages(player, Config.getLangComp("sign-updated"));
                             } else {
-                                MiscUtils.sendMessages(player, Config.getLang("sign-need-reselect"));
+                                MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
                             }
                         } else {
-                            MiscUtils.sendMessages(player, Config.getLang("sign-need-reselect"));
+                            MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
                         }
                     } else {
-                        MiscUtils.sendMessages(player, Config.getLang("sign-need-reselect"));
+                        MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
                     }
                 } else {
-                    MiscUtils.sendMessages(player, Config.getLang("no-sign-selected"));
+                    MiscUtils.sendMessages(player, Config.getLangComp("no-sign-selected"));
                 }
             } else {
-                MiscUtils.sendMessages(sender, Config.getLang("no-permission"));
+                MiscUtils.sendMessages(sender, Config.getLangComp("no-permission"));
             }
             return true;
         } else {
-            MiscUtils.sendMessages(sender, Config.getLang("not-player"));
+            MiscUtils.sendMessages(sender, Config.getLangComp("not-player"));
             return false;
         }
     }

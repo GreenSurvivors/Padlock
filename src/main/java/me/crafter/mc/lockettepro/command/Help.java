@@ -2,7 +2,7 @@ package me.crafter.mc.lockettepro.command;
 
 import me.crafter.mc.lockettepro.config.Config;
 import me.crafter.mc.lockettepro.impl.MiscUtils;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.plugin.Plugin;
@@ -28,7 +28,7 @@ public class Help extends SubCommand {
     }
 
     @Override
-    protected @NotNull String getHelpText() {
+    protected @NotNull Component getHelpText() {
         return Config.getCmdHelp("help");
     }
 
@@ -48,35 +48,30 @@ public class Help extends SubCommand {
             SubCommand command = Command.getSubCommandFromString(sender, args[2]);
 
             if (command != null) {
-                String header = Config.getLang("cmd.help.header");
-                String helpText = command.getHelpText();
+                Component component = Config.getLangComp("cmd.help.header");
+                component = component.append(Component.newline());
+                component = component.append(command.getHelpText());
 
-                if (!helpText.isEmpty()) {
-                    sender.sendMessage(header + "\n" + helpText);
-                } else {
-                    //hardcoded since it's pretty likely something is broken
-                    sender.sendMessage(ChatColor.RED + "[Error] Couldn't get help text.");
-                }
+                MiscUtils.sendMessages(sender, component);
             } else {
-                MiscUtils.sendMessages(sender, Config.getLang("cmd.no-subcommand"));
+                MiscUtils.sendMessages(sender, Config.getLangComp("cmd.no-subcommand"));
                 return false;
             }
         } else {
-            StringBuilder textBuilder = new StringBuilder(Config.getLang("cmd.help.header"));
-            textBuilder.append("\n");
+            Component component = Config.getLangComp("cmd.help.header");
+            component = component.append(Component.newline());
 
             for (SubCommand subCommand : Command.getSubCommands(sender)) {
-                textBuilder.append(" - ");
+                component = component.append(Component.text(" - "));
 
                 for (String alias : subCommand.getAlias()) {
-                    textBuilder.append(alias);
-                    textBuilder.append(", ");
+                    component = component.append(Component.text(alias).append(Component.text(", ")));
                 }
 
-                textBuilder.append("\n");
+                component = component.append(Component.newline());
             }
 
-            MiscUtils.sendMessages(sender, textBuilder.toString());
+            MiscUtils.sendMessages(sender, component);
         }
 
         return true;

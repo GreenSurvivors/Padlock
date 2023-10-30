@@ -2,6 +2,7 @@ package me.crafter.mc.lockettepro.command;
 
 import me.crafter.mc.lockettepro.config.Config;
 import me.crafter.mc.lockettepro.impl.MiscUtils;
+import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permissible;
 import org.bukkit.plugin.Plugin;
@@ -27,7 +28,7 @@ public class Version extends SubCommand {
     }
 
     @Override
-    protected @NotNull String getHelpText() {
+    protected @NotNull Component getHelpText() {
         return Config.getCmdHelp("version");
     }
 
@@ -44,9 +45,9 @@ public class Version extends SubCommand {
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         if (sender.hasPermission("lockettepro.version")) {
-            sender.sendMessage(plugin.getDescription().getFullName());
+            sender.sendMessage(plugin.getDescription().getFullName()); //todo
         } else {
-            MiscUtils.sendMessages(sender, Config.getLang("no-permission"));
+            MiscUtils.sendMessages(sender, Config.getLangComp("no-permission"));
         }
         return true;
     }

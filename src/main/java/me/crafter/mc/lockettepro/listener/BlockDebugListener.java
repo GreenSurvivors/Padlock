@@ -2,6 +2,8 @@ package me.crafter.mc.lockettepro.listener;
 
 import me.crafter.mc.lockettepro.api.LocketteProAPI;
 import me.crafter.mc.lockettepro.impl.MiscUtils;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
@@ -23,18 +25,18 @@ public class BlockDebugListener implements Listener {
             event.setCancelled(true);
             Block b = event.getClickedBlock();
             if (b == null) return;
-            p.sendMessage(ChatColor.GREEN + "===========================");
-            p.sendMessage("isLockable: " + formatBoolean(LocketteProAPI.isLockable(b)));
-            p.sendMessage("isLocked: " + formatBoolean(LocketteProAPI.isLocked(b)));
-            p.sendMessage(" - isOwner/User: " + formatBoolean(LocketteProAPI.isOwner(b, p)) + ChatColor.RESET + "/" + formatBoolean(LocketteProAPI.isMember(b, p)));
-            p.sendMessage("isLockedSingle: " + formatBoolean(LocketteProAPI.isLockedSingleBlock(b, null)));
-            p.sendMessage(" - isOwner/UserSingle: " + formatBoolean(LocketteProAPI.isOwnerSingleBlock(b, null, p)) + ChatColor.RESET + "/" + formatBoolean(LocketteProAPI.isUserSingleBlock(b, null, p)));
-            p.sendMessage("isLockedUpDownLockedDoor: " + formatBoolean(LocketteProAPI.isUpDownOfLockedDoor(b)));
-            p.sendMessage(" - isOwner/UserSingle: " + formatBoolean(LocketteProAPI.isOwnerUpDownLockedDoor(b, p)) + ChatColor.RESET + "/" + formatBoolean(LocketteProAPI.isOwnerUpDownLockedDoor(b, p)));
+            p.sendMessage(Component.text("===========================").color(NamedTextColor.GREEN));
+            p.sendMessage(Component.text("isLockable: ").append(formatBoolean(LocketteProAPI.isLockable(b))));
+            p.sendMessage(Component.text("isLocked: ").append(formatBoolean(LocketteProAPI.isLocked(b))));
+            p.sendMessage(Component.text(" - isOwner/User: ").append(formatBoolean(LocketteProAPI.isOwner(b, p))).append(Component.text("/")).append(formatBoolean(LocketteProAPI.isMember(b, p))));
+            p.sendMessage(Component.text("isLockedSingle: ").append(formatBoolean(LocketteProAPI.isLockedSingleBlock(b, null))));
+            p.sendMessage(Component.text(" - isOwner/UserSingle: ").append(formatBoolean(LocketteProAPI.isOwnerSingleBlock(b, null, p))).append(Component.text("/")).append(formatBoolean(LocketteProAPI.isUserSingleBlock(b, null, p))));
+            p.sendMessage(Component.text("isLockedUpDownLockedDoor: ").append(formatBoolean(LocketteProAPI.isUpDownOfLockedDoor(b))));
+            p.sendMessage(Component.text(" - isOwner/UserSingle: ").append(formatBoolean(LocketteProAPI.isOwnerUpDownLockedDoor(b, p))).append(Component.text("/")).append(formatBoolean(LocketteProAPI.isOwnerUpDownLockedDoor(b, p))));
             if (b.getState() instanceof Sign sign && LocketteProAPI.isLockSign(sign)) {
-                p.sendMessage("isSignExpired: " + formatBoolean(LocketteProAPI.isSignExpired(sign)));
-                p.sendMessage(" - created: " + MiscUtils.getCreatedFromLine(((Sign) b.getState()).getLine(0)));
-                p.sendMessage(" - now     : " + (int) (System.currentTimeMillis() / 1000));
+                p.sendMessage(Component.text("isSignExpired: ").append(formatBoolean(LocketteProAPI.isSignExpired(sign))));
+                p.sendMessage(Component.text(" - created: ").append(Component.text(MiscUtils.getCreatedFromLine(((Sign) b.getState()).getLine(0)))));
+                p.sendMessage(Component.text(" - now     : ").append(Component.text((int) (System.currentTimeMillis() / 1000))));
             }
 
             p.sendMessage("Block: " + b.getType() + " " + b.getData());
@@ -48,12 +50,8 @@ public class BlockDebugListener implements Listener {
         }
     }
 
-    public String formatBoolean(boolean tf) {
-        if (tf) {
-            return ChatColor.GREEN + "true";
-        } else {
-            return ChatColor.RED + "false";
-        }
+    public Component formatBoolean(boolean tf) {
+        return tf ? Component.text("true").color(NamedTextColor.GREEN) : Component.text("false").color(NamedTextColor.RED);
     }
 
 }
