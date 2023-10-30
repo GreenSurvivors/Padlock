@@ -86,6 +86,7 @@ public class LockSign {
         return set;
     }
 
+    @Deprecated(forRemoval = true)
     public static void updateSignFromAdditional(@NotNull Sign main, @NotNull Sign additional) {
         for (int i = 1; i <= 3; i++) {
             String line = additional.getSide(Side.FRONT).getLine(i);
@@ -102,6 +103,7 @@ public class LockSign {
         setInvalid(additional);
     }
 
+    @Deprecated(forRemoval = true)
     public static void updateLegacyUUIDs(@NotNull Sign sign) {
         PersistentDataContainer container = sign.getPersistentDataContainer();
 
@@ -137,7 +139,8 @@ public class LockSign {
         sign.update();
     }
 
-    public static boolean isLegacySign(@NotNull Sign sign) { //todo use!!!!
+    @Deprecated(forRemoval = true)
+    public static boolean isLegacySign(@NotNull Sign sign) {
         return !sign.getPersistentDataContainer().has(storedOwnersUUIDKey, uuidSetData);
     }
 

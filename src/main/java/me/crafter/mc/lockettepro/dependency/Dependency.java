@@ -13,10 +13,6 @@ public class Dependency {
     protected static WorldGuardPlugin worldguard = null;
     private static CoreProtectAPI coreProtectAPI; //todo
 
-    public static WorldGuardPlugin getWorldguard() {
-        return worldguard;
-    }
-
     public Dependency(Plugin plugin) {
         // WorldGuard
         Plugin worldguardplugin = plugin.getServer().getPluginManager().getPlugin("WorldGuard");
@@ -33,6 +29,10 @@ public class Dependency {
                 plugin.getLogger().warning("CoreProtect API is not enabled!");
             }
         }
+    }
+
+    public static WorldGuardPlugin getWorldguard() {
+        return worldguard;
     }
 
     public static boolean isProtectedFrom(Block block, Player player) {

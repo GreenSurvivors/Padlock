@@ -2,11 +2,9 @@ package me.crafter.mc.lockettepro.impl;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import me.crafter.mc.lockettepro.LockettePro;
 import me.crafter.mc.lockettepro.config.Config;
-import org.bukkit.DyeColor;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
-import org.bukkit.Tag;
+import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
@@ -25,10 +23,8 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.URL;
 import java.net.URLConnection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
+import java.util.logging.Level;
 import java.util.regex.Pattern;
 
 public class MiscUtils {
@@ -82,8 +78,9 @@ public class MiscUtils {
     }
 
     public static void sendMessages(@NotNull CommandSender sender, @Nullable String messages) {
-        if (messages == null || messages.isEmpty()) return;
-        sender.sendMessage(messages);
+        if (messages != null && !messages.isEmpty()) {
+            sender.sendMessage(messages);
+        }
     }
 
     public static boolean shouldNotify(Player player) {
@@ -141,6 +138,20 @@ public class MiscUtils {
             response.append(inputLine);
         }
         return response.toString();
+    }
+
+    public static @NotNull List<String> getNamesFromUUIDStrSet(final @NotNull Set<String> stringUUIDs) {
+        List<String> players = new ArrayList<>(stringUUIDs.size());
+
+        for (String uuidStr : stringUUIDs) {
+            try {
+                players.add(Bukkit.getOfflinePlayer(UUID.fromString(uuidStr)).getName());
+            } catch (IllegalArgumentException e) {
+                LockettePro.getPlugin().getLogger().log(Level.WARNING, "couldn't get UUID from String \"" + uuidStr + "\"", e);
+            }
+        }
+
+        return players;
     }
 
     public static boolean isPrivateTimeLine(@NotNull String text) {

@@ -31,7 +31,8 @@ compileJava {
 
 repositories {
     mavenCentral()
-    maven {name 'Spigot';     url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/'}
+    maven { name 'Spigot'; url 'https://hub.spigotmc.org/nexus/content/repositories/snapshots/' }
+    //todo paper not spigot
     maven { name 'sk89q-repo'; url "https://maven.enginehub.org/repo/" } //worldguard
     maven { name 'playpro'; url 'https://maven.playpro.com/' } //coreProtect
     maven {name 'dmulloy2';   url 'https://repo.dmulloy2.net/repository/public/'}

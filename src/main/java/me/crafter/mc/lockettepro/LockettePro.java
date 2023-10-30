@@ -1,5 +1,6 @@
 package me.crafter.mc.lockettepro;
 
+import me.crafter.mc.lockettepro.command.Command;
 import me.crafter.mc.lockettepro.config.Config;
 import me.crafter.mc.lockettepro.dependency.Dependency;
 import me.crafter.mc.lockettepro.listener.BlockDebugListener;
@@ -44,7 +45,7 @@ public class LockettePro extends JavaPlugin {
         for (String commandStr : this.getDescription().getCommands().keySet()) {
             PluginCommand mainCommand = getCommand(commandStr);
             if (mainCommand != null) {
-                LockCmd lockCmd = new LockCmd(this);
+                Command lockCmd = new Command(this);
 
                 mainCommand.setExecutor(lockCmd);
                 mainCommand.setTabCompleter(lockCmd);

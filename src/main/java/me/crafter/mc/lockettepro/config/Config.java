@@ -6,6 +6,7 @@ import org.bukkit.Tag;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
@@ -217,8 +218,12 @@ public class Config { //todo
         return lockexpirestring;
     }
 
-    public static String getLang(String path) {
-        return ChatColor.translateAlternateColorCodes('&', lang.getString(path, ""));
+    public static @NotNull String getCmdHelp(String subCommand) {
+        return getLang("cmd.help." + subCommand);
+    }
+
+    public static @NotNull String getLang(String path) {
+        return ChatColor.translateAlternateColorCodes('&', lang.getString(path, "")); //todo getString could be null
     }
 
     public static boolean isLockable(Material material) {

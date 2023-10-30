@@ -30,11 +30,11 @@ public class LocketteProAPI {
     /**
      * returns lock sign of a block, sets all additional signs invalid
      *
-     * @param sign
+     * @param signToUpdate
      * @return
      */
-    public static @Nullable Sign updateLegacySign(Sign sign) {
-        Block attachedTo = getAttachedBlock(sign.getBlock());
+    public static @Nullable Sign updateLegacySign(Sign signToUpdate) {
+        Block attachedTo = getAttachedBlock(signToUpdate.getBlock());
 
         if (attachedTo != null) {
             BlockData data = attachedTo.getBlockData();
@@ -50,6 +50,7 @@ public class LocketteProAPI {
                             LockSign.updateSignFromAdditional(lockSign, additional);
                         }
 
+                        LockSign.updateLegacyUUIDs(lockSign);
                         return lockSign;
                     } else {
                         //todo logging
@@ -64,6 +65,7 @@ public class LocketteProAPI {
                         LockSign.updateSignFromAdditional(lockSign, additional);
                     }
 
+                    LockSign.updateLegacyUUIDs(lockSign);
                     return lockSign;
                 } else {
                     //todo logging
@@ -76,13 +78,14 @@ public class LocketteProAPI {
                         LockSign.updateSignFromAdditional(lockSign, additional);
                     }
 
+                    LockSign.updateNamesByUuid(lockSign);
                     return lockSign;
                 } else {
                     //todo logging
                 }
             }
         } else {
-            setInvalid(sign);
+            setInvalid(signToUpdate);
         }
 
         return null;
@@ -263,6 +266,21 @@ public class LocketteProAPI {
         }
 
         return getAdditionalSignsSingleBlock(chestBlock, null);
+    }
+
+    public static @Nullable Sign getLockSign(Block block) {
+        if (block.getBlockData() instanceof Door) {
+            DoorParts door = Doors.getDoorParts(block);
+
+            if (door != null) {
+                return getLockSignDoor(door);
+            } else {
+                return null;
+            }
+        } else if (block.getBlockData() instanceof Chest) {
+            return getLockSignChest(block);
+        }
+        return getLockSignSingleBlock(block, null);
     }
 
     public static boolean isLocked(@NotNull Block block) {
