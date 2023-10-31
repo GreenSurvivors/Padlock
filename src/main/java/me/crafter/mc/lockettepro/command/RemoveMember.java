@@ -1,6 +1,7 @@
 package me.crafter.mc.lockettepro.command;
 
 import me.crafter.mc.lockettepro.LockettePro;
+import me.crafter.mc.lockettepro.config.MessageManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permissible;
@@ -27,7 +28,7 @@ public class RemoveMember extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getCmdHelp("removemember");
+        return plugin.getMessageManager().getLang(MessageManager.LangPath.helpRemoveMember);
     }
 
     /**

@@ -2,6 +2,7 @@ package me.crafter.mc.lockettepro.command;
 
 import me.crafter.mc.lockettepro.LockettePro;
 import me.crafter.mc.lockettepro.LocketteProAPI;
+import me.crafter.mc.lockettepro.config.MessageManager;
 import me.crafter.mc.lockettepro.impl.MiscUtils;
 import me.crafter.mc.lockettepro.impl.signdata.LockSign;
 import me.crafter.mc.lockettepro.impl.signdata.SignSelection;
@@ -76,11 +77,11 @@ public class Command implements CommandExecutor, TabCompleter {
 
                                 if (otherSign == null) {
                                     LocketteProAPI.setInvalid(sign);
-                                    plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
+                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
                                     return true;
                                 } else {
                                     sign = otherSign;
-                                    plugin.getMessageManager().sendLang(sender, "sign-updated");
+                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.updateSignSuccess);
                                 }
                             }
 
@@ -91,35 +92,35 @@ public class Command implements CommandExecutor, TabCompleter {
                                         LockSign.addPlayer(sign, addOwner, offlinePlayer);
 
                                         if (addOwner) {
-                                            plugin.getMessageManager().sendLang(sender, "sign-added-owner");
+                                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.addOwnerSuccess);
                                         } else {
-                                            plugin.getMessageManager().sendLang(sender, "sign-added-member");
+                                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.addMemberSuccess);
                                         }
                                     } else {
-                                        plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
+                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
                                     }
                                 } else {
-                                    plugin.getMessageManager().sendLang(sender, "unknown-player");
+                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.unknownPlayer);
                                 }
                             } else {
-                                plugin.getMessageManager().sendLang(sender, "no-permission");
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.noPermission);
                             }
                         } else {
-                            plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
+                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
                         }
                     } else {
-                        plugin.getMessageManager().sendLang(sender, "no-sign-selected");
+                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNotSelected);
                     }
                 } else {
-                    plugin.getMessageManager().sendLang(sender, "command-not-enough-args");
+                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.notEnoughArgs);
                 }
             } else {
-                plugin.getMessageManager().sendLang(sender, "no-permission");
+                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.noPermission);
             }
 
             return true;
         } else {
-            plugin.getMessageManager().sendLang(sender, "not-player");
+            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.notAPlayer);
             return false;
         }
     }
@@ -148,11 +149,11 @@ public class Command implements CommandExecutor, TabCompleter {
 
                                 if (otherSign == null) {
                                     LocketteProAPI.setInvalid(sign);
-                                    plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
+                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
                                     return true;
                                 } else {
                                     sign = otherSign;
-                                    plugin.getMessageManager().sendLang(sender, "sign-updated");
+                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.updateSignSuccess);
                                 }
                             }
 
@@ -161,38 +162,42 @@ public class Command implements CommandExecutor, TabCompleter {
                                     if (LocketteProAPI.isLockSign(sign)) {
                                         if (LockSign.removePlayer(sign, removeOwner, offlinePlayer.getUniqueId())) {
                                             if (removeOwner) {
-                                                plugin.getMessageManager().sendLang(sender, "sign-removed-owner");
+                                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.removeOwnerSuccess);
                                             } else {
-                                                plugin.getMessageManager().sendLang(sender, "sign-removed-member");
+                                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.removeMemberSuccess);
                                             }
                                         } else {
-                                            plugin.getMessageManager().sendLang(sender, "sign-couldnt-remove");
+                                            if (removeOwner) {
+                                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.removeOwnerError);
+                                            } else {
+                                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.removeMemberError);
+                                            }
                                         }
                                     } else {
-                                        plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
+                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
                                     }
                                 } else {
-                                    plugin.getMessageManager().sendLang(sender, "unknown-player");
+                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.unknownPlayer);
                                 }
                             } else {
-                                plugin.getMessageManager().sendLang(sender, "no-permission");
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.noPermission);
                             }
                         } else {
-                            plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
+                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
                         }
                     } else {
-                        plugin.getMessageManager().sendLang(sender, "no-sign-selected");
+                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNotSelected);
                     }
                 } else {
-                    plugin.getMessageManager().sendLang(sender, "command-not-enough-args");
+                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.notEnoughArgs);
                 }
             } else {
-                plugin.getMessageManager().sendLang(sender, "no-permission");
+                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.noPermission);
             }
 
             return true;
         } else {
-            plugin.getMessageManager().sendLang(sender, "not-player");
+            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.notAPlayer);
             return false;
         }
     }
@@ -253,7 +258,7 @@ public class Command implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender sender, org.bukkit.command.Command cmd, @NotNull String commandLabel, final String[] args) {
         if (cmd.getName().equals("lockettepro")) {
             if (args.length == 0) {
-                plugin.getMessageManager().sendLang(sender, "command-usage");
+                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.cmdUsage);
             } else {
                 SubCommand subCommand = getSubCommandFromString(sender, args[1]);
 
@@ -261,7 +266,7 @@ public class Command implements CommandExecutor, TabCompleter {
                     return subCommand.onCommand(sender, args);
                 }
 
-                plugin.getMessageManager().sendLang(sender, "command-usage");
+                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.cmdUsage);
                 return false;
             }
         }

@@ -350,7 +350,7 @@ public class LocketteProAPI {
     }
 
     public static boolean isProtected(@NotNull Block block) {
-        return ((block.getState() instanceof Sign sign && isLockSign(sign)) || isLocked(block) || isUpDownOfLockedDoor(block));
+        return ((block.getState() instanceof Sign sign && isLockSign(sign)) || isLocked(block) || isPartOfLockedDoor(block));
     }
 
     private static @Nullable Sign getFacingSign(@NotNull Block block, @NotNull BlockFace blockface) {
@@ -469,7 +469,7 @@ public class LocketteProAPI {
         // Normal situation, that block is just locked by an adjacent sign
         if (protectedblock != null && isOwner(protectedblock, player)) return true;
         // Situation where double door's block
-        return protectedblock != null && isUpDownOfLockedDoor(protectedblock) && isOwnerUpDownLockedDoor(protectedblock, player);
+        return protectedblock != null && isPartOfLockedDoor(protectedblock) && isOwnerUpDownLockedDoor(protectedblock, player);
     }
 
     public static boolean isLockable(Block block) {
@@ -594,7 +594,7 @@ public class LocketteProAPI {
         return ExpireSign.isSignExpired(sign);
     }
 
-    public static boolean isUpDownOfLockedDoor(Block block) { //todo
+    public static boolean isPartOfLockedDoor(Block block) { //todo
         Block blockup = block.getRelative(BlockFace.UP);
         if (isUpDownAlsoLockableBlock(blockup) && isLocked(blockup)) return true;
         Block blockdown = block.getRelative(BlockFace.DOWN);
@@ -700,7 +700,7 @@ public class LocketteProAPI {
     }
 
     @Deprecated
-    public static boolean isLockString(String line) { //todocomponent
+    public static boolean isLockString(String line) { //todo component
         return LockSign.isLockString(line);
     }
 

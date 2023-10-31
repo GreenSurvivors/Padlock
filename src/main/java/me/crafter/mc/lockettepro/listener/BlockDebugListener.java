@@ -20,40 +20,39 @@ public class BlockDebugListener implements Listener {
     @SuppressWarnings("deprecation")
     @EventHandler(priority = EventPriority.MONITOR)
     public void onDebugClick(PlayerInteractEvent event) { //todo use MessageManager
-        Player p = event.getPlayer();
-        if (p.isSneaking() && event.getAction() == Action.LEFT_CLICK_BLOCK) {
+        Player player = event.getPlayer();
+        if (player.isSneaking() && event.getAction() == Action.LEFT_CLICK_BLOCK) {
             event.setCancelled(true);
-            Block b = event.getClickedBlock();
-            if (b == null) return;
-            p.sendMessage(Component.text("===========================").color(NamedTextColor.GREEN));
-            p.sendMessage(Component.text("isLockable: ").append(formatBoolean(LocketteProAPI.isLockable(b))));
-            p.sendMessage(Component.text("isLocked: ").append(formatBoolean(LocketteProAPI.isLocked(b))));
-            p.sendMessage(Component.text(" - isOwner/User: ").append(formatBoolean(LocketteProAPI.isOwner(b, p))).append(Component.text("/")).append(formatBoolean(LocketteProAPI.isMember(b, p))));
-            p.sendMessage(Component.text("isLockedSingle: ").append(formatBoolean(LocketteProAPI.isLockedSingleBlock(b, null))));
-            p.sendMessage(Component.text(" - isOwner/UserSingle: ").append(formatBoolean(LocketteProAPI.isOwnerSingleBlock(b, null, p))).append(Component.text("/")).append(formatBoolean(LocketteProAPI.isUserSingleBlock(b, null, p))));
-            p.sendMessage(Component.text("isLockedUpDownLockedDoor: ").append(formatBoolean(LocketteProAPI.isUpDownOfLockedDoor(b))));
-            p.sendMessage(Component.text(" - isOwner/UserSingle: ").append(formatBoolean(LocketteProAPI.isOwnerUpDownLockedDoor(b, p))).append(Component.text("/")).append(formatBoolean(LocketteProAPI.isOwnerUpDownLockedDoor(b, p))));
-            if (b.getState() instanceof Sign sign && LocketteProAPI.isLockSign(sign)) {
-                p.sendMessage(Component.text("isSignExpired: ").append(formatBoolean(LocketteProAPI.isSignExpired(sign))));
-                p.sendMessage(Component.text(" - created: ").append(Component.text(MiscUtils.getCreatedFromLine(((Sign) b.getState()).getLine(0)))));
-                p.sendMessage(Component.text(" - now     : ").append(Component.text((int) (System.currentTimeMillis() / 1000))));
-            }
+            Block clickedBlock = event.getClickedBlock();
 
-            p.sendMessage("Block: " + b.getType() + " " + b.getData());
-
-            if (Tag.WALL_SIGNS.isTagged(b.getType())) {
-                for (String line : ((Sign) b.getState()).getLines()) {
-                    p.sendMessage(ChatColor.GREEN + line);
+            if (clickedBlock != null) {
+                player.sendMessage(Component.text("===========================").color(NamedTextColor.GREEN));
+                player.sendMessage(Component.text("isLockable: ").append(formatBoolean(LocketteProAPI.isLockable(clickedBlock))));
+                player.sendMessage(Component.text("isLocked: ").append(formatBoolean(LocketteProAPI.isLocked(clickedBlock))));
+                player.sendMessage(Component.text(" - isOwner/User: ").append(formatBoolean(LocketteProAPI.isOwner(clickedBlock, player))).append(Component.text("/")).append(formatBoolean(LocketteProAPI.isMember(clickedBlock, player))));
+                player.sendMessage(Component.text("isLockedSingle: ").append(formatBoolean(LocketteProAPI.isLockedSingleBlock(clickedBlock, null))));
+                player.sendMessage(Component.text(" - isOwner/UserSingle: ").append(formatBoolean(LocketteProAPI.isOwnerSingleBlock(clickedBlock, null, player))).append(Component.text("/")).append(formatBoolean(LocketteProAPI.isUserSingleBlock(clickedBlock, null, player))));
+                player.sendMessage(Component.text("isLockedUpDownLockedDoor: ").append(formatBoolean(LocketteProAPI.isPartOfLockedDoor(clickedBlock))));
+                player.sendMessage(Component.text(" - isOwner/UserSingle: ").append(formatBoolean(LocketteProAPI.isOwnerUpDownLockedDoor(clickedBlock, player))).append(Component.text("/")).append(formatBoolean(LocketteProAPI.isOwnerUpDownLockedDoor(clickedBlock, player))));
+                if (clickedBlock.getState() instanceof Sign sign && LocketteProAPI.isLockSign(sign)) {
+                    player.sendMessage(Component.text("isSignExpired: ").append(formatBoolean(LocketteProAPI.isSignExpired(sign))));
+                    player.sendMessage(Component.text(" - created: ").append(Component.text(MiscUtils.getCreatedFromLine(((Sign) clickedBlock.getState()).getLine(0)))));
+                    player.sendMessage(Component.text(" - now     : ").append(Component.text((int) (System.currentTimeMillis() / 1000))));
                 }
+
+                player.sendMessage("Block: " + clickedBlock.getType() + " " + clickedBlock.getData());
+
+                if (Tag.WALL_SIGNS.isTagged(clickedBlock.getType())) {
+                    for (String line : ((Sign) clickedBlock.getState()).getLines()) {
+                        player.sendMessage(ChatColor.GREEN + line);
+                    }
+                }
+                player.sendMessage(player.getUniqueId().toString());
             }
-            p.sendMessage(p.getUniqueId().toString());
         }
     }
 
-    public Component formatBoolean(boolean tf) {
+    private Component formatBoolean(boolean tf) {
         return tf ? Component.text("true").color(NamedTextColor.GREEN) : Component.text("false").color(NamedTextColor.RED);
     }
-
 }
-
-

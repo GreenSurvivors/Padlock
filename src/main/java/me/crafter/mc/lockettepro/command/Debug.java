@@ -2,6 +2,7 @@ package me.crafter.mc.lockettepro.command;
 
 import me.crafter.mc.lockettepro.Dependency;
 import me.crafter.mc.lockettepro.LockettePro;
+import me.crafter.mc.lockettepro.config.MessageManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -30,7 +31,7 @@ public class Debug extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getCmdHelp("debug");
+        return plugin.getMessageManager().getLang(MessageManager.LangPath.helpDebug);
     }
 
     /**
@@ -72,7 +73,7 @@ public class Debug extends SubCommand {
                 sender.sendMessage(" - none");
             }
         } else {
-            plugin.getMessageManager().sendLang(sender, "no-permission");
+            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.noPermission);
         }
 
         return true;

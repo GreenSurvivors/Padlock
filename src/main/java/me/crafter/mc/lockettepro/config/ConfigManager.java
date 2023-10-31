@@ -15,10 +15,10 @@ import java.util.logging.Level;
 public class ConfigManager { //todo
     private boolean worldguard = false;
     private boolean coreprotect = false;
-    private LockettePro plugin;
+    private final LockettePro plugin;
     private FileConfiguration config;
     private Set<Material> lockables = new HashSet<>();
-    private byte enablequickprotect = (byte) 1;
+    private byte enablequickprotect = 1;
     private boolean blockinterfereplacement = true;
     private boolean blockitemtransferin = false;
     private boolean blockitemtransferout = false;

@@ -1,6 +1,7 @@
 package me.crafter.mc.lockettepro.command;
 
 import me.crafter.mc.lockettepro.LockettePro;
+import me.crafter.mc.lockettepro.config.MessageManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permissible;
@@ -27,7 +28,7 @@ public class Reload extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getCmdHelp("reload");
+        return plugin.getMessageManager().getLang(MessageManager.LangPath.helpReload);
     }
 
     /**
@@ -45,9 +46,9 @@ public class Reload extends SubCommand {
         if (sender.hasPermission("lockettepro.reload")) {
             plugin.getConfigManager().reload();
 
-            plugin.getMessageManager().sendLang(sender, "config-reloaded");
+            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.reloadSuccess);
         } else {
-            plugin.getMessageManager().sendLang(sender, "no-permission");
+            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.noPermission);
         }
 
         return true;

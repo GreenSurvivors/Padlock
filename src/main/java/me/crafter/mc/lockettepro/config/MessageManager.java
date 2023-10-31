@@ -14,15 +14,14 @@ import java.io.File;
 
 public class MessageManager {
     private final Plugin plugin;
-    private FileConfiguration lang;
-    private String langfilename = "lang.yml";
     private String invalidString = "[Invalid]"; //todo^2
+    private FileConfiguration lang;
+    private String langfilename = "lang_en.yml";
     private String privatestring = "[Private]";
     private String additionalstring = "[More Users]";
     private String everyonestring = "[Everyone]";
     private String timerstring = "[Timer:@]";
     private String lockexpirestring = "&3[Expired]";
-
     public MessageManager(Plugin plugin) {
         this.plugin = plugin;
     }
@@ -31,31 +30,20 @@ public class MessageManager {
         this.langfilename = langfilename;
     }
 
-    public void reload() {//todo
-        initDefaultConfig();
+    protected void reload() {//todo
         initAdditionalFiles();
         lang = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), langfilename));
 
 
-        privatestring = lang.getString("private-sign", "[Private]");
-        additionalstring = lang.getString("additional-sign", "[More Users]");
-        everyonestring = lang.getString("everyone-sign", "[Everyone]");
-        timerstring = lang.getString("timer-sign", "[Timer:@]");
+        //todo mini-message
+        privatestring = lang.getString(LangPath.privateSign.getPath(), LangPath.privateSign.getDefaultValue());
+        additionalstring = lang.getString(LangPath.additionalSign.getPath(), LangPath.additionalSign.getDefaultValue());
+        everyonestring = lang.getString(LangPath.everyoneSign.getPath(), LangPath.everyoneSign.getDefaultValue());
+        timerstring = lang.getString(LangPath.timerSign.getPath(), LangPath.timerSign.getDefaultValue());
+        invalidString = lang.getString(LangPath.invalidSign.getPath(), LangPath.invalidSign.getDefaultValue());
 
         lockexpirestring = ChatColor.translateAlternateColorCodes('&',
-                lang.getString("lock-expire-string", "&3[Expired]"));
-    }
-
-    private void initDefaultConfig() {//todo remove
-        plugin.saveDefaultConfig();
-
-        lang.addDefault("private-signs", "[Private]");
-        lang.addDefault("additional-signs", "[More Users]");
-        lang.addDefault("everyone-signs", "[Everyone]");
-        lang.addDefault("timer-signs", "[Timer:@]");
-        lang.addDefault("lock-expire-string", "&3[Expired]");
-
-        lang.options().copyDefaults(true);
+                lang.getString(LangPath.expireSign.getPath(), LangPath.expireSign.getDefaultValue()));
     }
 
     private void initAdditionalFiles() {
@@ -76,18 +64,14 @@ public class MessageManager {
 
     public String getLockExpireString() {
         return lockexpirestring;
+    } //todo
+
+    public @NotNull Component getLang(@NotNull MessageManager.LangPath path) { // todo lang in minimessage format
+        return MiniMessage.miniMessage().deserialize(lang.getString(path.path, path.defaultValue));
     }
 
-    public @NotNull Component getCmdHelp(String subCommand) {
-        return getLang("cmd.help." + subCommand);
-    }
-
-    public @NotNull Component getLang(@NotNull String path) { // todo lang in minimessage format
-        return MiniMessage.miniMessage().deserialize(lang.getString(path, ""));
-    }
-
-    public void sendLang(CommandSender sender, @NotNull String path) {
-        sendMessages(sender, MiniMessage.miniMessage().deserialize(lang.getString(path, "")));
+    public void sendLang(CommandSender sender, @NotNull LangPath path) {
+        sendMessages(sender, MiniMessage.miniMessage().deserialize(lang.getString(path.path, path.defaultValue)));
     }
 
     public Component getInvalidString() {
@@ -137,4 +121,83 @@ public class MessageManager {
     public String getDefaultAdditionalString() {
         return additionalstring;
     }
+
+    public enum LangPath {
+        privateSign("sign.line.private", "[Private]"),
+        @Deprecated(forRemoval = true)
+        additionalSign("sign.line.additional", "[More Users]"),
+        everyoneSign("sign.line.everyone", "[Everyone]"),
+        timerSign("sign.line.everyone", "[Timer:@]"),
+        expireSign("sign.line.expire", "&3[Expired]"), //todo miniMessage
+        errorSign("sign.line.error", "[Error]"),
+        invalidSign("sign.line.invalid", "[Invalid]"),
+
+        helpHeader("cmd.help.header"),
+        helpNoPermissionSubcommand("cmd.help.no-perm-subcommand"),
+        helpAddMember("cmd.help.add-member"),
+        helpRemoveMember("cmd.help.remove-member"),
+        helpAddOwner("cmd.help.add-owner"),
+        helpRemoveOwner("cmd.help.remove-owner"),
+        helpDebug("cmd.help.debug"),
+        helpHelp("cmd.help.help"),
+        helpInfo("cmd.help.info"),
+        helpReload("cmd.help.reload"),
+        helpUpdateSign("cmd.help.update-sign"),
+        helpVersion("cmd.help.version"),
+
+        addOwnerSuccess("cmd.add-owner.success"),
+        removeOwnerSuccess("cmd.remove-owner.success"),
+        removeOwnerError("cmd.remove-owner.error"),
+        addMemberSuccess("cmd.add-member.success"),
+        removeMemberSuccess("cmd.remove-member.success"),
+        removeMemberError("cmd.remove-owner.error"),
+        updateSignSuccess("cmd.sign-update.success"),
+        infoOwners("cmd.info.owners"),
+        infoMembers("cmd.info.members"),
+        reloadSuccess("cmd.reload.success"),
+
+        signNeedReselect("cmd.sign-need-reselect"),
+        signNotSelected("cmd.no-sign-selected"),
+        unknownPlayer("cmd.unknown-player"),
+        notAPlayer("cmd.not-a-player"),
+        notEnoughArgs("cmd.not-enough-args"),
+        cmdUsage("cmd.usage"),
+
+        noPermission("no-permission"),
+        notOwner("lock.not-owner"),
+
+        lockSuccess("action.lock.success"),
+        quickLockError("action.quick-lock.error"),
+        lockErrorAlreadyLocked("action.lock.error.already-locked"),
+        lockErrorNotLockable("action.lock.error.not-lockable"),
+        selectSign("action.select-sign.success"),
+        breakLockSuccess("action.break-lock.success"),
+        actionPreventedLocked("action.prevented.locked"),
+        actionPreventedInterfere("action.prevented.interfere-with-others"),
+
+        noticeQuickLock("notice.quick-lock"),
+        noticeManuelLock("notice.manual-lock");
+
+        private final String path;
+        private final String defaultValue;
+
+        LangPath(String path) {
+            this.path = path;
+            this.defaultValue = "";
+        }
+
+        LangPath(String path, String defaultValue) {
+            this.path = path;
+            this.defaultValue = defaultValue;
+        }
+
+        public String getPath() {
+            return path;
+        }
+
+        public String getDefaultValue() {
+            return defaultValue;
+        }
+    }
+
 }

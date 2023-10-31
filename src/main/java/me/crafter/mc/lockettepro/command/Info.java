@@ -2,6 +2,7 @@ package me.crafter.mc.lockettepro.command;
 
 import me.crafter.mc.lockettepro.LockettePro;
 import me.crafter.mc.lockettepro.LocketteProAPI;
+import me.crafter.mc.lockettepro.config.MessageManager;
 import me.crafter.mc.lockettepro.impl.MiscUtils;
 import me.crafter.mc.lockettepro.impl.signdata.LockSign;
 import me.crafter.mc.lockettepro.impl.signdata.SignSelection;
@@ -34,7 +35,7 @@ public class Info extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getCmdHelp("info");
+        return plugin.getMessageManager().getLang(MessageManager.LangPath.helpInfo);
     }
 
     /**
@@ -59,22 +60,22 @@ public class Info extends SubCommand {
 
                             if (otherSign == null) {
                                 LocketteProAPI.setInvalid(sign);
-                                plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
                                 return true;
                             } else {
                                 sign = otherSign;
-                                plugin.getMessageManager().sendLang(sender, "sign-updated");
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.updateSignSuccess);
                             }
                         }
 
-                        Component component = plugin.getMessageManager().getLang("cmd.info.owners");
+                        Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.infoOwners);
                         for (String name : MiscUtils.getNamesFromUUIDStrSet(LockSign.getUUIDs(sign, true))) {
                             component = component.append(Component.text(name));
                             component = component.append(Component.text(", "));
                         }
                         component = component.append(Component.newline());
 
-                        component = component.append(plugin.getMessageManager().getLang("cmd.info.owners"));
+                        component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.infoMembers));
                         for (String name : MiscUtils.getNamesFromUUIDStrSet(LockSign.getUUIDs(sign, false))) {
                             component = component.append(Component.text(name));
                             component = component.append(Component.text(", "));
@@ -82,16 +83,16 @@ public class Info extends SubCommand {
 
                         plugin.getMessageManager().sendMessages(sender, component);
                     } else {
-                        plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
+                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
                     }
                 } else {
-                    plugin.getMessageManager().sendLang(sender, "no-sign-selected");
+                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNotSelected);
                 }
             } else {
-                plugin.getMessageManager().sendLang(sender, "no-permission");
+                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.noPermission);
             }
         } else {
-            plugin.getMessageManager().sendLang(sender, "not-player");
+            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.notAPlayer);
             return false;
         }
 

@@ -42,6 +42,7 @@ public class BlockInventoryMoveListener implements Listener {
                         }
                     }
                 }
+
                 return;
             }
         }
@@ -78,5 +79,4 @@ public class BlockInventoryMoveListener implements Listener {
         }
         return false;
     }
-
 }

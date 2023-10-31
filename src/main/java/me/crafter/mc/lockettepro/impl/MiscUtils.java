@@ -63,7 +63,6 @@ public class MiscUtils {
         }
     }
 
-
     public static void playLockEffect(Player player, Block block) {
 //		player.playSound(block.getLocation(), Sound.DOOR_CLOSE, 0.3F, 1.4F);
 //		player.spigot().playEffect(block.getLocation().add(0.5, 0.5, 0.5), Effect.CRIT, 0, 0, 0.3F, 0.3F, 0.3F, 0.1F, 64, 64);

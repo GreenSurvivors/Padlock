@@ -2,6 +2,7 @@ package me.crafter.mc.lockettepro.command;
 
 import me.crafter.mc.lockettepro.LockettePro;
 import me.crafter.mc.lockettepro.LocketteProAPI;
+import me.crafter.mc.lockettepro.config.MessageManager;
 import me.crafter.mc.lockettepro.impl.signdata.SignSelection;
 import net.kyori.adventure.text.Component;
 import org.bukkit.block.Block;
@@ -32,7 +33,7 @@ public class UpdateSign extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getCmdHelp("updatesign");
+        return plugin.getMessageManager().getLang(MessageManager.LangPath.helpUpdateSign);
     }
 
     /**
@@ -53,34 +54,34 @@ public class UpdateSign extends SubCommand {
                 if (block != null) {
                     if (block instanceof Sign sign) {
                         if (LocketteProAPI.updateLegacySign(sign) != null) {
-                            plugin.getMessageManager().sendLang(sender, "sign-updated");
+                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.updateSignSuccess);
                         } else {
-                            plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
+                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
                         }
                     } else if (LocketteProAPI.isLocked(block)) { //something went wrong, try to recover
                         Sign sign = LocketteProAPI.getLockSign(block);
 
                         if (sign != null) {
                             if (LocketteProAPI.updateLegacySign(sign) != null) {
-                                plugin.getMessageManager().sendLang(sender, "sign-updated");
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.updateSignSuccess);
                             } else {
-                                plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
                             }
                         } else {
-                            plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
+                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
                         }
                     } else {
-                        plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
+                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
                     }
                 } else {
-                    plugin.getMessageManager().sendLang(sender, "no-sign-selected");
+                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNotSelected);
                 }
             } else {
-                plugin.getMessageManager().sendLang(sender, "no-permission");
+                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.noPermission);
             }
             return true;
         } else {
-            plugin.getMessageManager().sendLang(sender, "not-player");
+            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.notAPlayer);
             return false;
         }
     }
