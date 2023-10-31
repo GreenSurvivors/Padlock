@@ -1,11 +1,9 @@
 package me.crafter.mc.lockettepro.command;
 
-import me.crafter.mc.lockettepro.config.Config;
-import me.crafter.mc.lockettepro.impl.MiscUtils;
+import me.crafter.mc.lockettepro.LockettePro;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permissible;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 public class Version extends SubCommand {
-    protected Version(@NotNull Plugin plugin) {
+    protected Version(@NotNull LockettePro plugin) {
         super(plugin);
     }
 
@@ -29,7 +27,7 @@ public class Version extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return Config.getCmdHelp("version");
+        return plugin.getMessageManager().getCmdHelp("version");
     }
 
     /**
@@ -47,7 +45,7 @@ public class Version extends SubCommand {
         if (sender.hasPermission("lockettepro.version")) {
             sender.sendMessage(plugin.getDescription().getFullName()); //todo
         } else {
-            MiscUtils.sendMessages(sender, Config.getLangComp("no-permission"));
+            plugin.getMessageManager().sendLang(sender, "no-permission");
         }
         return true;
     }

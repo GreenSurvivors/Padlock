@@ -1,11 +1,9 @@
 package me.crafter.mc.lockettepro.command;
 
-import me.crafter.mc.lockettepro.config.Config;
-import me.crafter.mc.lockettepro.impl.MiscUtils;
+import me.crafter.mc.lockettepro.LockettePro;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permissible;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 public class Reload extends SubCommand {
-    protected Reload(@NotNull Plugin plugin) {
+    protected Reload(@NotNull LockettePro plugin) {
         super(plugin);
     }
 
@@ -29,7 +27,7 @@ public class Reload extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return Config.getCmdHelp("reload");
+        return plugin.getMessageManager().getCmdHelp("reload");
     }
 
     /**
@@ -45,11 +43,11 @@ public class Reload extends SubCommand {
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         if (sender.hasPermission("lockettepro.reload")) {
-            Config.reload();
+            plugin.getConfigManager().reload();
 
-            MiscUtils.sendMessages(sender, Config.getLangComp("config-reloaded"));
+            plugin.getMessageManager().sendLang(sender, "config-reloaded");
         } else {
-            MiscUtils.sendMessages(sender, Config.getLangComp("no-permission"));
+            plugin.getMessageManager().sendLang(sender, "no-permission");
         }
 
         return true;

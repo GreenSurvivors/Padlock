@@ -1,6 +1,5 @@
-package me.crafter.mc.lockettepro.impl;
+package me.crafter.mc.lockettepro.impl.doordata;
 
-import me.crafter.mc.lockettepro.api.DoorParts;
 import org.bukkit.Sound;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
@@ -14,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
-import static me.crafter.mc.lockettepro.api.LocketteProAPI.cardinalFaces;
+import static me.crafter.mc.lockettepro.LocketteProAPI.cardinalFaces;
 
 public class Doors {
     public static void toggleDoor(Block block) {

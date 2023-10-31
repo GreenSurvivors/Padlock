@@ -1,7 +1,7 @@
 package me.crafter.mc.lockettepro.listener;
 
-import me.crafter.mc.lockettepro.api.LocketteProAPI;
-import me.crafter.mc.lockettepro.config.Config;
+import me.crafter.mc.lockettepro.LockettePro;
+import me.crafter.mc.lockettepro.LocketteProAPI;
 import me.crafter.mc.lockettepro.impl.Cache;
 import me.crafter.mc.lockettepro.impl.MiscUtils;
 import org.bukkit.block.Block;
@@ -16,17 +16,22 @@ import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 
 public class BlockInventoryMoveListener implements Listener {
+    private final LockettePro plugin;
+
+    public BlockInventoryMoveListener(LockettePro plugin) {
+        this.plugin = plugin;
+    }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     public void onInventoryMove(InventoryMoveItemEvent event) {
-        if (Config.isItemTransferOutBlocked() || Config.getHopperMinecartAction() != (byte) 0) {
+        if (plugin.getConfigManager().isItemTransferOutBlocked() || plugin.getConfigManager().getHopperMinecartAction() != (byte) 0) {
             if (isInventoryLocked(event.getSource())) {
-                if (Config.isItemTransferOutBlocked()) {
+                if (plugin.getConfigManager().isItemTransferOutBlocked()) {
                     event.setCancelled(true);
                 }
                 // Additional Hopper Minecart Check
                 if (event.getDestination().getHolder() instanceof HopperMinecart) {
-                    byte hopperminecartaction = Config.getHopperMinecartAction();
+                    byte hopperminecartaction = plugin.getConfigManager().getHopperMinecartAction();
                     switch (hopperminecartaction) {
                         // case 0 - Impossible
                         case (byte) 1 -> // Cancel only, it is not called if !Config.isItemTransferOutBlocked()
@@ -41,10 +46,9 @@ public class BlockInventoryMoveListener implements Listener {
             }
         }
 
-        if (Config.isItemTransferInBlocked()) {
+        if (plugin.getConfigManager().isItemTransferInBlocked()) {
             if (isInventoryLocked(event.getDestination())) {
                 event.setCancelled(true);
-                return;
             }
         }
     }
@@ -56,7 +60,7 @@ public class BlockInventoryMoveListener implements Listener {
         }
         if (inventoryholder instanceof BlockState) {
             Block block = ((BlockState) inventoryholder).getBlock();
-            if (Config.isCacheEnabled()) { // Cache is enabled
+            if (plugin.getConfigManager().isCacheEnabled()) { // Cache is enabled
                 if (Cache.hasValidCache(block)) {
                     return MiscUtils.getAccess(block);
                 } else {

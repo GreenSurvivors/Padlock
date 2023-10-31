@@ -1,7 +1,8 @@
-package me.crafter.mc.lockettepro.impl;
+package me.crafter.mc.lockettepro.impl.signdata;
 
-import me.crafter.mc.lockettepro.api.LocketteProAPI;
-import me.crafter.mc.lockettepro.config.Config;
+import me.crafter.mc.lockettepro.LockettePro;
+import me.crafter.mc.lockettepro.LocketteProAPI;
+import me.crafter.mc.lockettepro.impl.MiscUtils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
@@ -29,6 +30,6 @@ public class ExpireSign { //todo update
         long createdtime = MiscUtils.getCreatedFromLine(line);
         if (createdtime == -1L) return false; // No expire
         long currenttime = (int) (System.currentTimeMillis() / 1000);
-        return createdtime + Config.getLockExpireDays() * 86400L < currenttime;
+        return createdtime + LockettePro.getPlugin().getConfigManager().getLockExpireDays() * 86400L < currenttime;
     }
 }

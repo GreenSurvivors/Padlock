@@ -1,16 +1,14 @@
 package me.crafter.mc.lockettepro.command;
 
-import me.crafter.mc.lockettepro.api.LocketteProAPI;
-import me.crafter.mc.lockettepro.config.Config;
-import me.crafter.mc.lockettepro.impl.MiscUtils;
-import me.crafter.mc.lockettepro.impl.SignSelection;
+import me.crafter.mc.lockettepro.LockettePro;
+import me.crafter.mc.lockettepro.LocketteProAPI;
+import me.crafter.mc.lockettepro.impl.signdata.SignSelection;
 import net.kyori.adventure.text.Component;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -18,7 +16,7 @@ import java.util.List;
 import java.util.Set;
 
 public class UpdateSign extends SubCommand {
-    protected UpdateSign(@NotNull Plugin plugin) {
+    protected UpdateSign(@NotNull LockettePro plugin) {
         super(plugin);
     }
 
@@ -34,7 +32,7 @@ public class UpdateSign extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return Config.getCmdHelp("updatesign");
+        return plugin.getMessageManager().getCmdHelp("updatesign");
     }
 
     /**
@@ -55,34 +53,34 @@ public class UpdateSign extends SubCommand {
                 if (block != null) {
                     if (block instanceof Sign sign) {
                         if (LocketteProAPI.updateLegacySign(sign) != null) {
-                            MiscUtils.sendMessages(player, Config.getLangComp("sign-updated"));
+                            plugin.getMessageManager().sendLang(sender, "sign-updated");
                         } else {
-                            MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
+                            plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
                         }
                     } else if (LocketteProAPI.isLocked(block)) { //something went wrong, try to recover
                         Sign sign = LocketteProAPI.getLockSign(block);
 
                         if (sign != null) {
                             if (LocketteProAPI.updateLegacySign(sign) != null) {
-                                MiscUtils.sendMessages(player, Config.getLangComp("sign-updated"));
+                                plugin.getMessageManager().sendLang(sender, "sign-updated");
                             } else {
-                                MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
+                                plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
                             }
                         } else {
-                            MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
+                            plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
                         }
                     } else {
-                        MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
+                        plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
                     }
                 } else {
-                    MiscUtils.sendMessages(player, Config.getLangComp("no-sign-selected"));
+                    plugin.getMessageManager().sendLang(sender, "no-sign-selected");
                 }
             } else {
-                MiscUtils.sendMessages(sender, Config.getLangComp("no-permission"));
+                plugin.getMessageManager().sendLang(sender, "no-permission");
             }
             return true;
         } else {
-            MiscUtils.sendMessages(sender, Config.getLangComp("not-player"));
+            plugin.getMessageManager().sendLang(sender, "not-player");
             return false;
         }
     }

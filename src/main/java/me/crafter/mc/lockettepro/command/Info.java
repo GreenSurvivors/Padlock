@@ -1,17 +1,16 @@
 package me.crafter.mc.lockettepro.command;
 
-import me.crafter.mc.lockettepro.api.LocketteProAPI;
-import me.crafter.mc.lockettepro.config.Config;
-import me.crafter.mc.lockettepro.impl.LockSign;
+import me.crafter.mc.lockettepro.LockettePro;
+import me.crafter.mc.lockettepro.LocketteProAPI;
 import me.crafter.mc.lockettepro.impl.MiscUtils;
-import me.crafter.mc.lockettepro.impl.SignSelection;
+import me.crafter.mc.lockettepro.impl.signdata.LockSign;
+import me.crafter.mc.lockettepro.impl.signdata.SignSelection;
 import net.kyori.adventure.text.Component;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -19,7 +18,7 @@ import java.util.List;
 import java.util.Set;
 
 public class Info extends SubCommand {
-    protected Info(@NotNull Plugin plugin) {
+    protected Info(@NotNull LockettePro plugin) {
         super(plugin);
     }
 
@@ -35,7 +34,7 @@ public class Info extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return Config.getCmdHelp("info");
+        return plugin.getMessageManager().getCmdHelp("info");
     }
 
     /**
@@ -60,39 +59,39 @@ public class Info extends SubCommand {
 
                             if (otherSign == null) {
                                 LocketteProAPI.setInvalid(sign);
-                                MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
+                                plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
                                 return true;
                             } else {
                                 sign = otherSign;
-                                MiscUtils.sendMessages(player, Config.getLangComp("sign-updated"));
+                                plugin.getMessageManager().sendLang(sender, "sign-updated");
                             }
                         }
 
-                        Component component = Config.getLangComp("cmd.info.owners");
+                        Component component = plugin.getMessageManager().getLang("cmd.info.owners");
                         for (String name : MiscUtils.getNamesFromUUIDStrSet(LockSign.getUUIDs(sign, true))) {
                             component = component.append(Component.text(name));
                             component = component.append(Component.text(", "));
                         }
                         component = component.append(Component.newline());
 
-                        component = component.append(Config.getLangComp("cmd.info.owners"));
+                        component = component.append(plugin.getMessageManager().getLang("cmd.info.owners"));
                         for (String name : MiscUtils.getNamesFromUUIDStrSet(LockSign.getUUIDs(sign, false))) {
                             component = component.append(Component.text(name));
                             component = component.append(Component.text(", "));
                         }
 
-                        MiscUtils.sendMessages(sender, component);
+                        plugin.getMessageManager().sendMessages(sender, component);
                     } else {
-                        MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
+                        plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
                     }
                 } else {
-                    MiscUtils.sendMessages(player, Config.getLangComp("no-sign-selected"));
+                    plugin.getMessageManager().sendLang(sender, "no-sign-selected");
                 }
             } else {
-                MiscUtils.sendMessages(sender, Config.getLangComp("no-permission"));
+                plugin.getMessageManager().sendLang(sender, "no-permission");
             }
         } else {
-            MiscUtils.sendMessages(sender, Config.getLangComp("not-player"));
+            plugin.getMessageManager().sendLang(sender, "not-player");
             return false;
         }
 

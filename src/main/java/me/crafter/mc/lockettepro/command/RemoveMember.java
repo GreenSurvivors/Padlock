@@ -1,10 +1,9 @@
 package me.crafter.mc.lockettepro.command;
 
-import me.crafter.mc.lockettepro.config.Config;
+import me.crafter.mc.lockettepro.LockettePro;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permissible;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -12,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 public class RemoveMember extends SubCommand {
-    protected RemoveMember(@NotNull Plugin plugin) {
+    protected RemoveMember(@NotNull LockettePro plugin) {
         super(plugin);
     }
 
@@ -28,7 +27,7 @@ public class RemoveMember extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return Config.getCmdHelp("removemember");
+        return plugin.getMessageManager().getCmdHelp("removemember");
     }
 
     /**

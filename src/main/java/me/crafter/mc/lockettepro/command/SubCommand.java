@@ -1,9 +1,9 @@
 package me.crafter.mc.lockettepro.command;
 
+import me.crafter.mc.lockettepro.LockettePro;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permissible;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -11,9 +11,9 @@ import java.util.List;
 import java.util.Set;
 
 public abstract class SubCommand {
-    protected final @NotNull Plugin plugin;
+    protected final @NotNull LockettePro plugin;
 
-    protected SubCommand(@NotNull Plugin plugin) {
+    protected SubCommand(@NotNull LockettePro plugin) {
         this.plugin = plugin;
     }
 

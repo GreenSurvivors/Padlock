@@ -1,7 +1,6 @@
-package me.crafter.mc.lockettepro.dependency;
+package me.crafter.mc.lockettepro;
 
 import com.sk89q.worldguard.bukkit.WorldGuardPlugin;
-import me.crafter.mc.lockettepro.config.Config;
 import net.coreprotect.CoreProtect;
 import net.coreprotect.CoreProtectAPI;
 import org.bukkit.Bukkit;
@@ -12,17 +11,19 @@ import org.bukkit.plugin.Plugin;
 public class Dependency {
     protected static WorldGuardPlugin worldguard = null;
     private static CoreProtectAPI coreProtectAPI; //todo
+    private static LockettePro plugin;
 
-    public Dependency(Plugin plugin) {
+    public static void setPluginAndLoad(LockettePro plugin) {
+        Dependency.plugin = plugin;
         // WorldGuard
         Plugin worldguardplugin = plugin.getServer().getPluginManager().getPlugin("WorldGuard");
-        if (!Config.worldguard || !(worldguardplugin instanceof WorldGuardPlugin)) {
+        if (!plugin.getConfigManager().getWorldguard() || !(worldguardplugin instanceof WorldGuardPlugin)) {
             worldguard = null;
         } else {
             worldguard = (WorldGuardPlugin) worldguardplugin;
         }
 
-        if (Config.coreprotect && Bukkit.getPluginManager().getPlugin("CoreProtect") != null && CoreProtect.getInstance().getAPI().APIVersion() == 6) {
+        if (plugin.getConfigManager().getCoreprotect() && Bukkit.getPluginManager().getPlugin("CoreProtect") != null && CoreProtect.getInstance().getAPI().APIVersion() == 6) {
             coreProtectAPI = CoreProtect.getInstance().getAPI();
             if (!coreProtectAPI.isEnabled()) {
                 coreProtectAPI = null;

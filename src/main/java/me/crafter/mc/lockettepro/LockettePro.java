@@ -1,24 +1,26 @@
 package me.crafter.mc.lockettepro;
 
 import me.crafter.mc.lockettepro.command.Command;
-import me.crafter.mc.lockettepro.config.Config;
-import me.crafter.mc.lockettepro.dependency.Dependency;
+import me.crafter.mc.lockettepro.config.ConfigManager;
+import me.crafter.mc.lockettepro.config.MessageManager;
 import me.crafter.mc.lockettepro.listener.BlockDebugListener;
 import me.crafter.mc.lockettepro.listener.BlockEnvironmentListener;
 import me.crafter.mc.lockettepro.listener.BlockInventoryMoveListener;
 import me.crafter.mc.lockettepro.listener.BlockPlayerListener;
 import org.bukkit.command.PluginCommand;
-import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.logging.Level;
 
 public class LockettePro extends JavaPlugin {
     private static final boolean needcheckhand = true;
-    private static Plugin plugin;
+    private static LockettePro plugin;
     private final boolean debug = false;
+    private ConfigManager configManager;
+    private MessageManager messageManager;
 
-    public static Plugin getPlugin() {
+    public static LockettePro getPlugin() {
         return plugin;
     }
 
@@ -31,14 +33,16 @@ public class LockettePro extends JavaPlugin {
         plugin = this;
 
         // Read config
-        new Config(this);
+        messageManager = new MessageManager(this);
+        configManager = new ConfigManager(this);
+        configManager.reload();
 
         // Register Listeners
         // If debug mode is not on, debug listener won't register
         if (debug) getServer().getPluginManager().registerEvents(new BlockDebugListener(), this);
         getServer().getPluginManager().registerEvents(new BlockPlayerListener(this), this);
-        getServer().getPluginManager().registerEvents(new BlockEnvironmentListener(), this);
-        getServer().getPluginManager().registerEvents(new BlockInventoryMoveListener(), this);
+        getServer().getPluginManager().registerEvents(new BlockEnvironmentListener(this), this);
+        getServer().getPluginManager().registerEvents(new BlockInventoryMoveListener(this), this);
 
 
         this.getCommand("");
@@ -56,12 +60,20 @@ public class LockettePro extends JavaPlugin {
             }
         }
 
-
         // Dependency
-        new Dependency(this);
+        Dependency.setPluginAndLoad(this);
     }
 
     @Override
     public void onDisable() {
+    }
+
+    @NotNull
+    public ConfigManager getConfigManager() {
+        return configManager;
+    }
+
+    public MessageManager getMessageManager() {
+        return messageManager;
     }
 }

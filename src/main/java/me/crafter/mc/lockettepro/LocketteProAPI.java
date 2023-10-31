@@ -1,10 +1,9 @@
-package me.crafter.mc.lockettepro.api;
+package me.crafter.mc.lockettepro;
 
-import me.crafter.mc.lockettepro.LockettePro;
-import me.crafter.mc.lockettepro.config.Config;
-import me.crafter.mc.lockettepro.impl.Doors;
-import me.crafter.mc.lockettepro.impl.ExpireSign;
-import me.crafter.mc.lockettepro.impl.LockSign;
+import me.crafter.mc.lockettepro.impl.doordata.DoorParts;
+import me.crafter.mc.lockettepro.impl.doordata.Doors;
+import me.crafter.mc.lockettepro.impl.signdata.ExpireSign;
+import me.crafter.mc.lockettepro.impl.signdata.LockSign;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -58,7 +57,7 @@ public class LocketteProAPI {
                         LockettePro.getPlugin().getLogger().warning("Couldn't find a Lock sign to update, but the door is locked.");
                     }
                 } else {
-                    LockettePro.getPlugin().getLogger().warning("Couldn't get door parts, but data says there should be one. Is it half? " + attachedTo.getLocation().toString());
+                    LockettePro.getPlugin().getLogger().warning("Couldn't get door parts, but data says there should be one. Is it half? " + attachedTo.getLocation());
                 }
             } else if (data instanceof Chest) {
                 Sign lockSign = getLockSignChest(attachedTo);
@@ -479,7 +478,7 @@ public class LocketteProAPI {
         if (Tag.SIGNS.isTagged(material)) {
             return false;
         }
-        if (Config.isLockable(material)) { // Directly lockable
+        if (LockettePro.getPlugin().getConfigManager().isLockable(material)) { // Directly lockable
             return true;
         } else { // Indirectly lockable
             Block blockup = block.getRelative(BlockFace.UP);
@@ -495,7 +494,7 @@ public class LocketteProAPI {
     }
 
     public static boolean isUpDownAlsoLockableBlock(Block block) {
-        if (Config.isLockable(block.getType())) {
+        if (LockettePro.getPlugin().getConfigManager().isLockable(block.getType())) {
             return (block.getBlockData() instanceof Door);
         }
         return false;
@@ -550,7 +549,7 @@ public class LocketteProAPI {
 
             // This is extra interfere block
             case HOPPER, DISPENSER, DROPPER -> {
-                if (!Config.isInterferePlacementBlocked()) return false;
+                if (!LockettePro.getPlugin().getConfigManager().isInterferePlacementBlocked()) return false;
                 for (BlockFace blockface : allFaces) {
                     Block newblock = block.getRelative(blockface);
                     switch (newblock.getType()) {
@@ -576,7 +575,7 @@ public class LocketteProAPI {
     private static boolean isValidLockSign(@Nullable Sign sign) {//Please mind, a private sign may have expired, but do how two locked blocks line up it's totally possible for more than one [Private] sign per block. However only the first valid found wil get used
         if (sign != null && isLockSign(sign)) {
             // Found [Private] sign, is expire turned on and expired? (relativeblock is now sign)
-            return !Config.isLockExpire() || !isSignExpired(sign);
+            return !LockettePro.getPlugin().getConfigManager().isLockExpire() || !isSignExpired(sign);
         } else {
             return false;
         }
@@ -629,7 +628,7 @@ public class LocketteProAPI {
             Block relative = block.getRelative(blockface);
             if (relative.getState() instanceof Sign sign) {
                 for (String line : sign.getSide(Side.FRONT).getLines()) { //todo
-                    int linetime = Config.getTimer(line);
+                    int linetime = LockettePro.getPlugin().getMessageManager().getTimer(line);
                     if (linetime > 0) return linetime;
                 }
             }

@@ -1,9 +1,8 @@
-package me.crafter.mc.lockettepro.impl;
+package me.crafter.mc.lockettepro.impl.signdata;
 
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import me.crafter.mc.lockettepro.LockettePro;
-import me.crafter.mc.lockettepro.config.Config;
 import net.kyori.adventure.text.Component;
 import org.apache.commons.collections4.set.ListOrderedSet;
 import org.bukkit.Bukkit;
@@ -46,22 +45,22 @@ public class LockSign {
     }
 
     public static void setInvalid(@NotNull Sign sign) {
-        sign.getSide(Side.FRONT).line(0, Config.getInvalidString());
+        sign.getSide(Side.FRONT).line(0, LockettePro.getPlugin().getMessageManager().getInvalidString());
         sign.update();
     }
 
     public static boolean isLockComp(@NotNull Component line) {
-        return Config.isPrivateSignComp(line);
+        return LockettePro.getPlugin().getMessageManager().isPrivateSignComp(line);
     }
 
     @Deprecated(forRemoval = true)
     public static boolean isLockString(@NotNull String line) {
-        return Config.isPrivateSignString(line);
+        return LockettePro.getPlugin().getMessageManager().isPrivateSignString(line);
     }
 
     @Deprecated(forRemoval = true)
     private static boolean isAdditionalString(String line) {
-        return Config.isAdditionalSignString(line);
+        return LockettePro.getPlugin().getMessageManager().isAdditionalSignString(line);
     }
 
     public static boolean isLockSign(@NotNull Sign sign) {

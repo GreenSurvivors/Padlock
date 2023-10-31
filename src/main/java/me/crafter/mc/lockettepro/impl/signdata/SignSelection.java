@@ -1,4 +1,4 @@
-package me.crafter.mc.lockettepro.impl;
+package me.crafter.mc.lockettepro.impl.signdata;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;

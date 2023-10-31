@@ -1,6 +1,6 @@
 package me.crafter.mc.lockettepro.listener;
 
-import me.crafter.mc.lockettepro.api.LocketteProAPI;
+import me.crafter.mc.lockettepro.LocketteProAPI;
 import me.crafter.mc.lockettepro.impl.MiscUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
@@ -19,7 +19,7 @@ public class BlockDebugListener implements Listener {
 
     @SuppressWarnings("deprecation")
     @EventHandler(priority = EventPriority.MONITOR)
-    public void onDebugClick(PlayerInteractEvent event) {
+    public void onDebugClick(PlayerInteractEvent event) { //todo use MessageManager
         Player p = event.getPlayer();
         if (p.isSneaking() && event.getAction() == Action.LEFT_CLICK_BLOCK) {
             event.setCancelled(true);

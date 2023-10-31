@@ -1,8 +1,7 @@
 package me.crafter.mc.lockettepro.command;
 
-import me.crafter.mc.lockettepro.config.Config;
-import me.crafter.mc.lockettepro.dependency.Dependency;
-import me.crafter.mc.lockettepro.impl.MiscUtils;
+import me.crafter.mc.lockettepro.Dependency;
+import me.crafter.mc.lockettepro.LockettePro;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -15,7 +14,7 @@ import java.util.List;
 import java.util.Set;
 
 public class Debug extends SubCommand {
-    protected Debug(@NotNull Plugin plugin) {
+    protected Debug(@NotNull LockettePro plugin) {
         super(plugin);
     }
 
@@ -31,7 +30,7 @@ public class Debug extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return Config.getCmdHelp("debug");
+        return plugin.getMessageManager().getCmdHelp("debug");
     }
 
     /**
@@ -53,7 +52,8 @@ public class Debug extends SubCommand {
             sender.sendMessage("LockettePro: " + plugin.getPluginMeta().getVersion());
             // Version
             sender.sendMessage("Server version: " + Bukkit.getVersion());
-            sender.sendMessage("Expire: " + Config.isLockExpire() + " " + (Config.isLockExpire() ? Config.getLockExpireDays() : ""));
+            sender.sendMessage("Expire: " + plugin.getConfigManager().isLockExpire() + " " +
+                    (plugin.getConfigManager().isLockExpire() ? plugin.getConfigManager().getLockExpireDays() : ""));
 
             // Other
             sender.sendMessage("Linked plugins:");
@@ -72,7 +72,7 @@ public class Debug extends SubCommand {
                 sender.sendMessage(" - none");
             }
         } else {
-            MiscUtils.sendMessages(sender, Config.getLangComp("no-permission"));
+            plugin.getMessageManager().sendLang(sender, "no-permission");
         }
 
         return true;

@@ -1,8 +1,7 @@
 package me.crafter.mc.lockettepro.impl;
 
 import me.crafter.mc.lockettepro.LockettePro;
-import me.crafter.mc.lockettepro.api.LocketteProAPI;
-import me.crafter.mc.lockettepro.config.Config;
+import me.crafter.mc.lockettepro.LocketteProAPI;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.metadata.FixedMetadataValue;
@@ -23,7 +22,7 @@ public class Cache {
     public static void setCache(Block block, boolean access) {
         block.removeMetadata("expires", LockettePro.getPlugin());
         block.removeMetadata("locked", LockettePro.getPlugin());
-        block.setMetadata("expires", new FixedMetadataValue(LockettePro.getPlugin(), System.currentTimeMillis() + Config.getCacheTimeMillis()));
+        block.setMetadata("expires", new FixedMetadataValue(LockettePro.getPlugin(), System.currentTimeMillis() + LockettePro.getPlugin().getConfigManager().getCacheTimeMillis()));
         block.setMetadata("locked", new FixedMetadataValue(LockettePro.getPlugin(), access));
     }
 

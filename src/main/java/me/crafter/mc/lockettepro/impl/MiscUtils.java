@@ -3,8 +3,6 @@ package me.crafter.mc.lockettepro.impl;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import me.crafter.mc.lockettepro.LockettePro;
-import me.crafter.mc.lockettepro.config.Config;
-import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -12,12 +10,10 @@ import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.sign.Side;
-import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.metadata.MetadataValue;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -76,12 +72,6 @@ public class MiscUtils {
     public static void playAccessDenyEffect(Player player, Block block) {
 //		player.playSound(block.getLocation(), Sound.VILLAGER_NO, 0.3F, 0.9F);
 //		player.spigot().playEffect(block.getLocation().add(0.5, 0.5, 0.5), Effect.FLAME, 0, 0, 0.3F, 0.3F, 0.3F, 0.01F, 64, 64);
-    }
-
-    public static void sendMessages(@NotNull CommandSender sender, @Nullable Component messages) { //todo preparation for MessageManager
-        if (messages != null) {
-            sender.sendMessage(messages);
-        }
     }
 
     public static boolean shouldNotify(Player player) {
@@ -175,7 +165,7 @@ public class MiscUtils {
         if (isPrivateTimeLine(text)) {
             return Long.parseLong(text.split("#created:", 2)[1]);
         } else {
-            return Config.getLockDefaultCreateTimeUnix();
+            return LockettePro.getPlugin().getConfigManager().getLockDefaultCreateTimeUnix();
         }
     }
 }

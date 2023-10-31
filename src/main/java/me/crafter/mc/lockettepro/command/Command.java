@@ -1,10 +1,10 @@
 package me.crafter.mc.lockettepro.command;
 
-import me.crafter.mc.lockettepro.api.LocketteProAPI;
-import me.crafter.mc.lockettepro.config.Config;
-import me.crafter.mc.lockettepro.impl.LockSign;
+import me.crafter.mc.lockettepro.LockettePro;
+import me.crafter.mc.lockettepro.LocketteProAPI;
 import me.crafter.mc.lockettepro.impl.MiscUtils;
-import me.crafter.mc.lockettepro.impl.SignSelection;
+import me.crafter.mc.lockettepro.impl.signdata.LockSign;
+import me.crafter.mc.lockettepro.impl.signdata.SignSelection;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
@@ -13,7 +13,6 @@ import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
 import org.bukkit.command.TabCompleter;
 import org.bukkit.entity.Player;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -22,8 +21,11 @@ import java.util.stream.Collectors;
 
 public class Command implements CommandExecutor, TabCompleter {
     private final static Set<SubCommand> SUBCOMMANDS = new HashSet<>();
+    private static LockettePro plugin;
 
-    public Command(Plugin plugin) {
+    public Command(LockettePro plugin) {
+        Command.plugin = plugin;
+
         SUBCOMMANDS.add(new Help(plugin));
         SUBCOMMANDS.add(new Info(plugin));
         SUBCOMMANDS.add(new AddMember(plugin));
@@ -74,11 +76,11 @@ public class Command implements CommandExecutor, TabCompleter {
 
                                 if (otherSign == null) {
                                     LocketteProAPI.setInvalid(sign);
-                                    MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
+                                    plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
                                     return true;
                                 } else {
                                     sign = otherSign;
-                                    MiscUtils.sendMessages(player, Config.getLangComp("sign-updated"));
+                                    plugin.getMessageManager().sendLang(sender, "sign-updated");
                                 }
                             }
 
@@ -89,35 +91,35 @@ public class Command implements CommandExecutor, TabCompleter {
                                         LockSign.addPlayer(sign, addOwner, offlinePlayer);
 
                                         if (addOwner) {
-                                            MiscUtils.sendMessages(player, Config.getLangComp("sign-added-owner"));
+                                            plugin.getMessageManager().sendLang(sender, "sign-added-owner");
                                         } else {
-                                            MiscUtils.sendMessages(player, Config.getLangComp("sign-added-member"));
+                                            plugin.getMessageManager().sendLang(sender, "sign-added-member");
                                         }
                                     } else {
-                                        MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
+                                        plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
                                     }
                                 } else {
-                                    MiscUtils.sendMessages(sender, Config.getLangComp("unknown-player"));
+                                    plugin.getMessageManager().sendLang(sender, "unknown-player");
                                 }
                             } else {
-                                MiscUtils.sendMessages(sender, Config.getLangComp("no-permission"));
+                                plugin.getMessageManager().sendLang(sender, "no-permission");
                             }
                         } else {
-                            MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
+                            plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
                         }
                     } else {
-                        MiscUtils.sendMessages(player, Config.getLangComp("no-sign-selected"));
+                        plugin.getMessageManager().sendLang(sender, "no-sign-selected");
                     }
                 } else {
-                    MiscUtils.sendMessages(sender, Config.getLangComp("command-not-enough-args"));
+                    plugin.getMessageManager().sendLang(sender, "command-not-enough-args");
                 }
             } else {
-                MiscUtils.sendMessages(sender, Config.getLangComp("no-permission"));
+                plugin.getMessageManager().sendLang(sender, "no-permission");
             }
 
             return true;
         } else {
-            MiscUtils.sendMessages(sender, Config.getLangComp("not-player"));
+            plugin.getMessageManager().sendLang(sender, "not-player");
             return false;
         }
     }
@@ -146,11 +148,11 @@ public class Command implements CommandExecutor, TabCompleter {
 
                                 if (otherSign == null) {
                                     LocketteProAPI.setInvalid(sign);
-                                    MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
+                                    plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
                                     return true;
                                 } else {
                                     sign = otherSign;
-                                    MiscUtils.sendMessages(player, Config.getLangComp("sign-updated"));
+                                    plugin.getMessageManager().sendLang(sender, "sign-updated");
                                 }
                             }
 
@@ -159,38 +161,38 @@ public class Command implements CommandExecutor, TabCompleter {
                                     if (LocketteProAPI.isLockSign(sign)) {
                                         if (LockSign.removePlayer(sign, removeOwner, offlinePlayer.getUniqueId())) {
                                             if (removeOwner) {
-                                                MiscUtils.sendMessages(player, Config.getLangComp("sign-removed-owner"));
+                                                plugin.getMessageManager().sendLang(sender, "sign-removed-owner");
                                             } else {
-                                                MiscUtils.sendMessages(player, Config.getLangComp("sign-removed-member"));
+                                                plugin.getMessageManager().sendLang(sender, "sign-removed-member");
                                             }
                                         } else {
-                                            MiscUtils.sendMessages(player, Config.getLangComp("sign-couldnt-remove"));
+                                            plugin.getMessageManager().sendLang(sender, "sign-couldnt-remove");
                                         }
                                     } else {
-                                        MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
+                                        plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
                                     }
                                 } else {
-                                    MiscUtils.sendMessages(sender, Config.getLangComp("unknown-player"));
+                                    plugin.getMessageManager().sendLang(sender, "unknown-player");
                                 }
                             } else {
-                                MiscUtils.sendMessages(sender, Config.getLangComp("no-permission"));
+                                plugin.getMessageManager().sendLang(sender, "no-permission");
                             }
                         } else {
-                            MiscUtils.sendMessages(player, Config.getLangComp("sign-need-reselect"));
+                            plugin.getMessageManager().sendLang(sender, "sign-need-reselect");
                         }
                     } else {
-                        MiscUtils.sendMessages(player, Config.getLangComp("no-sign-selected"));
+                        plugin.getMessageManager().sendLang(sender, "no-sign-selected");
                     }
                 } else {
-                    MiscUtils.sendMessages(sender, Config.getLangComp("command-not-enough-args"));
+                    plugin.getMessageManager().sendLang(sender, "command-not-enough-args");
                 }
             } else {
-                MiscUtils.sendMessages(sender, Config.getLangComp("no-permission"));
+                plugin.getMessageManager().sendLang(sender, "no-permission");
             }
 
             return true;
         } else {
-            MiscUtils.sendMessages(sender, Config.getLangComp("not-player"));
+            plugin.getMessageManager().sendLang(sender, "not-player");
             return false;
         }
     }
@@ -251,7 +253,7 @@ public class Command implements CommandExecutor, TabCompleter {
     public boolean onCommand(@NotNull CommandSender sender, org.bukkit.command.Command cmd, @NotNull String commandLabel, final String[] args) {
         if (cmd.getName().equals("lockettepro")) {
             if (args.length == 0) {
-                MiscUtils.sendMessages(sender, Config.getLangComp("command-usage"));
+                plugin.getMessageManager().sendLang(sender, "command-usage");
             } else {
                 SubCommand subCommand = getSubCommandFromString(sender, args[1]);
 
@@ -259,7 +261,7 @@ public class Command implements CommandExecutor, TabCompleter {
                     return subCommand.onCommand(sender, args);
                 }
 
-                MiscUtils.sendMessages(sender, Config.getLangComp("command-usage"));
+                plugin.getMessageManager().sendLang(sender, "command-usage");
                 return false;
             }
         }

@@ -1,11 +1,9 @@
 package me.crafter.mc.lockettepro.command;
 
-import me.crafter.mc.lockettepro.config.Config;
-import me.crafter.mc.lockettepro.impl.MiscUtils;
+import me.crafter.mc.lockettepro.LockettePro;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permissible;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -13,7 +11,7 @@ import java.util.List;
 import java.util.Set;
 
 public class Help extends SubCommand {
-    protected Help(@NotNull Plugin plugin) {
+    protected Help(@NotNull LockettePro plugin) {
         super(plugin);
     }
 
@@ -29,7 +27,7 @@ public class Help extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return Config.getCmdHelp("help");
+        return plugin.getMessageManager().getCmdHelp("help");
     }
 
     /**
@@ -48,17 +46,17 @@ public class Help extends SubCommand {
             SubCommand command = Command.getSubCommandFromString(sender, args[2]);
 
             if (command != null) {
-                Component component = Config.getLangComp("cmd.help.header");
+                Component component = plugin.getMessageManager().getLang("cmd.help.header");
                 component = component.append(Component.newline());
                 component = component.append(command.getHelpText());
 
-                MiscUtils.sendMessages(sender, component);
+                plugin.getMessageManager().sendMessages(sender, component);
             } else {
-                MiscUtils.sendMessages(sender, Config.getLangComp("cmd.no-subcommand"));
+                plugin.getMessageManager().sendLang(sender, "cmd.no-subcommand");
                 return false;
             }
         } else {
-            Component component = Config.getLangComp("cmd.help.header");
+            Component component = plugin.getMessageManager().getLang("cmd.help.header");
             component = component.append(Component.newline());
 
             for (SubCommand subCommand : Command.getSubCommands(sender)) {
@@ -71,7 +69,7 @@ public class Help extends SubCommand {
                 component = component.append(Component.newline());
             }
 
-            MiscUtils.sendMessages(sender, component);
+            plugin.getMessageManager().sendMessages(sender, component);
         }
 
         return true;
