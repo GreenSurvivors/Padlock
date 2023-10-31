@@ -3,6 +3,7 @@ package me.crafter.mc.lockettepro.command;
 import me.crafter.mc.lockettepro.LockettePro;
 import me.crafter.mc.lockettepro.LocketteProAPI;
 import me.crafter.mc.lockettepro.config.MessageManager;
+import me.crafter.mc.lockettepro.config.PermissionManager;
 import me.crafter.mc.lockettepro.impl.MiscUtils;
 import me.crafter.mc.lockettepro.impl.signdata.LockSign;
 import me.crafter.mc.lockettepro.impl.signdata.SignSelection;
@@ -65,7 +66,7 @@ public class Command implements CommandExecutor, TabCompleter {
      */
     protected static boolean onAddPlayer(@NotNull CommandSender sender, final @NotNull String @NotNull [] args, boolean addOwner) {
         if (sender instanceof Player player) {
-            if (sender.hasPermission("lockettepro.edit")) {
+            if (sender.hasPermission(PermissionManager.edit.getPerm())) {
                 if (args.length >= 2) {
                     OfflinePlayer offlinePlayer = Command.getPlayerFromArgument(args[1]);
                     Block block = SignSelection.getSelectedSign(player);
@@ -85,7 +86,7 @@ public class Command implements CommandExecutor, TabCompleter {
                                 }
                             }
 
-                            if (player.hasPermission("lockettepro.edit.admin") || (!addOwner && LocketteProAPI.isOwnerOfSign(sign, player))) {
+                            if (player.hasPermission(PermissionManager.adminEdit.getPerm()) || (!addOwner && LocketteProAPI.isOwnerOfSign(sign, player))) {
                                 if (offlinePlayer != null) {
 
                                     if (LocketteProAPI.isLockSign(sign)) {
@@ -137,7 +138,7 @@ public class Command implements CommandExecutor, TabCompleter {
      */
     protected static boolean onRemovePlayer(@NotNull CommandSender sender, final @NotNull String @NotNull [] args, boolean removeOwner) {
         if (sender instanceof Player player) {
-            if (sender.hasPermission("lockettepro.edit")) {
+            if (sender.hasPermission(PermissionManager.edit.getPerm())) {
                 if (args.length >= 2) {
                     OfflinePlayer offlinePlayer = getPlayerFromArgument(args[1]);
                     Block block = SignSelection.getSelectedSign(player);
@@ -157,7 +158,7 @@ public class Command implements CommandExecutor, TabCompleter {
                                 }
                             }
 
-                            if (player.hasPermission("lockettepro.edit.admin") || (!removeOwner && LockSign.isOwner(sign, player.getUniqueId()))) {
+                            if (player.hasPermission(PermissionManager.adminEdit.getPerm()) || (!removeOwner && LockSign.isOwner(sign, player.getUniqueId()))) {
                                 if (offlinePlayer != null) {
                                     if (LocketteProAPI.isLockSign(sign)) {
                                         if (LockSign.removePlayer(sign, removeOwner, offlinePlayer.getUniqueId())) {

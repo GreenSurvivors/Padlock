@@ -3,6 +3,7 @@ package me.crafter.mc.lockettepro.command;
 import me.crafter.mc.lockettepro.Dependency;
 import me.crafter.mc.lockettepro.LockettePro;
 import me.crafter.mc.lockettepro.config.MessageManager;
+import me.crafter.mc.lockettepro.config.PermissionManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -21,7 +22,7 @@ public class Debug extends SubCommand {
 
     @Override
     protected boolean checkPermission(Permissible sender) {
-        return sender.hasPermission("lockettepro.debug");
+        return sender.hasPermission(PermissionManager.debug.getPerm());
     }
 
     @Override
@@ -47,7 +48,7 @@ public class Debug extends SubCommand {
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         // This is not the author debug, this prints out info
-        if (sender.hasPermission("lockettepro.debug")) {
+        if (this.checkPermission(sender)) {
             sender.sendMessage("LockettePro Debug Message");
             // Basic
             sender.sendMessage("LockettePro: " + plugin.getPluginMeta().getVersion());

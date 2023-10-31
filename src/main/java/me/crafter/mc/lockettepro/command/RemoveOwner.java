@@ -2,6 +2,7 @@ package me.crafter.mc.lockettepro.command;
 
 import me.crafter.mc.lockettepro.LockettePro;
 import me.crafter.mc.lockettepro.config.MessageManager;
+import me.crafter.mc.lockettepro.config.PermissionManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permissible;
@@ -18,7 +19,7 @@ public class RemoveOwner extends SubCommand {
 
     @Override
     protected boolean checkPermission(Permissible sender) {
-        return sender.hasPermission("lockettepro.edit") && sender.hasPermission("lockettepro.edit.admin");
+        return sender.hasPermission(PermissionManager.edit.getPerm()) && sender.hasPermission(PermissionManager.adminEdit.getPerm());
     }
 
     @Override

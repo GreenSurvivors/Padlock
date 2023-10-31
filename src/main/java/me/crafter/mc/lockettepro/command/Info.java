@@ -3,6 +3,7 @@ package me.crafter.mc.lockettepro.command;
 import me.crafter.mc.lockettepro.LockettePro;
 import me.crafter.mc.lockettepro.LocketteProAPI;
 import me.crafter.mc.lockettepro.config.MessageManager;
+import me.crafter.mc.lockettepro.config.PermissionManager;
 import me.crafter.mc.lockettepro.impl.MiscUtils;
 import me.crafter.mc.lockettepro.impl.signdata.LockSign;
 import me.crafter.mc.lockettepro.impl.signdata.SignSelection;
@@ -25,7 +26,7 @@ public class Info extends SubCommand {
 
     @Override
     protected boolean checkPermission(Permissible sender) {
-        return sender.hasPermission("lockettepro.info");
+        return sender.hasPermission(PermissionManager.cmdInfo.getPerm());
     }
 
     @Override
@@ -51,7 +52,7 @@ public class Info extends SubCommand {
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) { //todo this needs formatting and general glow up
         if (sender instanceof Player player) {
-            if (sender.hasPermission("lockettepro.info")) {
+            if (this.checkPermission(sender)) {
                 Block block = SignSelection.getSelectedSign(player);
                 if (block != null) {
                     if (block instanceof Sign sign) {

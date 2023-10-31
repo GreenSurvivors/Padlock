@@ -3,6 +3,7 @@ package me.crafter.mc.lockettepro.command;
 import me.crafter.mc.lockettepro.LockettePro;
 import me.crafter.mc.lockettepro.LocketteProAPI;
 import me.crafter.mc.lockettepro.config.MessageManager;
+import me.crafter.mc.lockettepro.config.PermissionManager;
 import me.crafter.mc.lockettepro.impl.signdata.SignSelection;
 import net.kyori.adventure.text.Component;
 import org.bukkit.block.Block;
@@ -23,7 +24,7 @@ public class UpdateSign extends SubCommand {
 
     @Override
     protected boolean checkPermission(Permissible sender) {
-        return sender.hasPermission("lockettepro.updatesign");
+        return sender.hasPermission(PermissionManager.cmdUpdateSign.getPerm());
     }
 
     @Override
@@ -49,7 +50,7 @@ public class UpdateSign extends SubCommand {
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         if (sender instanceof Player player) {
-            if (player.hasPermission("lockettepro.update")) {
+            if (this.checkPermission(sender)) {
                 Block block = SignSelection.getSelectedSign(player);
                 if (block != null) {
                     if (block instanceof Sign sign) {
