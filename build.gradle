@@ -3,7 +3,7 @@ plugins {
     id 'maven-publish'
     id("io.papermc.paperweight.userdev") version "1.5.9"
     id("xyz.jpenilla.run-paper") version "1.0.6"
-}
+} //todo readme
 // Suppiled by Jenkins
 ext.majorVersion = 3
 ext.minorVersion = 0
@@ -18,7 +18,7 @@ targetCompatibility = 17
 
 // differet version convension from Nyaa plugins
 group = "me.crafter.mc"
-archivesBaseName = "LockettePro"
+archivesBaseName = "GreenLocker"
 version = "$majorVersion.$minorVersion.$buildNumber".toString()
 runServer {
     minecraftVersion("1.20.1")
@@ -33,7 +33,6 @@ compileJava {
 repositories {
     mavenCentral()
     maven { name 'Paper'; url 'https://repo.papermc.io/repository/maven-public/' }
-    //todo paper not spigot
     maven { name 'sk89q-repo'; url "https://maven.enginehub.org/repo/" } //worldguard
     maven { name 'playpro'; url 'https://maven.playpro.com/' } //coreProtect
     maven {name 'dmulloy2';   url 'https://repo.dmulloy2.net/repository/public/'}
@@ -57,11 +56,18 @@ tasks.register('sourcesJar', Jar) {
     from sourceSets.main.java.srcDirs
 }
 
+tasks {
+    // Configure reobfJar to run when invoking the build task
+    assemble {
+        dependsOn(reobfJar)
+    }
+}
+
 publishing {
     publications {
         mavenJava(MavenPublication) {
             artifact sourcesJar
-            artifactId "lockettepro"
+            artifactId "greenlocker"
             version "$majorVersion.$minorVersion-SNAPSHOT"
             from components.java
         }

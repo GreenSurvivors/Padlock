@@ -1,25 +1,58 @@
-name: LockettePro
-main: me.crafter.mc.lockettepro.LockettePro
+name: GreenLocker
+main: de.greensurvivors.greenlocker.GreenLocker
 author: connection_lost
 softdepend: [ WorldGuard, CoreProtect ]
 loadbefore: [ SignShop ]
 version: ${version}
 api-version: 1.20
 description: >
-  LockettePro is a chest protection plugin for Bukkit. It is 100% compatible with original Lockette, but delivers a lot of performance enhancements and feature options.
+  Greenlocker is a chest protection plugin for Paper. It is 80% compatible with original Lockette, but delivers a lot of performance enhancements and feature options.
 commands:
-  lockettepro:
-    permission: lockettepro.command
+  greenlocker:
+    permission: greenlocker.command
     usage: |
       /lock
-    aliases: [ lock, lockette, lockit ]
-permissions:
-  lockettepro.command:
-    description: Command permission for LockettePro
-    default: true
-  lockettepro.lock:
-    description: Basic lock permission
-    default: true
-  lockettepro.edit:
+    aliases: [ lock, greenlocker, lockit ]
+permissions: #todo update
+  greenlocker.edit:
     description: Edit sign permission
     default: true
+  #admin perms
+  greenlocker.admin.edit:
+    description: Edit Owners of signs
+    default: op
+  greenlocker.admin.break:
+    description: Break Signs you are not Owner of
+    default: op
+  greenlocker.admin.interfere:
+    description: Place interfere blocks
+    default: op
+  greenlocker.debug:
+    description: Debug perm when developing this plugin.
+    default: false
+  greenlocker.noexpire:
+    description: Signs placed with this permission do not expire
+    default: false
+  # user commands
+  greenlocker.cmd.help:
+    description: Help command to list possible commands + command descriptions
+    default: true
+  greenlocker.cmd.info:
+    description: gives feedback about owners and members of a lock sign
+    default: true
+  # admin commands
+  greenlocker.cmd.reload:
+    description: reloads config and language
+    default: op
+  greenlocker.cmd.updatesign:
+    description: updates legacy Lockette signs to new greenlockSigns
+    default: op
+  greenlocker.cmd.version:
+    description: returns the version of this plugin
+    default: op
+  # actions
+  greenlocker.action.lock:
+    description: Basic lock permission
+    default: true
+  greenlocker.action.lockothers:
+    description: if one has the permission to make others owner of a sign but not themselves
