@@ -60,7 +60,7 @@ public class RemoveMember extends SubCommand {
      * to default to the command executor
      */
     @Override
-    protected @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String[] args) { //todo
-        return null;
+    protected @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
+        return Command.onTapCompleateRemovePlayer(sender, false);
     }
 }

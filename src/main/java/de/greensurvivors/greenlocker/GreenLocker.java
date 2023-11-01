@@ -44,9 +44,6 @@ public class GreenLocker extends JavaPlugin {
         getServer().getPluginManager().registerEvents(new BlockEnvironmentListener(this), this);
         getServer().getPluginManager().registerEvents(new BlockInventoryMoveListener(this), this);
 
-
-        this.getCommand("");
-
         //register command
         for (String commandStr : this.getDescription().getCommands().keySet()) {
             PluginCommand mainCommand = getCommand(commandStr);

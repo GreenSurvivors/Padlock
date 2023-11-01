@@ -45,7 +45,8 @@ public class Version extends SubCommand {
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         if (this.checkPermission(sender)) {
-            sender.sendMessage(plugin.getDescription().getFullName()); //todo
+            //plugin.getPluginMeta().getName() + " " + plugin.getPluginMeta().getVersion();
+            plugin.getMessageManager().sendMessages(sender, Component.text(plugin.getDescription().getFullName())); //todo
         } else {
             plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.noPermission);
         }

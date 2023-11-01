@@ -7,13 +7,16 @@ version: ${version}
 api-version: 1.20
 description: >
   Greenlocker is a chest protection plugin for Paper. It is 80% compatible with original Lockette, but delivers a lot of performance enhancements and feature options.
+libraries:
+  - org.apache.commons:commons-collections4:4.4
+
 commands:
   greenlocker:
     permission: greenlocker.command
     usage: |
       /lock
     aliases: [ lock, greenlocker, lockit ]
-permissions: #todo update
+permissions:
   greenlocker.edit:
     description: Edit sign permission
     default: true

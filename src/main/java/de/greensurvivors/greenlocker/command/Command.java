@@ -7,6 +7,7 @@ import de.greensurvivors.greenlocker.config.PermissionManager;
 import de.greensurvivors.greenlocker.impl.MiscUtils;
 import de.greensurvivors.greenlocker.impl.signdata.LockSign;
 import de.greensurvivors.greenlocker.impl.signdata.SignSelection;
+import org.apache.commons.collections4.set.ListOrderedSet;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
@@ -19,6 +20,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.logging.Level;
 import java.util.stream.Collectors;
 
 public class Command implements CommandExecutor, TabCompleter {
@@ -48,6 +50,77 @@ public class Command implements CommandExecutor, TabCompleter {
             try {
                 return Bukkit.getOfflinePlayer(UUID.fromString(arg));
             } catch (IllegalArgumentException ignored) {
+            }
+        }
+
+        return null;
+    }
+
+    protected static @Nullable List<String> onTapCompleateRemovePlayer(@NotNull CommandSender sender, boolean removeOwner) {
+        if (sender instanceof Player player) {
+            if (sender.hasPermission(PermissionManager.edit.getPerm())) {
+                Block block = SignSelection.getSelectedSign(player);
+
+                if (block != null) {
+                    if (block instanceof Sign sign) {
+                        if (GreenLockerAPI.isAdditionalSign(sign) || LockSign.isLegacySign(sign)) {
+                            Sign otherSign = GreenLockerAPI.updateLegacySign(sign); //get main sign
+
+                            if (otherSign == null) {
+                                GreenLockerAPI.setInvalid(sign);
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
+                                return null;
+                            } else {
+                                sign = otherSign;
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.updateSignSuccess);
+                            }
+                        }
+
+                        if (removeOwner) {
+                            if (sender.hasPermission(PermissionManager.adminEdit.getPerm())) {
+                                ListOrderedSet<String> uuidStrs = LockSign.getUUIDs(sign, true);
+                                List<String> result = new ArrayList<>();
+
+                                for (String uuidStr : uuidStrs) {
+                                    UUID uuid;
+
+                                    try {
+                                        uuid = UUID.fromString(uuidStr);
+                                    } catch (IllegalArgumentException e) {
+                                        plugin.getLogger().log(Level.WARNING, "couldn't get UUID from String \"" + uuidStr + "\" of Sign at " + sign.getLocation(), e);
+
+                                        result.add(uuidStr);
+                                        continue;
+                                    }
+
+                                    result.add(Bukkit.getOfflinePlayer(uuid).getName());
+                                }
+
+                                return result;
+                            }
+                        } else {
+                            ListOrderedSet<String> uuidStrs = LockSign.getUUIDs(sign, false);
+                            List<String> result = new ArrayList<>();
+
+                            for (String uuidStr : uuidStrs) {
+                                UUID uuid;
+
+                                try {
+                                    uuid = UUID.fromString(uuidStr);
+                                } catch (IllegalArgumentException e) {
+                                    plugin.getLogger().log(Level.WARNING, "couldn't get UUID from String \"" + uuidStr + "\" of Sign at " + sign.getLocation(), e);
+
+                                    result.add(uuidStr);
+                                    continue;
+                                }
+
+                                result.add(Bukkit.getOfflinePlayer(uuid).getName());
+                            }
+
+                            return result;
+                        }
+                    }
+                }
             }
         }
 
@@ -256,21 +329,19 @@ public class Command implements CommandExecutor, TabCompleter {
         }
     }
 
-    public boolean onCommand(@NotNull CommandSender sender, org.bukkit.command.Command cmd, @NotNull String commandLabel, final String[] args) {
-        if (cmd.getName().equals("greenlocker")) { //todo but why?
-            if (args.length == 0) {
-                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.cmdUsage);
-            } else {
-                SubCommand subCommand = getSubCommandFromString(sender, args[1]);
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command cmd, @NotNull String commandLabel, final String[] args) {
+        if (args.length == 0) {
+            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.cmdUsage);
+            return true;
+        } else {
+            SubCommand subCommand = getSubCommandFromString(sender, args[0]);
 
-                if (subCommand != null) {
-                    return subCommand.onCommand(sender, args);
-                }
-
-                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.cmdUsage);
-                return false;
+            if (subCommand != null) {
+                return subCommand.onCommand(sender, args);
             }
+
+            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.cmdUsage);
+            return false;
         }
-        return true;
     }
 }

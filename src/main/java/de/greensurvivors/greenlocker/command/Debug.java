@@ -8,7 +8,6 @@ import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permissible;
-import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -65,10 +64,11 @@ public class Debug extends SubCommand {
                 sender.sendMessage(" - Worldguard: " + Dependency.getWorldguard().getPluginMeta().getVersion());
             }
 
-            Plugin coreProtect = Bukkit.getPluginManager().getPlugin("CoreProtect");
-            if (coreProtect != null) {
+            String CoreProtectAPIVersion = Dependency.getCoreProtectAPIVersion();
+
+            if (CoreProtectAPIVersion != null) {
                 linked = true;
-                sender.sendMessage(" - CoreProtect: " + coreProtect.getPluginMeta().getVersion()); //todo get co from Depencency
+                sender.sendMessage(" - CoreProtectAPI: " + CoreProtectAPIVersion);
             }
             if (!linked) {
                 sender.sendMessage(" - none");

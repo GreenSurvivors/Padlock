@@ -5,6 +5,7 @@ import de.greensurvivors.greenlocker.config.MessageManager;
 import de.greensurvivors.greenlocker.config.PermissionManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Player;
 import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -60,7 +61,11 @@ public class AddMember extends SubCommand {
      * to default to the command executor
      */
     @Override
-    protected @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String[] args) { //todo
-        return null;
+    protected @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
+        if (sender.hasPermission(PermissionManager.edit.getPerm())) {
+            return plugin.getServer().getOnlinePlayers().stream().map(Player::getName).toList();
+        } else {
+            return null;
+        }
     }
 }
