@@ -1,5 +1,6 @@
 package de.greensurvivors.greenlocker;
 
+import de.greensurvivors.greenlocker.config.MessageManager;
 import de.greensurvivors.greenlocker.impl.doordata.DoorParts;
 import de.greensurvivors.greenlocker.impl.doordata.Doors;
 import de.greensurvivors.greenlocker.impl.signdata.ExpireSign;
@@ -54,7 +55,7 @@ public class GreenLockerAPI {
                         LockSign.updateLegacyUUIDs(lockSign);
                         return lockSign;
                     } else {
-                        GreenLocker.getPlugin().getLogger().warning("Couldn't find a Lock sign to update, but the door is locked.");
+                        GreenLocker.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the door at " + attachedTo.getLocation() + " is locked.");
                     }
                 } else {
                     GreenLocker.getPlugin().getLogger().warning("Couldn't get door parts, but data says there should be one. Is it half? " + attachedTo.getLocation());
@@ -69,7 +70,7 @@ public class GreenLockerAPI {
                     LockSign.updateLegacyUUIDs(lockSign);
                     return lockSign;
                 } else {
-                    //todo logging
+                    GreenLocker.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the door at " + attachedTo.getLocation() + "is locked.");
                 }
             } else {
                 Sign lockSign = getLockSignSingleBlock(attachedTo, null);
@@ -82,7 +83,7 @@ public class GreenLockerAPI {
                     LockSign.updateNamesByUuid(lockSign);
                     return lockSign;
                 } else {
-                    //todo logging
+                    GreenLocker.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the block at " + attachedTo.getLocation() + "is locked.");
                 }
             }
         } else {
@@ -627,7 +628,7 @@ public class GreenLockerAPI {
         for (BlockFace blockface : cardinalFaces) {
             Block relative = block.getRelative(blockface);
             if (relative.getState() instanceof Sign sign) {
-                for (String line : sign.getSide(Side.FRONT).getLines()) { //todo
+                for (Component line : sign.getSide(Side.FRONT).lines()) {
                     int linetime = GreenLocker.getPlugin().getMessageManager().getTimer(line);
                     if (linetime > 0) return linetime;
                 }
@@ -699,12 +700,7 @@ public class GreenLockerAPI {
         return relativeFace;
     }
 
-    @Deprecated
-    public static boolean isLockString(String line) { //todo component
-        return LockSign.isLockString(line);
-    }
-
-    public static boolean isLockComp(Component line) { //todocomponent
-        return LockSign.isLockComp(line);
+    public static boolean isLockComp(Component line) {
+        return GreenLocker.getPlugin().getMessageManager().isSignComp(line, MessageManager.LangPath.privateSign);
     }
 }

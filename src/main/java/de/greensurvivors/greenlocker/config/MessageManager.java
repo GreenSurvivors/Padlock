@@ -2,7 +2,7 @@ package de.greensurvivors.greenlocker.config;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
-import org.bukkit.ChatColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
@@ -11,17 +11,16 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
+import java.util.HashMap;
 
-public class MessageManager {
+public class MessageManager { //todo dokument whole plugin
     private final Plugin plugin;
-    private String invalidString = "[Invalid]"; //todo^2
+    private final HashMap<LangPath, String> nakedSigns = new HashMap<>(); // path -> naked
+    private @Nullable Component prefixComp = null;
     private FileConfiguration lang;
     private String langfilename = "lang_en.yml";
-    private String privatestring = "[Private]";
-    private String additionalstring = "[More Users]";
-    private String everyonestring = "[Everyone]";
-    private String timerstring = "[Timer:@]";
-    private String lockexpirestring = "&3[Expired]";
+
+
     public MessageManager(Plugin plugin) {
         this.plugin = plugin;
     }
@@ -30,24 +29,22 @@ public class MessageManager {
         this.langfilename = langfilename;
     }
 
-    protected void reload() {//todo
+    protected void reload() {
         initAdditionalFiles();
         lang = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), langfilename));
 
+        prefixComp = MiniMessage.miniMessage().deserialize(lang.getString(LangPath.pluginPrefix.getPath(), LangPath.pluginPrefix.getDefaultValue()));
 
-        //todo mini-message
-        privatestring = lang.getString(LangPath.privateSign.getPath(), LangPath.privateSign.getDefaultValue());
-        additionalstring = lang.getString(LangPath.additionalSign.getPath(), LangPath.additionalSign.getDefaultValue());
-        everyonestring = lang.getString(LangPath.everyoneSign.getPath(), LangPath.everyoneSign.getDefaultValue());
-        timerstring = lang.getString(LangPath.timerSign.getPath(), LangPath.timerSign.getDefaultValue());
-        invalidString = lang.getString(LangPath.invalidSign.getPath(), LangPath.invalidSign.getDefaultValue());
-
-        lockexpirestring = ChatColor.translateAlternateColorCodes('&',
-                lang.getString(LangPath.expireSign.getPath(), LangPath.expireSign.getDefaultValue()));
+        nakedSigns.put(LangPath.privateSign, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.privateSign.getPath(), LangPath.privateSign.getDefaultValue())));
+        nakedSigns.put(LangPath.additionalSign, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.additionalSign.getPath(), LangPath.additionalSign.getDefaultValue())));
+        nakedSigns.put(LangPath.everyoneSign, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.everyoneSign.getPath(), LangPath.everyoneSign.getDefaultValue())));
+        nakedSigns.put(LangPath.timerSign, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.timerSign.getPath(), LangPath.timerSign.getDefaultValue())));
+        nakedSigns.put(LangPath.invalidSign, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.invalidSign.getPath(), LangPath.invalidSign.getDefaultValue())));
+        nakedSigns.put(LangPath.expireSign, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.expireSign.getPath(), LangPath.expireSign.getDefaultValue())));
     }
 
     private void initAdditionalFiles() {
-        String[] availablefiles = {"lang_de.yml", "lang_en.yml", "lang_es.yml", "lang_hu.yml", "lang_it.yml", "lang_zh-cn.yml"}; //todo update
+        String[] availablefiles = {"lang_de.yml", "lang_en.yml", "lang_es.yml", "lang_hu.yml", "lang_it.yml", "lang_zh-cn.yml"};
         for (String filename : availablefiles) {
             File langfile = new File(plugin.getDataFolder(), filename);
             if (!langfile.exists()) {
@@ -58,52 +55,47 @@ public class MessageManager {
 
     public void sendMessages(@NotNull CommandSender sender, @Nullable Component messages) { //todo preparation for MessageManager
         if (messages != null) {
-            sender.sendMessage(messages);
+            if (prefixComp != null) {
+                sender.sendMessage(prefixComp.append(messages));
+            } else {
+                sender.sendMessage(messages);
+                plugin.getLogger().severe("send a message in chat, but the prefix was null. Pretty sure the language file was never loaded.");
+            }
         }
     }
-
-    public String getLockExpireString() {
-        return lockexpirestring;
-    } //todo
 
     public @NotNull Component getLang(@NotNull MessageManager.LangPath path) { // todo lang in minimessage format
         return MiniMessage.miniMessage().deserialize(lang.getString(path.path, path.defaultValue));
     }
 
-    public void sendLang(CommandSender sender, @NotNull LangPath path) {
-        sendMessages(sender, MiniMessage.miniMessage().deserialize(lang.getString(path.path, path.defaultValue)));
+    public void sendLang(@NotNull CommandSender sender, @NotNull LangPath path) {
+        if (prefixComp != null) {
+            sender.sendMessage(prefixComp.append(MiniMessage.miniMessage().deserialize(lang.getString(path.path, path.defaultValue))));
+        } else {
+            sender.sendMessage(MiniMessage.miniMessage().deserialize(lang.getString(path.path, path.defaultValue)));
+            plugin.getLogger().severe("send a message in chat, but the prefix was null. Pretty sure the language file was never loaded.");
+        }
     }
 
-    public Component getInvalidString() {
-        return MiniMessage.miniMessage().deserialize(invalidString);
+    public boolean isSignComp(@NotNull Component compToTest, @NotNull LangPath langPath) {
+        String strToTest = PlainTextComponentSerializer.plainText().serialize(compToTest).trim();
+
+        return strToTest.equalsIgnoreCase(nakedSigns.get(langPath));
     }
 
-    public boolean isPrivateSignComp(Component message) { //todo ignore casing
-        return MiniMessage.miniMessage().deserialize(privatestring).contains(message);
+    public boolean isTimerSignComp(@NotNull Component compToTest) {
+        String strToTest = PlainTextComponentSerializer.plainText().serialize(compToTest).trim();
+
+        String[] splitted = nakedSigns.get(LangPath.timerSign).split("@", 2);
+        return strToTest.startsWith(splitted[0]) && strToTest.endsWith(splitted[1]);
     }
 
-    @Deprecated(forRemoval = true)
-    public boolean isPrivateSignString(String message) {
-        return privatestring.contains(message);
-    }
+    public int getTimer(Component compToTest) {
+        String strToTest = PlainTextComponentSerializer.plainText().serialize(compToTest).trim();
+        String[] splitted = nakedSigns.get(LangPath.timerSign).split("@", 2);
 
-    public boolean isAdditionalSignString(String message) {
-        return additionalstring.contains(message);
-    }
-
-    public boolean isEveryoneSignString(String message) {
-        return everyonestring.contains(message);
-    } //todo
-
-    public boolean isTimerSignString(String message) { //todo
-        String[] splitted = timerstring.split("@", 2);
-        return message.startsWith(splitted[0]) && message.endsWith(splitted[1]);
-    }
-
-    public int getTimer(String message) {
-        String[] splitted = timerstring.split("@", 2);
-        if (message.startsWith(splitted[0]) && message.endsWith(splitted[1])) {
-            String newmessage = message.replace(splitted[0], "").replace(splitted[1], "");
+        if (strToTest.startsWith(splitted[0]) && strToTest.endsWith(splitted[1])) {
+            String newmessage = strToTest.replace(splitted[0], "").replace(splitted[1], "");
             try {
                 int seconds = Integer.parseInt(newmessage);
                 return Math.min(seconds, 20);
@@ -114,16 +106,8 @@ public class MessageManager {
         return 0;
     }
 
-    public String getPrivateString() {
-        return privatestring;
-    }
-
-    public String getDefaultAdditionalString() {
-        return additionalstring;
-    }
-
-    public enum LangPath { //todo prefix
-        pluginPrefix("prefix", "&6[GreenLocker]&r"),
+    public enum LangPath {
+        pluginPrefix("prefix", "&6[GreenLocker]&r"), //todo miniMessage
 
         privateSign("sign.line.private", "[Private]"),
         @Deprecated(forRemoval = true)

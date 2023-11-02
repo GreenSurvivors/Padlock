@@ -16,58 +16,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Doors {
-    private enum DoorSound { // todo find a way to use net.minecraft.world.level.block.state.properties.BlockSetType
-        OAK(Material.OAK_DOOR),
-        SPRUCE(Material.SPRUCE_DOOR),
-        BIRCH(Material.BIRCH_DOOR),
-        ACACIA(Material.ACACIA_DOOR),
-        JUNGLE(Material.JUNGLE_DOOR),
-        DARK_OAK(Material.DARK_OAK_DOOR),
-        MANGROVE(Material.MANGROVE_DOOR),
-        IRON(Material.IRON_DOOR, Sound.BLOCK_IRON_DOOR_CLOSE, Sound.BLOCK_IRON_DOOR_OPEN),
-        CRIMSON(Material.CRIMSON_DOOR, Sound.BLOCK_NETHER_WOOD_DOOR_CLOSE, Sound.BLOCK_NETHER_WOOD_DOOR_OPEN),
-        WARPED(Material.WARPED_DOOR, Sound.BLOCK_NETHER_WOOD_DOOR_CLOSE, Sound.BLOCK_NETHER_WOOD_DOOR_OPEN),
-        CHERRY(Material.CHERRY_DOOR, Sound.BLOCK_CHERRY_WOOD_DOOR_CLOSE, Sound.BLOCK_CHERRY_WOOD_DOOR_OPEN),
-        BAMBOO(Material.BAMBOO_DOOR, Sound.BLOCK_BAMBOO_WOOD_DOOR_CLOSE, Sound.BLOCK_BAMBOO_WOOD_DOOR_OPEN);
-
-        private final Material material;
-        private final Sound closeSound;
-        private final Sound openSound;
-
-        DoorSound(Material material) {
-            this.material = material;
-            this.closeSound = Sound.BLOCK_WOODEN_DOOR_CLOSE;
-            this.openSound = Sound.BLOCK_WOODEN_DOOR_OPEN;
-        }
-
-        DoorSound(Material material, Sound closeSound, Sound openSound) {
-            this.material = material;
-            this.closeSound = closeSound;
-            this.openSound = openSound;
-        }
-
-        public static Sound getCloseSound(Material material) {
-            for (DoorSound doorSound : DoorSound.values()) {
-                if (doorSound.material.equals(material)) {
-                    return doorSound.closeSound;
-                }
-            }
-
-            // fallback in case a new door wasn't implemented yet
-            return Sound.BLOCK_WOODEN_DOOR_CLOSE;
-        }
-
-        public static Sound getOpenSound(Material material) {
-            for (DoorSound doorSound : DoorSound.values()) {
-                if (doorSound.material.equals(material)) {
-                    return doorSound.openSound;
-                }
-            }
-
-            // fallback in case a new door wasn't implemented yet
-            return Sound.BLOCK_WOODEN_DOOR_OPEN;
-        }
-    }
     public static void toggleDoor(Block block) {
         if (block.getBlockData() instanceof Openable openable) {
             boolean open = !openable.isOpen();
@@ -136,5 +84,58 @@ public class Doors {
         }
 
         return adjacent;
+    }
+
+    private enum DoorSound { // todo find a way to use net.minecraft.world.level.block.state.properties.BlockSetType
+        OAK(Material.OAK_DOOR),
+        SPRUCE(Material.SPRUCE_DOOR),
+        BIRCH(Material.BIRCH_DOOR),
+        ACACIA(Material.ACACIA_DOOR),
+        JUNGLE(Material.JUNGLE_DOOR),
+        DARK_OAK(Material.DARK_OAK_DOOR),
+        MANGROVE(Material.MANGROVE_DOOR),
+        IRON(Material.IRON_DOOR, Sound.BLOCK_IRON_DOOR_CLOSE, Sound.BLOCK_IRON_DOOR_OPEN),
+        CRIMSON(Material.CRIMSON_DOOR, Sound.BLOCK_NETHER_WOOD_DOOR_CLOSE, Sound.BLOCK_NETHER_WOOD_DOOR_OPEN),
+        WARPED(Material.WARPED_DOOR, Sound.BLOCK_NETHER_WOOD_DOOR_CLOSE, Sound.BLOCK_NETHER_WOOD_DOOR_OPEN),
+        CHERRY(Material.CHERRY_DOOR, Sound.BLOCK_CHERRY_WOOD_DOOR_CLOSE, Sound.BLOCK_CHERRY_WOOD_DOOR_OPEN),
+        BAMBOO(Material.BAMBOO_DOOR, Sound.BLOCK_BAMBOO_WOOD_DOOR_CLOSE, Sound.BLOCK_BAMBOO_WOOD_DOOR_OPEN);
+
+        private final Material material;
+        private final Sound closeSound;
+        private final Sound openSound;
+
+        DoorSound(Material material) {
+            this.material = material;
+            this.closeSound = Sound.BLOCK_WOODEN_DOOR_CLOSE;
+            this.openSound = Sound.BLOCK_WOODEN_DOOR_OPEN;
+        }
+
+        DoorSound(Material material, Sound closeSound, Sound openSound) {
+            this.material = material;
+            this.closeSound = closeSound;
+            this.openSound = openSound;
+        }
+
+        public static Sound getCloseSound(Material material) {
+            for (DoorSound doorSound : DoorSound.values()) {
+                if (doorSound.material.equals(material)) {
+                    return doorSound.closeSound;
+                }
+            }
+
+            // fallback in case a new door wasn't implemented yet
+            return Sound.BLOCK_WOODEN_DOOR_CLOSE;
+        }
+
+        public static Sound getOpenSound(Material material) {
+            for (DoorSound doorSound : DoorSound.values()) {
+                if (doorSound.material.equals(material)) {
+                    return doorSound.openSound;
+                }
+            }
+
+            // fallback in case a new door wasn't implemented yet
+            return Sound.BLOCK_WOODEN_DOOR_OPEN;
+        }
     }
 }

@@ -13,7 +13,6 @@ import de.greensurvivors.greenlocker.impl.signdata.ExpireSign;
 import de.greensurvivors.greenlocker.impl.signdata.LockSign;
 import de.greensurvivors.greenlocker.impl.signdata.SignSelection;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -41,7 +40,7 @@ import org.jetbrains.annotations.NotNull;
 import java.util.ArrayList;
 import java.util.List;
 
-public class BlockPlayerListener implements Listener {
+public class BlockPlayerListener implements Listener { //todo this whole class
     private final GreenLocker plugin;
 
     public BlockPlayerListener(GreenLocker plugin) {
@@ -91,7 +90,7 @@ public class BlockPlayerListener implements Listener {
                                 // Not locked, not a locked door nearby
                                 MiscUtils.removeASign(player);
                                 // Put sign on
-                                Block newsign = MiscUtils.putSignOn(block, blockface, plugin.getMessageManager().getPrivateString(), player.getName(), signType);
+                                Block newsign = MiscUtils.putSignOn(block, blockface, plugin.getMessageManager().getLang(MessageManager.LangPath.privateSign), player.name(), signType);
                                 Cache.resetCache(block);
                                 // Send message
                                 plugin.getMessageManager().sendLang(player, MessageManager.LangPath.lockSuccess);
@@ -120,34 +119,16 @@ public class BlockPlayerListener implements Listener {
     private void onManualLock(@NotNull SignChangeEvent event) { //todo correct signLines according to correct casing;
         if (!Tag.WALL_SIGNS.isTagged(event.getBlock().getType())) return;
 
-        Component component = event.line(0);
-        if (component == null) return;
-        String topline = PlainTextComponentSerializer.plainText().serialize(component);
+        Component topline = event.line(0);
+        if (topline == null) return;
         Player player = event.getPlayer();
-        /*  Issue #46 - Old version of Minecraft trim signs in unexpected way.
-         *  This is caused by Minecraft was doing: (unconfirmed but seemingly)
-         *  Place Sign -> Event Fire -> Trim Sign
-         *  The event.getLine() will be inaccurate if the line has white space to trim
-         *
-         *  This will cause player without permission will be able to lock chests by
-         *  adding a white space after the [private] word.
-         *  Currently, this is fixed by using trimmed line in checking permission. Trimmed
-         *  line should not be used anywhere else.
-         */
-        if (!player.hasPermission(PermissionManager.actionLock.getPerm())) {
-            String toplinetrimmed = topline.trim();
-            if (GreenLockerAPI.isLockString(toplinetrimmed)) {
-                event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.errorSign));
-                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.noPermission);
-                return;
-            }
-        }
-        if (GreenLockerAPI.isLockString(topline)) {
+
+        if (GreenLockerAPI.isLockComp(topline)) {
             Block block = GreenLockerAPI.getAttachedBlock(event.getBlock());
             if (block != null && GreenLockerAPI.isLockable(block)) {
                 boolean locked = GreenLockerAPI.isLocked(block);
                 if (!locked && !GreenLockerAPI.isPartOfLockedDoor(block)) { //todo reorganize this
-                    if (GreenLockerAPI.isLockString(topline)) {
+                    if (GreenLockerAPI.isLockComp(topline)) {
                         Sign sign = (Sign) event.getBlock().getState();
                         sign.setWaxed(true);
                         sign.update();
@@ -159,12 +140,12 @@ public class BlockPlayerListener implements Listener {
                         Cache.resetCache(block);
                     }
                 } else if (!locked && GreenLockerAPI.isOwnerUpDownLockedDoor(block, player)) {
-                    if (GreenLockerAPI.isLockString(topline)) {
+                    if (GreenLockerAPI.isLockComp(topline)) {
                         plugin.getMessageManager().sendLang(player, MessageManager.LangPath.lockErrorAlreadyLocked);
                         event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.errorSign));
                     }
                 } else if (GreenLockerAPI.isOwner(block, player)) {
-                    if (GreenLockerAPI.isLockString(topline)) {
+                    if (GreenLockerAPI.isLockComp(topline)) {
                         plugin.getMessageManager().sendLang(player, MessageManager.LangPath.lockErrorAlreadyLocked);
                         event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.errorSign));
                     }
@@ -222,7 +203,7 @@ public class BlockPlayerListener implements Listener {
                 if (GreenLockerAPI.isOwnerOfSign(sign, player)) {
                     //todo update but don't add members of this additional sign
                 } else {
-                    //todo just update additional signs
+                    GreenLockerAPI.updateLegacySign(sign);
                     event.setCancelled(true);
                     MiscUtils.playAccessDenyEffect(player, block);
                 }

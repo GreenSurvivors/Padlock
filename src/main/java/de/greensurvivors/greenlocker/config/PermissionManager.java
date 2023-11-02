@@ -21,7 +21,7 @@ public enum PermissionManager {
 
     private final String perm;
 
-    private PermissionManager(String perm) {
+    PermissionManager(String perm) {
         this.perm = perm;
     }
 

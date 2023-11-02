@@ -3,6 +3,7 @@ package de.greensurvivors.greenlocker.impl.signdata;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import de.greensurvivors.greenlocker.GreenLocker;
+import de.greensurvivors.greenlocker.config.MessageManager;
 import net.kyori.adventure.text.Component;
 import org.apache.commons.collections4.set.ListOrderedSet;
 import org.bukkit.Bukkit;
@@ -45,31 +46,17 @@ public class LockSign {
     }
 
     public static void setInvalid(@NotNull Sign sign) {
-        sign.getSide(Side.FRONT).line(0, GreenLocker.getPlugin().getMessageManager().getInvalidString());
+        sign.getSide(Side.FRONT).line(0, GreenLocker.getPlugin().getMessageManager().getLang(MessageManager.LangPath.invalidSign));
         sign.update();
     }
 
-    public static boolean isLockComp(@NotNull Component line) {
-        return GreenLocker.getPlugin().getMessageManager().isPrivateSignComp(line);
-    }
-
-    @Deprecated(forRemoval = true)
-    public static boolean isLockString(@NotNull String line) {
-        return GreenLocker.getPlugin().getMessageManager().isPrivateSignString(line);
-    }
-
-    @Deprecated(forRemoval = true)
-    private static boolean isAdditionalString(String line) {
-        return GreenLocker.getPlugin().getMessageManager().isAdditionalSignString(line);
-    }
-
     public static boolean isLockSign(@NotNull Sign sign) {
-        return isLockComp(sign.getSide(Side.FRONT).line(0));
+        return GreenLocker.getPlugin().getMessageManager().isSignComp(sign.getSide(Side.FRONT).line(0), MessageManager.LangPath.privateSign);
     }
 
     @Deprecated(forRemoval = true)
     public static boolean isAdditionalSign(@NotNull Sign sign) {
-        return isAdditionalString(sign.getSide(Side.FRONT).getLine(0));
+        return GreenLocker.getPlugin().getMessageManager().isSignComp(sign.getSide(Side.FRONT).line(0), MessageManager.LangPath.additionalSign);
     }
 
     public static boolean isOwner(@NotNull final Sign sign, UUID uuid) {
