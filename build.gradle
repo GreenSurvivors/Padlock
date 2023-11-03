@@ -13,7 +13,7 @@ ext.buildNumber = System.env.BUILD_NUMBER == null ? "x"                : "build"
 ext.mavenDirectory = System.env.MAVEN_DIR == null ? "$projectDir/repo" : "$System.env.MAVEN_DIR"
 ext.jdDirectory = System.env.JAVADOCS_DIR == null ? null               : "$System.env.JAVADOCS_DIR"
 
-sourceCompatibility = 21
+sourceCompatibility = 17
 targetCompatibility = 17
 
 // differet version convension from Nyaa plugins

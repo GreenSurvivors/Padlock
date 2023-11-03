@@ -17,7 +17,7 @@ public class ConfigOption<T> {
         return path;
     }
 
-    protected @NotNull T getFallbackValue() {
+    protected T getFallbackValue() {
         return fallbackValue;
     }
 

@@ -86,6 +86,7 @@ public class LockSign {
             if (line.contains("#")) {
                 String[] splitted = line.split("#", 2);
 
+                //todo this might be as well a #created
                 if (splitted[1].length() == 36) { // uuid valid check
                     addPlayer(main, false, Bukkit.getOfflinePlayer(UUID.fromString(splitted[1])));
                 }

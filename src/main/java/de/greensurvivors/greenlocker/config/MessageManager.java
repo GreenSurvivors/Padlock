@@ -55,7 +55,7 @@ public class MessageManager { //todo dokument whole plugin
         }
     }
 
-    public void sendMessages(@NotNull CommandSender sender, @Nullable Component messages) { //todo preparation for MessageManager
+    public void sendMessages(@NotNull CommandSender sender, @Nullable Component messages) {
         if (messages != null) {
             sender.sendMessage(prefixComp.append(messages));
         }
@@ -93,13 +93,13 @@ public class MessageManager { //todo dokument whole plugin
     public boolean isTimerSignComp(@NotNull Component compToTest) {
         String strToTest = PlainTextComponentSerializer.plainText().serialize(compToTest).trim();
 
-        String[] splitted = nakedSigns.get(LangPath.TIMER_SIGN).split("@", 2);
+        String[] splitted = nakedSigns.get(LangPath.TIMER_SIGN).split("<time>", 2);
         return strToTest.startsWith(splitted[0]) && strToTest.endsWith(splitted[1]);
     }
 
     public int getTimer(Component compToTest) {
         String strToTest = PlainTextComponentSerializer.plainText().serialize(compToTest).trim();
-        String[] splitted = nakedSigns.get(LangPath.TIMER_SIGN).split("@", 2);
+        String[] splitted = nakedSigns.get(LangPath.TIMER_SIGN).split("<time>", 2);
 
         if (strToTest.startsWith(splitted[0]) && strToTest.endsWith(splitted[1])) {
             String newmessage = strToTest.replace(splitted[0], "").replace(splitted[1], "");
@@ -114,14 +114,14 @@ public class MessageManager { //todo dokument whole plugin
     }
 
     public enum LangPath {
-        PLUGIN_PREFIX("prefix", "&6[GreenLocker]&r"), //todo miniMessage
+        PLUGIN_PREFIX("prefix", "<gold>[GreenLocker]</gold> "),
 
         PRIVATE_SIGN("sign.line.private", "[Private]"),
         @Deprecated(forRemoval = true)
         ADDITIONAL_SIGN("sign.line.additional", "[More Users]"),
         EVERYONE_SIGN("sign.line.everyone", "[Everyone]"),
-        TIMER_SIGN("sign.line.everyone", "[Timer:@]"),
-        EXPIRE_SIGN("sign.line.expire", "&3[Expired]"), //todo miniMessage
+        TIMER_SIGN("sign.line.everyone", "[Timer:<time>]"),
+        EXPIRE_SIGN("sign.line.expire", "[<dark_aqua>Expired</dark_aqua>]"),
         ERROR_SIGN("sign.line.error", "[Error]"),
         INVALID_SIGN("sign.line.invalid", "[Invalid]"),
 
