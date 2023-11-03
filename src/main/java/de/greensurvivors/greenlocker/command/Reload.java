@@ -19,7 +19,7 @@ public class Reload extends SubCommand {
 
     @Override
     protected boolean checkPermission(Permissible sender) {
-        return sender.hasPermission(PermissionManager.cmdReload.getPerm());
+        return sender.hasPermission(PermissionManager.CMD_RELOAD.getPerm());
     }
 
     @Override
@@ -29,7 +29,7 @@ public class Reload extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.helpReload);
+        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_RELOAD);
     }
 
     /**
@@ -47,9 +47,9 @@ public class Reload extends SubCommand {
         if (this.checkPermission(sender)) {
             plugin.getConfigManager().reload();
 
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.reloadSuccess);
+            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.RELOAD_SUCCESS);
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.noPermission);
+            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
         }
 
         return true;

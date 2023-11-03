@@ -19,7 +19,7 @@ public class Version extends SubCommand {
 
     @Override
     protected boolean checkPermission(Permissible sender) {
-        return sender.hasPermission(PermissionManager.cmdVersion.getPerm());
+        return sender.hasPermission(PermissionManager.CMD_VERSION.getPerm());
     }
 
     @Override
@@ -29,7 +29,7 @@ public class Version extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.helpVersion);
+        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_VERSION);
     }
 
     /**
@@ -48,7 +48,7 @@ public class Version extends SubCommand {
             //plugin.getPluginMeta().getName() + " " + plugin.getPluginMeta().getVersion();
             plugin.getMessageManager().sendMessages(sender, Component.text(plugin.getDescription().getFullName())); //todo
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.noPermission);
+            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
         }
         return true;
     }

@@ -58,7 +58,7 @@ public class Command implements CommandExecutor, TabCompleter {
 
     protected static @Nullable List<String> onTapCompleateRemovePlayer(@NotNull CommandSender sender, boolean removeOwner) {
         if (sender instanceof Player player) {
-            if (sender.hasPermission(PermissionManager.edit.getPerm())) {
+            if (sender.hasPermission(PermissionManager.EDIT.getPerm())) {
                 Block block = SignSelection.getSelectedSign(player);
 
                 if (block != null) {
@@ -68,16 +68,16 @@ public class Command implements CommandExecutor, TabCompleter {
 
                             if (otherSign == null) {
                                 GreenLockerAPI.setInvalid(sign);
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
                                 return null;
                             } else {
                                 sign = otherSign;
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.updateSignSuccess);
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UPDATE_SIGN_SUCCESS);
                             }
                         }
 
                         if (removeOwner) {
-                            if (sender.hasPermission(PermissionManager.adminEdit.getPerm())) {
+                            if (sender.hasPermission(PermissionManager.PERMISSION_MANAGER.getPerm())) {
                                 ListOrderedSet<String> uuidStrs = LockSign.getUUIDs(sign, true);
                                 List<String> result = new ArrayList<>();
 
@@ -139,7 +139,7 @@ public class Command implements CommandExecutor, TabCompleter {
      */
     protected static boolean onAddPlayer(@NotNull CommandSender sender, final @NotNull String @NotNull [] args, boolean addOwner) {
         if (sender instanceof Player player) {
-            if (sender.hasPermission(PermissionManager.edit.getPerm())) {
+            if (sender.hasPermission(PermissionManager.EDIT.getPerm())) {
                 if (args.length >= 2) {
                     OfflinePlayer offlinePlayer = Command.getPlayerFromArgument(args[1]);
                     Block block = SignSelection.getSelectedSign(player);
@@ -151,50 +151,50 @@ public class Command implements CommandExecutor, TabCompleter {
 
                                 if (otherSign == null) {
                                     GreenLockerAPI.setInvalid(sign);
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
+                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
                                     return true;
                                 } else {
                                     sign = otherSign;
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.updateSignSuccess);
+                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UPDATE_SIGN_SUCCESS);
                                 }
                             }
 
-                            if (player.hasPermission(PermissionManager.adminEdit.getPerm()) || (!addOwner && GreenLockerAPI.isOwnerOfSign(sign, player))) {
+                            if (player.hasPermission(PermissionManager.PERMISSION_MANAGER.getPerm()) || (!addOwner && GreenLockerAPI.isOwnerOfSign(sign, player))) {
                                 if (offlinePlayer != null) {
 
                                     if (GreenLockerAPI.isLockSign(sign)) {
                                         LockSign.addPlayer(sign, addOwner, offlinePlayer);
 
                                         if (addOwner) {
-                                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.addOwnerSuccess);
+                                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.ADD_OWNER_SUCCESS);
                                         } else {
-                                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.addMemberSuccess);
+                                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.ADD_MEMBER_SUCCESS);
                                         }
                                     } else {
-                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
+                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
                                     }
                                 } else {
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.unknownPlayer);
+                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UNKNOWN_PLAYER);
                                 }
                             } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.noPermission);
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
                             }
                         } else {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
+                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
                         }
                     } else {
-                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNotSelected);
+                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NOT_SELECTED);
                     }
                 } else {
-                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.notEnoughArgs);
+                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_ENOUGH_ARGS);
                 }
             } else {
-                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.noPermission);
+                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
             }
 
             return true;
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.notAPlayer);
+            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_PLAYER);
             return false;
         }
     }
@@ -211,7 +211,7 @@ public class Command implements CommandExecutor, TabCompleter {
      */
     protected static boolean onRemovePlayer(@NotNull CommandSender sender, final @NotNull String @NotNull [] args, boolean removeOwner) {
         if (sender instanceof Player player) {
-            if (sender.hasPermission(PermissionManager.edit.getPerm())) {
+            if (sender.hasPermission(PermissionManager.EDIT.getPerm())) {
                 if (args.length >= 2) {
                     OfflinePlayer offlinePlayer = getPlayerFromArgument(args[1]);
                     Block block = SignSelection.getSelectedSign(player);
@@ -223,55 +223,55 @@ public class Command implements CommandExecutor, TabCompleter {
 
                                 if (otherSign == null) {
                                     GreenLockerAPI.setInvalid(sign);
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
+                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
                                     return true;
                                 } else {
                                     sign = otherSign;
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.updateSignSuccess);
+                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UPDATE_SIGN_SUCCESS);
                                 }
                             }
 
-                            if (player.hasPermission(PermissionManager.adminEdit.getPerm()) || (!removeOwner && LockSign.isOwner(sign, player.getUniqueId()))) {
+                            if (player.hasPermission(PermissionManager.PERMISSION_MANAGER.getPerm()) || (!removeOwner && LockSign.isOwner(sign, player.getUniqueId()))) {
                                 if (offlinePlayer != null) {
                                     if (GreenLockerAPI.isLockSign(sign)) {
                                         if (LockSign.removePlayer(sign, removeOwner, offlinePlayer.getUniqueId())) {
                                             if (removeOwner) {
-                                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.removeOwnerSuccess);
+                                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_OWNER_SUCCESS);
                                             } else {
-                                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.removeMemberSuccess);
+                                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_MEMBER_SUCCESS);
                                             }
                                         } else {
                                             if (removeOwner) {
-                                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.removeOwnerError);
+                                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_OWNER_ERROR);
                                             } else {
-                                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.removeMemberError);
+                                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_MEMBER_ERROR);
                                             }
                                         }
                                     } else {
-                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
+                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
                                     }
                                 } else {
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.unknownPlayer);
+                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UNKNOWN_PLAYER);
                                 }
                             } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.noPermission);
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
                             }
                         } else {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
+                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
                         }
                     } else {
-                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNotSelected);
+                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NOT_SELECTED);
                     }
                 } else {
-                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.notEnoughArgs);
+                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_ENOUGH_ARGS);
                 }
             } else {
-                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.noPermission);
+                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
             }
 
             return true;
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.notAPlayer);
+            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_PLAYER);
             return false;
         }
     }
@@ -293,7 +293,7 @@ public class Command implements CommandExecutor, TabCompleter {
     }
 
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command, @NotNull String alias, @NotNull String[] args) { //todo
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command, @NotNull String alias, @NotNull String[] args) {
         List<String> suggestionList = null;
 
         if (args.length == 1) {
@@ -331,7 +331,7 @@ public class Command implements CommandExecutor, TabCompleter {
 
     public boolean onCommand(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command cmd, @NotNull String commandLabel, final String[] args) {
         if (args.length == 0) {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.cmdUsage);
+            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.CMD_USAGE);
             return true;
         } else {
             SubCommand subCommand = getSubCommandFromString(sender, args[0]);
@@ -340,7 +340,7 @@ public class Command implements CommandExecutor, TabCompleter {
                 return subCommand.onCommand(sender, args);
             }
 
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.cmdUsage);
+            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.CMD_USAGE);
             return false;
         }
     }

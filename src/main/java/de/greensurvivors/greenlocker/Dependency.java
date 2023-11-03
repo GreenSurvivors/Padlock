@@ -17,13 +17,13 @@ public class Dependency {
     public static void setPluginAndLoad(GreenLocker plugin) {
         // WorldGuard
         Plugin worldguardplugin = plugin.getServer().getPluginManager().getPlugin("WorldGuard");
-        if (!plugin.getConfigManager().getWorldguard() || !(worldguardplugin instanceof WorldGuardPlugin)) {
+        if (!plugin.getConfigManager().shouldUseWorldguard() || !(worldguardplugin instanceof WorldGuardPlugin)) {
             worldguard = null;
         } else {
             worldguard = (WorldGuardPlugin) worldguardplugin;
         }
 
-        if (plugin.getConfigManager().getCoreprotect() && Bukkit.getPluginManager().getPlugin("CoreProtect") != null && CoreProtect.getInstance().getAPI().APIVersion() >= 6) {
+        if (plugin.getConfigManager().shouldUseCoreprotect() && Bukkit.getPluginManager().getPlugin("CoreProtect") != null && CoreProtect.getInstance().getAPI().APIVersion() >= 6) {
             coreProtectAPI = CoreProtect.getInstance().getAPI();
             if (!coreProtectAPI.isEnabled()) {
                 coreProtectAPI = null;

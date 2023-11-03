@@ -2,6 +2,7 @@ package de.greensurvivors.greenlocker.listener;
 
 import de.greensurvivors.greenlocker.GreenLocker;
 import de.greensurvivors.greenlocker.GreenLockerAPI;
+import de.greensurvivors.greenlocker.config.ConfigManager;
 import de.greensurvivors.greenlocker.impl.doordata.Doors;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
@@ -28,7 +29,7 @@ public class BlockEnvironmentListener implements Listener {
     // Prevent explosion break block
     @EventHandler(priority = EventPriority.HIGH)
     public void onEntityExplode(EntityExplodeEvent event) {
-        if (!plugin.getConfigManager().isProtectionExempted("explosion")) {
+        if (!plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.EXPLOSION)) {
             event.blockList().removeIf(GreenLockerAPI::isProtected);
         }
     }
@@ -36,7 +37,7 @@ public class BlockEnvironmentListener implements Listener {
     // Prevent bed / respawn anchor break block
     @EventHandler(priority = EventPriority.HIGH)
     public void onBlockExplode(BlockExplodeEvent event) {
-        if (!plugin.getConfigManager().isProtectionExempted("explosion")) {
+        if (!plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.EXPLOSION)) {
             event.blockList().removeIf(GreenLockerAPI::isProtected);
         }
     }
@@ -44,7 +45,7 @@ public class BlockEnvironmentListener implements Listener {
     // Prevent tree break block
     @EventHandler(priority = EventPriority.HIGH)
     public void onStructureGrow(StructureGrowEvent event) {
-        if (!plugin.getConfigManager().isProtectionExempted("growth")) {
+        if (!plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.GROWTH)) {
             for (BlockState blockstate : event.getBlocks()) {
                 if (GreenLockerAPI.isProtected(blockstate.getBlock())) {
                     event.setCancelled(true);
@@ -57,7 +58,7 @@ public class BlockEnvironmentListener implements Listener {
     // Prevent piston extend break lock
     @EventHandler(priority = EventPriority.HIGH)
     public void onPistonExtend(BlockPistonExtendEvent event) {
-        if (!plugin.getConfigManager().isProtectionExempted("piston")) {
+        if (!plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.PISTON)) {
             for (Block block : event.getBlocks()) {
                 if (GreenLockerAPI.isProtected(block)) {
                     event.setCancelled(true);
@@ -70,7 +71,7 @@ public class BlockEnvironmentListener implements Listener {
     // Prevent piston retract break lock
     @EventHandler(priority = EventPriority.HIGH)
     public void onPistonRetract(BlockPistonRetractEvent event) {
-        if (!plugin.getConfigManager().isProtectionExempted("piston")) {
+        if (!plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.PISTON)) {
             for (Block block : event.getBlocks()) {
                 if (GreenLockerAPI.isProtected(block)) {
                     event.setCancelled(true);
@@ -83,7 +84,7 @@ public class BlockEnvironmentListener implements Listener {
     // Prevent redstone current open doors
     @EventHandler(priority = EventPriority.HIGH)
     public void onBlockRedstoneChange(BlockRedstoneEvent event) {
-        if (!plugin.getConfigManager().isProtectionExempted("redstone")) {
+        if (!plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.REDSTONE)) {
             if (GreenLockerAPI.isProtected(event.getBlock())) {
                 event.setNewCurrent(event.getOldCurrent());
             }
@@ -93,7 +94,7 @@ public class BlockEnvironmentListener implements Listener {
     // Prevent villager open door
     @EventHandler(priority = EventPriority.HIGH)
     public void onVillagerOpenDoor(EntityInteractEvent event) {
-        if (plugin.getConfigManager().isProtectionExempted("villager")) return;
+        if (plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.VILLAGER)) return;
         // Explicitly to villager vs all doors
         if (event.getEntity() instanceof Villager &&
                 (Doors.isSingleDoorBlock(event.getBlock()) || Doors.isDoubleDoorBlock(event.getBlock())) &&
@@ -105,10 +106,10 @@ public class BlockEnvironmentListener implements Listener {
     // Prevent mob change block
     @EventHandler(priority = EventPriority.HIGH)
     public void onMobChangeBlock(EntityChangeBlockEvent event) { //todo there are so many more mobgriefs
-        if ((event.getEntity() instanceof Enderman && !plugin.getConfigManager().isProtectionExempted("enderman")) ||// enderman pick up/place block
-                (event.getEntity() instanceof Wither && !plugin.getConfigManager().isProtectionExempted("wither")) ||// wither break block
-                (event.getEntity() instanceof Zombie && !plugin.getConfigManager().isProtectionExempted("zombie")) ||// zombie break door
-                (event.getEntity() instanceof Silverfish && !plugin.getConfigManager().isProtectionExempted("silverfish"))) {
+        if ((event.getEntity() instanceof Enderman && !plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.ENDERMAN)) ||// enderman pick up/place block
+                (event.getEntity() instanceof Wither && !plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.WITHER)) ||// wither break block
+                (event.getEntity() instanceof Zombie && !plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.ZOMBIE)) ||// zombie break door
+                (event.getEntity() instanceof Silverfish && !plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.SILVERFISH))) {
             if (GreenLockerAPI.isProtected(event.getBlock())) {
                 event.setCancelled(true);
             }

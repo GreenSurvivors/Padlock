@@ -2,6 +2,7 @@ package de.greensurvivors.greenlocker.listener;
 
 import de.greensurvivors.greenlocker.GreenLocker;
 import de.greensurvivors.greenlocker.GreenLockerAPI;
+import de.greensurvivors.greenlocker.config.ConfigManager;
 import de.greensurvivors.greenlocker.impl.Cache;
 import de.greensurvivors.greenlocker.impl.MiscUtils;
 import org.bukkit.block.Block;
@@ -24,21 +25,21 @@ public class BlockInventoryMoveListener implements Listener {
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     public void onInventoryMove(InventoryMoveItemEvent event) {
-        if (plugin.getConfigManager().isItemTransferOutBlocked() || plugin.getConfigManager().getHopperMinecartAction() != (byte) 0) {
+        if (plugin.getConfigManager().isItemTransferOutBlocked() || plugin.getConfigManager().getHopperMinecartAction() != ConfigManager.HopperMinecartBlockedOption.FALSE) {
             if (isInventoryLocked(event.getSource())) {
                 if (plugin.getConfigManager().isItemTransferOutBlocked()) {
                     event.setCancelled(true);
                 }
                 // Additional Hopper Minecart Check
                 if (event.getDestination().getHolder() instanceof HopperMinecart) {
-                    byte hopperminecartaction = plugin.getConfigManager().getHopperMinecartAction();
+                    ConfigManager.HopperMinecartBlockedOption hopperminecartaction = plugin.getConfigManager().getHopperMinecartAction();
                     switch (hopperminecartaction) {
                         // case 0 - Impossible
-                        case (byte) 1 -> // Cancel only, it is not called if !Config.isItemTransferOutBlocked()
+                        case TRUE -> // Cancel only, it is not called if !Config.isItemTransferOutBlocked()
                                 event.setCancelled(true);
-                        case (byte) 2 -> { // Extra action - HopperMinecart removal
+                        case REMOVE -> { // Extra action - HopperMinecart removal
                             event.setCancelled(true);
-                            ((HopperMinecart) event.getDestination().getHolder()).remove();
+                            ((HopperMinecart) event.getDestination().getHolder()).remove(); //todo test if this drops the cart and its items
                         }
                     }
                 }

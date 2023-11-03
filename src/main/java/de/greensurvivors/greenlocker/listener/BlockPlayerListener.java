@@ -3,6 +3,7 @@ package de.greensurvivors.greenlocker.listener;
 import de.greensurvivors.greenlocker.Dependency;
 import de.greensurvivors.greenlocker.GreenLocker;
 import de.greensurvivors.greenlocker.GreenLockerAPI;
+import de.greensurvivors.greenlocker.config.ConfigManager;
 import de.greensurvivors.greenlocker.config.MessageManager;
 import de.greensurvivors.greenlocker.config.PermissionManager;
 import de.greensurvivors.greenlocker.impl.Cache;
@@ -39,6 +40,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 public class BlockPlayerListener implements Listener { //todo this whole class
     private final GreenLocker plugin;
@@ -50,20 +52,32 @@ public class BlockPlayerListener implements Listener { //todo this whole class
     // Quick protect for chests
     @EventHandler(ignoreCancelled = true, priority = EventPriority.NORMAL)
     public void onPlayerQuickLockChest(PlayerInteractEvent event) {
-        // Check quick lock enabled
-        if (plugin.getConfigManager().getQuickProtectAction() == (byte) 0) return;
+        Player player = event.getPlayer();
+
+        // Check quick lock status
+        switch (plugin.getConfigManager().getQuickProtectAction()) {
+            case OFF -> {
+                return;
+            }
+            case SNEAK_REQUIRED -> {
+                if (!player.isSneaking()) {
+                    return;
+                }
+            }
+            case NOT_SNEAKING_REQUIRED -> {
+                if (player.isSneaking()) {
+                    return;
+                }
+            }
+        }
+
         // Get player and action info
         Action action = event.getAction();
-        Player player = event.getPlayer();
         // Check action correctness
         if (action == Action.RIGHT_CLICK_BLOCK && Tag.SIGNS.isTagged(player.getInventory().getItemInMainHand().getType())) {
             if (player.getGameMode().equals(GameMode.SPECTATOR)) {
                 return;
             }
-            // Check quick lock action correctness
-            if (!((event.getPlayer().isSneaking() && plugin.getConfigManager().getQuickProtectAction() == (byte) 2) ||
-                    (!event.getPlayer().isSneaking() && plugin.getConfigManager().getQuickProtectAction() == (byte) 1)))
-                return;
             // Check permission 
             if (player.hasPermission(PermissionManager.actionLock.getPerm())) {
                 // Get target block to lock
@@ -90,22 +104,22 @@ public class BlockPlayerListener implements Listener { //todo this whole class
                                 // Not locked, not a locked door nearby
                                 MiscUtils.removeASign(player);
                                 // Put sign on
-                                Block newsign = MiscUtils.putSignOn(block, blockface, plugin.getMessageManager().getLang(MessageManager.LangPath.privateSign), player.name(), signType);
+                                Block newsign = MiscUtils.putSignOn(block, blockface, plugin.getMessageManager().getLang(MessageManager.LangPath.PRIVATE_SIGN), player.name(), signType);
                                 Cache.resetCache(block);
                                 // Send message
-                                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.lockSuccess);
+                                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
                                 // Cleanups - old names
                                 LockSign.updateNamesByUuid((Sign) newsign.getState());
 
                                 // Cleanups - Expiracy
-                                if (plugin.getConfigManager().isLockExpire()) {
+                                if (plugin.getConfigManager().doLocksExpire()) {
                                     // set created to now
-                                    ExpireSign.updateLineWithTime((Sign) newsign.getState(), player.hasPermission(PermissionManager.noExpire.getPerm())); // set created to -1 (no expire) or now
+                                    ExpireSign.updateLineWithTime((Sign) newsign.getState(), player.hasPermission(PermissionManager.NO_EXPIRE.getPerm())); // set created to -1 (no expire) or now
                                 }
                                 Dependency.logPlacement(player, newsign);
                             } else {
                                 // Cannot lock this block
-                                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.quickLockError);
+                                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.QUICK_LOCK_ERROR);
                             }
                         }
                     }
@@ -133,7 +147,7 @@ public class BlockPlayerListener implements Listener { //todo this whole class
                         sign.setWaxed(true);
                         sign.update();
 
-                        plugin.getMessageManager().sendLang(player, MessageManager.LangPath.lockSuccess);
+                        plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
                         if (!player.hasPermission(PermissionManager.actionLockOthers.getPerm())) { // Player with permission can lock with another name
                             event.line(1, Component.text(player.getName()));
                         }
@@ -141,22 +155,22 @@ public class BlockPlayerListener implements Listener { //todo this whole class
                     }
                 } else if (!locked && GreenLockerAPI.isOwnerUpDownLockedDoor(block, player)) {
                     if (GreenLockerAPI.isLockComp(topline)) {
-                        plugin.getMessageManager().sendLang(player, MessageManager.LangPath.lockErrorAlreadyLocked);
-                        event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.errorSign));
+                        plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_ERROR_ALREADY_LOCKED);
+                        event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN));
                     }
                 } else if (GreenLockerAPI.isOwner(block, player)) {
                     if (GreenLockerAPI.isLockComp(topline)) {
-                        plugin.getMessageManager().sendLang(player, MessageManager.LangPath.lockErrorAlreadyLocked);
-                        event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.errorSign));
+                        plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_ERROR_ALREADY_LOCKED);
+                        event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN));
                     }
                 } else { // Not possible to fall here except override
-                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.lockErrorAlreadyLocked);
-                    event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.errorSign));
+                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_ERROR_ALREADY_LOCKED);
+                    event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN));
                     MiscUtils.playAccessDenyEffect(player, block);
                 }
             } else {
-                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.lockErrorNotLockable);
-                event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.errorSign));
+                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_ERROR_NOT_LOCKABLE);
+                event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN));
                 MiscUtils.playAccessDenyEffect(player, block);
             }
         }
@@ -170,13 +184,13 @@ public class BlockPlayerListener implements Listener { //todo this whole class
 
         if (event.getAction() == Action.RIGHT_CLICK_BLOCK && event.hasBlock() && Tag.WALL_SIGNS.isTagged(clickedBlock.getType())) {
             Player player = event.getPlayer();
-            if (!player.hasPermission(PermissionManager.edit.getPerm())) return;
+            if (!player.hasPermission(PermissionManager.EDIT.getPerm())) return;
 
             if (clickedBlock.getState() instanceof Sign sign &&
                     (GreenLockerAPI.isOwnerOfSign(sign, player) ||
-                            ((GreenLockerAPI.isLockSign(sign) || GreenLockerAPI.isAdditionalSign(sign)) && player.hasPermission(PermissionManager.adminEdit.getPerm())))) {
+                            ((GreenLockerAPI.isLockSign(sign) || GreenLockerAPI.isAdditionalSign(sign)) && player.hasPermission(PermissionManager.PERMISSION_MANAGER.getPerm())))) {
                 SignSelection.selectSign(player, clickedBlock);
-                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.selectSign);
+                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.SELECT_SIGN);
                 MiscUtils.playLockEffect(player, clickedBlock);
             }
         }
@@ -187,15 +201,15 @@ public class BlockPlayerListener implements Listener { //todo this whole class
     private void onAttemptBreakSign(@NotNull BlockBreakEvent event) {
         Block block = event.getBlock();
         Player player = event.getPlayer();
-        if (player.hasPermission(PermissionManager.adminBreak.getPerm())) return;
+        if (player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm())) return;
 
         if (block.getState() instanceof Sign sign) {
             if (GreenLockerAPI.isLockSign(sign)) {
                 if (GreenLockerAPI.isOwnerOfSign(sign, player)) {
-                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.breakLockSuccess);
+                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.BREAK_LOCK_SUCCESS);
                     Cache.resetCache(GreenLockerAPI.getAttachedBlock(block));
                 } else {
-                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.notOwner);
+                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.NOT_OWNER);
                     event.setCancelled(true);
                     MiscUtils.playAccessDenyEffect(player, block);
                 }
@@ -246,7 +260,7 @@ public class BlockPlayerListener implements Listener { //todo this whole class
         Block block = event.getBlock();
         Player player = event.getPlayer();
         if (GreenLockerAPI.isLocked(block) || GreenLockerAPI.isPartOfLockedDoor(block)) {
-            plugin.getMessageManager().sendLang(player, MessageManager.LangPath.actionPreventedLocked);
+            plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
             event.setCancelled(true);
             MiscUtils.playAccessDenyEffect(player, block);
         }
@@ -275,8 +289,8 @@ public class BlockPlayerListener implements Listener { //todo this whole class
                 Player player = event.getPlayer();
                 if (((GreenLockerAPI.isLocked(block) && !GreenLockerAPI.isMember(block, player)) ||
                         (GreenLockerAPI.isPartOfLockedDoor(block) && !GreenLockerAPI.isUserUpDownLockedDoor(block, player)))
-                        && !player.hasPermission(PermissionManager.adminUse.getPerm())) {
-                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.actionPreventedLocked);
+                        && !player.hasPermission(PermissionManager.ADMIN_USE.getPerm())) {
+                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
                     event.setCancelled(true);
                     MiscUtils.playAccessDenyEffect(player, block);
                 } else { // Handle double doors
@@ -322,9 +336,9 @@ public class BlockPlayerListener implements Listener { //todo this whole class
         Block block = event.getBlock();
         Player player = event.getPlayer();
 
-        if (!player.hasPermission(PermissionManager.adminInterfere.getPerm())) {
+        if (!player.hasPermission(PermissionManager.ADMIN_INTERFERE.getPerm())) {
             if (GreenLockerAPI.mayInterfere(block, player)) {
-                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.actionPreventedInterfere);
+                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_INTERFERE);
                 event.setCancelled(true);
                 MiscUtils.playAccessDenyEffect(player, block);
             }
@@ -338,9 +352,10 @@ public class BlockPlayerListener implements Listener { //todo this whole class
         Player player = event.getPlayer();
         if (player.hasPermission(PermissionManager.actionLock.getPerm())) {
             if (MiscUtils.shouldNotify(player) && plugin.getConfigManager().isLockable(block.getType())) {
-                switch (plugin.getConfigManager().getQuickProtectAction()) {
-                    case 0 -> plugin.getMessageManager().sendLang(player, MessageManager.LangPath.noticeManuelLock);
-                    case 1, 2 -> plugin.getMessageManager().sendLang(player, MessageManager.LangPath.noticeQuickLock);
+                if (Objects.requireNonNull(plugin.getConfigManager().getQuickProtectAction()) == ConfigManager.QuickProtectOption.OFF) {
+                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.NOTICE_MANUEL_LOCK);
+                } else {
+                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.NOTICE_QUICK_LOCK);
                 }
             }
         }

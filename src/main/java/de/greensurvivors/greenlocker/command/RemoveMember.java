@@ -19,7 +19,7 @@ public class RemoveMember extends SubCommand {
 
     @Override
     protected boolean checkPermission(Permissible sender) {
-        return sender.hasPermission(PermissionManager.edit.getPerm());
+        return sender.hasPermission(PermissionManager.EDIT.getPerm());
     }
 
     @Override
@@ -29,7 +29,7 @@ public class RemoveMember extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.helpRemoveMember);
+        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_REMOVE_MEMBER);
     }
 
     /**

@@ -21,7 +21,7 @@ public class Debug extends SubCommand {
 
     @Override
     protected boolean checkPermission(Permissible sender) {
-        return sender.hasPermission(PermissionManager.debug.getPerm());
+        return sender.hasPermission(PermissionManager.DEBUG.getPerm());
     }
 
     @Override
@@ -31,7 +31,7 @@ public class Debug extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.helpDebug);
+        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_DEBUG);
     }
 
     /**
@@ -53,8 +53,8 @@ public class Debug extends SubCommand {
             sender.sendMessage("GreenLocker: " + plugin.getPluginMeta().getVersion());
             // Version
             sender.sendMessage("Server version: " + Bukkit.getVersion());
-            sender.sendMessage("Expire: " + plugin.getConfigManager().isLockExpire() + " " +
-                    (plugin.getConfigManager().isLockExpire() ? plugin.getConfigManager().getLockExpireDays() : ""));
+            sender.sendMessage("Expire: " + plugin.getConfigManager().doLocksExpire() + " " +
+                    (plugin.getConfigManager().doLocksExpire() ? plugin.getConfigManager().getLockExpireDays() : ""));
 
             // Other
             sender.sendMessage("Linked plugins:");
@@ -74,7 +74,7 @@ public class Debug extends SubCommand {
                 sender.sendMessage(" - none");
             }
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.noPermission);
+            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
         }
 
         return true;

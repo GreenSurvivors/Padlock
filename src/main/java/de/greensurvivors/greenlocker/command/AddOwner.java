@@ -20,7 +20,7 @@ public class AddOwner extends SubCommand {
 
     @Override
     protected boolean checkPermission(Permissible sender) {
-        return sender.hasPermission(PermissionManager.edit.getPerm()) && sender.hasPermission(PermissionManager.adminEdit.getPerm());
+        return sender.hasPermission(PermissionManager.EDIT.getPerm()) && sender.hasPermission(PermissionManager.PERMISSION_MANAGER.getPerm());
     }
 
     @Override
@@ -30,7 +30,7 @@ public class AddOwner extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.helpAddOwner);
+        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_ADD_OWNER);
     }
 
     /**
@@ -62,7 +62,7 @@ public class AddOwner extends SubCommand {
      */
     @Override
     protected @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
-        if (sender.hasPermission(PermissionManager.edit.getPerm())) {
+        if (sender.hasPermission(PermissionManager.EDIT.getPerm())) {
             return plugin.getServer().getOnlinePlayers().stream().map(Player::getName).toList();
         } else {
             return null;

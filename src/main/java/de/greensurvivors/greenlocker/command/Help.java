@@ -19,7 +19,7 @@ public class Help extends SubCommand {
 
     @Override
     protected boolean checkPermission(Permissible sender) {
-        return sender.hasPermission(PermissionManager.cmdHelp.getPerm());
+        return sender.hasPermission(PermissionManager.CMD_HELP.getPerm());
     }
 
     @Override
@@ -29,7 +29,7 @@ public class Help extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.helpHelp);
+        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_HELP);
     }
 
     /**
@@ -48,17 +48,17 @@ public class Help extends SubCommand {
             SubCommand command = Command.getSubCommandFromString(sender, args[2]);
 
             if (command != null) {
-                Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.helpHeader);
+                Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_HEADER);
                 component = component.append(Component.newline());
                 component = component.append(command.getHelpText());
 
                 plugin.getMessageManager().sendMessages(sender, component);
             } else {
-                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.helpNoPermissionSubcommand);
+                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.HELP_NO_PERMISSION_SUBCOMMAND);
                 return false;
             }
         } else {
-            Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.helpHeader);
+            Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_HEADER);
             component = component.append(Component.newline());
 
             for (SubCommand subCommand : Command.getSubCommands(sender)) {

@@ -46,17 +46,17 @@ public class LockSign {
     }
 
     public static void setInvalid(@NotNull Sign sign) {
-        sign.getSide(Side.FRONT).line(0, GreenLocker.getPlugin().getMessageManager().getLang(MessageManager.LangPath.invalidSign));
+        sign.getSide(Side.FRONT).line(0, GreenLocker.getPlugin().getMessageManager().getLang(MessageManager.LangPath.INVALID_SIGN));
         sign.update();
     }
 
     public static boolean isLockSign(@NotNull Sign sign) {
-        return GreenLocker.getPlugin().getMessageManager().isSignComp(sign.getSide(Side.FRONT).line(0), MessageManager.LangPath.privateSign);
+        return GreenLocker.getPlugin().getMessageManager().isSignComp(sign.getSide(Side.FRONT).line(0), MessageManager.LangPath.PRIVATE_SIGN);
     }
 
     @Deprecated(forRemoval = true)
     public static boolean isAdditionalSign(@NotNull Sign sign) {
-        return GreenLocker.getPlugin().getMessageManager().isSignComp(sign.getSide(Side.FRONT).line(0), MessageManager.LangPath.additionalSign);
+        return GreenLocker.getPlugin().getMessageManager().isSignComp(sign.getSide(Side.FRONT).line(0), MessageManager.LangPath.ADDITIONAL_SIGN);
     }
 
     public static boolean isOwner(@NotNull final Sign sign, UUID uuid) {

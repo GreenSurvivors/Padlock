@@ -576,7 +576,7 @@ public class GreenLockerAPI {
     private static boolean isValidLockSign(@Nullable Sign sign) {//Please mind, a private sign may have expired, but do how two locked blocks line up it's totally possible for more than one [Private] sign per block. However only the first valid found wil get used
         if (sign != null && isLockSign(sign)) {
             // Found [Private] sign, is expire turned on and expired? (relativeblock is now sign)
-            return !GreenLocker.getPlugin().getConfigManager().isLockExpire() || !isSignExpired(sign);
+            return !GreenLocker.getPlugin().getConfigManager().doLocksExpire() || !isSignExpired(sign);
         } else {
             return false;
         }
@@ -701,6 +701,6 @@ public class GreenLockerAPI {
     }
 
     public static boolean isLockComp(Component line) {
-        return GreenLocker.getPlugin().getMessageManager().isSignComp(line, MessageManager.LangPath.privateSign);
+        return GreenLocker.getPlugin().getMessageManager().isSignComp(line, MessageManager.LangPath.PRIVATE_SIGN);
     }
 }

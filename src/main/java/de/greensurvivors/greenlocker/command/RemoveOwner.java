@@ -19,7 +19,7 @@ public class RemoveOwner extends SubCommand {
 
     @Override
     protected boolean checkPermission(Permissible sender) {
-        return sender.hasPermission(PermissionManager.edit.getPerm()) && sender.hasPermission(PermissionManager.adminEdit.getPerm());
+        return sender.hasPermission(PermissionManager.EDIT.getPerm()) && sender.hasPermission(PermissionManager.PERMISSION_MANAGER.getPerm());
     }
 
     @Override
@@ -29,7 +29,7 @@ public class RemoveOwner extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.helpRemoveOwner);
+        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_REMOVE_OWNER);
     }
 
     /**

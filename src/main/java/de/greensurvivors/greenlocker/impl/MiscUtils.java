@@ -161,6 +161,7 @@ public class MiscUtils {
         }
     }
 
+    //todo maybe work with coreProtect together if dependency was enabled
     public static long getCreatedFromLine(String text) { //todo
         if (isPrivateTimeLine(text)) {
             return Long.parseLong(text.split("#created:", 2)[1]);

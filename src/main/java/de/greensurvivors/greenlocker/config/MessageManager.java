@@ -16,9 +16,10 @@ import java.util.HashMap;
 public class MessageManager { //todo dokument whole plugin
     private final Plugin plugin;
     private final HashMap<LangPath, String> nakedSigns = new HashMap<>(); // path -> naked
-    private @Nullable Component prefixComp = null;
+    private final HashMap<LangPath, Component> langCache = new HashMap<>();
+    private @NotNull Component prefixComp = MiniMessage.miniMessage().deserialize(LangPath.PLUGIN_PREFIX.getDefaultValue());
     private FileConfiguration lang;
-    private String langfilename = "lang_en.yml";
+    private String langfilename = "lang/lang_en.yml";
 
 
     public MessageManager(Plugin plugin) {
@@ -33,18 +34,19 @@ public class MessageManager { //todo dokument whole plugin
         initAdditionalFiles();
         lang = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), langfilename));
 
-        prefixComp = MiniMessage.miniMessage().deserialize(lang.getString(LangPath.pluginPrefix.getPath(), LangPath.pluginPrefix.getDefaultValue()));
+        prefixComp = MiniMessage.miniMessage().deserialize(lang.getString(LangPath.PLUGIN_PREFIX.getPath(), LangPath.PLUGIN_PREFIX.getDefaultValue()));
 
-        nakedSigns.put(LangPath.privateSign, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.privateSign.getPath(), LangPath.privateSign.getDefaultValue())));
-        nakedSigns.put(LangPath.additionalSign, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.additionalSign.getPath(), LangPath.additionalSign.getDefaultValue())));
-        nakedSigns.put(LangPath.everyoneSign, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.everyoneSign.getPath(), LangPath.everyoneSign.getDefaultValue())));
-        nakedSigns.put(LangPath.timerSign, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.timerSign.getPath(), LangPath.timerSign.getDefaultValue())));
-        nakedSigns.put(LangPath.invalidSign, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.invalidSign.getPath(), LangPath.invalidSign.getDefaultValue())));
-        nakedSigns.put(LangPath.expireSign, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.expireSign.getPath(), LangPath.expireSign.getDefaultValue())));
+        nakedSigns.put(LangPath.PRIVATE_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.PRIVATE_SIGN.getPath(), LangPath.PRIVATE_SIGN.getDefaultValue())));
+        nakedSigns.put(LangPath.ADDITIONAL_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.ADDITIONAL_SIGN.getPath(), LangPath.ADDITIONAL_SIGN.getDefaultValue())));
+        nakedSigns.put(LangPath.EVERYONE_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.EVERYONE_SIGN.getPath(), LangPath.EVERYONE_SIGN.getDefaultValue())));
+        nakedSigns.put(LangPath.TIMER_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.TIMER_SIGN.getPath(), LangPath.TIMER_SIGN.getDefaultValue())));
+        nakedSigns.put(LangPath.INVALID_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.INVALID_SIGN.getPath(), LangPath.INVALID_SIGN.getDefaultValue())));
+        nakedSigns.put(LangPath.EXPIRE_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.EXPIRE_SIGN.getPath(), LangPath.EXPIRE_SIGN.getDefaultValue())));
     }
 
     private void initAdditionalFiles() {
-        String[] availablefiles = {"lang_de.yml", "lang_en.yml", "lang_es.yml", "lang_hu.yml", "lang_it.yml", "lang_zh-cn.yml"};
+        //todo don't hardcode them
+        String[] availablefiles = {"lang/lang_de.yml", "lang/lang_en.yml", "lang/lang_es.yml", "lang/lang_hu.yml", "lang/lang_it.yml", "lang/lang_zh-cn.yml"};
         for (String filename : availablefiles) {
             File langfile = new File(plugin.getDataFolder(), filename);
             if (!langfile.exists()) {
@@ -55,26 +57,31 @@ public class MessageManager { //todo dokument whole plugin
 
     public void sendMessages(@NotNull CommandSender sender, @Nullable Component messages) { //todo preparation for MessageManager
         if (messages != null) {
-            if (prefixComp != null) {
-                sender.sendMessage(prefixComp.append(messages));
-            } else {
-                sender.sendMessage(messages);
-                plugin.getLogger().severe("send a message in chat, but the prefix was null. Pretty sure the language file was never loaded.");
-            }
+            sender.sendMessage(prefixComp.append(messages));
         }
     }
 
     public @NotNull Component getLang(@NotNull MessageManager.LangPath path) { // todo lang in minimessage format
-        return MiniMessage.miniMessage().deserialize(lang.getString(path.path, path.defaultValue));
+        Component result = langCache.get(path);
+
+        if (result == null) {
+            result = MiniMessage.miniMessage().deserialize(lang.getString(path.path, path.defaultValue));
+
+            langCache.put(path, result);
+        }
+        return result;
     }
 
     public void sendLang(@NotNull CommandSender sender, @NotNull LangPath path) {
-        if (prefixComp != null) {
-            sender.sendMessage(prefixComp.append(MiniMessage.miniMessage().deserialize(lang.getString(path.path, path.defaultValue))));
-        } else {
-            sender.sendMessage(MiniMessage.miniMessage().deserialize(lang.getString(path.path, path.defaultValue)));
-            plugin.getLogger().severe("send a message in chat, but the prefix was null. Pretty sure the language file was never loaded.");
+        Component message = langCache.get(path);
+
+        if (message == null) {
+            message = MiniMessage.miniMessage().deserialize(lang.getString(path.path, path.defaultValue));
+
+            langCache.put(path, message);
         }
+
+        sender.sendMessage(prefixComp.append(message));
     }
 
     public boolean isSignComp(@NotNull Component compToTest, @NotNull LangPath langPath) {
@@ -86,13 +93,13 @@ public class MessageManager { //todo dokument whole plugin
     public boolean isTimerSignComp(@NotNull Component compToTest) {
         String strToTest = PlainTextComponentSerializer.plainText().serialize(compToTest).trim();
 
-        String[] splitted = nakedSigns.get(LangPath.timerSign).split("@", 2);
+        String[] splitted = nakedSigns.get(LangPath.TIMER_SIGN).split("@", 2);
         return strToTest.startsWith(splitted[0]) && strToTest.endsWith(splitted[1]);
     }
 
     public int getTimer(Component compToTest) {
         String strToTest = PlainTextComponentSerializer.plainText().serialize(compToTest).trim();
-        String[] splitted = nakedSigns.get(LangPath.timerSign).split("@", 2);
+        String[] splitted = nakedSigns.get(LangPath.TIMER_SIGN).split("@", 2);
 
         if (strToTest.startsWith(splitted[0]) && strToTest.endsWith(splitted[1])) {
             String newmessage = strToTest.replace(splitted[0], "").replace(splitted[1], "");
@@ -107,62 +114,62 @@ public class MessageManager { //todo dokument whole plugin
     }
 
     public enum LangPath {
-        pluginPrefix("prefix", "&6[GreenLocker]&r"), //todo miniMessage
+        PLUGIN_PREFIX("prefix", "&6[GreenLocker]&r"), //todo miniMessage
 
-        privateSign("sign.line.private", "[Private]"),
+        PRIVATE_SIGN("sign.line.private", "[Private]"),
         @Deprecated(forRemoval = true)
-        additionalSign("sign.line.additional", "[More Users]"),
-        everyoneSign("sign.line.everyone", "[Everyone]"),
-        timerSign("sign.line.everyone", "[Timer:@]"),
-        expireSign("sign.line.expire", "&3[Expired]"), //todo miniMessage
-        errorSign("sign.line.error", "[Error]"),
-        invalidSign("sign.line.invalid", "[Invalid]"),
+        ADDITIONAL_SIGN("sign.line.additional", "[More Users]"),
+        EVERYONE_SIGN("sign.line.everyone", "[Everyone]"),
+        TIMER_SIGN("sign.line.everyone", "[Timer:@]"),
+        EXPIRE_SIGN("sign.line.expire", "&3[Expired]"), //todo miniMessage
+        ERROR_SIGN("sign.line.error", "[Error]"),
+        INVALID_SIGN("sign.line.invalid", "[Invalid]"),
 
-        helpHeader("cmd.help.header"),
-        helpNoPermissionSubcommand("cmd.help.no-perm-subcommand"),
-        helpAddMember("cmd.help.add-member"),
-        helpRemoveMember("cmd.help.remove-member"),
-        helpAddOwner("cmd.help.add-owner"),
-        helpRemoveOwner("cmd.help.remove-owner"),
-        helpDebug("cmd.help.debug"),
-        helpHelp("cmd.help.help"),
-        helpInfo("cmd.help.info"),
-        helpReload("cmd.help.reload"),
-        helpUpdateSign("cmd.help.update-sign"),
-        helpVersion("cmd.help.version"),
+        HELP_HEADER("cmd.help.header"),
+        HELP_NO_PERMISSION_SUBCOMMAND("cmd.help.no-perm-subcommand"),
+        HELP_ADD_MEMBER("cmd.help.add-member"),
+        HELP_REMOVE_MEMBER("cmd.help.remove-member"),
+        HELP_ADD_OWNER("cmd.help.add-owner"),
+        HELP_REMOVE_OWNER("cmd.help.remove-owner"),
+        HELP_DEBUG("cmd.help.debug"),
+        HELP_HELP("cmd.help.help"),
+        HELP_INFO("cmd.help.info"),
+        HELP_RELOAD("cmd.help.reload"),
+        HELP_UPDATE_SIGN("cmd.help.update-sign"),
+        HELP_VERSION("cmd.help.version"),
 
-        addOwnerSuccess("cmd.add-owner.success"),
-        removeOwnerSuccess("cmd.remove-owner.success"),
-        removeOwnerError("cmd.remove-owner.error"),
-        addMemberSuccess("cmd.add-member.success"),
-        removeMemberSuccess("cmd.remove-member.success"),
-        removeMemberError("cmd.remove-owner.error"),
-        updateSignSuccess("cmd.sign-update.success"),
-        infoOwners("cmd.info.owners"),
-        infoMembers("cmd.info.members"),
-        reloadSuccess("cmd.reload.success"),
+        ADD_OWNER_SUCCESS("cmd.add-owner.success"),
+        REMOVE_OWNER_SUCCESS("cmd.remove-owner.success"),
+        REMOVE_OWNER_ERROR("cmd.remove-owner.error"),
+        ADD_MEMBER_SUCCESS("cmd.add-member.success"),
+        REMOVE_MEMBER_SUCCESS("cmd.remove-member.success"),
+        REMOVE_MEMBER_ERROR("cmd.remove-owner.error"),
+        UPDATE_SIGN_SUCCESS("cmd.sign-update.success"),
+        INFO_OWNERS("cmd.info.owners"),
+        INFO_MEMBERS("cmd.info.members"),
+        RELOAD_SUCCESS("cmd.reload.success"),
 
-        signNeedReselect("cmd.sign-need-reselect"),
-        signNotSelected("cmd.no-sign-selected"),
-        unknownPlayer("cmd.unknown-player"),
-        notAPlayer("cmd.not-a-player"),
-        notEnoughArgs("cmd.not-enough-args"),
-        cmdUsage("cmd.usage"),
+        SIGN_NEED_RESELECT("cmd.sign-need-reselect"),
+        SIGN_NOT_SELECTED("cmd.no-sign-selected"),
+        UNKNOWN_PLAYER("cmd.unknown-player"),
+        NOT_A_PLAYER("cmd.not-a-player"),
+        NOT_ENOUGH_ARGS("cmd.not-enough-args"),
+        CMD_USAGE("cmd.usage"),
 
-        noPermission("no-permission"),
-        notOwner("lock.not-owner"),
+        NO_PERMISSION("no-permission"),
+        NOT_OWNER("lock.not-owner"),
 
-        lockSuccess("action.lock.success"),
-        quickLockError("action.quick-lock.error"),
-        lockErrorAlreadyLocked("action.lock.error.already-locked"),
-        lockErrorNotLockable("action.lock.error.not-lockable"),
-        selectSign("action.select-sign.success"),
-        breakLockSuccess("action.break-lock.success"),
-        actionPreventedLocked("action.prevented.locked"),
-        actionPreventedInterfere("action.prevented.interfere-with-others"),
+        LOCK_SUCCESS("action.lock.success"),
+        QUICK_LOCK_ERROR("action.quick-lock.error"),
+        LOCK_ERROR_ALREADY_LOCKED("action.lock.error.already-locked"),
+        LOCK_ERROR_NOT_LOCKABLE("action.lock.error.not-lockable"),
+        SELECT_SIGN("action.select-sign.success"),
+        BREAK_LOCK_SUCCESS("action.break-lock.success"),
+        ACTION_PREVENTED_LOCKED("action.prevented.locked"),
+        ACTION_PREVENTED_INTERFERE("action.prevented.interfere-with-others"),
 
-        noticeQuickLock("notice.quick-lock"),
-        noticeManuelLock("notice.manual-lock");
+        NOTICE_QUICK_LOCK("notice.quick-lock"),
+        NOTICE_MANUEL_LOCK("notice.manual-lock");
 
         private final String path;
         private final String defaultValue;

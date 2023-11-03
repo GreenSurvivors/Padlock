@@ -1,20 +1,20 @@
 package de.greensurvivors.greenlocker.config;
 
 public enum PermissionManager {
-    edit("greenlocker.edit"),
-    adminEdit("greenlocker.admin.edit"),
-    adminBreak("greenlocker.admin.break"),
-    adminUse("greenlocker.admin.use"),
-    adminInterfere("greenlocker.admin.interfere"),
-    debug("greenlocker.debug"),
+    EDIT("greenlocker.edit"),
+    PERMISSION_MANAGER("greenlocker.admin.edit"),
+    ADMIN_BREAK("greenlocker.admin.break"),
+    ADMIN_USE("greenlocker.admin.use"),
+    ADMIN_INTERFERE("greenlocker.admin.interfere"),
+    DEBUG("greenlocker.debug"),
 
-    noExpire("greenlocker.noexpire"),
+    NO_EXPIRE("greenlocker.noexpire"),
 
-    cmdHelp("greenlocker.cmd.help"),
-    cmdInfo("greenlocker.cmd.info"),
-    cmdReload("greenlocker.cmd.reload"),
-    cmdUpdateSign("greenlocker.cmd.updatesign"),
-    cmdVersion("greenlocker.cmd.version"),
+    CMD_HELP("greenlocker.cmd.help"),
+    CMD_INFO("greenlocker.cmd.info"),
+    CMD_RELOAD("greenlocker.cmd.reload"),
+    CMD_UPDATE_SIGN("greenlocker.cmd.updatesign"),
+    CMD_VERSION("greenlocker.cmd.version"),
 
     actionLock("greenlocker.action.lock"),
     actionLockOthers("greenlocker.action.lockothers");

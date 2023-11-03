@@ -26,7 +26,7 @@ public class Info extends SubCommand {
 
     @Override
     protected boolean checkPermission(Permissible sender) {
-        return sender.hasPermission(PermissionManager.cmdInfo.getPerm());
+        return sender.hasPermission(PermissionManager.CMD_INFO.getPerm());
     }
 
     @Override
@@ -36,7 +36,7 @@ public class Info extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.helpInfo);
+        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_INFO);
     }
 
     /**
@@ -61,22 +61,22 @@ public class Info extends SubCommand {
 
                             if (otherSign == null) {
                                 GreenLockerAPI.setInvalid(sign);
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
                                 return true;
                             } else {
                                 sign = otherSign;
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.updateSignSuccess);
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UPDATE_SIGN_SUCCESS);
                             }
                         }
 
-                        Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.infoOwners);
+                        Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_OWNERS);
                         for (String name : MiscUtils.getNamesFromUUIDStrSet(LockSign.getUUIDs(sign, true))) {
                             component = component.append(Component.text(name));
                             component = component.append(Component.text(", "));
                         }
                         component = component.append(Component.newline());
 
-                        component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.infoMembers));
+                        component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_MEMBERS));
                         for (String name : MiscUtils.getNamesFromUUIDStrSet(LockSign.getUUIDs(sign, false))) {
                             component = component.append(Component.text(name));
                             component = component.append(Component.text(", "));
@@ -84,16 +84,16 @@ public class Info extends SubCommand {
 
                         plugin.getMessageManager().sendMessages(sender, component);
                     } else {
-                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNeedReselect);
+                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
                     }
                 } else {
-                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.signNotSelected);
+                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NOT_SELECTED);
                 }
             } else {
-                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.noPermission);
+                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
             }
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.notAPlayer);
+            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_PLAYER);
             return false;
         }
 
