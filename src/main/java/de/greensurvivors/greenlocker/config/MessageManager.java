@@ -13,7 +13,7 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.util.HashMap;
 
-public class MessageManager { //todo dokument whole plugin
+public class MessageManager {
     private final Plugin plugin;
     private final HashMap<LangPath, String> nakedSigns = new HashMap<>(); // path -> naked
     private final HashMap<LangPath, Component> langCache = new HashMap<>();
@@ -120,8 +120,8 @@ public class MessageManager { //todo dokument whole plugin
         @Deprecated(forRemoval = true)
         ADDITIONAL_SIGN("sign.line.additional", "[More Users]"),
         EVERYONE_SIGN("sign.line.everyone", "[Everyone]"),
-        TIMER_SIGN("sign.line.everyone", "[Timer:<time>]"),
-        EXPIRE_SIGN("sign.line.expire", "[<dark_aqua>Expired</dark_aqua>]"),
+        TIMER_SIGN("sign.line.timer", "[Timer:<time>]"),
+        EXPIRE_SIGN("sign.line.expired", "[<dark_aqua>Expired</dark_aqua>]"),
         ERROR_SIGN("sign.line.error", "[Error]"),
         INVALID_SIGN("sign.line.invalid", "[Invalid]"),
 
@@ -160,9 +160,9 @@ public class MessageManager { //todo dokument whole plugin
         NOT_OWNER("lock.not-owner"),
 
         LOCK_SUCCESS("action.lock.success"),
-        QUICK_LOCK_ERROR("action.quick-lock.error"),
         LOCK_ERROR_ALREADY_LOCKED("action.lock.error.already-locked"),
         LOCK_ERROR_NOT_LOCKABLE("action.lock.error.not-lockable"),
+        QUICK_LOCK_ERROR("action.quick-lock.error"),
         SELECT_SIGN("action.select-sign.success"),
         BREAK_LOCK_SUCCESS("action.break-lock.success"),
         ACTION_PREVENTED_LOCKED("action.prevented.locked"),

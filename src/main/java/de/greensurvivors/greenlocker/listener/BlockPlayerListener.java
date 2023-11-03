@@ -188,7 +188,7 @@ public class BlockPlayerListener implements Listener { //todo this whole class
 
             if (clickedBlock.getState() instanceof Sign sign &&
                     (GreenLockerAPI.isOwnerOfSign(sign, player) ||
-                            ((GreenLockerAPI.isLockSign(sign) || GreenLockerAPI.isAdditionalSign(sign)) && player.hasPermission(PermissionManager.PERMISSION_MANAGER.getPerm())))) {
+                            ((GreenLockerAPI.isLockSign(sign) || GreenLockerAPI.isAdditionalSign(sign)) && player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm())))) {
                 SignSelection.selectSign(player, clickedBlock);
                 plugin.getMessageManager().sendLang(player, MessageManager.LangPath.SELECT_SIGN);
                 MiscUtils.playLockEffect(player, clickedBlock);

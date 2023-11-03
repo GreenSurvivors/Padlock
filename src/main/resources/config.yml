@@ -2,7 +2,7 @@
 # https://github.com/connection-lost/LockettePro/wiki/*-config.yml
 # If there are missing entries, you can add them manually.
 
-language-file-name: 'lang_en.yml'
+language-file-name: 'lang/lang_en.yml'
 enable-quick-protect: true
 worldguard: true
 coreprotect: true

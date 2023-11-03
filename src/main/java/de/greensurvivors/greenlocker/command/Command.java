@@ -77,7 +77,7 @@ public class Command implements CommandExecutor, TabCompleter {
                         }
 
                         if (removeOwner) {
-                            if (sender.hasPermission(PermissionManager.PERMISSION_MANAGER.getPerm())) {
+                            if (sender.hasPermission(PermissionManager.ADMIN_EDIT.getPerm())) {
                                 ListOrderedSet<String> uuidStrs = LockSign.getUUIDs(sign, true);
                                 List<String> result = new ArrayList<>();
 
@@ -159,7 +159,7 @@ public class Command implements CommandExecutor, TabCompleter {
                                 }
                             }
 
-                            if (player.hasPermission(PermissionManager.PERMISSION_MANAGER.getPerm()) || (!addOwner && GreenLockerAPI.isOwnerOfSign(sign, player))) {
+                            if (player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()) || (!addOwner && GreenLockerAPI.isOwnerOfSign(sign, player))) {
                                 if (offlinePlayer != null) {
 
                                     if (GreenLockerAPI.isLockSign(sign)) {
@@ -231,7 +231,7 @@ public class Command implements CommandExecutor, TabCompleter {
                                 }
                             }
 
-                            if (player.hasPermission(PermissionManager.PERMISSION_MANAGER.getPerm()) || (!removeOwner && LockSign.isOwner(sign, player.getUniqueId()))) {
+                            if (player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()) || (!removeOwner && LockSign.isOwner(sign, player.getUniqueId()))) {
                                 if (offlinePlayer != null) {
                                     if (GreenLockerAPI.isLockSign(sign)) {
                                         if (LockSign.removePlayer(sign, removeOwner, offlinePlayer.getUniqueId())) {
@@ -305,7 +305,7 @@ public class Command implements CommandExecutor, TabCompleter {
                 }
             }
         } else if (args.length >= 2) {
-            SubCommand subCommand = getSubCommandFromString(sender, args[1]);
+            SubCommand subCommand = getSubCommandFromString(sender, args[0]);
 
             if (subCommand != null) {
                 suggestionList = subCommand.onTabComplete(sender, args);
@@ -318,7 +318,7 @@ public class Command implements CommandExecutor, TabCompleter {
         if (suggestionList != null) {
             List<String> filteredList = new ArrayList<>();
             for (String s : suggestionList) {
-                if (s.startsWith(args[0])) {
+                if (s.startsWith(args[args.length - 1])) {
                     filteredList.add(s);
                 }
             }

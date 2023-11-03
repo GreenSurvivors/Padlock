@@ -105,14 +105,15 @@ public class BlockEnvironmentListener implements Listener {
 
     // Prevent mob change block
     @EventHandler(priority = EventPriority.HIGH)
-    public void onMobChangeBlock(EntityChangeBlockEvent event) { //todo there are so many more mobgriefs
+    public void onMobChangeBlock(EntityChangeBlockEvent event) {
         if ((event.getEntity() instanceof Enderman && !plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.ENDERMAN)) ||// enderman pick up/place block
+                (event.getEntity() instanceof EnderDragon && !plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.ENDER_DRAGON)) || // ender dragons break blocks
                 (event.getEntity() instanceof Wither && !plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.WITHER)) ||// wither break block
                 (event.getEntity() instanceof Zombie && !plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.ZOMBIE)) ||// zombie break door
                 (event.getEntity() instanceof Silverfish && !plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.SILVERFISH))) {
             if (GreenLockerAPI.isProtected(event.getBlock())) {
                 event.setCancelled(true);
             }
-        }// ignore other reason (boat break lily pad, arrow ignite tnt, etc.)
+        }// ignore other reason (boat break lily pad, arrow ignite tnt, rabbit eating carrots, sheep eating grass etc.)
     }
 }

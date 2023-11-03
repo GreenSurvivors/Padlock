@@ -9,6 +9,7 @@ import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -45,7 +46,7 @@ public class Help extends SubCommand {
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         if (args.length >= 2) {
-            SubCommand command = Command.getSubCommandFromString(sender, args[2]);
+            SubCommand command = Command.getSubCommandFromString(sender, args[1]);
 
             if (command != null) {
                 Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_HEADER);
@@ -54,6 +55,7 @@ public class Help extends SubCommand {
 
                 plugin.getMessageManager().sendMessages(sender, component);
             } else {
+                //how did anyone manage to get the help command working without having the permission for it?
                 plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.HELP_NO_PERMISSION_SUBCOMMAND);
                 return false;
             }
@@ -91,6 +93,16 @@ public class Help extends SubCommand {
      */
     @Override
     protected @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
-        return null;
+        if (args.length == 2) {
+            List<String> result = new ArrayList<>();
+
+            for (SubCommand subCommand : Command.getSubCommands(sender)) {
+                result.addAll(subCommand.getAlias());
+            }
+
+            return result;
+        } else {
+            return null;
+        }
     }
 }

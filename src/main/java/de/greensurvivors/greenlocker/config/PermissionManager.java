@@ -2,7 +2,7 @@ package de.greensurvivors.greenlocker.config;
 
 public enum PermissionManager {
     EDIT("greenlocker.edit"),
-    PERMISSION_MANAGER("greenlocker.admin.edit"),
+    ADMIN_EDIT("greenlocker.admin.edit"),
     ADMIN_BREAK("greenlocker.admin.break"),
     ADMIN_USE("greenlocker.admin.use"),
     ADMIN_INTERFERE("greenlocker.admin.interfere"),

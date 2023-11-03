@@ -15,6 +15,7 @@ public class ConfigManager {
     // please note: While fallback values are defined here, these are in fact NOT the default options. They are just used in the unfortunate case loading them goes wrong.
     // if you want to change default options, have also a look into resources/config.yaml
     private final ConfigOption<Boolean> IMPORT_FROM_LOCKETTEPRO = new ConfigOption<>("import-fromLockettePro", false);
+    private final ConfigOption<String> LANG_FILENAME = new ConfigOption<>("language-file-name", "lang/lang_en.yml");
     private final ConfigOption<Boolean> DEPENDENCY_WORLDGUARD_ENABLED = new ConfigOption<>("dependency.worldguard.enabled", false);
     private final ConfigOption<Boolean> DEPENDENCY_COREPROTECT_ENABLED = new ConfigOption<>("dependency.coreprotect.enabled", false);
     private final ConfigOption<Set<Material>> LOCKABLES = new ConfigOption<>("lockables", setUpLockableDefaults());
@@ -77,8 +78,6 @@ public class ConfigManager {
     }
 
     public void reload() {
-        QuickProtectOption.valueOf("");
-
         plugin.saveDefaultConfig();
         FileConfiguration config = plugin.getConfig();
 
@@ -88,7 +87,7 @@ public class ConfigManager {
         IMPORT_FROM_LOCKETTEPRO.setValue(false);
 
         //reload Language files
-        plugin.getMessageManager().setLangFileName(config.getString("language-file-name", "lang/lang_en.yml"));
+        plugin.getMessageManager().setLangFileName(config.getString(LANG_FILENAME.getPath(), LANG_FILENAME.getFallbackValue()));
         plugin.getMessageManager().reload();
 
         DEPENDENCY_WORLDGUARD_ENABLED.setValue(config.getBoolean(DEPENDENCY_WORLDGUARD_ENABLED.getPath(), DEPENDENCY_WORLDGUARD_ENABLED.getFallbackValue()));
@@ -211,6 +210,8 @@ public class ConfigManager {
         //never allow these!
         resultSet.removeAll(Tag.ALL_SIGNS.getValues());
         resultSet.remove(Material.SCAFFOLDING);
+        resultSet.remove(Material.AIR);
+        resultSet.remove(Material.CAVE_AIR);
         LOCKABLES.setValue(resultSet);
 
         Object object = config.get(QUICKPROTECT_TYPE.getPath(), QUICKPROTECT_TYPE.getFallbackValue());
@@ -422,12 +423,12 @@ public class ConfigManager {
         PISTON,
         REDSTONE,
         // entities
-        //todo update or make self updating
-        VILLAGER,
+        VILLAGER, // open doors
         ENDERMAN,
+        ENDER_DRAGON,
         WITHER,
         ZOMBIE,
-        SILVERFISH
+        SILVERFISH // break blocks if they slither out of them
     }
 
     public enum HopperMinecartBlockedOption {

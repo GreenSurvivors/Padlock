@@ -1,37 +1,68 @@
-private-signs: '[Private]'
-additional-signs: '[More Users]'
-everyone-signs: '[Everyone]'
-timer-signs: '[Timer:@]'
-prefix: '&6[LockettePro] '
-
-command-usage: "&bLockettePro plugin help\n&c1. In order to add a user to a sign, right click the sign, then enter /lock <line number> <text> to change the line.\n&c2. To reload configuration, enter /lock reload.\nLockettePro by connection_lost"
-you-can-quick-lock-it: '&aRight click the block with a sign to lock.'
-you-can-manual-lock-it: '&aPlace a sign and write [Private] to lock it.'
-config-reloaded: '&aConfig reloaded.'
-no-permission: '&cYou don''t have permission to do that.'
-no-sign-selected: '&cSelect a sign by right-clicking on it first.'
-sign-need-reselect: '&cPlease re-select the sign.'
-line-is-too-long: '&cThis line is too long!'
-cannot-change-this-line: '&cYou cannot change this line.'
-sign-changed: '&aSign edited successfully.'
-locked-quick: '&aBlock locked successfully.'
-additional-sign-added-quick: '&aAdditional sign added successfully.'
-cannot-lock-quick: '&cYou cannot lock this.'
-cannot-add-additional-sign-quick: '&cYou cannot add a sign here'
-locked-manual: '&aBlock locked successfully.'
-additional-sign-added-manual: '&aAdditional sign added successfully.'
-cannot-lock-manual: '&cYou cannot lock this.'
-cannot-add-additional-sign-manual: '&cYou cannot add a sign here'
-not-locked-yet-manual: '&cThis block is not locked yet.'
-cannot-lock-door-nearby-manual: '&cThere is a door nearby.'
-block-already-locked-manual: '&cThis block is already locked.'
-block-is-not-lockable: '&cThis block is not lockable.'
-sign-selected: '&aSign Selected.'
-break-own-lock-sign: '&aYou broke your lock sign.'
-cannot-break-this-lock-sign: '&cYou cannot break this lock sign.'
-break-own-additional-sign: '&aYou broke your additional sign.'
-break-redundant-additional-sign: '&aYou broke a redundant additional sign.'
-cannot-break-this-additional-sign: '&cYou cannot break this additional sign.'
-block-is-locked: '&cThis block is locked.'
-cannot-interfere-with-others: '&cYou cannot place a block that may interfere others.'
-sign-error: '&4[ERROR]'
+prefix: '<gold>[GreenLocker]</gold> '
+sign:
+  line:
+    private: '[Private]'
+    additional: '[More Users]'
+    everyone: '[Everyone]'
+    timer: '[Timer:<time>]'
+    expired: '[<dark_aqua>Expired</dark_aqua>]'
+    error: '[<dark_red>Error</dark_red>]'
+    invalid: '[Invalid]'
+cmd:
+  help:
+    header: '----------------{Help}----------------'
+    no-perm-subcommand: 'You have no permissions to see any commands.'
+    add-member: '/lock addmember <player> | lets you grant other players basic access to the locked Block.'
+    remove-member: '/lock removemember <player> | revokes basic access to the locked Block.'
+    add-owner: '/lock addowner <player> | lets you grant other players advanced access to the locked Block.'
+    remove-owner: '/lock removeowner <player> | revokes advanced access to the locked Block.'
+    debug: '/lock debug | admin tool to get debug information about the plugin.'
+    help: '/lock help | this command. Gives you feedback about commands you have permission to use.'
+    info: '/lock info | select a block and get a list of all the hidden member and owners.'
+    reload: '/lock reload | reload config and language files.'
+    update-sign: '/lock updatesign | manuel start a updating process for a legacy lockette sign.'
+    version: '/lock version | returns the version of this plugin.'
+  add-owner:
+    success: '<dark_green>Successfully added as owner.</dark_green>'
+  remove-owner:
+    success: '<dark_green>Successfully removed as owner.</dark_green>'
+    error: "<red>Couldn't remove as an owner!</red>"
+  add-member:
+    success: '<dark_green>Successfully added as member.</dark_green>'
+  remove-member:
+    success: '<dark_green>Successfully removed as member.</dark_green>'
+    error: "<red>Couldn't remove as an member!</red>"
+  sign-update:
+    success: '<dark_green>Successfully updated legacy lockette sign.</dark_green>'
+  info:
+    owners: 'owners: '
+    members: 'members: '
+  reload:
+    success: '<dark_green>Greenlocker was reloaded.</dark_green>'
+  sign-need-reselect: '<red>Please re-select the sign.</red>'
+  no-sign-selected: '<red>Select a sign by right-clicking on it first.</red>'
+  unknown-player: "<red>Couldn't find this player. Did you type it right?.</red>"
+  not-a-player: 'This command can only be called as a player.'
+  not-enough-args: 'You provided too few arguments. Pleas try again.'
+  usage: '/lock <subcommand> <subcommand arguments> | see command refference in /lock help!'
+no-permission: "<red>You don't have permission to do that.</red>"
+lock:
+  not-owner: "<red>Only the owner of this sign may do that.</red>"
+action:
+  lock:
+    success: '<dark_green>Block locked successfully.</dark_green>'
+    error:
+      already-locked: '<red>This block is already locked.</red>'
+      not-lockable: '<red>This block is not lockable.</red>'
+  quick-lock:
+    error: "<red>couldn't quick lock this block.</red>"
+  select-sign:
+    success: '<dark_green>Sign Selected.</dark_green>'
+  break-lock:
+    success: '<dark_green>You broke the lock sign.</dark_green>'
+  prevented:
+    locked: '<red>This block is locked.</red>'
+    interfere-with-others: '<red>You cannot place a block that may interfere others.</red>'
+notice:
+  quick-lock: '<dark_green>Right click the block with a sign to lock.</dark_green>'
+  manual-lock: '<dark_green>Place a sign and write [Private] to lock it.</dark_green>'

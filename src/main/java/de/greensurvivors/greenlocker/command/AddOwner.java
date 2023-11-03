@@ -20,7 +20,7 @@ public class AddOwner extends SubCommand {
 
     @Override
     protected boolean checkPermission(Permissible sender) {
-        return sender.hasPermission(PermissionManager.EDIT.getPerm()) && sender.hasPermission(PermissionManager.PERMISSION_MANAGER.getPerm());
+        return sender.hasPermission(PermissionManager.EDIT.getPerm()) && sender.hasPermission(PermissionManager.ADMIN_EDIT.getPerm());
     }
 
     @Override
