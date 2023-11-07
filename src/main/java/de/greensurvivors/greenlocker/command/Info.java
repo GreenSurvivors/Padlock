@@ -5,8 +5,8 @@ import de.greensurvivors.greenlocker.GreenLockerAPI;
 import de.greensurvivors.greenlocker.config.MessageManager;
 import de.greensurvivors.greenlocker.config.PermissionManager;
 import de.greensurvivors.greenlocker.impl.MiscUtils;
-import de.greensurvivors.greenlocker.impl.signdata.LockSign;
-import de.greensurvivors.greenlocker.impl.signdata.SignSelection;
+import de.greensurvivors.greenlocker.impl.SignSelection;
+import de.greensurvivors.greenlocker.impl.signdata.SignLock;
 import net.kyori.adventure.text.Component;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -51,12 +51,13 @@ public class Info extends SubCommand {
      */
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) { //todo this needs formatting and general glow up
+        //todo needs timer, redstone, created + expired, everyone
         if (sender instanceof Player player) {
             if (this.checkPermission(sender)) {
                 Block block = SignSelection.getSelectedSign(player);
                 if (block != null) {
                     if (block instanceof Sign sign) {
-                        if (GreenLockerAPI.isAdditionalSign(sign) || LockSign.isLegacySign(sign)) {
+                        if (GreenLockerAPI.isAdditionalSign(sign) || SignLock.isLegacySign(sign)) {
                             Sign otherSign = GreenLockerAPI.updateLegacySign(sign); //get main sign
 
                             if (otherSign == null) {
@@ -70,14 +71,14 @@ public class Info extends SubCommand {
                         }
 
                         Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_OWNERS);
-                        for (String name : MiscUtils.getNamesFromUUIDStrSet(LockSign.getUUIDs(sign, true))) {
+                        for (String name : MiscUtils.getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, true))) {
                             component = component.append(Component.text(name));
                             component = component.append(Component.text(", "));
                         }
                         component = component.append(Component.newline());
 
                         component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_MEMBERS));
-                        for (String name : MiscUtils.getNamesFromUUIDStrSet(LockSign.getUUIDs(sign, false))) {
+                        for (String name : MiscUtils.getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, false))) {
                             component = component.append(Component.text(name));
                             component = component.append(Component.text(", "));
                         }

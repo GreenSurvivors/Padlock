@@ -1,0 +1,9 @@
+todo Redstone support
+Redstone contraptions cannot open protected doors, unless a [Redstone] tag is added.
+Hoppers (minecart hoppers too!) cannot take or put items, unless a [Redstone] tag is added.
+
+todo support gates/trapdoors in a door way
+todo extra features if they still worked
+todo readme
+todo wiki
+todo dokument whole plugin

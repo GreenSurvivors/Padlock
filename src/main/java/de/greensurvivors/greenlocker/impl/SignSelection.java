@@ -1,4 +1,4 @@
-package de.greensurvivors.greenlocker.impl.signdata;
+package de.greensurvivors.greenlocker.impl;
 
 import com.google.common.cache.CacheBuilder;
 import com.google.common.cache.CacheLoader;
@@ -13,8 +13,8 @@ import java.util.concurrent.TimeUnit;
 public class SignSelection {
     private static final LoadingCache<UUID, Block> selectedsign = CacheBuilder.newBuilder()
             .expireAfterAccess(30, TimeUnit.SECONDS)
-            .build(new CacheLoader<>() {
-                public @NotNull Block load(@NotNull UUID key) {
+            .build(new CacheLoader<>() { //todo test if a loader is really needed
+                public Block load(@NotNull UUID key) {
                     return null;
                 }
             });

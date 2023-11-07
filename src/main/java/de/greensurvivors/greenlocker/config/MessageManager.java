@@ -1,12 +1,14 @@
 package de.greensurvivors.greenlocker.config;
 
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
+import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import org.bukkit.command.CommandSender;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
+import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -55,16 +57,21 @@ public class MessageManager {
         }
     }
 
-    public void sendMessages(@NotNull CommandSender sender, @Nullable Component messages) {
+    public void sendMessages(@NotNull Audience audience, @Nullable Component messages) {
         if (messages != null) {
-            sender.sendMessage(prefixComp.append(messages));
+            audience.sendMessage(prefixComp.append(messages));
         }
+    }
+
+    public @NotNull Component getLang(@NotNull MessageManager.LangPath path, TagResolver resolver) {
+        return MiniMessage.miniMessage().deserialize(lang.getString(path.path, path.defaultValue), resolver);
     }
 
     public @NotNull Component getLang(@NotNull MessageManager.LangPath path) { // todo lang in minimessage format
         Component result = langCache.get(path);
 
         if (result == null) {
+
             result = MiniMessage.miniMessage().deserialize(lang.getString(path.path, path.defaultValue));
 
             langCache.put(path, result);
@@ -72,7 +79,7 @@ public class MessageManager {
         return result;
     }
 
-    public void sendLang(@NotNull CommandSender sender, @NotNull LangPath path) {
+    public void sendLang(@NotNull Audience audience, @NotNull LangPath path) {
         Component message = langCache.get(path);
 
         if (message == null) {
@@ -81,7 +88,7 @@ public class MessageManager {
             langCache.put(path, message);
         }
 
-        sender.sendMessage(prefixComp.append(message));
+        audience.sendMessage(prefixComp.append(message));
     }
 
     public boolean isSignComp(@NotNull Component compToTest, @NotNull LangPath langPath) {
@@ -90,27 +97,27 @@ public class MessageManager {
         return strToTest.equalsIgnoreCase(nakedSigns.get(langPath));
     }
 
-    public boolean isTimerSignComp(@NotNull Component compToTest) {
-        String strToTest = PlainTextComponentSerializer.plainText().serialize(compToTest).trim();
-
-        String[] splitted = nakedSigns.get(LangPath.TIMER_SIGN).split("<time>", 2);
-        return strToTest.startsWith(splitted[0]) && strToTest.endsWith(splitted[1]);
+    public @Nullable String getNakedSignText(@NotNull LangPath langPath) {
+        return nakedSigns.get(langPath);
     }
 
-    public int getTimer(Component compToTest) {
-        String strToTest = PlainTextComponentSerializer.plainText().serialize(compToTest).trim();
-        String[] splitted = nakedSigns.get(LangPath.TIMER_SIGN).split("<time>", 2);
+    public enum PlaceHolder {
+        TIME("time");
 
-        if (strToTest.startsWith(splitted[0]) && strToTest.endsWith(splitted[1])) {
-            String newmessage = strToTest.replace(splitted[0], "").replace(splitted[1], "");
-            try {
-                int seconds = Integer.parseInt(newmessage);
-                return Math.min(seconds, 20);
-            } catch (Exception ignored) {
-            }
+        private final String placeholder;
+
+        PlaceHolder(String placeholder) {
+            this.placeholder = placeholder;
         }
 
-        return 0;
+        /**
+         * Since this will be used in Mini-messages placeholder only the pattern "[!?#]?[a-z0-9_-]*" is valid.
+         * if used inside an unparsed text you have to add surrounding <> yourself.
+         */
+        @Subst("name") // substitution; will be inserted if the IDE/compiler tests if input is valid.
+        public String getPlaceholder() {
+            return placeholder;
+        }
     }
 
     public enum LangPath {
@@ -120,7 +127,7 @@ public class MessageManager {
         @Deprecated(forRemoval = true)
         ADDITIONAL_SIGN("sign.line.additional", "[More Users]"),
         EVERYONE_SIGN("sign.line.everyone", "[Everyone]"),
-        TIMER_SIGN("sign.line.timer", "[Timer:<time>]"),
+        TIMER_SIGN("sign.line.timer", "[Timer:<" + PlaceHolder.TIME.getPlaceholder() + ">]"),
         EXPIRE_SIGN("sign.line.expired", "[<dark_aqua>Expired</dark_aqua>]"),
         ERROR_SIGN("sign.line.error", "[Error]"),
         INVALID_SIGN("sign.line.invalid", "[Invalid]"),
@@ -131,6 +138,10 @@ public class MessageManager {
         HELP_REMOVE_MEMBER("cmd.help.remove-member"),
         HELP_ADD_OWNER("cmd.help.add-owner"),
         HELP_REMOVE_OWNER("cmd.help.remove-owner"),
+        HELP_SETCREATED("cmd.help.set-created"),
+        HELP_SETEVERYONE("cmd.help.set-everyone"),
+        HELP_SETREDSTONE("cmd.help.set-redstone"),
+        HELP_SETTIMER("cmd.help.set-timer"),
         HELP_DEBUG("cmd.help.debug"),
         HELP_HELP("cmd.help.help"),
         HELP_INFO("cmd.help.info"),
@@ -144,6 +155,11 @@ public class MessageManager {
         ADD_MEMBER_SUCCESS("cmd.add-member.success"),
         REMOVE_MEMBER_SUCCESS("cmd.remove-member.success"),
         REMOVE_MEMBER_ERROR("cmd.remove-owner.error"),
+        SET_CREATED_SUCCESS("cmd.set-created.success"),
+        SET_CREATED_ERROR_TIMEFORMAT("cmd.set-created.error.time-format"),
+        SET_TIMER_SUCCESS_ON("cmd.set-timer.success.on"),
+        SET_TIMER_SUCCESS_OFF("cmd.set-timer.success.off"),
+        SET_TIMER_ERROR("cmd.set-timer.error.time-format"),
         UPDATE_SIGN_SUCCESS("cmd.sign-update.success"),
         INFO_OWNERS("cmd.info.owners"),
         INFO_MEMBERS("cmd.info.members"),

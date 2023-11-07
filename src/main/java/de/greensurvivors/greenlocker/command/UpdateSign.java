@@ -4,7 +4,7 @@ import de.greensurvivors.greenlocker.GreenLocker;
 import de.greensurvivors.greenlocker.GreenLockerAPI;
 import de.greensurvivors.greenlocker.config.MessageManager;
 import de.greensurvivors.greenlocker.config.PermissionManager;
-import de.greensurvivors.greenlocker.impl.signdata.SignSelection;
+import de.greensurvivors.greenlocker.impl.SignSelection;
 import net.kyori.adventure.text.Component;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;

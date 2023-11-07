@@ -22,7 +22,7 @@ import java.util.UUID;
 import java.util.logging.Level;
 
 //todo this is not timer/everyone compatible!
-public class LockSign {
+public class SignLock {
     private final static NamespacedKey storedMembersUUIDKey = new NamespacedKey(GreenLocker.getPlugin(), "MemberUUIDs");
     private final static NamespacedKey storedOwnersUUIDKey = new NamespacedKey(GreenLocker.getPlugin(), "OwnerUUIDs");
     private static final MemberUUUIDSetDataType uuidSetData = new MemberUUUIDSetDataType();

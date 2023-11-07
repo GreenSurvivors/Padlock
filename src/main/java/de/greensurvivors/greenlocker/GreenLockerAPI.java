@@ -3,8 +3,9 @@ package de.greensurvivors.greenlocker;
 import de.greensurvivors.greenlocker.config.MessageManager;
 import de.greensurvivors.greenlocker.impl.doordata.DoorParts;
 import de.greensurvivors.greenlocker.impl.doordata.Doors;
-import de.greensurvivors.greenlocker.impl.signdata.ExpireSign;
-import de.greensurvivors.greenlocker.impl.signdata.LockSign;
+import de.greensurvivors.greenlocker.impl.signdata.SignExpiration;
+import de.greensurvivors.greenlocker.impl.signdata.SignLock;
+import de.greensurvivors.greenlocker.impl.signdata.SignTimer;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
@@ -14,7 +15,6 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.type.Chest;
 import org.bukkit.block.data.type.Door;
-import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -23,8 +23,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-//todo whole expires thing
-//todo update lang
 public class GreenLockerAPI {
     public final static BlockFace[] cardinalFaces = {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST};
     public final static BlockFace[] allFaces = {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN};
@@ -35,6 +33,7 @@ public class GreenLockerAPI {
      * @param signToUpdate
      * @return
      */
+    @Deprecated(forRemoval = true)
     public static @Nullable Sign updateLegacySign(Sign signToUpdate) {
         Block attachedTo = getAttachedBlock(signToUpdate.getBlock());
 
@@ -49,10 +48,12 @@ public class GreenLockerAPI {
 
                     if (lockSign != null) {
                         for (Sign additional : getAdditionalSignsDoor(attachedDoor)) {
-                            LockSign.updateSignFromAdditional(lockSign, additional);
+                            SignLock.updateSignFromAdditional(lockSign, additional);
                         }
 
-                        LockSign.updateLegacyUUIDs(lockSign);
+                        SignLock.updateLegacyUUIDs(lockSign);
+                        SignExpiration.updateLegacyTime(lockSign);
+                        SignTimer.updateLegacyTimer(lockSign);
                         return lockSign;
                     } else {
                         GreenLocker.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the door at " + attachedTo.getLocation() + " is locked.");
@@ -64,10 +65,12 @@ public class GreenLockerAPI {
                 Sign lockSign = getLockSignChest(attachedTo);
                 if (lockSign != null) {
                     for (Sign additional : getAdditionalSignsChest(attachedTo)) {
-                        LockSign.updateSignFromAdditional(lockSign, additional);
+                        SignLock.updateSignFromAdditional(lockSign, additional);
                     }
 
-                    LockSign.updateLegacyUUIDs(lockSign);
+                    SignLock.updateLegacyUUIDs(lockSign);
+                    SignExpiration.updateLegacyTime(lockSign);
+                    SignTimer.updateLegacyTimer(lockSign);
                     return lockSign;
                 } else {
                     GreenLocker.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the door at " + attachedTo.getLocation() + "is locked.");
@@ -77,10 +80,12 @@ public class GreenLockerAPI {
 
                 if (lockSign != null) {
                     for (Sign additional : getAdditionalSignsSingleBlock(attachedTo, null)) {
-                        LockSign.updateSignFromAdditional(lockSign, additional);
+                        SignLock.updateSignFromAdditional(lockSign, additional);
                     }
 
-                    LockSign.updateNamesByUuid(lockSign);
+                    SignLock.updateLegacyUUIDs(lockSign);
+                    SignExpiration.updateLegacyTime(lockSign);
+                    SignTimer.updateLegacyTimer(lockSign);
                     return lockSign;
                 } else {
                     GreenLocker.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the block at " + attachedTo.getLocation() + "is locked.");
@@ -94,7 +99,7 @@ public class GreenLockerAPI {
     }
 
     public static void setInvalid(@NotNull Sign sign) {
-        LockSign.setInvalid(sign);
+        SignLock.setInvalid(sign);
     }
 
     private static @Nullable Sign getLockSignDoor(@NotNull DoorParts doorToCheck) { //todo check for adittional signs and if found update; also do everything async if possible
@@ -307,7 +312,7 @@ public class GreenLockerAPI {
                 Sign sign = getLockSignDoor(door);
 
                 if (sign != null) {
-                    return LockSign.isOwner(sign, player.getUniqueId());
+                    return SignLock.isOwner(sign, player.getUniqueId());
                 }
             } else {
                 return false;
@@ -317,7 +322,7 @@ public class GreenLockerAPI {
             Sign sign = getLockSignChest(block);
 
             if (sign != null) {
-                return LockSign.isOwner(sign, player.getUniqueId());
+                return SignLock.isOwner(sign, player.getUniqueId());
             }
         }
 
@@ -333,7 +338,7 @@ public class GreenLockerAPI {
                 Sign sign = getLockSignDoor(door);
 
                 if (sign != null) {
-                    return LockSign.isMember(sign, player.getUniqueId());
+                    return SignLock.isMember(sign, player.getUniqueId());
                 }
             } else {
                 return false;
@@ -343,7 +348,7 @@ public class GreenLockerAPI {
             Sign sign = getLockSignChest(block);
 
             if (sign != null) {
-                return LockSign.isMember(sign, player.getUniqueId());
+                return SignLock.isMember(sign, player.getUniqueId());
             }
         }
 
@@ -442,7 +447,7 @@ public class GreenLockerAPI {
 
                 // Find [Private] sign?
                 if (isValidLockSign(sign)) {
-                    return LockSign.isOwner(sign, player.getUniqueId());
+                    return SignLock.isOwner(sign, player.getUniqueId());
                 }
             } // exempted blockface
         } // for loop
@@ -457,7 +462,7 @@ public class GreenLockerAPI {
 
                 // Find [Private] sign?
                 if (isValidLockSign(sign)) {
-                    return LockSign.isMember(sign, player.getUniqueId());
+                    return SignLock.isMember(sign, player.getUniqueId());
                 }
             } // exempted blockface
         } // for loop
@@ -583,16 +588,16 @@ public class GreenLockerAPI {
     }
 
     public static boolean isLockSign(@NotNull Sign sign) {
-        return LockSign.isLockSign(sign);
+        return SignLock.isLockSign(sign);
     }
 
     @Deprecated(forRemoval = true)
     public static boolean isAdditionalSign(@NotNull Sign sign) {
-        return LockSign.isAdditionalSign(sign);
+        return SignLock.isAdditionalSign(sign);
     }
 
     public static boolean isSignExpired(Sign sign) {
-        return ExpireSign.isSignExpired(sign);
+        return SignExpiration.isSignExpired(sign);
     }
 
     public static boolean isPartOfLockedDoor(Block block) { //todo
@@ -624,21 +629,21 @@ public class GreenLockerAPI {
         }
     }
 
-    public static int getTimerOnSigns(Block block) {
+    public static long getTimerOnSigns(Block block) {
         for (BlockFace blockface : cardinalFaces) {
             Block relative = block.getRelative(blockface);
             if (relative.getState() instanceof Sign sign) {
-                for (Component line : sign.getSide(Side.FRONT).lines()) {
-                    int linetime = GreenLocker.getPlugin().getMessageManager().getTimer(line);
-                    if (linetime > 0) return linetime;
+                Long timerDuration = SignTimer.getTimer(sign);
+                if (timerDuration != null && timerDuration > 0) {
+                    return timerDuration;
                 }
             }
         }
         return 0;
     }
 
-    public static int getTimerDoor(Block block) {
-        int timersingle = getTimerSingleDoor(block);
+    public static long getTimerDoor(Block block) {
+        long timersingle = getTimerSingleDoor(block);
         if (timersingle > 0) return timersingle;
         for (BlockFace blockface : cardinalFaces) {
             Block relative = block.getRelative(blockface);
@@ -648,28 +653,28 @@ public class GreenLockerAPI {
         return 0;
     }
 
-    public static int getTimerSingleDoor(Block block) {
+    public static long getTimerSingleDoor(Block block) {
         DoorParts doors = Doors.getDoorParts(block);
         if (doors == null) {
             return 0;
         }
 
-        int relativeuptimer = getTimerOnSigns(doors.upPart().getRelative(BlockFace.UP));
+        long relativeuptimer = getTimerOnSigns(doors.upPart().getRelative(BlockFace.UP));
         if (relativeuptimer > 0) {
             return relativeuptimer;
         }
 
-        int doors0 = getTimerOnSigns(doors.downPart());
+        long doors0 = getTimerOnSigns(doors.downPart());
         if (doors0 > 0) {
             return doors0;
         }
 
-        int doors1 = getTimerOnSigns(doors.upPart());
+        long doors1 = getTimerOnSigns(doors.upPart());
         if (doors1 > 0) {
             return doors1;
         }
 
-        int relativedowntimer = getTimerOnSigns(doors.downPart().getRelative(BlockFace.DOWN));
+        long relativedowntimer = getTimerOnSigns(doors.downPart().getRelative(BlockFace.DOWN));
         return Math.max(relativedowntimer, 0);
     }
 

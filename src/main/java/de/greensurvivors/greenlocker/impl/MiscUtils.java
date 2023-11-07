@@ -88,7 +88,6 @@ public class MiscUtils {
         return metadatas.get(0).asBoolean();
     }
 
-
     public static boolean isUserName(String text) { //todo use
         return usernamePattern.matcher(text).matches();
     }
@@ -143,30 +142,5 @@ public class MiscUtils {
         }
 
         return players;
-    }
-
-    public static boolean isPrivateTimeLine(@NotNull String text) {
-        if (text.contains("#")) {
-            String[] splitted = text.split("#", 2);
-            return splitted[1].startsWith("created:");
-        }
-        return false;
-    }
-
-    public static String StripSharpSign(String text) {
-        if (text.contains("#")) {
-            return text.split("#", 2)[0];
-        } else {
-            return text;
-        }
-    }
-
-    //todo maybe work with coreProtect together if dependency was enabled
-    public static long getCreatedFromLine(String text) { //todo
-        if (isPrivateTimeLine(text)) {
-            return Long.parseLong(text.split("#created:", 2)[1]);
-        } else {
-            return GreenLocker.getPlugin().getConfigManager().getLockDefaultCreateTimeUnix();
-        }
     }
 }

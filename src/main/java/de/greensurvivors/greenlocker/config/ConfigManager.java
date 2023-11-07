@@ -25,7 +25,7 @@ public class ConfigManager {
     private final ConfigOption<Boolean> LOCK_BLOCKS_ITEM_TRANSFER_OUT = new ConfigOption<>("lock.blocked.item-transfer.out", true);
     private final ConfigOption<HopperMinecartBlockedOption> LOCK_BLOCKS_HOPPER_MINECART = new ConfigOption<>("lock.blocked.hopper-minecart", HopperMinecartBlockedOption.REMOVE);
     private final ConfigOption<Set<ProtectionExemption>> LOCK_EXEMPTIONS = new ConfigOption<>("lock.exemptions", Set.of());
-    private final ConfigOption<Double> LOCK_EXPIRE_DAYS = new ConfigOption<>("lock.expire.days", 999.9);
+    private final ConfigOption<Long> LOCK_EXPIRE_DAYS = new ConfigOption<>("lock.expire.days", 999L);
     //while this works intern with milliseconds, configurable are only seconds for easier handling of the config
     private final ConfigOption<Integer> CACHE_MILLISECONDS = new ConfigOption<>("cache.seconds", 0);
 
@@ -316,7 +316,7 @@ public class ConfigManager {
         }
         LOCK_EXEMPTIONS.setValue(exemptions);
 
-        LOCK_EXPIRE_DAYS.setValue(config.getDouble(LOCK_EXPIRE_DAYS.getPath(), LOCK_EXPIRE_DAYS.getFallbackValue()));
+        LOCK_EXPIRE_DAYS.setValue(config.getLong(LOCK_EXPIRE_DAYS.getPath(), LOCK_EXPIRE_DAYS.getFallbackValue()));
 
         CACHE_MILLISECONDS.setValue(config.getInt(CACHE_MILLISECONDS.getPath(), CACHE_MILLISECONDS.getFallbackValue()) * 1000);
         if (CACHE_MILLISECONDS.getValueOrFallback() > 0) {
@@ -377,11 +377,11 @@ public class ConfigManager {
         return LOCK_EXPIRE_DAYS.getValueOrFallback() > 0;
     }
 
-    public Double getLockExpireDays() {
+    public Long getLockExpireDays() {
         return LOCK_EXPIRE_DAYS.getValueOrFallback();
     }
 
-    public long getLockDefaultCreateTimeUnix() {
+    public long getLockDefaultCreateTimeEpoch() {
         //todo something seems fishy here so this is disabled for now
         return -1L;
     }

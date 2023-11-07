@@ -1,7 +1,7 @@
 package de.greensurvivors.greenlocker.listener;
 
 import de.greensurvivors.greenlocker.GreenLockerAPI;
-import de.greensurvivors.greenlocker.impl.MiscUtils;
+import de.greensurvivors.greenlocker.impl.signdata.SignExpiration;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.ChatColor;
@@ -36,7 +36,8 @@ public class BlockDebugListener implements Listener {
                 player.sendMessage(Component.text(" - isOwner/UserSingle: ").append(formatBoolean(GreenLockerAPI.isOwnerUpDownLockedDoor(clickedBlock, player))).append(Component.text("/")).append(formatBoolean(GreenLockerAPI.isOwnerUpDownLockedDoor(clickedBlock, player))));
                 if (clickedBlock.getState() instanceof Sign sign && GreenLockerAPI.isLockSign(sign)) {
                     player.sendMessage(Component.text("isSignExpired: ").append(formatBoolean(GreenLockerAPI.isSignExpired(sign))));
-                    player.sendMessage(Component.text(" - created: ").append(Component.text(MiscUtils.getCreatedFromLine(((Sign) clickedBlock.getState()).getLine(0)))));
+                    Long timeStamp = SignExpiration.getCreatedTime(sign);
+                    player.sendMessage(Component.text(" - created: ").append(Component.text(timeStamp == null ? -1L : timeStamp)));
                     player.sendMessage(Component.text(" - now     : ").append(Component.text((int) (System.currentTimeMillis() / 1000))));
                 }
 

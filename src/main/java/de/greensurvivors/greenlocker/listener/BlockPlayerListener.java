@@ -8,11 +8,11 @@ import de.greensurvivors.greenlocker.config.MessageManager;
 import de.greensurvivors.greenlocker.config.PermissionManager;
 import de.greensurvivors.greenlocker.impl.Cache;
 import de.greensurvivors.greenlocker.impl.MiscUtils;
+import de.greensurvivors.greenlocker.impl.SignSelection;
 import de.greensurvivors.greenlocker.impl.doordata.DoorToggleTask;
 import de.greensurvivors.greenlocker.impl.doordata.Doors;
-import de.greensurvivors.greenlocker.impl.signdata.ExpireSign;
-import de.greensurvivors.greenlocker.impl.signdata.LockSign;
-import de.greensurvivors.greenlocker.impl.signdata.SignSelection;
+import de.greensurvivors.greenlocker.impl.signdata.SignExpiration;
+import de.greensurvivors.greenlocker.impl.signdata.SignLock;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -79,7 +79,7 @@ public class BlockPlayerListener implements Listener { //todo this whole class
                 return;
             }
             // Check permission 
-            if (player.hasPermission(PermissionManager.actionLock.getPerm())) {
+            if (player.hasPermission(PermissionManager.ACTION_LOCK.getPerm())) {
                 // Get target block to lock
                 BlockFace blockface = event.getBlockFace();
                 if (blockface == BlockFace.NORTH || blockface == BlockFace.WEST || blockface == BlockFace.EAST || blockface == BlockFace.SOUTH) {
@@ -109,12 +109,12 @@ public class BlockPlayerListener implements Listener { //todo this whole class
                                 // Send message
                                 plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
                                 // Cleanups - old names
-                                LockSign.updateNamesByUuid((Sign) newsign.getState());
+                                SignLock.updateNamesByUuid((Sign) newsign.getState());
 
                                 // Cleanups - Expiracy
                                 if (plugin.getConfigManager().doLocksExpire()) {
                                     // set created to now
-                                    ExpireSign.updateLineWithTime((Sign) newsign.getState(), player.hasPermission(PermissionManager.NO_EXPIRE.getPerm())); // set created to -1 (no expire) or now
+                                    SignExpiration.updateLineWithTimeNow((Sign) newsign.getState(), player.hasPermission(PermissionManager.NO_EXPIRE.getPerm())); // set created to -1 (no expire) or now
                                 }
                                 Dependency.logPlacement(player, newsign);
                             } else {
@@ -148,7 +148,7 @@ public class BlockPlayerListener implements Listener { //todo this whole class
                         sign.update();
 
                         plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
-                        if (!player.hasPermission(PermissionManager.actionLockOthers.getPerm())) { // Player with permission can lock with another name
+                        if (!player.hasPermission(PermissionManager.ACTION_LOCK_OTHERS.getPerm())) { // Player with permission can lock with another name
                             event.line(1, Component.text(player.getName()));
                         }
                         Cache.resetCache(block);
@@ -297,7 +297,7 @@ public class BlockPlayerListener implements Listener { //todo this whole class
                     if (action == Action.RIGHT_CLICK_BLOCK) {
                         if ((Doors.isDoubleDoorBlock(block) || Doors.isSingleDoorBlock(block)) && GreenLockerAPI.isLocked(block)) {
                             Block doorblock = Doors.getBottomDoorBlock(block);
-                            int closetime = GreenLockerAPI.getTimerDoor(doorblock);
+                            long closetime = GreenLockerAPI.getTimerDoor(doorblock);
                             List<Block> doors = new ArrayList<>();
                             doors.add(doorblock);
                             if (doorblock.getType() == Material.IRON_DOOR || doorblock.getType() == Material.IRON_TRAPDOOR) {
@@ -350,7 +350,7 @@ public class BlockPlayerListener implements Listener { //todo this whole class
     private void onPlaceFirstBlockNotify(@NotNull BlockPlaceEvent event) {
         Block block = event.getBlock();
         Player player = event.getPlayer();
-        if (player.hasPermission(PermissionManager.actionLock.getPerm())) {
+        if (player.hasPermission(PermissionManager.ACTION_LOCK.getPerm())) {
             if (MiscUtils.shouldNotify(player) && plugin.getConfigManager().isLockable(block.getType())) {
                 if (Objects.requireNonNull(plugin.getConfigManager().getQuickProtectAction()) == ConfigManager.QuickProtectOption.OFF) {
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.NOTICE_MANUEL_LOCK);

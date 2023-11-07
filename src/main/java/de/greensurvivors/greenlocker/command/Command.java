@@ -5,8 +5,8 @@ import de.greensurvivors.greenlocker.GreenLockerAPI;
 import de.greensurvivors.greenlocker.config.MessageManager;
 import de.greensurvivors.greenlocker.config.PermissionManager;
 import de.greensurvivors.greenlocker.impl.MiscUtils;
-import de.greensurvivors.greenlocker.impl.signdata.LockSign;
-import de.greensurvivors.greenlocker.impl.signdata.SignSelection;
+import de.greensurvivors.greenlocker.impl.SignSelection;
+import de.greensurvivors.greenlocker.impl.signdata.SignLock;
 import org.apache.commons.collections4.set.ListOrderedSet;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
@@ -37,6 +37,8 @@ public class Command implements CommandExecutor, TabCompleter {
         // admin sub commands
         SUBCOMMANDS.add(new AddOwner(plugin));
         SUBCOMMANDS.add(new RemoveOwner(plugin));
+        SUBCOMMANDS.add(new SetCreated(plugin));
+        SUBCOMMANDS.add(new SetTimer(plugin));
         SUBCOMMANDS.add(new UpdateSign(plugin));
         SUBCOMMANDS.add(new Version(plugin));
         SUBCOMMANDS.add(new Debug(plugin));
@@ -63,7 +65,7 @@ public class Command implements CommandExecutor, TabCompleter {
 
                 if (block != null) {
                     if (block instanceof Sign sign) {
-                        if (GreenLockerAPI.isAdditionalSign(sign) || LockSign.isLegacySign(sign)) {
+                        if (GreenLockerAPI.isAdditionalSign(sign) || SignLock.isLegacySign(sign)) {
                             Sign otherSign = GreenLockerAPI.updateLegacySign(sign); //get main sign
 
                             if (otherSign == null) {
@@ -78,7 +80,7 @@ public class Command implements CommandExecutor, TabCompleter {
 
                         if (removeOwner) {
                             if (sender.hasPermission(PermissionManager.ADMIN_EDIT.getPerm())) {
-                                ListOrderedSet<String> uuidStrs = LockSign.getUUIDs(sign, true);
+                                ListOrderedSet<String> uuidStrs = SignLock.getUUIDs(sign, true);
                                 List<String> result = new ArrayList<>();
 
                                 for (String uuidStr : uuidStrs) {
@@ -99,7 +101,7 @@ public class Command implements CommandExecutor, TabCompleter {
                                 return result;
                             }
                         } else {
-                            ListOrderedSet<String> uuidStrs = LockSign.getUUIDs(sign, false);
+                            ListOrderedSet<String> uuidStrs = SignLock.getUUIDs(sign, false);
                             List<String> result = new ArrayList<>();
 
                             for (String uuidStr : uuidStrs) {
@@ -146,7 +148,7 @@ public class Command implements CommandExecutor, TabCompleter {
 
                     if (block != null) {
                         if (block instanceof Sign sign) {
-                            if (GreenLockerAPI.isAdditionalSign(sign) || LockSign.isLegacySign(sign)) {
+                            if (GreenLockerAPI.isAdditionalSign(sign) || SignLock.isLegacySign(sign)) {
                                 Sign otherSign = GreenLockerAPI.updateLegacySign(sign); //get main sign
 
                                 if (otherSign == null) {
@@ -163,7 +165,7 @@ public class Command implements CommandExecutor, TabCompleter {
                                 if (offlinePlayer != null) {
 
                                     if (GreenLockerAPI.isLockSign(sign)) {
-                                        LockSign.addPlayer(sign, addOwner, offlinePlayer);
+                                        SignLock.addPlayer(sign, addOwner, offlinePlayer);
 
                                         if (addOwner) {
                                             plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.ADD_OWNER_SUCCESS);
@@ -218,7 +220,7 @@ public class Command implements CommandExecutor, TabCompleter {
 
                     if (block != null) {
                         if (block instanceof Sign sign) {
-                            if (GreenLockerAPI.isAdditionalSign(sign) || LockSign.isLegacySign(sign)) {
+                            if (GreenLockerAPI.isAdditionalSign(sign) || SignLock.isLegacySign(sign)) {
                                 Sign otherSign = GreenLockerAPI.updateLegacySign(sign); //get main sign
 
                                 if (otherSign == null) {
@@ -231,10 +233,10 @@ public class Command implements CommandExecutor, TabCompleter {
                                 }
                             }
 
-                            if (player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()) || (!removeOwner && LockSign.isOwner(sign, player.getUniqueId()))) {
+                            if (player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()) || (!removeOwner && SignLock.isOwner(sign, player.getUniqueId()))) {
                                 if (offlinePlayer != null) {
                                     if (GreenLockerAPI.isLockSign(sign)) {
-                                        if (LockSign.removePlayer(sign, removeOwner, offlinePlayer.getUniqueId())) {
+                                        if (SignLock.removePlayer(sign, removeOwner, offlinePlayer.getUniqueId())) {
                                             if (removeOwner) {
                                                 plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_OWNER_SUCCESS);
                                             } else {
