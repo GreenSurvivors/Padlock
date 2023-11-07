@@ -12,7 +12,7 @@ block-item-transfer-out: true
 block-hopper-minecart: remove
 cache-time-seconds: 0
 lock-expire: false
-lock-expire-days: 999.9
+lock-expire-days: 999
 lock-default-create-time-unix: -1
 
 

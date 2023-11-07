@@ -55,6 +55,23 @@ public class SignTimer {
         }
     }
 
+    /**
+     * used to parse timer when locking manuel
+     *
+     * @param line
+     * @return
+     */
+    public static @Nullable Long getTimerFromComp(Component line) {
+        String strToTest = PlainTextComponentSerializer.plainText().serialize(line).trim();
+        Matcher matcher = legacyPattern.matcher(strToTest);
+
+        if (matcher.matches()) {
+            return Math.min(Long.parseLong(matcher.group(2)), 20);
+        } else {
+            return null;
+        }
+    }
+
     @Deprecated(forRemoval = true)
     public static void updateLegacyTimer(Sign sign) {
         Long legacyTimer = getLegacyTimer(sign);
@@ -66,12 +83,11 @@ public class SignTimer {
 
     @Deprecated(forRemoval = true)
     private static @Nullable Long getLegacyTimer(Sign sign) {
-        for (Component compToTest : sign.getSide(Side.FRONT).lines()) {
-            String strToTest = PlainTextComponentSerializer.plainText().serialize(compToTest).trim();
-            Matcher matcher = legacyPattern.matcher(strToTest);
+        for (Component line : sign.getSide(Side.FRONT).lines()) {
+            Long timer = getTimerFromComp(line);
 
-            if (matcher.matches()) {
-                return Math.min(Long.parseLong(matcher.group(1)), 20);
+            if (timer != null) {
+                return timer;
             }
         }
 

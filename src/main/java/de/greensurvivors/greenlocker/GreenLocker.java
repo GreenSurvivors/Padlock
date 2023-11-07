@@ -14,7 +14,6 @@ import org.jetbrains.annotations.NotNull;
 import java.util.logging.Level;
 
 public class GreenLocker extends JavaPlugin {
-    private static final boolean needcheckhand = true;
     private static GreenLocker plugin;
     private final boolean debug = false;
     private ConfigManager configManager;
@@ -22,10 +21,6 @@ public class GreenLocker extends JavaPlugin {
 
     public static GreenLocker getPlugin() {
         return plugin;
-    }
-
-    public static boolean needCheckHand() {
-        return needcheckhand;
     }
 
     @Override

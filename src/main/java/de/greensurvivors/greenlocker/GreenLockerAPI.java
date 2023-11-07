@@ -106,7 +106,7 @@ public class GreenLockerAPI {
         SignLock.setInvalid(sign);
     }
 
-    private static @Nullable Sign getLockSignDoor(@NotNull DoorParts doorToCheck) { //todo check for adittional signs and if found update; also do everything async if possible
+    private static @Nullable Sign getLockSignDoor(@NotNull DoorParts doorToCheck) { //todo check for adittional signs and if found update
         Map<BlockFace, DoorParts> connectedDoors = Doors.getConnectedDoors(doorToCheck);
 
         for (BlockFace blockFace : cardinalFaces) {

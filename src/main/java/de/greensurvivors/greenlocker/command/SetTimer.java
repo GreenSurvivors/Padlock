@@ -28,8 +28,8 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SetTimer extends SubCommand {
-    private static final @NotNull Pattern periodPattern = Pattern.compile("(-?[0-9]+)([sSmhHdDwWM])");
-    private static final @NotNull Pattern numberEndPattern = Pattern.compile("-?[0-9]+$");
+    private static final @NotNull Pattern periodPattern = Pattern.compile("(-?[0-9]+)([tTsSmhHdDwWM])");
+    private static final @NotNull Pattern numberEndPattern = Pattern.compile("^*?\\d$");
 
     protected SetTimer(@NotNull GreenLocker plugin) {
         super(plugin);
@@ -62,9 +62,12 @@ public class SetTimer extends SubCommand {
 
         while (matcher.find()) {
             try {
+
+
                 long num = Long.parseLong(matcher.group(1));
                 String typ = matcher.group(2);
                 millis += switch (typ) {
+                    case "t", "T" -> Math.round(50D * num); // ticks
                     case "s" -> TimeUnit.SECONDS.toMillis(num);
                     case "m" -> TimeUnit.MINUTES.toMillis(num);
                     case "h", "H" -> TimeUnit.HOURS.toMillis(num);
@@ -73,7 +76,6 @@ public class SetTimer extends SubCommand {
                     case "M" -> TimeUnit.DAYS.toMillis(Period.ofMonths((int) num).getDays());
                     default -> 0;
                 };
-
             } catch (NumberFormatException e) {
                 plugin.getLogger().log(Level.WARNING, "Couldn't get time period for " + period, e);
             }
@@ -167,18 +169,14 @@ public class SetTimer extends SubCommand {
         String arg = args[args.length - 1];
         List<String> result = new ArrayList<>();
 
-        if (periodPattern.matcher(arg).matches()) {
-            if (numberEndPattern.matcher(arg).matches()) {
-                result.addAll(List.of("s", "m", "h", "d", "w", "M"));
-            }
-
-            for (int i = 0; i <= 9; i++) {
-                result.add(String.valueOf(i));
-            }
-
-            return result;
+        if (numberEndPattern.matcher(arg).matches()) {
+            result.addAll(List.of("t", "s", "m", "h", "d", "w", "M"));
         }
 
-        return null;
+        for (int i = 0; i <= 9; i++) {
+            result.add(String.valueOf(i));
+        }
+
+        return result.stream().map(str -> arg + str).toList();
     }
 }

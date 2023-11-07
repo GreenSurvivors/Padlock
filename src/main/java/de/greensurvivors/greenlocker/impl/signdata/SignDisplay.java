@@ -47,16 +47,18 @@ public class SignDisplay {
                     break;
                 } //line already filled
             } //outer loop
-        } else {
+        } else if (owners) {
             GreenLocker.getPlugin().getLogger().log(Level.WARNING, "Lock sign without Owners at " + sign.getLocation());
         }
 
     }
 
-    public static void updateDisplay(@NotNull Sign sign) { //todo slightly redo
-        final int amountOfLines = sign.getSide(Side.FRONT).lines().size() - 1;
+    public static void updateDisplay(@NotNull Sign sign) {
+        final int amountOfLines = sign.getSide(Side.FRONT).lines().size();
         int lastIndex = amountOfLines - 1;
         final Component[] linesToUpdate = new Component[amountOfLines];
+
+        linesToUpdate[0] = GreenLocker.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PRIVATE_SIGN);
 
         Boolean isEveryOneSign = EveryoneSign.getAccessEveryone(sign);
         if (isEveryOneSign != null && isEveryOneSign) {
@@ -83,7 +85,7 @@ public class SignDisplay {
                 line = Component.empty();
             }
 
-            sign.getSide(Side.FRONT).line(i + 1, line);
+            sign.getSide(Side.FRONT).line(i, line);
         }
 
         sign.update();

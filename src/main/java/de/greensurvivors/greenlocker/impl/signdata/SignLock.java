@@ -16,6 +16,7 @@ import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
 import java.util.UUID;
@@ -123,7 +124,14 @@ public class SignLock {
         return !sign.getPersistentDataContainer().has(storedOwnersUUIDKey, uuidSetDataType);
     }
 
-    public static void addPlayer(@NotNull final Sign sign, boolean isOwner, @NotNull OfflinePlayer player) {
+    /**
+     * if player null this jus ensures the list was ever stored in the getPersistentDataContainer
+     *
+     * @param sign
+     * @param isOwner
+     * @param player
+     */
+    public static void addPlayer(@NotNull final Sign sign, boolean isOwner, @Nullable OfflinePlayer player) {
         PersistentDataContainer container = sign.getPersistentDataContainer();
 
         ListOrderedSet<String> set = container.get(isOwner ? storedOwnersUUIDKey : storedMembersUUIDKey, uuidSetDataType);
@@ -131,7 +139,9 @@ public class SignLock {
             set = new ListOrderedSet<>();
         }
 
-        set.add(player.getUniqueId().toString());
+        if (player != null) {
+            set.add(player.getUniqueId().toString());
+        }
 
         sign.getPersistentDataContainer().set(isOwner ? storedOwnersUUIDKey : storedMembersUUIDKey, uuidSetDataType, set);
         SignDisplay.updateDisplay(sign); // update the block to make the UUID change effective

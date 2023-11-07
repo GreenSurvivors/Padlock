@@ -67,16 +67,6 @@ public class MiscUtils {
         }
     }
 
-    public static void playLockEffect(Player player, Block block) {
-//		player.playSound(block.getLocation(), Sound.DOOR_CLOSE, 0.3F, 1.4F);
-//		player.spigot().playEffect(block.getLocation().add(0.5, 0.5, 0.5), Effect.CRIT, 0, 0, 0.3F, 0.3F, 0.3F, 0.1F, 64, 64);
-    }
-
-    public static void playAccessDenyEffect(Player player, Block block) {
-//		player.playSound(block.getLocation(), Sound.VILLAGER_NO, 0.3F, 0.9F);
-//		player.spigot().playEffect(block.getLocation().add(0.5, 0.5, 0.5), Effect.FLAME, 0, 0, 0.3F, 0.3F, 0.3F, 0.01F, 64, 64);
-    }
-
     public static boolean shouldNotify(Player player) {
         if (notified.contains(player.getUniqueId())) {
             return false;
@@ -91,7 +81,7 @@ public class MiscUtils {
         return metadatas.get(0).asBoolean();
     }
 
-    public static boolean isUserName(String text) { //todo use
+    public static boolean isUserName(String text) {
         return usernamePattern.matcher(text).matches();
     }
 

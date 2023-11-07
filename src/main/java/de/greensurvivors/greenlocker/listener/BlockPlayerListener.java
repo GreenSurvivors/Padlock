@@ -11,8 +11,9 @@ import de.greensurvivors.greenlocker.impl.MiscUtils;
 import de.greensurvivors.greenlocker.impl.SignSelection;
 import de.greensurvivors.greenlocker.impl.doordata.DoorToggleTask;
 import de.greensurvivors.greenlocker.impl.doordata.Doors;
-import de.greensurvivors.greenlocker.impl.signdata.SignExpiration;
+import de.greensurvivors.greenlocker.impl.signdata.*;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
@@ -130,7 +131,7 @@ public class BlockPlayerListener implements Listener { //todo this whole class
 
     // Manual protection
     @EventHandler(priority = EventPriority.NORMAL, ignoreCancelled = true)
-    private void onManualLock(@NotNull SignChangeEvent event) { //todo correct signLines according to correct casing;
+    private void onManualLock(@NotNull SignChangeEvent event) {
         if (!Tag.WALL_SIGNS.isTagged(event.getBlock().getType())) return;
 
         Component topline = event.line(0);
@@ -138,42 +139,77 @@ public class BlockPlayerListener implements Listener { //todo this whole class
         Player player = event.getPlayer();
 
         if (GreenLockerAPI.isLockComp(topline)) {
-            Block block = GreenLockerAPI.getAttachedBlock(event.getBlock());
-            if (block != null && GreenLockerAPI.isLockable(block)) {
-                boolean locked = GreenLockerAPI.isLocked(block);
-                if (!locked && !GreenLockerAPI.isPartOfLockedDoor(block)) { //todo reorganize this
-                    if (GreenLockerAPI.isLockComp(topline)) {
-                        Sign sign = (Sign) event.getBlock().getState();
-                        sign.setWaxed(true);
-                        sign.update();
+            Block attachedBlock = GreenLockerAPI.getAttachedBlock(event.getBlock());
+            if (attachedBlock != null && GreenLockerAPI.isLockable(attachedBlock)) {
+                if (GreenLockerAPI.isLocked(attachedBlock)) {
+                    if (GreenLockerAPI.isOwner(attachedBlock, player)) {
+                        plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_ERROR_ALREADY_LOCKED);
+                        event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN));
+                    } else {
+                        plugin.getMessageManager().sendLang(player, MessageManager.LangPath.NOT_OWNER);
+                        event.setCancelled(true);
+                    }
+                } else {
+                    Sign sign = (Sign) event.getBlock().getState();
+                    sign.setWaxed(true);
+                    sign.update();
 
-                        plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
-                        if (!player.hasPermission(PermissionManager.ACTION_LOCK_OTHERS.getPerm())) { // Player with permission can lock with another name
-                            event.line(1, Component.text(player.getName()));
+                    PlainTextComponentSerializer plainTextComponentSerializer = PlainTextComponentSerializer.plainText();
+
+                    if (!player.hasPermission(PermissionManager.ACTION_LOCK_OTHERS.getPerm())) { // Player with permission can lock with another name
+                        event.line(1, Component.text(player.getName()));
+                        SignLock.addPlayer(sign, true, player);
+                    } else {
+                        Component line = event.line(1);
+
+                        if (line != null) {
+                            String strLine = plainTextComponentSerializer.serialize(line);
+
+                            if (MiscUtils.isUserName(strLine)) {
+                                SignLock.addPlayer(sign, true, Bukkit.getOfflinePlayer(strLine));
+                            } else {
+                                //todo sendLang
+                                event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN));
+                                return;
+                            }
+                        } else if (player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm())) { // failsafe: only allow setting a sign without owner if you could break it!
+                            SignLock.addPlayer(sign, true, null);
+                        } else {
+                            event.setCancelled(true);
+                            return;
                         }
-                        Cache.resetCache(block);
                     }
-                } else if (!locked && GreenLockerAPI.isOwnerUpDownLockedDoor(block, player)) {
-                    if (GreenLockerAPI.isLockComp(topline)) {
-                        plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_ERROR_ALREADY_LOCKED);
-                        event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN));
-                    }
-                } else if (GreenLockerAPI.isOwner(block, player)) {
-                    if (GreenLockerAPI.isLockComp(topline)) {
-                        plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_ERROR_ALREADY_LOCKED);
-                        event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN));
-                    }
-                } else { // Not possible to fall here except override
-                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_ERROR_ALREADY_LOCKED);
-                    event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN));
-                    MiscUtils.playAccessDenyEffect(player, block);
+
+                    for (int i = 2; i < event.lines().size(); i++) {
+                        Component line = event.line(i);
+                        if (line == null) {
+                            continue;
+                        }
+
+                        String strLine = PlainTextComponentSerializer.plainText().serialize(line);
+                        Long timer = SignTimer.getTimerFromComp(line);
+
+                        if (timer != null) {
+                            SignTimer.setTimer(sign, timer);
+                            plugin.getLogger().warning("did set timer.");
+                        } else if (plugin.getMessageManager().isSignComp(line, MessageManager.LangPath.EVERYONE_SIGN)) {
+                            EveryoneSign.setEveryone(sign, true);
+                        } else if (MiscUtils.isUserName(strLine)) {
+                            SignLock.addPlayer(sign, false, Bukkit.getOfflinePlayer(strLine));
+                        } // else invalid line
+                    } // for loop
+
+                    //update Sign after event was done
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> SignDisplay.updateDisplay(sign), 2);
+
+                    Cache.resetCache(attachedBlock);
+                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
                 }
             } else {
                 plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_ERROR_NOT_LOCKABLE);
                 event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN));
-                MiscUtils.playAccessDenyEffect(player, block);
             }
-        }
+        } // not a lock sign
     }
 
     // Player select sign
@@ -191,7 +227,6 @@ public class BlockPlayerListener implements Listener { //todo this whole class
                             ((GreenLockerAPI.isLockSign(sign) || GreenLockerAPI.isAdditionalSign(sign)) && player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm())))) {
                 SignSelection.selectSign(player, clickedBlock);
                 plugin.getMessageManager().sendLang(player, MessageManager.LangPath.SELECT_SIGN);
-                MiscUtils.playLockEffect(player, clickedBlock);
             }
         }
     }
@@ -211,15 +246,16 @@ public class BlockPlayerListener implements Listener { //todo this whole class
                 } else {
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.NOT_OWNER);
                     event.setCancelled(true);
-                    MiscUtils.playAccessDenyEffect(player, block);
                 }
             } else if (GreenLockerAPI.isAdditionalSign(sign)) {
                 if (GreenLockerAPI.isOwnerOfSign(sign, player)) {
-                    //todo update but don't add members of this additional sign
+                    final Sign lockSign = GreenLockerAPI.getLockSign(GreenLockerAPI.getAttachedBlock(block));
+
+                    //let the additional sign break but update the others
+                    Bukkit.getScheduler().runTaskLater(plugin, () -> GreenLockerAPI.updateLegacySign(lockSign), 2);
                 } else {
                     GreenLockerAPI.updateLegacySign(sign);
                     event.setCancelled(true);
-                    MiscUtils.playAccessDenyEffect(player, block);
                 }
             }
         }
@@ -233,16 +269,11 @@ public class BlockPlayerListener implements Listener { //todo this whole class
             sign.setWaxed(true);
             sign.update();
             event.setCancelled(true);
-
-            // langua added this, however it doesn't seem on brant since
-            // a.) everything works as intended
-            // b.) smoke particles are used nowhere else
-            //block.getWorld().spawnParticle(Particle.SMOKE_NORMAL, block.getLocation(), 5);
         }
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    private void onAttemptBreakWaxedLockerSign(@NotNull PlayerInteractEvent event) {
+    private void onAttemptRemoveWaxOfLockerSign(@NotNull PlayerInteractEvent event) {
         Action action = event.getAction();
         Block block = event.getClickedBlock();
 
@@ -262,7 +293,6 @@ public class BlockPlayerListener implements Listener { //todo this whole class
         if (GreenLockerAPI.isLocked(block) || GreenLockerAPI.isPartOfLockedDoor(block)) {
             plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
             event.setCancelled(true);
-            MiscUtils.playAccessDenyEffect(player, block);
         }
     }
 
@@ -273,15 +303,13 @@ public class BlockPlayerListener implements Listener { //todo this whole class
         Block block = event.getClickedBlock();
 
         if (block == null) return;
-        if (GreenLocker.needCheckHand()) {
-            if (event.getHand() != EquipmentSlot.HAND) {
-                if (action == Action.RIGHT_CLICK_BLOCK) {
-                    if (GreenLockerAPI.isChest(block)) {
-                        // something not right
-                        event.setCancelled(true);
-                    }
-                    return;
+        if (event.getHand() != EquipmentSlot.HAND) { //todo what?
+            if (action == Action.RIGHT_CLICK_BLOCK) {
+                if (GreenLockerAPI.isChest(block)) {
+                    // something not right
+                    event.setCancelled(true);
                 }
+                return;
             }
         }
         switch (action) {
@@ -292,7 +320,6 @@ public class BlockPlayerListener implements Listener { //todo this whole class
                         && !player.hasPermission(PermissionManager.ADMIN_USE.getPerm())) {
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
                     event.setCancelled(true);
-                    MiscUtils.playAccessDenyEffect(player, block);
                 } else { // Handle double doors
                     if (action == Action.RIGHT_CLICK_BLOCK) {
                         if ((Doors.isDoubleDoorBlock(block) || Doors.isSingleDoorBlock(block)) && GreenLockerAPI.isLocked(block)) {
@@ -340,7 +367,6 @@ public class BlockPlayerListener implements Listener { //todo this whole class
             if (GreenLockerAPI.mayInterfere(block, player)) {
                 plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_INTERFERE);
                 event.setCancelled(true);
-                MiscUtils.playAccessDenyEffect(player, block);
             }
         }
     }
@@ -366,8 +392,9 @@ public class BlockPlayerListener implements Listener { //todo this whole class
         Player player = event.getPlayer();
         Block block = event.getBlockClicked().getRelative(event.getBlockFace());
 
-        if (GreenLockerAPI.isProtected(block) && !(GreenLockerAPI.isOwner(block, player) ||
-                (block.getState() instanceof Sign sign && GreenLockerAPI.isOwnerOfSign(sign, player)))) {
+        if (GreenLockerAPI.isProtected(block) && (!(GreenLockerAPI.isOwner(block, player) ||
+                (block.getState() instanceof Sign sign && GreenLockerAPI.isOwnerOfSign(sign, player))) ||
+                player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
             event.setCancelled(true);
 
             new BukkitRunnable() {
@@ -385,8 +412,9 @@ public class BlockPlayerListener implements Listener { //todo this whole class
     private void onBucketUse(@NotNull PlayerBucketFillEvent event) {
         Player player = event.getPlayer();
         Block block = event.getBlockClicked().getRelative(event.getBlockFace());
-        if (GreenLockerAPI.isProtected(block) && !(GreenLockerAPI.isOwner(block, player) ||
-                (block.getState() instanceof Sign sign && GreenLockerAPI.isOwnerOfSign(sign, player)))) {
+        if (GreenLockerAPI.isProtected(block) && (!(GreenLockerAPI.isOwner(block, player) ||
+                (block.getState() instanceof Sign sign && GreenLockerAPI.isOwnerOfSign(sign, player))) ||
+                player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
             event.setCancelled(true);
         }
     }
@@ -395,8 +423,9 @@ public class BlockPlayerListener implements Listener { //todo this whole class
     private void onLecternTake(@NotNull PlayerTakeLecternBookEvent event) {
         Player player = event.getPlayer();
         Block block = event.getLectern().getBlock();
-        if (GreenLockerAPI.isProtected(block) && !(GreenLockerAPI.isOwner(block, player) ||
-                (block.getState() instanceof Sign sign && GreenLockerAPI.isOwnerOfSign(sign, player)))) {
+        if (GreenLockerAPI.isProtected(block) && (!(GreenLockerAPI.isOwner(block, player) ||
+                (block.getState() instanceof Sign sign && GreenLockerAPI.isOwnerOfSign(sign, player))) ||
+                player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
             event.setCancelled(true);
         }
     }

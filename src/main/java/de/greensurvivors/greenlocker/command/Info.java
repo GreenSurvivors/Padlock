@@ -72,11 +72,6 @@ public class Info extends SubCommand {
 
                         Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_OWNERS);
                         for (String name : MiscUtils.getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, true))) {
-                            if (name == null) {
-                                plugin.getLogger().warning("nullName in owners");
-                                continue;
-                            }
-
                             component = component.append(Component.text(name));
                             component = component.append(Component.text(", "));
                         }
@@ -84,11 +79,6 @@ public class Info extends SubCommand {
 
                         component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_MEMBERS));
                         for (String name : MiscUtils.getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, false))) {
-                            if (name == null) {
-                                plugin.getLogger().warning("nullName in members");
-                                continue;
-                            }
-
                             component = component.append(Component.text(name));
                             component = component.append(Component.text(", "));
                         }
