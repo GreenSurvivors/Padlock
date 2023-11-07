@@ -49,7 +49,7 @@ public class Info extends SubCommand {
      * @param args   Passed command arguments
      * @return true if a valid command, otherwise false
      */
-    @Override
+    @Override //todo check if member or admin
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) { //todo this needs formatting and general glow up
         //todo needs timer, redstone, created + expired, everyone
         if (sender instanceof Player player) {

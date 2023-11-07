@@ -332,7 +332,7 @@ public class ConfigManager {
 
     @Deprecated(forRemoval = true)
     private void getFromLegacy() {
-        LegacyLocketteAdapter adapter = new LegacyLocketteAdapter();
+        LegacyLocketteConfigAdapter adapter = new LegacyLocketteConfigAdapter();
         adapter.reload(plugin);
 
         FileConfiguration config = plugin.getConfig();

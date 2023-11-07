@@ -5,9 +5,10 @@ import de.greensurvivors.greenlocker.GreenLockerAPI;
 import de.greensurvivors.greenlocker.config.MessageManager;
 import de.greensurvivors.greenlocker.config.PermissionManager;
 import de.greensurvivors.greenlocker.impl.SignSelection;
-import de.greensurvivors.greenlocker.impl.signdata.SignExpiration;
+import de.greensurvivors.greenlocker.impl.signdata.EveryoneSign;
 import de.greensurvivors.greenlocker.impl.signdata.SignLock;
 import net.kyori.adventure.text.Component;
+import org.apache.commons.lang3.BooleanUtils;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
@@ -16,65 +17,27 @@ import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.time.DateTimeException;
-import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.time.format.DateTimeFormatter;
-import java.time.format.DateTimeParseException;
-import java.time.temporal.TemporalAccessor;
-import java.time.temporal.TemporalQueries;
 import java.util.List;
 import java.util.Set;
 
-public class SetCreated extends SubCommand {
-    private final static DateTimeFormatter[] supportedFormats = new DateTimeFormatter[]{
-            DateTimeFormatter.ISO_DATE_TIME,
-            DateTimeFormatter.ISO_TIME,
-            DateTimeFormatter.RFC_1123_DATE_TIME,
-            DateTimeFormatter.ofPattern("dd.MM.yyyy['T'HH:mm[:ss]][zzzz]")
-    };
-
-    protected SetCreated(@NotNull GreenLocker plugin) {
+public class SetEveryone extends SubCommand {
+    protected SetEveryone(@NotNull GreenLocker plugin) {
         super(plugin);
     }
 
     @Override
     protected boolean checkPermission(Permissible sender) {
-        return sender.hasPermission(PermissionManager.CMD_SET_CREATED.getPerm());
+        return sender.hasPermission(PermissionManager.CMD_SET_EVERYONE.getPerm());
     }
 
     @Override
     protected @NotNull Set<String> getAlias() {
-        return Set.of("setCreated", "created");
+        return Set.of("seteveryone", "everyone");
     }
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_SETCREATED);
-    }
-
-    private @Nullable Long getEpochMillisFromString(@NotNull String string) {
-        for (DateTimeFormatter formatter : supportedFormats) {
-            try {
-                TemporalAccessor temporalAccessor = formatter.parse(string);
-
-                ZoneId zoneId = null;
-                try {
-                    zoneId = temporalAccessor.query(TemporalQueries.zone());
-                } catch (DateTimeException ignored) {
-                }
-
-                if (zoneId == null) {
-                    zoneId = ZoneId.systemDefault();
-                }
-
-                LocalDateTime localDateTime = formatter.parse("", LocalDateTime::from);
-                return localDateTime.atZone(zoneId).toInstant().toEpochMilli();
-            } catch (DateTimeParseException ignored) {
-            }
-        }
-
-        return null;
+        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_SETEVERYONE);
     }
 
     /**
@@ -88,7 +51,7 @@ public class SetCreated extends SubCommand {
      * @return true if a valid command, otherwise false
      */
     @Override
-    protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
+    protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) { //todo check if owner or admin
         if (sender instanceof Player player) {
             if (sender.hasPermission(PermissionManager.CMD_SET_CREATED.getPerm())) {
                 if (args.length >= 2) {
@@ -109,15 +72,13 @@ public class SetCreated extends SubCommand {
                                 }
                             }
 
-                            Long millisEpoch = getEpochMillisFromString(args[1]);
+                            Boolean setting = BooleanUtils.toBooleanObject(args[1]);
 
-                            if (millisEpoch != null) {
-                                SignExpiration.updateWithTime(sign, millisEpoch);
-
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_CREATED_SUCCESS);
-                                return true;
+                            if (setting != null) {
+                                EveryoneSign.setEveryone(sign, setting);
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_EVERYONE_SUCCESS);
                             } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_CREATED_ERROR);
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_EVERYONE_ERROR);
                                 return false;
                             }
                         } else {
@@ -154,6 +115,10 @@ public class SetCreated extends SubCommand {
      */
     @Override
     protected @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
-        return null; //todo
+        if (args.length == 2) {
+            return List.of(Boolean.TRUE.toString(), Boolean.FALSE.toString());
+        } else {
+            return null;
+        }
     }
 }

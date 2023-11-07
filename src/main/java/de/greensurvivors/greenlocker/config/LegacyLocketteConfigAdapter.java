@@ -18,7 +18,7 @@ import java.util.Set;
  * However, please be aware that there were made changes, like using Enums or giving the cache time in seconds back.
  */
 @Deprecated(forRemoval = true)
-class LegacyLocketteAdapter {
+class LegacyLocketteConfigAdapter {
     private boolean worldguard = false;
     private boolean coreprotect = false;
     private Set<Material> lockables = new HashSet<>();
@@ -33,7 +33,7 @@ class LegacyLocketteAdapter {
     private long lockdefaultcreatetime = -1L;
     private Set<ConfigManager.ProtectionExemption> protectionexempt = new HashSet<>();
 
-    protected LegacyLocketteAdapter() {
+    protected LegacyLocketteConfigAdapter() {
     }
 
     protected void reload(Plugin plugin) {

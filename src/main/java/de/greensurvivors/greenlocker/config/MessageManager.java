@@ -97,7 +97,7 @@ public class MessageManager {
         return strToTest.equalsIgnoreCase(nakedSigns.get(langPath));
     }
 
-    public @Nullable String getNakedSignText(@NotNull LangPath langPath) {
+    public String getNakedSignText(@NotNull LangPath langPath) {
         return nakedSigns.get(langPath);
     }
 
@@ -156,10 +156,12 @@ public class MessageManager {
         REMOVE_MEMBER_SUCCESS("cmd.remove-member.success"),
         REMOVE_MEMBER_ERROR("cmd.remove-owner.error"),
         SET_CREATED_SUCCESS("cmd.set-created.success"),
-        SET_CREATED_ERROR_TIMEFORMAT("cmd.set-created.error.time-format"),
+        SET_CREATED_ERROR("cmd.set-created.error"),
+        SET_EVERYONE_SUCCESS("cmd.set-everyone.success"),
+        SET_EVERYONE_ERROR("cmd.set-everyone.error"),
         SET_TIMER_SUCCESS_ON("cmd.set-timer.success.on"),
         SET_TIMER_SUCCESS_OFF("cmd.set-timer.success.off"),
-        SET_TIMER_ERROR("cmd.set-timer.error.time-format"),
+        SET_TIMER_ERROR("cmd.set-timer.error"),
         UPDATE_SIGN_SUCCESS("cmd.sign-update.success"),
         INFO_OWNERS("cmd.info.owners"),
         INFO_MEMBERS("cmd.info.members"),

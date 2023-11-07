@@ -31,7 +31,7 @@ public class BlockDebugListener implements Listener {
                 player.sendMessage(Component.text("isLocked: ").append(formatBoolean(GreenLockerAPI.isLocked(clickedBlock))));
                 player.sendMessage(Component.text(" - isOwner/User: ").append(formatBoolean(GreenLockerAPI.isOwner(clickedBlock, player))).append(Component.text("/")).append(formatBoolean(GreenLockerAPI.isMember(clickedBlock, player))));
                 player.sendMessage(Component.text("isLockedSingle: ").append(formatBoolean(GreenLockerAPI.isLockedSingleBlock(clickedBlock, null))));
-                player.sendMessage(Component.text(" - isOwner/UserSingle: ").append(formatBoolean(GreenLockerAPI.isOwnerSingleBlock(clickedBlock, null, player))).append(Component.text("/")).append(formatBoolean(GreenLockerAPI.isUserSingleBlock(clickedBlock, null, player))));
+                player.sendMessage(Component.text(" - isOwner/UserSingle: ").append(formatBoolean(GreenLockerAPI.isOwnerSingleBlock(clickedBlock, null, player))).append(Component.text("/")).append(formatBoolean(GreenLockerAPI.isMemberSingleBlock(clickedBlock, null, player))));
                 player.sendMessage(Component.text("isLockedUpDownLockedDoor: ").append(formatBoolean(GreenLockerAPI.isPartOfLockedDoor(clickedBlock))));
                 player.sendMessage(Component.text(" - isOwner/UserSingle: ").append(formatBoolean(GreenLockerAPI.isOwnerUpDownLockedDoor(clickedBlock, player))).append(Component.text("/")).append(formatBoolean(GreenLockerAPI.isOwnerUpDownLockedDoor(clickedBlock, player))));
                 if (clickedBlock.getState() instanceof Sign sign && GreenLockerAPI.isLockSign(sign)) {

@@ -39,6 +39,7 @@ public class Command implements CommandExecutor, TabCompleter {
         SUBCOMMANDS.add(new RemoveOwner(plugin));
         SUBCOMMANDS.add(new SetCreated(plugin));
         SUBCOMMANDS.add(new SetTimer(plugin));
+        SUBCOMMANDS.add(new SetEveryone(plugin));
         SUBCOMMANDS.add(new UpdateSign(plugin));
         SUBCOMMANDS.add(new Version(plugin));
         SUBCOMMANDS.add(new Debug(plugin));
@@ -143,7 +144,6 @@ public class Command implements CommandExecutor, TabCompleter {
         if (sender instanceof Player player) {
             if (sender.hasPermission(PermissionManager.EDIT.getPerm())) {
                 if (args.length >= 2) {
-                    OfflinePlayer offlinePlayer = Command.getPlayerFromArgument(args[1]);
                     Block block = SignSelection.getSelectedSign(player);
 
                     if (block != null) {
@@ -161,6 +161,7 @@ public class Command implements CommandExecutor, TabCompleter {
                                 }
                             }
 
+                            OfflinePlayer offlinePlayer = Command.getPlayerFromArgument(args[1]);
                             if (player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()) || (!addOwner && GreenLockerAPI.isOwnerOfSign(sign, player))) {
                                 if (offlinePlayer != null) {
 

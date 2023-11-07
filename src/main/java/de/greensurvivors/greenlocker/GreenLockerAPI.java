@@ -3,6 +3,7 @@ package de.greensurvivors.greenlocker;
 import de.greensurvivors.greenlocker.config.MessageManager;
 import de.greensurvivors.greenlocker.impl.doordata.DoorParts;
 import de.greensurvivors.greenlocker.impl.doordata.Doors;
+import de.greensurvivors.greenlocker.impl.signdata.EveryoneSign;
 import de.greensurvivors.greenlocker.impl.signdata.SignExpiration;
 import de.greensurvivors.greenlocker.impl.signdata.SignLock;
 import de.greensurvivors.greenlocker.impl.signdata.SignTimer;
@@ -54,6 +55,7 @@ public class GreenLockerAPI {
                         SignLock.updateLegacyUUIDs(lockSign);
                         SignExpiration.updateLegacyTime(lockSign);
                         SignTimer.updateLegacyTimer(lockSign);
+                        EveryoneSign.updateLegacy(lockSign);
                         return lockSign;
                     } else {
                         GreenLocker.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the door at " + attachedTo.getLocation() + " is locked.");
@@ -71,6 +73,7 @@ public class GreenLockerAPI {
                     SignLock.updateLegacyUUIDs(lockSign);
                     SignExpiration.updateLegacyTime(lockSign);
                     SignTimer.updateLegacyTimer(lockSign);
+                    EveryoneSign.updateLegacy(lockSign);
                     return lockSign;
                 } else {
                     GreenLocker.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the door at " + attachedTo.getLocation() + "is locked.");
@@ -86,6 +89,7 @@ public class GreenLockerAPI {
                     SignLock.updateLegacyUUIDs(lockSign);
                     SignExpiration.updateLegacyTime(lockSign);
                     SignTimer.updateLegacyTimer(lockSign);
+                    EveryoneSign.updateLegacy(lockSign);
                     return lockSign;
                 } else {
                     GreenLocker.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the block at " + attachedTo.getLocation() + "is locked.");
@@ -352,7 +356,7 @@ public class GreenLockerAPI {
             }
         }
 
-        return isUserSingleBlock(block, null, player);
+        return isMemberSingleBlock(block, null, player);
     }
 
     public static boolean isProtected(@NotNull Block block) {
@@ -455,7 +459,7 @@ public class GreenLockerAPI {
         return false;
     }
 
-    public static boolean isUserSingleBlock(Block block, BlockFace exempt, Player player) { // Requires isLocked
+    public static boolean isMemberSingleBlock(Block block, BlockFace exempt, Player player) { // Requires isLocked
         for (BlockFace blockface : cardinalFaces) {
             if (blockface != exempt) {
                 Sign sign = getFacingSign(block, blockface);
@@ -493,7 +497,6 @@ public class GreenLockerAPI {
             return isUpDownAlsoLockableBlock(blockdown);
         }
     }
-
 
     public static boolean isChest(Block block) {
         return block.getBlockData() instanceof Chest || block.getBlockData() instanceof DoubleChest;

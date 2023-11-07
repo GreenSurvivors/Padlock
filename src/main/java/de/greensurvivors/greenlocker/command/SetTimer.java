@@ -42,7 +42,7 @@ public class SetTimer extends SubCommand {
 
     @Override
     protected @NotNull Set<String> getAlias() {
-        return Set.of("updatesign");
+        return Set.of("settimer", "timer");
     }
 
     @Override
@@ -91,7 +91,7 @@ public class SetTimer extends SubCommand {
      * @return true if a valid command, otherwise false
      */
     @Override
-    protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
+    protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) { //todo check if owner or admin
         if (sender instanceof Player player) {
             if (sender.hasPermission(PermissionManager.CMD_SET_CREATED.getPerm())) {
                 if (args.length >= 2) {

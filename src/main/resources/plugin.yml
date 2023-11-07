@@ -9,6 +9,7 @@ description: >
   Greenlocker is a chest protection plugin for Paper. It is 80% compatible with original Lockette, but delivers a lot of performance enhancements and feature options.
 libraries:
   - org.apache.commons:commons-collections4:4.4
+  - org.apache.commons:commons-lang3:3.13.0
 
 commands:
   greenlocker:

@@ -13,6 +13,7 @@ public enum PermissionManager {
     CMD_UPDATE_SIGN(new Permission("greenlocker.cmd.updatesign", "", PermissionDefault.OP)),
     CMD_SET_TIMER(new Permission("greenlocker.cmd.setTimer", PermissionDefault.TRUE)),
     CMD_SET_CREATED(new Permission("greenlocker.cmd.setcreated", "", PermissionDefault.OP)),
+    CMD_SET_EVERYONE(new Permission("greenlocker.cmd.everyone", "", PermissionDefault.TRUE)),
     CMD_VERSION(new Permission("greenlocker.cmd.version", "", PermissionDefault.OP)),
 
     ACTION_LOCK(new Permission("greenlocker.action.lock", "", PermissionDefault.TRUE)),
@@ -33,6 +34,7 @@ public enum PermissionManager {
                     CMD_UPDATE_SIGN.perm.getName(), true,
                     CMD_SET_TIMER.perm.getName(), true,
                     CMD_SET_CREATED.perm.getName(), true,
+                    CMD_SET_EVERYONE.perm.getName(), true,
                     CMD_VERSION.perm.getName(), true
             ))),
     DEBUG(new Permission("greenlocker.debug", "", PermissionDefault.OP)),

@@ -64,7 +64,9 @@ public class SignLock {
     }
 
     public static boolean isMember(@NotNull final Sign sign, UUID uuid) {
-        return getUUIDs(sign, false).contains(uuid.toString());
+        Boolean everyOneAccess = EveryoneSign.getAccessEveryone(sign);
+
+        return (everyOneAccess != null && everyOneAccess) || getUUIDs(sign, false).contains(uuid.toString());
     }
 
     public static @NotNull ListOrderedSet<String> getUUIDs(@NotNull final Sign sign, boolean owners) {
