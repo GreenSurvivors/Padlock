@@ -38,12 +38,12 @@ public class MessageManager {
 
         prefixComp = MiniMessage.miniMessage().deserialize(lang.getString(LangPath.PLUGIN_PREFIX.getPath(), LangPath.PLUGIN_PREFIX.getDefaultValue()));
 
-        nakedSigns.put(LangPath.PRIVATE_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.PRIVATE_SIGN.getPath(), LangPath.PRIVATE_SIGN.getDefaultValue())));
-        nakedSigns.put(LangPath.ADDITIONAL_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.ADDITIONAL_SIGN.getPath(), LangPath.ADDITIONAL_SIGN.getDefaultValue())));
-        nakedSigns.put(LangPath.EVERYONE_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.EVERYONE_SIGN.getPath(), LangPath.EVERYONE_SIGN.getDefaultValue())));
-        nakedSigns.put(LangPath.TIMER_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.TIMER_SIGN.getPath(), LangPath.TIMER_SIGN.getDefaultValue())));
-        nakedSigns.put(LangPath.INVALID_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.INVALID_SIGN.getPath(), LangPath.INVALID_SIGN.getDefaultValue())));
-        nakedSigns.put(LangPath.EXPIRE_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.EXPIRE_SIGN.getPath(), LangPath.EXPIRE_SIGN.getDefaultValue())));
+        nakedSigns.put(LangPath.PRIVATE_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.PRIVATE_SIGN.getPath(), LangPath.PRIVATE_SIGN.getDefaultValue())).toLowerCase());
+        nakedSigns.put(LangPath.ADDITIONAL_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.ADDITIONAL_SIGN.getPath(), LangPath.ADDITIONAL_SIGN.getDefaultValue())).toLowerCase());
+        nakedSigns.put(LangPath.EVERYONE_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.EVERYONE_SIGN.getPath(), LangPath.EVERYONE_SIGN.getDefaultValue())).toLowerCase());
+        nakedSigns.put(LangPath.TIMER_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.TIMER_SIGN.getPath(), LangPath.TIMER_SIGN.getDefaultValue())).toLowerCase());
+        nakedSigns.put(LangPath.INVALID_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.INVALID_SIGN.getPath(), LangPath.INVALID_SIGN.getDefaultValue())).toLowerCase());
+        nakedSigns.put(LangPath.EXPIRE_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.EXPIRE_SIGN.getPath(), LangPath.EXPIRE_SIGN.getDefaultValue())).toLowerCase());
     }
 
     private void initAdditionalFiles() {
@@ -94,7 +94,7 @@ public class MessageManager {
     public boolean isSignComp(@NotNull Component compToTest, @NotNull LangPath langPath) {
         String strToTest = PlainTextComponentSerializer.plainText().serialize(compToTest).trim();
 
-        return strToTest.equalsIgnoreCase(nakedSigns.get(langPath));
+        return strToTest.toLowerCase().startsWith(nakedSigns.get(langPath));
     }
 
     public String getNakedSignText(@NotNull LangPath langPath) {
@@ -154,7 +154,7 @@ public class MessageManager {
         REMOVE_OWNER_ERROR("cmd.remove-owner.error"),
         ADD_MEMBER_SUCCESS("cmd.add-member.success"),
         REMOVE_MEMBER_SUCCESS("cmd.remove-member.success"),
-        REMOVE_MEMBER_ERROR("cmd.remove-owner.error"),
+        REMOVE_MEMBER_ERROR("cmd.remove-member.error"),
         SET_CREATED_SUCCESS("cmd.set-created.success"),
         SET_CREATED_ERROR("cmd.set-created.error"),
         SET_EVERYONE_SUCCESS("cmd.set-everyone.success"),

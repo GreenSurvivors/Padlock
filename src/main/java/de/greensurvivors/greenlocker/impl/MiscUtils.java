@@ -3,6 +3,8 @@ package de.greensurvivors.greenlocker.impl;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import de.greensurvivors.greenlocker.GreenLocker;
+import de.greensurvivors.greenlocker.config.MessageManager;
+import de.greensurvivors.greenlocker.impl.signdata.SignLock;
 import net.kyori.adventure.text.Component;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -30,8 +32,7 @@ public class MiscUtils {
     private static final Set<UUID> notified = new HashSet<>();
 
     // Helper functions
-    public static Block putSignOn(Block block, BlockFace blockface, Component line1, Component line2, Material material) {
-        Block newsign = block.getRelative(blockface);
+    public static Block putPrivateSignOn(Block newsign, BlockFace blockface, Material material, Player player) {
         Material blockType = Material.getMaterial(material.name().replace("_SIGN", "_WALL_SIGN"));
         if (blockType != null && Tag.WALL_SIGNS.isTagged(blockType)) {
             newsign.setType(blockType);
@@ -48,10 +49,12 @@ public class MiscUtils {
         if (newsign.getType() == Material.DARK_OAK_WALL_SIGN) {
             sign.getSide(Side.FRONT).setColor(DyeColor.WHITE);
         }
-        sign.getSide(Side.FRONT).line(0, line1);
-        sign.getSide(Side.FRONT).line(1, line2);
+        sign.getSide(Side.FRONT).line(0, GreenLocker.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PRIVATE_SIGN));
+        sign.getSide(Side.FRONT).line(1, Component.text(player.getName()));
         sign.setWaxed(true);
         sign.update();
+
+        SignLock.addPlayer(sign, true, player);
         return newsign;
     }
 

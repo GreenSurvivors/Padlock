@@ -12,7 +12,6 @@ import de.greensurvivors.greenlocker.impl.SignSelection;
 import de.greensurvivors.greenlocker.impl.doordata.DoorToggleTask;
 import de.greensurvivors.greenlocker.impl.doordata.Doors;
 import de.greensurvivors.greenlocker.impl.signdata.SignExpiration;
-import de.greensurvivors.greenlocker.impl.signdata.SignLock;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -71,61 +70,62 @@ public class BlockPlayerListener implements Listener { //todo this whole class
             }
         }
 
-        // Get player and action info
-        Action action = event.getAction();
-        // Check action correctness
-        if (action == Action.RIGHT_CLICK_BLOCK && Tag.SIGNS.isTagged(player.getInventory().getItemInMainHand().getType())) {
-            if (player.getGameMode().equals(GameMode.SPECTATOR)) {
-                return;
-            }
-            // Check permission 
-            if (player.hasPermission(PermissionManager.ACTION_LOCK.getPerm())) {
-                // Get target block to lock
-                BlockFace blockface = event.getBlockFace();
-                if (blockface == BlockFace.NORTH || blockface == BlockFace.WEST || blockface == BlockFace.EAST || blockface == BlockFace.SOUTH) {
-                    Block block = event.getClickedBlock();
-                    if (block == null) return;
-                    // Check permission with external plugin
-                    if (Dependency.isProtectedFrom(block, player)) return; // blockwise
-                    if (Dependency.isProtectedFrom(block.getRelative(event.getBlockFace()), player)) return; // signwise
-                    // Check whether locking location is obstructed
-                    Block signLoc = block.getRelative(blockface);
-                    if (signLoc.isEmpty()) {
-                        // Check whether this block is lockable
-                        if (GreenLockerAPI.isLockable(block)) { //todo check for legacy additional signs
-                            // Is this block already locked?
-                            boolean locked = GreenLockerAPI.isLocked(block);
-                            // Cancel event here
-                            event.setCancelled(true);
-                            // Check lock info
-                            if (!locked && !GreenLockerAPI.isPartOfLockedDoor(block)) {
-                                // Get type
-                                Material signType = player.getInventory().getItemInMainHand().getType();
-                                // Not locked, not a locked door nearby
-                                MiscUtils.removeASign(player);
-                                // Put sign on
-                                Block newsign = MiscUtils.putSignOn(block, blockface, plugin.getMessageManager().getLang(MessageManager.LangPath.PRIVATE_SIGN), player.name(), signType);
-                                Cache.resetCache(block);
-                                // Send message
-                                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
-                                // Cleanups - old names
-                                SignLock.updateNamesByUuid((Sign) newsign.getState());
+        if (!player.getGameMode().equals(GameMode.SPECTATOR)) {
+            // Get player and action info
+            Action action = event.getAction();
 
-                                // Cleanups - Expiracy
-                                if (plugin.getConfigManager().doLocksExpire()) {
-                                    // set created to now
-                                    SignExpiration.updateLineWithTimeNow((Sign) newsign.getState(), player.hasPermission(PermissionManager.NO_EXPIRE.getPerm())); // set created to -1 (no expire) or now
+            // Get type
+            Material signType = player.getInventory().getItemInMainHand().getType();
+
+            // Check action correctness
+            if (action == Action.RIGHT_CLICK_BLOCK && Tag.SIGNS.isTagged(signType)) {
+                // Check permission
+                if (player.hasPermission(PermissionManager.ACTION_LOCK.getPerm())) {
+                    // Get target block to lock
+                    BlockFace blockface = event.getBlockFace();
+                    if (GreenLockerAPI.cardinalFaces.contains(blockface)) {
+                        Block block = event.getClickedBlock();
+                        if (block == null) return;
+                        Block signLocBlock = block.getRelative(blockface);
+
+                        // Check permission with external plugin
+                        if (Dependency.isProtectedFrom(block, player)) return; // blockwise
+                        if (Dependency.isProtectedFrom(signLocBlock, player)) return; // signwise
+
+                        // Check whether locking location is obstructed
+                        if (signLocBlock.isEmpty()) {
+                            // Check whether this block is lockable
+                            if (GreenLockerAPI.isLockable(block)) {
+                                // Is this block already locked?
+                                boolean locked = GreenLockerAPI.isLocked(block);
+                                // Cancel event here
+                                event.setCancelled(true);
+                                // Check lock info
+                                if (!locked && !GreenLockerAPI.isPartOfLockedDoor(block)) {
+
+                                    // Not locked, not a locked door nearby
+                                    MiscUtils.removeASign(player);
+                                    // Put sign on
+                                    Block newsign = MiscUtils.putPrivateSignOn(signLocBlock, blockface, signType, player);
+                                    Cache.resetCache(block);
+                                    // Send message
+                                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
+                                    // Cleanups - Expiracy
+                                    if (plugin.getConfigManager().doLocksExpire()) {
+                                        // set created to now
+                                        SignExpiration.updateWithTimeNow((Sign) newsign.getState(), player.hasPermission(PermissionManager.NO_EXPIRE.getPerm())); // set created to -1 (no expire) or now
+                                    }
+                                    Dependency.logPlacement(player, newsign);
+                                } else {
+                                    // Cannot lock this block
+                                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.QUICK_LOCK_ERROR);
                                 }
-                                Dependency.logPlacement(player, newsign);
-                            } else {
-                                // Cannot lock this block
-                                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.QUICK_LOCK_ERROR);
                             }
                         }
-                    }
-                }
-            }
-        }
+                    } // not cardinal face of block
+                } // no permission
+            } // not right-click or not holding signs
+        } // game mode spectator
     }
 
     // Manual protection

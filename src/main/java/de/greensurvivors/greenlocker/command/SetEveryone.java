@@ -58,7 +58,7 @@ public class SetEveryone extends SubCommand {
                     Block block = SignSelection.getSelectedSign(player);
 
                     if (block != null) {
-                        if (block instanceof Sign sign) {
+                        if (block.getState() instanceof Sign sign) {
                             if (GreenLockerAPI.isAdditionalSign(sign) || SignLock.isLegacySign(sign)) {
                                 Sign otherSign = GreenLockerAPI.updateLegacySign(sign); //get main sign
 

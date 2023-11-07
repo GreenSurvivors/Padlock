@@ -26,14 +26,11 @@ public class SignExpiration {
 
     public static void updateWithTime(Sign sign, long epochMilli) {
         sign.getPersistentDataContainer().set(createdKey, PersistentDataType.LONG, epochMilli);
+        sign.update();
     }
 
-    public static void updateLineWithTimeNow(Sign sign, boolean noexpire) {
-        if (noexpire) {
-            sign.getPersistentDataContainer().set(createdKey, PersistentDataType.LONG, -1L);
-        } else {
-            sign.getPersistentDataContainer().set(createdKey, PersistentDataType.LONG, System.currentTimeMillis());
-        }
+    public static void updateWithTimeNow(Sign sign, boolean noexpire) {
+        sign.getPersistentDataContainer().set(createdKey, PersistentDataType.LONG, noexpire ? -1L : System.currentTimeMillis());
         sign.update();
     }
 

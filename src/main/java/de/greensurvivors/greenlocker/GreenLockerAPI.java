@@ -25,8 +25,8 @@ import java.util.List;
 import java.util.Map;
 
 public class GreenLockerAPI {
-    public final static BlockFace[] cardinalFaces = {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST};
-    public final static BlockFace[] allFaces = {BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN};
+    public final static List<BlockFace> cardinalFaces = List.of(BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST);
+    public final static List<BlockFace> allFaces = List.of(BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN);
 
     /**
      * returns lock sign of a block, sets all additional signs invalid
@@ -310,7 +310,9 @@ public class GreenLockerAPI {
     }
 
     public static boolean isOwner(@NotNull Block block, @NotNull OfflinePlayer player) {
-        if (block.getBlockData() instanceof Door) {
+        if (block.getState() instanceof Sign sign && SignLock.isLockSign(sign)) {
+            return SignLock.isOwner(sign, player.getUniqueId());
+        } else if (block.getBlockData() instanceof Door) {
             DoorParts door = Doors.getDoorParts(block);
             if (door != null) {
                 Sign sign = getLockSignDoor(door);

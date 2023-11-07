@@ -53,7 +53,7 @@ public class UpdateSign extends SubCommand {
             if (this.checkPermission(sender)) {
                 Block block = SignSelection.getSelectedSign(player);
                 if (block != null) {
-                    if (block instanceof Sign sign) {
+                    if (block.getState() instanceof Sign sign) {
                         if (GreenLockerAPI.updateLegacySign(sign) != null) {
                             plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UPDATE_SIGN_SUCCESS);
                         } else {

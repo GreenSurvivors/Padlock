@@ -17,18 +17,18 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
-import java.time.Instant;
 import java.time.Period;
 import java.time.format.DateTimeParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class SetTimer extends SubCommand {
-    private static final @NotNull Pattern periodPattern = Pattern.compile("(-?[0-9]+)([sSmhHdDwWMyY])");
+    private static final @NotNull Pattern periodPattern = Pattern.compile("(-?[0-9]+)([sSmhHdDwWM])");
     private static final @NotNull Pattern numberEndPattern = Pattern.compile("-?[0-9]+$");
 
     protected SetTimer(@NotNull GreenLocker plugin) {
@@ -54,30 +54,31 @@ public class SetTimer extends SubCommand {
         try { //try Iso
             return Duration.parse(period).toMillis();
         } catch (DateTimeParseException e) {
-            plugin.getLogger().log(Level.INFO, "Couldn't get time period \"" + period + "\" as duration. Trying to parse manual next.", e);
+            plugin.getLogger().log(Level.FINE, "Couldn't get time period \"" + period + "\" as duration. Trying to parse manual next.", e);
         }
 
         Matcher matcher = periodPattern.matcher(period);
-        Instant instant = Instant.EPOCH;
+        long millis = 0;
+
         while (matcher.find()) {
             try {
                 long num = Long.parseLong(matcher.group(1));
                 String typ = matcher.group(2);
-                instant = switch (typ) {
-                    case "s" -> instant.plus(Duration.ofSeconds(num));
-                    case "m" -> instant.plus(Duration.ofMinutes(num));
-                    case "h", "H" -> instant.plus(Duration.ofHours(num));
-                    case "d", "D" -> instant.plus(Duration.ofDays(num));
-                    case "w", "W" -> instant.plus(Period.ofWeeks((int) num));
-                    case "M" -> instant.plus(Period.ofMonths((int) num));
-                    case "y", "Y" -> instant.plus(Period.ofYears((int) num));
-                    default -> instant;
+                millis += switch (typ) {
+                    case "s" -> TimeUnit.SECONDS.toMillis(num);
+                    case "m" -> TimeUnit.MINUTES.toMillis(num);
+                    case "h", "H" -> TimeUnit.HOURS.toMillis(num);
+                    case "d", "D" -> TimeUnit.DAYS.toMillis(num);
+                    case "w", "W" -> TimeUnit.DAYS.toMillis(Period.ofWeeks((int) num).getDays());
+                    case "M" -> TimeUnit.DAYS.toMillis(Period.ofMonths((int) num).getDays());
+                    default -> 0;
                 };
+
             } catch (NumberFormatException e) {
                 plugin.getLogger().log(Level.WARNING, "Couldn't get time period for " + period, e);
             }
         }
-        return instant.toEpochMilli();
+        return millis;
     }
 
     /**
@@ -98,7 +99,7 @@ public class SetTimer extends SubCommand {
                     Block block = SignSelection.getSelectedSign(player);
 
                     if (block != null) {
-                        if (block instanceof Sign sign) {
+                        if (block.getState() instanceof Sign sign) {
                             if (GreenLockerAPI.isAdditionalSign(sign) || SignLock.isLegacySign(sign)) {
                                 Sign otherSign = GreenLockerAPI.updateLegacySign(sign); //get main sign
 
@@ -168,7 +169,7 @@ public class SetTimer extends SubCommand {
 
         if (periodPattern.matcher(arg).matches()) {
             if (numberEndPattern.matcher(arg).matches()) {
-                result.addAll(List.of("s", "m", "h", "d", "w", "M", "y"));
+                result.addAll(List.of("s", "m", "h", "d", "w", "M"));
             }
 
             for (int i = 0; i <= 9; i++) {

@@ -16,14 +16,14 @@ import org.jetbrains.annotations.Nullable;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-public class SignTimer { //todo
-    private final static Pattern legacyPattern = Pattern.compile(GreenLocker.getPlugin().getMessageManager().getNakedSignText(MessageManager.LangPath.TIMER_SIGN).replace("[", "\\[(i?)").replace("<time>", "([0-9]+)"));
+public class SignTimer {
+    private final static Pattern legacyPattern = Pattern.compile(GreenLocker.getPlugin().getMessageManager().getNakedSignText(MessageManager.LangPath.TIMER_SIGN).replace("[", "\\[(i?)").replace("<time>", "(-?[0-9]+)"));
     private final static NamespacedKey timerKey = new NamespacedKey(GreenLocker.getPlugin(), "timer");
 
     protected static @Nullable Component getTimerComponent(@NotNull Sign sign) {
         Long timerDuration = getTimer(sign);
 
-        if (timerDuration != null) {
+        if (timerDuration != null && timerDuration > 0) {
             return GreenLocker.getPlugin().getMessageManager().getLang(MessageManager.LangPath.TIMER_SIGN,
                     Placeholder.unparsed(MessageManager.PlaceHolder.TIME.getPlaceholder(), String.valueOf(timerDuration)));
         } else {
@@ -33,6 +33,9 @@ public class SignTimer { //todo
 
     public static void setTimer(@NotNull Sign sign, long timerDuration) {
         sign.getPersistentDataContainer().set(timerKey, PersistentDataType.LONG, timerDuration);
+        sign.update();
+
+        SignDisplay.updateDisplay(sign);
     }
 
     public static @Nullable Long getTimer(Sign sign) {

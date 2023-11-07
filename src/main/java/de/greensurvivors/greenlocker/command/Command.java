@@ -34,12 +34,12 @@ public class Command implements CommandExecutor, TabCompleter {
         SUBCOMMANDS.add(new Info(plugin));
         SUBCOMMANDS.add(new AddMember(plugin));
         SUBCOMMANDS.add(new RemoveMember(plugin));
+        SUBCOMMANDS.add(new SetTimer(plugin));
+        SUBCOMMANDS.add(new SetEveryone(plugin));
         // admin sub commands
         SUBCOMMANDS.add(new AddOwner(plugin));
         SUBCOMMANDS.add(new RemoveOwner(plugin));
         SUBCOMMANDS.add(new SetCreated(plugin));
-        SUBCOMMANDS.add(new SetTimer(plugin));
-        SUBCOMMANDS.add(new SetEveryone(plugin));
         SUBCOMMANDS.add(new UpdateSign(plugin));
         SUBCOMMANDS.add(new Version(plugin));
         SUBCOMMANDS.add(new Debug(plugin));
@@ -65,7 +65,7 @@ public class Command implements CommandExecutor, TabCompleter {
                 Block block = SignSelection.getSelectedSign(player);
 
                 if (block != null) {
-                    if (block instanceof Sign sign) {
+                    if (block.getState() instanceof Sign sign) {
                         if (GreenLockerAPI.isAdditionalSign(sign) || SignLock.isLegacySign(sign)) {
                             Sign otherSign = GreenLockerAPI.updateLegacySign(sign); //get main sign
 
@@ -147,7 +147,7 @@ public class Command implements CommandExecutor, TabCompleter {
                     Block block = SignSelection.getSelectedSign(player);
 
                     if (block != null) {
-                        if (block instanceof Sign sign) {
+                        if (block.getState() instanceof Sign sign) {
                             if (GreenLockerAPI.isAdditionalSign(sign) || SignLock.isLegacySign(sign)) {
                                 Sign otherSign = GreenLockerAPI.updateLegacySign(sign); //get main sign
 
@@ -220,7 +220,7 @@ public class Command implements CommandExecutor, TabCompleter {
                     Block block = SignSelection.getSelectedSign(player);
 
                     if (block != null) {
-                        if (block instanceof Sign sign) {
+                        if (block.getState() instanceof Sign sign) {
                             if (GreenLockerAPI.isAdditionalSign(sign) || SignLock.isLegacySign(sign)) {
                                 Sign otherSign = GreenLockerAPI.updateLegacySign(sign); //get main sign
 
