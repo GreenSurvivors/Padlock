@@ -175,6 +175,7 @@ public class BlockPlayerListener implements Listener { //todo this whole class
                         } else if (player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm())) { // failsafe: only allow setting a sign without owner if you could break it!
                             SignLock.addPlayer(sign, true, null);
                         } else {
+                            //todo sendLang
                             event.setCancelled(true);
                             return;
                         }
@@ -201,9 +202,9 @@ public class BlockPlayerListener implements Listener { //todo this whole class
 
                     //update Sign after event was done
                     Bukkit.getScheduler().runTaskLater(plugin, () -> SignDisplay.updateDisplay(sign), 2);
+                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
 
                     Cache.resetCache(attachedBlock);
-                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
                 }
             } else {
                 plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_ERROR_NOT_LOCKABLE);

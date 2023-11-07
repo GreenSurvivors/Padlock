@@ -49,7 +49,7 @@ public class Info extends SubCommand {
      * @param args   Passed command arguments
      * @return true if a valid command, otherwise false
      */
-    @Override //todo check if member or admin
+    @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) { //todo this needs formatting and general glow up
         //todo needs timer, redstone, created + expired, everyone
         if (sender instanceof Player player) {
@@ -70,20 +70,28 @@ public class Info extends SubCommand {
                             }
                         }
 
-                        Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_OWNERS);
-                        for (String name : MiscUtils.getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, true))) {
-                            component = component.append(Component.text(name));
-                            component = component.append(Component.text(", "));
-                        }
-                        component = component.append(Component.newline());
+                        if (player.hasPermission(PermissionManager.ADMIN_USE.getPerm()) ||
+                                SignLock.isOwner(sign, player.getUniqueId()) ||
+                                SignLock.isMember(sign, player.getUniqueId())) {
 
-                        component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_MEMBERS));
-                        for (String name : MiscUtils.getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, false))) {
-                            component = component.append(Component.text(name));
-                            component = component.append(Component.text(", "));
-                        }
+                            Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_OWNERS);
 
-                        plugin.getMessageManager().sendMessages(sender, component);
+                            for (String name : MiscUtils.getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, true))) {
+                                component = component.append(Component.text(name));
+                                component = component.append(Component.text(", "));
+                            }
+                            component = component.append(Component.newline());
+
+                            component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_MEMBERS));
+                            for (String name : MiscUtils.getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, false))) {
+                                component = component.append(Component.text(name));
+                                component = component.append(Component.text(", "));
+                            }
+
+                            plugin.getMessageManager().sendMessages(sender, component);
+                        } else {
+                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
+                        }
                     } else {
                         plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
                     }

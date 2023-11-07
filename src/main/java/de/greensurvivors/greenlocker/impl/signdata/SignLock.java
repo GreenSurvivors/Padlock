@@ -21,7 +21,6 @@ import org.jetbrains.annotations.Nullable;
 import java.lang.reflect.Type;
 import java.util.UUID;
 
-//todo this is not timer/everyone compatible!
 public class SignLock {
     private final static NamespacedKey storedMembersUUIDKey = new NamespacedKey(GreenLocker.getPlugin(), "MemberUUIDs");
     private final static NamespacedKey storedOwnersUUIDKey = new NamespacedKey(GreenLocker.getPlugin(), "OwnerUUIDs");
@@ -73,7 +72,6 @@ public class SignLock {
             if (line.contains("#")) {
                 String[] splitted = line.split("#", 2);
 
-                //todo this might be as well a #created
                 if (splitted[1].length() == 36) { // uuid valid check
                     addPlayer(main, false, Bukkit.getOfflinePlayer(UUID.fromString(splitted[1])));
                 }

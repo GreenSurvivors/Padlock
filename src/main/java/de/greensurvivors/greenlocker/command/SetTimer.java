@@ -94,7 +94,7 @@ public class SetTimer extends SubCommand {
      * @return true if a valid command, otherwise false
      */
     @Override
-    protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) { //todo check if owner or admin
+    protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         if (sender instanceof Player player) {
             if (sender.hasPermission(PermissionManager.CMD_SET_CREATED.getPerm())) {
                 if (args.length >= 2) {
@@ -115,22 +115,26 @@ public class SetTimer extends SubCommand {
                                 }
                             }
 
-                            long timerDuration = 0;
-                            for (int i = 1; i < args.length; i++) {
-                                timerDuration += parsePeriod(args[i]);
-                            }
+                            if (SignLock.isOwner(sign, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm())) {
+                                long timerDuration = 0;
+                                for (int i = 1; i < args.length; i++) {
+                                    timerDuration += parsePeriod(args[i]);
+                                }
 
-                            if (timerDuration != 0) {
-                                SignTimer.setTimer(sign, timerDuration);
+                                if (timerDuration != 0) {
+                                    SignTimer.setTimer(sign, timerDuration);
 
-                                if (timerDuration > 0) {
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_SUCCESS_ON);
+                                    if (timerDuration > 0) {
+                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_SUCCESS_ON);
+                                    } else {
+                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_SUCCESS_OFF);
+                                    }
                                 } else {
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_SUCCESS_OFF);
+                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_ERROR);
+                                    return false;
                                 }
                             } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_ERROR);
-                                return false;
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_OWNER);
                             }
                         } else {
                             plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);

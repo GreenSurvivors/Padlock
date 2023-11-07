@@ -51,7 +51,7 @@ public class SetEveryone extends SubCommand {
      * @return true if a valid command, otherwise false
      */
     @Override
-    protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) { //todo check if owner or admin
+    protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         if (sender instanceof Player player) {
             if (sender.hasPermission(PermissionManager.CMD_SET_CREATED.getPerm())) {
                 if (args.length >= 2) {
@@ -72,14 +72,18 @@ public class SetEveryone extends SubCommand {
                                 }
                             }
 
-                            Boolean setting = BooleanUtils.toBooleanObject(args[1]);
+                            if (SignLock.isOwner(sign, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm())) {
+                                Boolean setting = BooleanUtils.toBooleanObject(args[1]);
 
-                            if (setting != null) {
-                                EveryoneSign.setEveryone(sign, setting);
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_EVERYONE_SUCCESS);
+                                if (setting != null) {
+                                    EveryoneSign.setEveryone(sign, setting);
+                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_EVERYONE_SUCCESS);
+                                } else {
+                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_EVERYONE_ERROR);
+                                    return false;
+                                }
                             } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_EVERYONE_ERROR);
-                                return false;
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_OWNER);
                             }
                         } else {
                             plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
