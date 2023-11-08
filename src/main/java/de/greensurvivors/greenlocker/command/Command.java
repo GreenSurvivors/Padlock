@@ -46,6 +46,12 @@ public class Command implements CommandExecutor, TabCompleter {
         SUBCOMMANDS.add(new Reload(plugin));
     }
 
+    /**
+     * I don't plan to support offline mode servers. If you don't have a valid UUID working for you, I'm not going through the hassle to service you.
+     *
+     * @param arg
+     * @return
+     */
     protected static @Nullable OfflinePlayer getPlayerFromArgument(String arg) {
         if (MiscUtils.isUserName(arg)) { //check valid names
             return Bukkit.getOfflinePlayer(arg); //Utils.getUuidByUsernameFromMojang();

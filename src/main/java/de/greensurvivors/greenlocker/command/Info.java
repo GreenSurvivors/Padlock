@@ -6,7 +6,10 @@ import de.greensurvivors.greenlocker.config.MessageManager;
 import de.greensurvivors.greenlocker.config.PermissionManager;
 import de.greensurvivors.greenlocker.impl.MiscUtils;
 import de.greensurvivors.greenlocker.impl.SignSelection;
+import de.greensurvivors.greenlocker.impl.signdata.EveryoneSign;
+import de.greensurvivors.greenlocker.impl.signdata.SignExpiration;
 import de.greensurvivors.greenlocker.impl.signdata.SignLock;
+import de.greensurvivors.greenlocker.impl.signdata.SignTimer;
 import net.kyori.adventure.text.Component;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
@@ -51,7 +54,6 @@ public class Info extends SubCommand {
      */
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) { //todo this needs formatting and general glow up
-        //todo needs timer, redstone, created + expired, everyone
         if (sender instanceof Player player) {
             if (this.checkPermission(sender)) {
                 Block block = SignSelection.getSelectedSign(player);
@@ -83,10 +85,25 @@ public class Info extends SubCommand {
                             component = component.append(Component.newline());
 
                             component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_MEMBERS));
-                            for (String name : MiscUtils.getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, false))) {
-                                component = component.append(Component.text(name));
-                                component = component.append(Component.text(", "));
+                            if (EveryoneSign.getAccessEveryone(sign)) {
+                                component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.EVERYONE_SIGN));
+                            } else {
+                                for (String name : MiscUtils.getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, false))) {
+                                    component = component.append(Component.text(name));
+                                    component = component.append(Component.text(", "));
+                                }
                             }
+
+                            Long timer = SignTimer.getTimer(sign);
+                            if (timer != null) {
+                                component = component.append(Component.newline());
+                                component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_TIMER));
+                                component = component.append(Component.text(timer));
+                            }
+
+                            component = component.append(Component.newline());
+                            component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_EXPIRED));
+                            component = component.append(Component.text(SignExpiration.isSignExpired(sign)));
 
                             plugin.getMessageManager().sendMessages(sender, component);
                         } else {

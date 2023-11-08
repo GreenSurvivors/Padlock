@@ -60,8 +60,9 @@ public class SignDisplay {
 
         linesToUpdate[0] = GreenLocker.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PRIVATE_SIGN);
 
-        Boolean isEveryOneSign = EveryoneSign.getAccessEveryone(sign);
-        if (isEveryOneSign != null && isEveryOneSign) {
+        boolean everyoneHasAccess = EveryoneSign.getAccessEveryone(sign);
+
+        if (everyoneHasAccess) {
             linesToUpdate[lastIndex] = GreenLocker.getPlugin().getMessageManager().getLang(MessageManager.LangPath.EVERYONE_SIGN);
             lastIndex--;
         }
@@ -73,7 +74,7 @@ public class SignDisplay {
         }
 
         fillWithPlayers(linesToUpdate, sign, true);
-        if (isEveryOneSign == null || !isEveryOneSign) {
+        if (!everyoneHasAccess) {
             fillWithPlayers(linesToUpdate, sign, false);
         }
 

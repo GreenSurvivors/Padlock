@@ -106,7 +106,7 @@ public class GreenLockerAPI {
         SignLock.setInvalid(sign);
     }
 
-    private static @Nullable Sign getLockSignDoor(@NotNull DoorParts doorToCheck) { //todo check for adittional signs and if found update
+    private static @Nullable Sign getLockSignDoor(@NotNull DoorParts doorToCheck) {
         Map<BlockFace, DoorParts> connectedDoors = Doors.getConnectedDoors(doorToCheck);
 
         for (BlockFace blockFace : cardinalFaces) {
@@ -288,7 +288,7 @@ public class GreenLockerAPI {
             } else {
                 return null;
             }
-        } else if (block.getBlockData() instanceof Chest) {
+        } else if (block.getState() instanceof Chest) {
             return getLockSignChest(block);
         }
         return getLockSignSingleBlock(block, null);
@@ -500,10 +500,6 @@ public class GreenLockerAPI {
         }
     }
 
-    public static boolean isChest(Block block) {
-        return block.getBlockData() instanceof Chest || block.getBlockData() instanceof DoubleChest;
-    }
-
     public static boolean isUpDownAlsoLockableBlock(Block block) {
         if (GreenLocker.getPlugin().getConfigManager().isLockable(block.getType())) {
             return (block.getBlockData() instanceof Door);
@@ -516,7 +512,7 @@ public class GreenLockerAPI {
             for (BlockFace blockface : allFaces) {
                 Block newblock = block.getRelative(blockface);
                 if (isLocked(newblock) && !isOwner(newblock, player)) {
-                    return true;
+                    return false;
                 }
             }
         }
@@ -526,18 +522,18 @@ public class GreenLockerAPI {
                 Block newblock = block.getRelative(blockface);
                 if (newblock.getBlockData() instanceof Door) {
                     if (isLocked(newblock) && !isOwner(newblock, player)) {
-                        return true;
+                        return false;
                     }
                 }
             }
             // Temp workaround bad code for checking up and down signs
             Block newblock2 = block.getRelative(BlockFace.UP, 2);
             if (isLocked(newblock2) && !isOwner(newblock2, player)) {
-                return true;
+                return false;
             }
             Block newblock3 = block.getRelative(BlockFace.DOWN, 1);
             if (isLocked(newblock3) && !isOwner(newblock3, player)) {
-                return true;
+                return false;
             }
             // End temp workaround bad code for checking up and down signs
         }
@@ -549,7 +545,7 @@ public class GreenLockerAPI {
                 if (newblock.getBlockData() instanceof Chest ||
                         newblock.getBlockData() instanceof DoubleChest) {
                     if (isLockedSingleBlock(newblock, null) && !isOwnerSingleBlock(newblock, null, player)) {
-                        return true;
+                        return false;
                     }
                 }
             }
@@ -560,27 +556,24 @@ public class GreenLockerAPI {
 
             // This is extra interfere block
             case HOPPER, DISPENSER, DROPPER -> {
-                if (!GreenLocker.getPlugin().getConfigManager().isInterferePlacementBlocked()) return false;
+                if (!GreenLocker.getPlugin().getConfigManager().isInterferePlacementBlocked()) return true;
                 for (BlockFace blockface : allFaces) {
                     Block newblock = block.getRelative(blockface);
                     switch (newblock.getType()) {
-                        case CHEST:
-                        case TRAPPED_CHEST:
-                        case HOPPER:
-                        case DISPENSER:
-                        case DROPPER:
+                        case CHEST, TRAPPED_CHEST, HOPPER, DISPENSER, DROPPER -> {
                             if (isLocked(newblock) && !isOwner(newblock, player)) {
-                                return true;
+                                return false;
                             }
-                        default:
-                            break;
+                        }
+                        default -> {
+                        }
                     }
                 }
             }
             default -> {
             }
         }
-        return false;
+        return true;
     }
 
     private static boolean isValidLockSign(@Nullable Sign sign) {//Please mind, a private sign may have expired, but do how two locked blocks line up it's totally possible for more than one [Private] sign per block. However only the first valid found wil get used

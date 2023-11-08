@@ -163,9 +163,12 @@ public class MessageManager {
         SET_TIMER_SUCCESS_OFF("cmd.set-timer.success.off"),
         SET_TIMER_ERROR("cmd.set-timer.error"),
         UPDATE_SIGN_SUCCESS("cmd.sign-update.success"),
+        RELOAD_SUCCESS("cmd.reload.success"),
+
         INFO_OWNERS("cmd.info.owners"),
         INFO_MEMBERS("cmd.info.members"),
-        RELOAD_SUCCESS("cmd.reload.success"),
+        INFO_TIMER("cmd.info.timer"),
+        INFO_EXPIRED("cmd.info.expired"),
 
         SIGN_NEED_RESELECT("cmd.sign-need-reselect"),
         SIGN_NOT_SELECTED("cmd.no-sign-selected"),
@@ -180,6 +183,7 @@ public class MessageManager {
         LOCK_SUCCESS("action.lock.success"),
         LOCK_ERROR_ALREADY_LOCKED("action.lock.error.already-locked"),
         LOCK_ERROR_NOT_LOCKABLE("action.lock.error.not-lockable"),
+        LOCK_ERROR_NO_OWNER("action.lock.error.no-owner"),
         QUICK_LOCK_ERROR("action.quick-lock.error"),
         SELECT_SIGN("action.select-sign.success"),
         BREAK_LOCK_SUCCESS("action.break-lock.success"),

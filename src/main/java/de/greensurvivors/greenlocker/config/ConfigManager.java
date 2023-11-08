@@ -18,7 +18,7 @@ public class ConfigManager {
     private final ConfigOption<String> LANG_FILENAME = new ConfigOption<>("language-file-name", "lang/lang_en.yml");
     private final ConfigOption<Boolean> DEPENDENCY_WORLDGUARD_ENABLED = new ConfigOption<>("dependency.worldguard.enabled", false);
     private final ConfigOption<Boolean> DEPENDENCY_COREPROTECT_ENABLED = new ConfigOption<>("dependency.coreprotect.enabled", false);
-    private final ConfigOption<Set<Material>> LOCKABLES = new ConfigOption<>("lockables", setUpLockableDefaults());
+    private final ConfigOption<Set<Material>> LOCKABLES = new ConfigOption<>("lockables", new HashSet<>()); //todo auto add inventory-blocks
     private final ConfigOption<QuickProtectOption> QUICKPROTECT_TYPE = new ConfigOption<>("lock.quick-lock.type", QuickProtectOption.NOT_SNEAKING_REQUIRED);
     private final ConfigOption<Boolean> LOCK_BLOCKS_INTERFERE = new ConfigOption<>("lock.blocked.interfere", true);
     private final ConfigOption<Boolean> LOCK_BLOCKS_ITEM_TRANSFER_IN = new ConfigOption<>("lock.blocked.item-transfer.in", false);
@@ -28,43 +28,10 @@ public class ConfigManager {
     private final ConfigOption<Long> LOCK_EXPIRE_DAYS = new ConfigOption<>("lock.expire.days", 999L);
     //while this works intern with milliseconds, configurable are only seconds for easier handling of the config
     private final ConfigOption<Integer> CACHE_MILLISECONDS = new ConfigOption<>("cache.seconds", 0);
+    private final ConfigOption<Long> DEFAULT_CREATETIME = new ConfigOption<>("lock-default-create-time-unix", -1L);
 
     public ConfigManager(GreenLocker plugin) {
         this.plugin = plugin;
-    }
-
-    @Deprecated(forRemoval = true) //todo
-    private static HashSet<Material> setUpLockableDefaults() {
-        HashSet<Material> lockablesSet = new HashSet<>(); //todo auto add inventory-blocks
-        //(trap)doors
-        lockablesSet.addAll(Tag.DOORS.getValues());
-        lockablesSet.addAll(Tag.TRAPDOORS.getValues());
-        //inventory blocks
-        lockablesSet.addAll(Tag.SHULKER_BOXES.getValues());
-        lockablesSet.add(Material.CHEST);
-        lockablesSet.add(Material.TRAPPED_CHEST);
-        lockablesSet.add(Material.CHISELED_BOOKSHELF);
-        lockablesSet.add(Material.DECORATED_POT);
-        lockablesSet.add(Material.LECTERN);
-        lockablesSet.add(Material.BARREL);
-        lockablesSet.add(Material.FURNACE);
-        lockablesSet.add(Material.BLAST_FURNACE);
-        lockablesSet.add(Material.SMOKER);
-        lockablesSet.add(Material.HOPPER);
-        lockablesSet.add(Material.DISPENSER);
-        lockablesSet.add(Material.DROPPER);
-        lockablesSet.add(Material.BREWING_STAND);
-        lockablesSet.add(Material.JUKEBOX);
-        lockablesSet.add(Material.BEACON);
-        lockablesSet.addAll(Tag.CAMPFIRES.getValues());
-        lockablesSet.addAll(Tag.ANVIL.getValues());
-        //valuable Blocks
-        lockablesSet.add(Material.DIAMOND_BLOCK);
-        lockablesSet.add(Material.NETHERITE_BLOCK);
-        // Maybe add Tag.BANNERS, Tag.BEDS, Tag.BEEHIVES, BrushableBlock, Conduit, CreatureSpawner, EnchantingTable
-
-        return lockablesSet;
-
     }
 
     protected static <E extends Enum<E>> @Nullable Enum<E> getEnumVal(@NotNull String arg, @NotNull Enum<E>[] a) {
@@ -323,11 +290,7 @@ public class ConfigManager {
             plugin.getLogger().info("Cache is enabled! In case of inconsistency, turn off immediately.");
         }
 
-        //todo something seems fishy here so this is disabled for now
-        /*
-        lockdefaultcreatetime = config.getLong("lock-default-create-time-unix", -1L);
-        if (lockdefaultcreatetime < -1L) lockdefaultcreatetime = -1L;
-        */
+        DEFAULT_CREATETIME.setValue(config.getLong(DEFAULT_CREATETIME.getPath(), DEFAULT_CREATETIME.getFallbackValue()));
     }
 
     @Deprecated(forRemoval = true)
@@ -348,6 +311,7 @@ public class ConfigManager {
         config.set(LOCK_EXEMPTIONS.getPath(), adapter.getProtectionExemptions());
         config.set(LOCK_EXPIRE_DAYS.getPath(), adapter.getLockExpireDays());
         config.set(CACHE_MILLISECONDS.getPath(), adapter.getCacheTimeSeconds());
+        config.set(DEFAULT_CREATETIME.getPath(), adapter.getLockDefaultCreateTimeUnix());
 
         plugin.saveConfig();
         plugin.reloadConfig();
@@ -382,8 +346,7 @@ public class ConfigManager {
     }
 
     public long getLockDefaultCreateTimeEpoch() {
-        //todo something seems fishy here so this is disabled for now
-        return -1L;
+        return DEFAULT_CREATETIME.getValueOrFallback();
     }
 
     public boolean isLockable(Material material) {

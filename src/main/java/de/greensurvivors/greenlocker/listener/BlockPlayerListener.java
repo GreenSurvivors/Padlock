@@ -20,7 +20,9 @@ import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.DoubleChest;
 import org.bukkit.block.Sign;
+import org.bukkit.block.data.type.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -42,7 +44,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class BlockPlayerListener implements Listener { //todo this whole class
+public class BlockPlayerListener implements Listener {
     private final GreenLocker plugin;
 
     public BlockPlayerListener(GreenLocker plugin) {
@@ -160,6 +162,7 @@ public class BlockPlayerListener implements Listener { //todo this whole class
                         event.line(1, Component.text(player.getName()));
                         SignLock.addPlayer(sign, true, player);
                     } else {
+                        // first line is Owner
                         Component line = event.line(1);
 
                         if (line != null) {
@@ -168,14 +171,14 @@ public class BlockPlayerListener implements Listener { //todo this whole class
                             if (MiscUtils.isUserName(strLine)) {
                                 SignLock.addPlayer(sign, true, Bukkit.getOfflinePlayer(strLine));
                             } else {
-                                //todo sendLang
+                                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.UNKNOWN_PLAYER);
                                 event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN));
                                 return;
                             }
                         } else if (player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm())) { // failsafe: only allow setting a sign without owner if you could break it!
                             SignLock.addPlayer(sign, true, null);
                         } else {
-                            //todo sendLang
+                            plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_ERROR_NO_OWNER);
                             event.setCancelled(true);
                             return;
                         }
@@ -304,56 +307,55 @@ public class BlockPlayerListener implements Listener { //todo this whole class
         Block block = event.getClickedBlock();
 
         if (block == null) return;
-        if (event.getHand() != EquipmentSlot.HAND) { //todo what?
+
+        //don't allow to open locked Chests (via 3rd party plugins?)
+        if (event.getHand() != EquipmentSlot.HAND) {
             if (action == Action.RIGHT_CLICK_BLOCK) {
-                if (GreenLockerAPI.isChest(block)) {
+                if (block.getBlockData() instanceof Chest || block.getBlockData() instanceof DoubleChest) {
+                    plugin.getLogger().info("I stopped someone opening a chest without their hands!");
                     // something not right
                     event.setCancelled(true);
                 }
                 return;
             }
         }
-        switch (action) {
-            case LEFT_CLICK_BLOCK, RIGHT_CLICK_BLOCK -> {
-                Player player = event.getPlayer();
-                if (((GreenLockerAPI.isLocked(block) && !GreenLockerAPI.isMember(block, player)) ||
-                        (GreenLockerAPI.isPartOfLockedDoor(block) && !GreenLockerAPI.isUserUpDownLockedDoor(block, player)))
-                        && !player.hasPermission(PermissionManager.ADMIN_USE.getPerm())) {
-                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
-                    event.setCancelled(true);
-                } else { // Handle double doors
-                    if (action == Action.RIGHT_CLICK_BLOCK) {
-                        if ((Doors.isDoubleDoorBlock(block) || Doors.isSingleDoorBlock(block)) && GreenLockerAPI.isLocked(block)) {
-                            Block doorblock = Doors.getBottomDoorBlock(block);
-                            long closetime = GreenLockerAPI.getTimerDoor(doorblock);
-                            List<Block> doors = new ArrayList<>();
-                            doors.add(doorblock);
-                            if (doorblock.getType() == Material.IRON_DOOR || doorblock.getType() == Material.IRON_TRAPDOOR) {
-                                Doors.toggleDoor(doorblock);
-                            }
-                            for (BlockFace blockface : GreenLockerAPI.cardinalFaces) {
-                                Block relative = doorblock.getRelative(blockface);
-                                if (relative.getType() == doorblock.getType()) {
-                                    doors.add(relative);
-                                    Doors.toggleDoor(relative);
-                                }
-                            }
-                            if (closetime > 0) {
-                                for (Block door : doors) {
-                                    if (door.hasMetadata("greenlocker.toggle")) {
-                                        return;
-                                    }
-                                }
-                                for (Block door : doors) {
-                                    door.setMetadata("greenlocker.toggle", new FixedMetadataValue(plugin, true));
-                                }
-                                Bukkit.getScheduler().runTaskLater(plugin, new DoorToggleTask(plugin, doors), closetime * 20L);
+        if (action == Action.LEFT_CLICK_BLOCK || action == Action.RIGHT_CLICK_BLOCK) {
+            Player player = event.getPlayer();
+            if (((GreenLockerAPI.isLocked(block) && !GreenLockerAPI.isMember(block, player)) ||
+                    (GreenLockerAPI.isPartOfLockedDoor(block) && !GreenLockerAPI.isUserUpDownLockedDoor(block, player)))
+                    && !player.hasPermission(PermissionManager.ADMIN_USE.getPerm())) {
+                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
+                event.setCancelled(true);
+            } else { // Handle double doors
+                if (action == Action.RIGHT_CLICK_BLOCK) {
+                    if ((Doors.isDoubleDoorBlock(block) || Doors.isSingleDoorBlock(block)) && GreenLockerAPI.isLocked(block)) {
+                        Block doorblock = Doors.getBottomDoorBlock(block);
+                        long closetime = GreenLockerAPI.getTimerDoor(doorblock);
+                        List<Block> doors = new ArrayList<>();
+                        doors.add(doorblock);
+                        if (doorblock.getType() == Material.IRON_DOOR || doorblock.getType() == Material.IRON_TRAPDOOR) {
+                            Doors.toggleDoor(doorblock);
+                        }
+                        for (BlockFace blockface : GreenLockerAPI.cardinalFaces) {
+                            Block relative = doorblock.getRelative(blockface);
+                            if (relative.getType() == doorblock.getType()) {
+                                doors.add(relative);
+                                Doors.toggleDoor(relative);
                             }
                         }
-                    }
-                }
-            }
-            default -> {
+                        if (closetime > 0) {
+                            for (Block door : doors) {
+                                if (door.hasMetadata("greenlocker.toggle")) {
+                                    return;
+                                }
+                            }
+                            for (Block door : doors) {
+                                door.setMetadata("greenlocker.toggle", new FixedMetadataValue(plugin, true));
+                            }
+                            Bukkit.getScheduler().runTaskLater(plugin, new DoorToggleTask(plugin, doors), closetime * 20L);
+                        }
+                    } // not door
+                } // not right-click
             }
         }
     }
@@ -364,11 +366,11 @@ public class BlockPlayerListener implements Listener { //todo this whole class
         Block block = event.getBlock();
         Player player = event.getPlayer();
 
-        if (!player.hasPermission(PermissionManager.ADMIN_INTERFERE.getPerm())) {
-            if (GreenLockerAPI.mayInterfere(block, player)) {
-                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_INTERFERE);
-                event.setCancelled(true);
-            }
+        if (!player.hasPermission(PermissionManager.ADMIN_INTERFERE.getPerm()) &&
+                !GreenLockerAPI.mayInterfere(block, player)) {
+
+            plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_INTERFERE);
+            event.setCancelled(true);
         }
     }
 

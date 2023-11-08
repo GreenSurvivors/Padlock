@@ -9,7 +9,6 @@ import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 public class EveryoneSign {
     private final static NamespacedKey everyoneKey = new NamespacedKey(GreenLocker.getPlugin(), "Everyone");
@@ -21,7 +20,7 @@ public class EveryoneSign {
         SignDisplay.updateDisplay(sign);
     }
 
-    public static @Nullable Boolean getAccessEveryone(@NotNull Sign sign) {
+    public static boolean getAccessEveryone(@NotNull Sign sign) {
         Boolean hasEveryOneAccess = sign.getPersistentDataContainer().get(everyoneKey, PersistentDataType.BOOLEAN);
 
         if (hasEveryOneAccess == null && getLegacySetting(sign)) {
@@ -29,7 +28,7 @@ public class EveryoneSign {
             return true;
         }
 
-        return hasEveryOneAccess;
+        return hasEveryOneAccess != null && hasEveryOneAccess;
     }
 
     @Deprecated(forRemoval = true)
