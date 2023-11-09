@@ -1,19 +1,19 @@
-name: GreenLocker
-main: de.greensurvivors.greenlocker.GreenLocker
+name: Padlock
+main: de.greensurvivors.padlock.Padlock
 authors: [ connection_lost, GreensurvivorsTeam ]
 softdepend: [ WorldGuard, CoreProtect ]
 loadbefore: [ SignShop ]
 version: ${version}
 api-version: 1.20
 description: >
-  Greenlocker is a chest protection plugin for Paper. It is 80% compatible with original Lockette, but delivers a lot of performance enhancements and feature options.
+  Padlock is a chest protection plugin for Paper. It is 80% compatible with original Lockette, but delivers a lot of performance enhancements and feature options.
 libraries:
   - org.apache.commons:commons-collections4:4.4
   - org.apache.commons:commons-lang3:3.13.0
 
 commands:
-  greenlocker:
+  padlock:
     usage: |
       /lock
-    aliases: [ lock, greenlocker, lockit ]
+    aliases: [ lock, padlock, lockit ]
 #Permissions are handled in Permission Manager

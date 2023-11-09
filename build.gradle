@@ -5,7 +5,7 @@ plugins {
     id("xyz.jpenilla.run-paper") version "1.0.6"
 }
 // Suppiled by Jenkins
-ext.majorVersion = 3
+ext.majorVersion = 1
 ext.minorVersion = 0
 ext.minecraftVersion = "1.20.1"
 
@@ -18,7 +18,7 @@ targetCompatibility = 17
 
 // differet version convension from Nyaa plugins
 group = "de.greensurvivors"
-archivesBaseName = "GreenLocker"
+archivesBaseName = "Padlock"
 version = "$majorVersion.$minorVersion.$buildNumber".toString()
 runServer {
     minecraftVersion("1.20.1")
@@ -67,7 +67,7 @@ publishing {
     publications {
         mavenJava(MavenPublication) {
             artifact sourcesJar
-            artifactId "greenlocker"
+            artifactId "padlock"
             version "$majorVersion.$minorVersion-SNAPSHOT"
             from components.java
         }

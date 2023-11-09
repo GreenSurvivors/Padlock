@@ -1,4 +1,4 @@
-prefix: '<gold>[GreenLocker]</gold> '
+prefix: '<gold>[Padlock]</gold> '
 sign:
   line:
     private: '[Private]'
@@ -50,7 +50,7 @@ cmd:
   sign-update:
     success: '<dark_green>Successfully updated legacy lockette sign.</dark_green>'
   reload:
-    success: '<dark_green>Greenlocker was reloaded.</dark_green>'
+    success: '<dark_green>Padlock was reloaded.</dark_green>'
   info:
     owners: 'owners: '
     members: 'members: '
