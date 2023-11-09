@@ -13,8 +13,9 @@ import java.util.List;
 import java.util.Set;
 
 /**
+ * Loads LockettePro config.
  * for whomever and why ever to update this adapter:
- * Please be aware that this class may look a lot like the config class in Lockette and this indeed intentional.
+ * Please be aware that this class may look a lot like the config class in LockettePro and this indeed intentional.
  * However, please be aware that there were made changes, like using Enums or giving the cache time in seconds back.
  */
 @Deprecated(forRemoval = true)

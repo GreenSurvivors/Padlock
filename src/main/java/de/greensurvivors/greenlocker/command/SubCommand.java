@@ -10,6 +10,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Set;
 
+/**
+ *
+ */
 public abstract class SubCommand {
     protected final @NotNull GreenLocker plugin;
 
@@ -17,21 +20,42 @@ public abstract class SubCommand {
         this.plugin = plugin;
     }
 
-    abstract protected boolean checkPermission(Permissible sender);
+    /**
+     * This checks, if the permissible has permission to see
+     * (like in tab-completion/help) and use the subcommand.
+     * <p>
+     * Note: The subcommand can perform additional checks once the
+     * {@link #onCommand(CommandSender, String[])} method was called and therefor fail at this point.
+     * Example: The method checks if the command sender is a player and owner of a sign.
+     *
+     * @param permissible to check the permission for
+     * @return true if the permissible can see/use the subcommand.
+     */
+    abstract protected boolean checkPermission(@NotNull Permissible permissible);
 
     /**
-     * has to be lower case
-     *
-     * @return
+     * get all the names a subcommand can get called.
+     * If subcommand1 has alias "subcommand1-alias1" and "subcommand1-alias2"
+     * and the command /command registers them they can be called via
+     * <p>/command subcommand1-alias1
+     * <p>/command subcommand1-alias2
+     * If two or more subcommands register the same alias the outcome is unknown.
+     * Please be aware of that. It really shouldn't be all that hard to not have
+     * two subcommands called the same in one single plugins command.
+     * <p> Every alias has to registered as lower case, so the casing when called
+     * doesn't matter.
      */
     abstract protected @NotNull Set<String> getAlias();
 
+    /**
+     * get information how the command works, like
+     * when used in a /help command wink wink
+     */
     abstract protected @NotNull Component getHelpText();
 
     /**
      * Executes the given command, returning its success.
-     * <br>
-     * If false is returned, then the "usage" plugin.yml entry for this command
+     * <br> If false is returned, then the "usage" plugin.yml entry for this command
      * (if defined) will be sent to the player.
      *
      * @param sender Source of the command
@@ -44,6 +68,7 @@ public abstract class SubCommand {
     /**
      * Requests a list of possible completions for a command argument.
      * Please Note: The subcommand will ALWAYS be the first argument aka arg[0].
+     * No filtering needs to be done, that task will lie on the shoulders of the calling command.
      *
      * @param sender Source of the command.  For players tab-completing a
      *               command inside of a command block, this will be the player, not

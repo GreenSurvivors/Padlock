@@ -3,6 +3,7 @@ package de.greensurvivors.greenlocker.impl.signdata;
 import de.greensurvivors.greenlocker.GreenLocker;
 import de.greensurvivors.greenlocker.config.MessageManager;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Sign;
@@ -31,7 +32,8 @@ public class SignDisplay {
                             OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(uuidStr));
 
                             if (player.getName() != null) {
-                                toFill[i] = Component.text(player.getName());
+                                toFill[i] = GreenLocker.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PLAYER_NAME_ON_SIGN,
+                                        Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), player.getName()));
 
                                 //we have written a line; back to main loop to get the next one!
                                 break;

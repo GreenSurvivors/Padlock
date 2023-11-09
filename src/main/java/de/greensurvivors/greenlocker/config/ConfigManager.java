@@ -4,20 +4,24 @@ import de.greensurvivors.greenlocker.GreenLocker;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.configuration.file.FileConfiguration;
+import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
+/**
+ * As the name might suggest: this will manage the config options of this plugin.
+ */
 public class ConfigManager {
-    private final GreenLocker plugin;
+    private final @NotNull GreenLocker plugin;
 
     // please note: While fallback values are defined here, these are in fact NOT the default options. They are just used in the unfortunate case loading them goes wrong.
     // if you want to change default options, have also a look into resources/config.yaml
     private final ConfigOption<Boolean> IMPORT_FROM_LOCKETTEPRO = new ConfigOption<>("import-fromLockettePro", false);
     private final ConfigOption<String> LANG_FILENAME = new ConfigOption<>("language-file-name", "lang/lang_en.yml");
-    private final ConfigOption<Boolean> DEPENDENCY_WORLDGUARD_ENABLED = new ConfigOption<>("dependency.worldguard.enabled", false);
-    private final ConfigOption<Boolean> DEPENDENCY_COREPROTECT_ENABLED = new ConfigOption<>("dependency.coreprotect.enabled", false);
+    private final ConfigOption<Boolean> DEPENDENCY_WORLDGUARD_ENABLED = new ConfigOption<>("dependency.worldguard.enabled", true);
+    private final ConfigOption<Boolean> DEPENDENCY_COREPROTECT_ENABLED = new ConfigOption<>("dependency.coreprotect.enabled", true);
     private final ConfigOption<Set<Material>> LOCKABLES = new ConfigOption<>("lockables", new HashSet<>()); //todo auto add inventory-blocks
     private final ConfigOption<QuickProtectOption> QUICKPROTECT_TYPE = new ConfigOption<>("lock.quick-lock.type", QuickProtectOption.NOT_SNEAKING_REQUIRED);
     private final ConfigOption<Boolean> LOCK_BLOCKS_INTERFERE = new ConfigOption<>("lock.blocked.interfere", true);
@@ -30,13 +34,22 @@ public class ConfigManager {
     private final ConfigOption<Integer> CACHE_MILLISECONDS = new ConfigOption<>("cache.seconds", 0);
     private final ConfigOption<Long> DEFAULT_CREATETIME = new ConfigOption<>("lock-default-create-time-unix", -1L);
 
-    public ConfigManager(GreenLocker plugin) {
+    public ConfigManager(@NotNull GreenLocker plugin) {
         this.plugin = plugin;
     }
 
-    protected static <E extends Enum<E>> @Nullable Enum<E> getEnumVal(@NotNull String arg, @NotNull Enum<E>[] a) {
-        for (Enum<E> value : a) {
-            if (value.name().equalsIgnoreCase(arg)) {
+    /**
+     * Try to get a member of the enum given as an argument by the name
+     *
+     * @param name  name of the enum to find
+     * @param enums the enum to check
+     * @param <E>   the type of the enum to check
+     * @return the member of the enum to check
+     */
+    @ApiStatus.Experimental
+    protected static <E extends Enum<E>> @Nullable Enum<E> getEnumVal(@NotNull String name, @NotNull Enum<E>[] enums) {
+        for (Enum<E> value : enums) {
+            if (value.name().equalsIgnoreCase(name)) {
                 return value;
             }
         }
@@ -44,6 +57,10 @@ public class ConfigManager {
         return null;
     }
 
+    /**
+     * reload the config and language files,
+     * will save default config
+     */
     public void reload() {
         plugin.saveDefaultConfig();
         FileConfiguration config = plugin.getConfig();
@@ -57,6 +74,7 @@ public class ConfigManager {
         plugin.getMessageManager().setLangFileName(config.getString(LANG_FILENAME.getPath(), LANG_FILENAME.getFallbackValue()));
         plugin.getMessageManager().reload();
 
+        //dependency
         DEPENDENCY_WORLDGUARD_ENABLED.setValue(config.getBoolean(DEPENDENCY_WORLDGUARD_ENABLED.getPath(), DEPENDENCY_WORLDGUARD_ENABLED.getFallbackValue()));
         DEPENDENCY_COREPROTECT_ENABLED.setValue(config.getBoolean(DEPENDENCY_COREPROTECT_ENABLED.getPath(), DEPENDENCY_COREPROTECT_ENABLED.getFallbackValue()));
 
@@ -182,7 +200,7 @@ public class ConfigManager {
         LOCKABLES.setValue(resultSet);
 
         Object object = config.get(QUICKPROTECT_TYPE.getPath(), QUICKPROTECT_TYPE.getFallbackValue());
-        if (Objects.requireNonNull(object) instanceof QuickProtectOption quickProtectOption) {
+        if (object instanceof QuickProtectOption quickProtectOption) {
             QUICKPROTECT_TYPE.setValue(quickProtectOption);
         } else if (object instanceof String string) {
             QuickProtectOption setting = (QuickProtectOption) getEnumVal(string, QuickProtectOption.values());
@@ -207,8 +225,7 @@ public class ConfigManager {
                     plugin.getLogger().warning("Couldn't get QuickProtectOption \"" + string + "\" for quick lock setting. Ignoring and using default value.");
                 }
             }
-            default ->
-                    plugin.getLogger().warning("Couldn't get QuickProtectOption \"" + object + "\" for quick lock setting. Ignoring and using default value.");
+            default -> plugin.getLogger().warning("Couldn't get QuickProtectOption \"" + object + "\" for quick lock setting. Ignoring and using default value.");
         }*/
 
         LOCK_BLOCKS_INTERFERE.setValue(config.getBoolean(LOCK_BLOCKS_INTERFERE.getPath(), LOCK_BLOCKS_INTERFERE.getFallbackValue()));
@@ -242,12 +259,11 @@ public class ConfigManager {
                     plugin.getLogger().warning("Couldn't get QuickProtectOption \"" + string + "\" for quick lock setting. Ignoring and using default value.");
                 }
             }
-            default ->
-                    plugin.getLogger().warning("Couldn't get QuickProtectOption \"" + object + "\" for quick lock setting. Ignoring and using default value.");
+            default -> plugin.getLogger().warning("Couldn't get QuickProtectOption \"" + object + "\" for quick lock setting. Ignoring and using default value.");
         }
         */
 
-        // load Material set of lockable blocks
+        // load lock exemptions
         objects = config.getList(LOCK_EXEMPTIONS.getPath(), new ArrayList<>(LOCK_EXEMPTIONS.getFallbackValue()));
         Set<ProtectionExemption> exemptions = new HashSet<>();
         for (Object exemptionObj : objects) {
@@ -293,6 +309,9 @@ public class ConfigManager {
         DEFAULT_CREATETIME.setValue(config.getLong(DEFAULT_CREATETIME.getPath(), DEFAULT_CREATETIME.getFallbackValue()));
     }
 
+    /**
+     * Bridge to load LockettePro configs for easy switch
+     */
     @Deprecated(forRemoval = true)
     private void getFromLegacy() {
         LegacyLocketteConfigAdapter adapter = new LegacyLocketteConfigAdapter();
@@ -317,7 +336,7 @@ public class ConfigManager {
         plugin.reloadConfig();
     }
 
-    public QuickProtectOption getQuickProtectAction() {
+    public @NotNull QuickProtectOption getQuickProtectAction() {
         return QUICKPROTECT_TYPE.getValueOrFallback();
     }
 
@@ -333,7 +352,7 @@ public class ConfigManager {
         return LOCK_BLOCKS_ITEM_TRANSFER_OUT.getValueOrFallback();
     }
 
-    public HopperMinecartBlockedOption getHopperMinecartAction() {
+    public @NotNull HopperMinecartBlockedOption getHopperMinecartAction() {
         return LOCK_BLOCKS_HOPPER_MINECART.getValueOrFallback();
     }
 
@@ -341,7 +360,7 @@ public class ConfigManager {
         return LOCK_EXPIRE_DAYS.getValueOrFallback() > 0;
     }
 
-    public Long getLockExpireDays() {
+    public @NotNull Long getLockExpireDays() {
         return LOCK_EXPIRE_DAYS.getValueOrFallback();
     }
 
@@ -374,13 +393,22 @@ public class ConfigManager {
     }
 
     public enum QuickProtectOption {
+        /** only quick protect if the player is NOT sneaking**/
         NOT_SNEAKING_REQUIRED,
+        /** quick protect, regardless if the player is sneaking or not (not recommended) */
         SNEAK_NONRELEVANT,
+        /** only quick protect if the player IS sneaking */
         SNEAK_REQUIRED,
+        /** don't quick protect */
         OFF,
     }
 
+    /**
+     * everything listed here is protected against, however one might want to not to,
+     * so you can turn it off.
+     */
     public enum ProtectionExemption {
+        /** tnt, creeper, endcrystal, every explosion.**/
         EXPLOSION,
         GROWTH,
         PISTON,
@@ -397,6 +425,7 @@ public class ConfigManager {
     public enum HopperMinecartBlockedOption {
         TRUE,
         FALSE,
+        /** breaks the mine-cart*/
         REMOVE
     }
 }

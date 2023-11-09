@@ -154,7 +154,6 @@ public class SignLock {
         boolean success = set.remove(uuid.toString());
         if (success) {
             sign.getPersistentDataContainer().set(isOwner ? storedOwnersUUIDKey : storedMembersUUIDKey, uuidSetDataType, set);
-
             SignDisplay.updateDisplay(sign);// update the block to make the UUID change effective
         }
 

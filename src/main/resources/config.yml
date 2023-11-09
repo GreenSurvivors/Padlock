@@ -2,17 +2,31 @@
 # https://github.com/connection-lost/LockettePro/wiki/*-config.yml
 # If there are missing entries, you can add them manually.
 
+# will turn itself off after imported the old config once. Will not import language files
+import-fromLockettePro: false
 language-file-name: 'lang/lang_en.yml'
 enable-quick-protect: true
-worldguard: true
-coreprotect: true
-block-interfere-placement: true
-block-item-transfer-in: false
-block-item-transfer-out: true
-block-hopper-minecart: remove
+dependency:
+  worldguard:
+    enabled: true
+  coreprotect:
+    enabled: true
+lock:
+  quick-lock:
+    type: NOT_SNEAKING_REQUIRED
+  blocked:
+    interfere: true
+    item-transfer:
+      in: false
+      out: true
+    hopper-minecart: REMOVE
+  exemptions:
+    -
+  expire:
+    days: 999
+cache:
+  seconds: 0
 cache-time-seconds: 0
-lock-expire: false
-lock-expire-days: 999
 lock-default-create-time-unix: -1
 
 
@@ -42,5 +56,3 @@ lockables:
   - DIAMOND_BLOCK
   - NETHERITE_BLOCK
   - CONDUIT
-protection-exempt:
-  - nothing

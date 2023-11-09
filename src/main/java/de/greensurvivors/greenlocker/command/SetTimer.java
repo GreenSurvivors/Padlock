@@ -1,13 +1,13 @@
 package de.greensurvivors.greenlocker.command;
 
 import de.greensurvivors.greenlocker.GreenLocker;
-import de.greensurvivors.greenlocker.GreenLockerAPI;
 import de.greensurvivors.greenlocker.config.MessageManager;
 import de.greensurvivors.greenlocker.config.PermissionManager;
 import de.greensurvivors.greenlocker.impl.SignSelection;
 import de.greensurvivors.greenlocker.impl.signdata.SignLock;
 import de.greensurvivors.greenlocker.impl.signdata.SignTimer;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
@@ -27,6 +27,9 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * set the timer a door/gate/trapdoor should toggle after used
+ */
 public class SetTimer extends SubCommand {
     private static final @NotNull Pattern periodPattern = Pattern.compile("(-?[0-9]+)([tTsSmhHdDwWM])");
     private static final @NotNull Pattern numberEndPattern = Pattern.compile("^*?\\d$");
@@ -36,20 +39,17 @@ public class SetTimer extends SubCommand {
     }
 
     @Override
-    protected boolean checkPermission(Permissible sender) {
-        return sender.hasPermission(PermissionManager.CMD_SET_TIMER.getPerm());
+    protected boolean checkPermission(@NotNull Permissible permissible) {
+        return permissible.hasPermission(PermissionManager.CMD_SET_TIMER.getPerm());
     }
 
-    @Override
-    protected @NotNull Set<String> getAlias() {
-        return Set.of("settimer", "timer");
-    }
-
-    @Override
-    protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_SETTIMER);
-    }
-
+    /**
+     * Try to get a time period of a string.
+     * First try ISO-8601 duration, and afterward our own implementation
+     * using the same time unit more than once is permitted.
+     *
+     * @return the duration in milliseconds, or zero if not possible
+     */
     private long parsePeriod(@NotNull String period) {
         try { //try Iso
             return Duration.parse(period).toMillis();
@@ -62,11 +62,9 @@ public class SetTimer extends SubCommand {
 
         while (matcher.find()) {
             try {
-
-
                 long num = Long.parseLong(matcher.group(1));
                 String typ = matcher.group(2);
-                millis += switch (typ) {
+                millis += switch (typ) { // from periodPattern
                     case "t", "T" -> Math.round(50D * num); // ticks
                     case "s" -> TimeUnit.SECONDS.toMillis(num);
                     case "m" -> TimeUnit.MINUTES.toMillis(num);
@@ -83,16 +81,15 @@ public class SetTimer extends SubCommand {
         return millis;
     }
 
-    /**
-     * Executes the given command, returning its success.
-     * <br>
-     * If false is returned, then the "usage" plugin.yml entry for this command
-     * (if defined) will be sent to the player.
-     *
-     * @param sender Source of the command
-     * @param args   Passed command arguments
-     * @return true if a valid command, otherwise false
-     */
+    @Override
+    protected @NotNull Set<String> getAlias() {
+        return Set.of("settimer", "timer");
+    }
+
+    @Override
+    protected @NotNull Component getHelpText() {
+        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_SETTIMER);
+    }
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         if (sender instanceof Player player) {
@@ -102,30 +99,32 @@ public class SetTimer extends SubCommand {
 
                     if (block != null) {
                         if (block.getState() instanceof Sign sign) {
-                            if (GreenLockerAPI.isAdditionalSign(sign) || SignLock.isLegacySign(sign)) {
-                                Sign otherSign = GreenLockerAPI.updateLegacySign(sign); //get main sign
-
-                                if (otherSign == null) {
-                                    GreenLockerAPI.setInvalid(sign);
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
-                                    return true;
-                                } else {
-                                    sign = otherSign;
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UPDATE_SIGN_SUCCESS);
-                                }
+                            //check for old Lockett(Pro) signs and try to update them
+                            sign = Command.checkAndUpdateLegacySign(sign, player);
+                            if (sign == null) {
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                                return true;
                             }
 
-                            if (SignLock.isOwner(sign, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm())) {
+                            // only owners and admins can change a signs properties
+                            if (SignLock.isOwner(sign, player.getUniqueId()) ||
+                                    player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm())) {
+                                // get all durations of all arguments together
+                                // note: writing every time element in one argument,
+                                // would have the same effect as spreading them across multiple arguments.
+                                // using the same time unit more than once is permitted.
                                 long timerDuration = 0;
                                 for (int i = 1; i < args.length; i++) {
                                     timerDuration += parsePeriod(args[i]);
                                 }
 
                                 if (timerDuration != 0) {
+                                    // success
                                     SignTimer.setTimer(sign, timerDuration);
 
                                     if (timerDuration > 0) {
-                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_SUCCESS_ON);
+                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_SUCCESS_ON,
+                                                Placeholder.component(MessageManager.PlaceHolder.TIME.getPlaceholder(), Component.text(timerDuration)));
                                     } else {
                                         plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_SUCCESS_OFF);
                                     }
@@ -144,6 +143,7 @@ public class SetTimer extends SubCommand {
                     }
                 } else {
                     plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_ENOUGH_ARGS);
+                    return false;
                 }
             } else {
                 plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
@@ -156,31 +156,24 @@ public class SetTimer extends SubCommand {
         }
     }
 
-    /**
-     * Requests a list of possible completions for a command argument.
-     * Please Note: The subcommand will ALWAYS be the first argument aka arg[0].
-     *
-     * @param sender Source of the command.  For players tab-completing a
-     *               command inside of a command block, this will be the player, not
-     *               the command block.
-     * @param args   The arguments passed to the command, including final
-     *               partial argument to be completed
-     * @return A List of possible completions for the final argument, or null
-     * to default to the command executor
-     */
     @Override
     protected @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
-        String arg = args[args.length - 1];
-        List<String> result = new ArrayList<>();
+        if (this.checkPermission(sender)) {
+            String arg = args[args.length - 1];
+            List<String> result = new ArrayList<>();
 
-        if (numberEndPattern.matcher(arg).matches()) {
-            result.addAll(List.of("t", "s", "m", "h", "d", "w", "M"));
+            if (numberEndPattern.matcher(arg).matches()) {
+                // add all distinct options from periodPattern
+                result.addAll(List.of("t", "s", "m", "h", "d", "w", "M"));
+            }
+
+            for (int i = 0; i <= 9; i++) {
+                result.add(String.valueOf(i));
+            }
+
+            return result.stream().map(str -> arg + str).toList();
+        } else {
+            return null;
         }
-
-        for (int i = 0; i <= 9; i++) {
-            result.add(String.valueOf(i));
-        }
-
-        return result.stream().map(str -> arg + str).toList();
     }
 }

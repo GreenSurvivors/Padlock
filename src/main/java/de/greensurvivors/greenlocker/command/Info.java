@@ -1,7 +1,6 @@
 package de.greensurvivors.greenlocker.command;
 
 import de.greensurvivors.greenlocker.GreenLocker;
-import de.greensurvivors.greenlocker.GreenLockerAPI;
 import de.greensurvivors.greenlocker.config.MessageManager;
 import de.greensurvivors.greenlocker.config.PermissionManager;
 import de.greensurvivors.greenlocker.impl.MiscUtils;
@@ -22,14 +21,18 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * get all important information about a lock sign.
+ * members, owners, timer, expiration, etc.
+ */
 public class Info extends SubCommand {
     protected Info(@NotNull GreenLocker plugin) {
         super(plugin);
     }
 
     @Override
-    protected boolean checkPermission(Permissible sender) {
-        return sender.hasPermission(PermissionManager.CMD_INFO.getPerm());
+    protected boolean checkPermission(@NotNull Permissible permissible) {
+        return permissible.hasPermission(PermissionManager.CMD_INFO.getPerm());
     }
 
     @Override
@@ -42,48 +45,34 @@ public class Info extends SubCommand {
         return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_INFO);
     }
 
-    /**
-     * Executes the given command, returning its success.
-     * <br>
-     * If false is returned, then the "usage" plugin.yml entry for this command
-     * (if defined) will be sent to the player.
-     *
-     * @param sender Source of the command
-     * @param args   Passed command arguments
-     * @return true if a valid command, otherwise false
-     */
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) { //todo this needs formatting and general glow up
-        if (sender instanceof Player player) {
-            if (this.checkPermission(sender)) {
+        if (this.checkPermission(sender)) {
+            if (sender instanceof Player player) {
                 Block block = SignSelection.getSelectedSign(player);
                 if (block != null) {
                     if (block.getState() instanceof Sign sign) {
-                        if (GreenLockerAPI.isAdditionalSign(sign) || SignLock.isLegacySign(sign)) {
-                            Sign otherSign = GreenLockerAPI.updateLegacySign(sign); //get main sign
-
-                            if (otherSign == null) {
-                                GreenLockerAPI.setInvalid(sign);
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
-                                return true;
-                            } else {
-                                sign = otherSign;
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UPDATE_SIGN_SUCCESS);
-                            }
+                        //check for old Lockett(Pro) signs and try to update them
+                        sign = Command.checkAndUpdateLegacySign(sign, player);
+                        if (sign == null) {
+                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                            return true;
                         }
 
+                        // only admins, owners and members
                         if (player.hasPermission(PermissionManager.ADMIN_USE.getPerm()) ||
                                 SignLock.isOwner(sign, player.getUniqueId()) ||
                                 SignLock.isMember(sign, player.getUniqueId())) {
 
+                            // owners
                             Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_OWNERS);
-
                             for (String name : MiscUtils.getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, true))) {
                                 component = component.append(Component.text(name));
                                 component = component.append(Component.text(", "));
                             }
-                            component = component.append(Component.newline());
 
+                            // members
+                            component = component.append(Component.newline());
                             component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_MEMBERS));
                             if (EveryoneSign.getAccessEveryone(sign)) {
                                 component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.EVERYONE_SIGN));
@@ -94,6 +83,7 @@ public class Info extends SubCommand {
                                 }
                             }
 
+                            // timer
                             Long timer = SignTimer.getTimer(sign);
                             if (timer != null) {
                                 component = component.append(Component.newline());
@@ -101,11 +91,12 @@ public class Info extends SubCommand {
                                 component = component.append(Component.text(timer));
                             }
 
+                            // expiration
                             component = component.append(Component.newline());
                             component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_EXPIRED));
                             component = component.append(Component.text(SignExpiration.isSignExpired(sign)));
 
-                            plugin.getMessageManager().sendMessages(sender, component);
+                            plugin.getMessageManager().sendMessageWithPrefix(sender, component);
                         } else {
                             plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
                         }
@@ -116,28 +107,16 @@ public class Info extends SubCommand {
                     plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NOT_SELECTED);
                 }
             } else {
-                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
+                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_PLAYER);
+                return false;
             }
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_PLAYER);
-            return false;
+            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
         }
 
         return true;
     }
 
-    /**
-     * Requests a list of possible completions for a command argument.
-     * Please Note: The subcommand will ALWAYS be the first argument aka arg[0].
-     *
-     * @param sender Source of the command.  For players tab-completing a
-     *               command inside of a command block, this will be the player, not
-     *               the command block.
-     * @param args   The arguments passed to the command, including final
-     *               partial argument to be completed
-     * @return A List of possible completions for the final argument, or null
-     * to default to the command executor
-     */
     @Override
     protected @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
         return null;

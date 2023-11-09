@@ -15,14 +15,22 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.util.HashMap;
 
+/**
+ * manages all translatable and placeholders used by this plugin.
+ */
 public class MessageManager {
     private final Plugin plugin;
-    private final HashMap<LangPath, String> nakedSigns = new HashMap<>(); // path -> naked
+    /**
+     * contains all sign lines without any decorations like color but still with every placeholder
+     */
+    private final HashMap<LangPath, String> nakedSignLiness = new HashMap<>(); // path -> naked
+    /**
+     * caches every component without placeholder for faster access in future
+     */
     private final HashMap<LangPath, Component> langCache = new HashMap<>();
-    private @NotNull Component prefixComp = MiniMessage.miniMessage().deserialize(LangPath.PLUGIN_PREFIX.getDefaultValue());
     private FileConfiguration lang;
+    private FileConfiguration fallback;
     private String langfilename = "lang/lang_en.yml";
-
 
     public MessageManager(Plugin plugin) {
         this.plugin = plugin;
@@ -32,21 +40,34 @@ public class MessageManager {
         this.langfilename = langfilename;
     }
 
-    protected void reload() {
-        initAdditionalFiles();
-        lang = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), langfilename));
-
-        prefixComp = MiniMessage.miniMessage().deserialize(lang.getString(LangPath.PLUGIN_PREFIX.getPath(), LangPath.PLUGIN_PREFIX.getDefaultValue()));
-
-        nakedSigns.put(LangPath.PRIVATE_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.PRIVATE_SIGN.getPath(), LangPath.PRIVATE_SIGN.getDefaultValue())).toLowerCase());
-        nakedSigns.put(LangPath.ADDITIONAL_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.ADDITIONAL_SIGN.getPath(), LangPath.ADDITIONAL_SIGN.getDefaultValue())).toLowerCase());
-        nakedSigns.put(LangPath.EVERYONE_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.EVERYONE_SIGN.getPath(), LangPath.EVERYONE_SIGN.getDefaultValue())).toLowerCase());
-        nakedSigns.put(LangPath.TIMER_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.TIMER_SIGN.getPath(), LangPath.TIMER_SIGN.getDefaultValue())).toLowerCase());
-        nakedSigns.put(LangPath.INVALID_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.INVALID_SIGN.getPath(), LangPath.INVALID_SIGN.getDefaultValue())).toLowerCase());
-        nakedSigns.put(LangPath.EXPIRE_SIGN, MiniMessage.miniMessage().stripTags(lang.getString(LangPath.EXPIRE_SIGN.getPath(), LangPath.EXPIRE_SIGN.getDefaultValue())).toLowerCase());
+    private @NotNull String getStringFromLang(@NotNull LangPath path) {
+        return lang.getString(path.getPath(), fallback.getString(path.getPath(), path.getDefaultValue()));
     }
 
-    private void initAdditionalFiles() {
+    /**
+     * reload language file. Please call {@link #setLangFileName(String)} before calling this for the first time
+     */
+    protected void reload() {
+        initLangFiles();
+        lang = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), langfilename));
+        fallback = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "lang/lang_en.yml")); //todo don't hardcode
+
+        langCache.put(LangPath.PLUGIN_PREFIX, MiniMessage.miniMessage().deserialize(getStringFromLang(LangPath.PLUGIN_PREFIX)));
+
+        nakedSignLiness.put(LangPath.PRIVATE_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.PRIVATE_SIGN)).toLowerCase());
+        nakedSignLiness.put(LangPath.ADDITIONAL_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.ADDITIONAL_SIGN)).toLowerCase());
+        nakedSignLiness.put(LangPath.EVERYONE_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.EVERYONE_SIGN)).toLowerCase());
+        nakedSignLiness.put(LangPath.TIMER_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.TIMER_SIGN)).toLowerCase());
+        nakedSignLiness.put(LangPath.ERROR_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.ERROR_SIGN)).toLowerCase());
+        nakedSignLiness.put(LangPath.INVALID_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.INVALID_SIGN)).toLowerCase());
+        nakedSignLiness.put(LangPath.EXPIRE_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.EXPIRE_SIGN)).toLowerCase());
+        nakedSignLiness.put(LangPath.PLAYER_NAME_ON_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.PLAYER_NAME_ON_SIGN)).toLowerCase());
+    }
+
+    /**
+     * saves lang files from resources to the plugins datafolder
+     */
+    private void initLangFiles() {
         //todo don't hardcode them
         String[] availablefiles = {"lang/lang_de.yml", "lang/lang_en.yml", "lang/lang_es.yml", "lang/lang_hu.yml", "lang/lang_it.yml", "lang/lang_zh-cn.yml"};
         for (String filename : availablefiles) {
@@ -57,52 +78,89 @@ public class MessageManager {
         }
     }
 
-    public void sendMessages(@NotNull Audience audience, @Nullable Component messages) {
+    /**
+     * prepend the message with the plugins prefix before sending it to the audience.
+     */
+    public void sendMessageWithPrefix(@NotNull Audience audience, @Nullable Component messages) {
         if (messages != null) {
-            audience.sendMessage(prefixComp.append(messages));
+            audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(messages));
         }
     }
 
-    public @NotNull Component getLang(@NotNull MessageManager.LangPath path, TagResolver resolver) {
-        return MiniMessage.miniMessage().deserialize(lang.getString(path.path, path.defaultValue), resolver);
+    /**
+     * get a component from lang file and apply the given tag resolver.
+     * Note: might be slightly slower than {@link #getLang(LangPath)} since this can not use cache.
+     */
+    public @NotNull Component getLang(@NotNull MessageManager.LangPath path, @NotNull TagResolver resolver) {
+        return MiniMessage.miniMessage().deserialize(getStringFromLang(path), resolver);
     }
 
-    public @NotNull Component getLang(@NotNull MessageManager.LangPath path) { // todo lang in minimessage format
+    /**
+     * get a component from lang file
+     */
+    public @NotNull Component getLang(@NotNull MessageManager.LangPath path) {
         Component result = langCache.get(path);
 
         if (result == null) {
-
-            result = MiniMessage.miniMessage().deserialize(lang.getString(path.path, path.defaultValue));
+            result = MiniMessage.miniMessage().deserialize(getStringFromLang(path));
 
             langCache.put(path, result);
         }
         return result;
     }
 
+    /**
+     * send a component from the lang file to the audience, prefixed with this plugins prefix.
+     */
     public void sendLang(@NotNull Audience audience, @NotNull LangPath path) {
         Component message = langCache.get(path);
 
         if (message == null) {
-            message = MiniMessage.miniMessage().deserialize(lang.getString(path.path, path.defaultValue));
+            message = MiniMessage.miniMessage().deserialize(getStringFromLang(path));
 
             langCache.put(path, message);
         }
 
-        audience.sendMessage(prefixComp.append(message));
+        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(message));
     }
 
+    /**
+     * send a component from the lang file to the audience, prefixed with this plugins prefix and applying the given tag resolver.
+     * Note: might be slightly slower than {@link #sendLang(Audience, LangPath)} since this can not use cache.
+     */
+    public void sendLang(@NotNull Audience audience, @NotNull LangPath path, @NotNull TagResolver resolver) {
+        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(
+                MiniMessage.miniMessage().deserialize(getStringFromLang(path), resolver)));
+    }
+
+    /**
+     * checks if the given component is a spefic kind of sign-line defined by {@link LangPath}
+     * please note: this will only work for simple lines. If the line has a placeholder in it, this will most likely fail!
+     *
+     * @return true if the component is the kind of sign.
+     */
     public boolean isSignComp(@NotNull Component compToTest, @NotNull LangPath langPath) {
         String strToTest = PlainTextComponentSerializer.plainText().serialize(compToTest).trim();
 
-        return strToTest.toLowerCase().startsWith(nakedSigns.get(langPath));
+        return strToTest.toLowerCase().startsWith(nakedSignLiness.get(langPath));
     }
 
-    public String getNakedSignText(@NotNull LangPath langPath) {
-        return nakedSigns.get(langPath);
+    /**
+     * get the line of a sign without any decorations, but still with its placeholders.
+     *
+     * @param langPath defines the type of line we need
+     */
+    public @Nullable String getNakedSignText(@NotNull LangPath langPath) {
+        return nakedSignLiness.get(langPath);
     }
 
+    /**
+     * placeholder strings used. will be surrounded in Minimassage typical format of <>
+     */
     public enum PlaceHolder {
-        TIME("time");
+        TIME("time"),
+        PLAYER("player"),
+        ARGUMENT("argument");
 
         private final String placeholder;
 
@@ -120,6 +178,9 @@ public class MessageManager {
         }
     }
 
+    /**
+     * Paths of all translatable
+     */
     public enum LangPath {
         PLUGIN_PREFIX("prefix", "<gold>[GreenLocker]</gold> "),
 
@@ -129,18 +190,17 @@ public class MessageManager {
         EVERYONE_SIGN("sign.line.everyone", "[Everyone]"),
         TIMER_SIGN("sign.line.timer", "[Timer:<" + PlaceHolder.TIME.getPlaceholder() + ">]"),
         EXPIRE_SIGN("sign.line.expired", "[<dark_aqua>Expired</dark_aqua>]"),
-        ERROR_SIGN("sign.line.error", "[Error]"),
+        ERROR_SIGN("sign.line.error", "[<dark_red>Error</dark_red>]"),
         INVALID_SIGN("sign.line.invalid", "[Invalid]"),
+        PLAYER_NAME_ON_SIGN("sign.line.player-name", PlaceHolder.PLAYER.getPlaceholder()), // used for formatting displayed player names
 
         HELP_HEADER("cmd.help.header"),
-        HELP_NO_PERMISSION_SUBCOMMAND("cmd.help.no-perm-subcommand"),
         HELP_ADD_MEMBER("cmd.help.add-member"),
         HELP_REMOVE_MEMBER("cmd.help.remove-member"),
         HELP_ADD_OWNER("cmd.help.add-owner"),
         HELP_REMOVE_OWNER("cmd.help.remove-owner"),
         HELP_SETCREATED("cmd.help.set-created"),
         HELP_SETEVERYONE("cmd.help.set-everyone"),
-        HELP_SETREDSTONE("cmd.help.set-redstone"),
         HELP_SETTIMER("cmd.help.set-timer"),
         HELP_DEBUG("cmd.help.debug"),
         HELP_HELP("cmd.help.help"),
@@ -158,7 +218,6 @@ public class MessageManager {
         SET_CREATED_SUCCESS("cmd.set-created.success"),
         SET_CREATED_ERROR("cmd.set-created.error"),
         SET_EVERYONE_SUCCESS("cmd.set-everyone.success"),
-        SET_EVERYONE_ERROR("cmd.set-everyone.error"),
         SET_TIMER_SUCCESS_ON("cmd.set-timer.success.on"),
         SET_TIMER_SUCCESS_OFF("cmd.set-timer.success.off"),
         SET_TIMER_ERROR("cmd.set-timer.error"),
@@ -170,12 +229,14 @@ public class MessageManager {
         INFO_TIMER("cmd.info.timer"),
         INFO_EXPIRED("cmd.info.expired"),
 
-        SIGN_NEED_RESELECT("cmd.sign-need-reselect"),
-        SIGN_NOT_SELECTED("cmd.no-sign-selected"),
-        UNKNOWN_PLAYER("cmd.unknown-player"),
-        NOT_A_PLAYER("cmd.not-a-player"),
-        NOT_ENOUGH_ARGS("cmd.not-enough-args"),
+        SIGN_NEED_RESELECT("cmd.error.sign-need-reselect"),
+        SIGN_NOT_SELECTED("cmd.error.no-sign-selected"),
+        UNKNOWN_PLAYER("cmd.error.unknown-player"),
+        NOT_A_PLAYER("cmd.error.not-a-player"),
+        NOT_ENOUGH_ARGS("cmd.error.not-enough-args"),
+        NOT_A_BOOL("cmd.error.not-a-bool"),
         CMD_USAGE("cmd.usage"),
+        CMD_NOT_A_SUBCOMMAND("cmd.not-a-subcommand"),
 
         NO_PERMISSION("no-permission"),
         NOT_OWNER("lock.not-owner"),
@@ -214,5 +275,4 @@ public class MessageManager {
             return defaultValue;
         }
     }
-
 }

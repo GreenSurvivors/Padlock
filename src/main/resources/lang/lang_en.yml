@@ -8,6 +8,8 @@ sign:
     expired: '[<dark_aqua>Expired</dark_aqua>]'
     error: '[<dark_red>Error</dark_red>]'
     invalid: '[Invalid]'
+    # used for formatting displayed player names
+    player-name: '<player>'
 cmd:
   help:
     header: '----------------{Help}----------------'
@@ -16,6 +18,9 @@ cmd:
     remove-member: '/lock removemember <player> | revokes basic access to the locked Block.'
     add-owner: '/lock addowner <player> | lets you grant other players advanced access to the locked Block.'
     remove-owner: '/lock removeowner <player> | revokes advanced access to the locked Block.'
+    set-created: '/lock setCreated <time> | set when a sign was supposedly created. Time formats: "2011-12-03T10:15:30", "2011-12-03T10:15:30+01:00" or "2011-12-03T10:15:30+01:00[Europe/Paris]"'
+    set-everyone: '/lock seteveryone <true/false> set if everyone should have member access or not.'
+    set-timer: '/lock settimer 0t 0s 0m 0h| set the timer a door/gate/trapdoor should toggle after used in ticks, seconds, minutes, or hours. Note: does not persist when server restarts.'
     debug: '/lock debug | admin tool to get debug information about the plugin.'
     help: '/lock help | this command. Gives you feedback about commands you have permission to use.'
     info: '/lock info | select a block and get a list of all the hidden member and owners.'
@@ -23,28 +28,43 @@ cmd:
     update-sign: '/lock updatesign | manuel start a updating process for a legacy lockette sign.'
     version: '/lock version | returns the version of this plugin.'
   add-owner:
-    success: '<dark_green>Successfully added as owner.</dark_green>'
+    success: '<dark_green>Successfully added <player> as owner.</dark_green>'
   remove-owner:
-    success: '<dark_green>Successfully removed as owner.</dark_green>'
+    success: '<dark_green>Successfully removed <player> as owner.</dark_green>'
     error: "<red>Couldn't remove as an owner!</red>"
   add-member:
-    success: '<dark_green>Successfully added as member.</dark_green>'
+    success: '<dark_green>Successfully added <player> as member.</dark_green>'
   remove-member:
-    success: '<dark_green>Successfully removed as member.</dark_green>'
-    error: "<red>Couldn't remove as an member!</red>"
+    success: '<dark_green>Successfully removed <player> as member.</dark_green>'
+    error: "<red>Couldn't remove <player> as an member!</red>"
+  set-created:
+    success: '<dark_green>Successfully changed time this sign was "created" at.</dark_green>'
+    error: "<red>Couldn't get created time from <argument></red>"
+  set-everyone:
+    success: '<dark_green>Everyone is Member now: <boolean></dark_green>'
+  set-timer:
+    success:
+      on: '<dark_green>Successfully set timer to: <time>ms.</dark_green>'
+      off: '<dark_green>Successfully turned the timer off.</dark_green>'
+    error: "<red>Couldn't get a period of time from your arguments.</red>"
   sign-update:
     success: '<dark_green>Successfully updated legacy lockette sign.</dark_green>'
+  reload:
+    success: '<dark_green>Greenlocker was reloaded.</dark_green>'
   info:
     owners: 'owners: '
     members: 'members: '
-  reload:
-    success: '<dark_green>Greenlocker was reloaded.</dark_green>'
-  sign-need-reselect: '<red>Please re-select the sign.</red>'
-  no-sign-selected: '<red>Select a sign by right-clicking on it first.</red>'
-  unknown-player: "<red>Couldn't find this player. Did you type it right?.</red>"
-  not-a-player: 'This command can only be called as a player.'
-  not-enough-args: 'You provided too few arguments. Pleas try again.'
+    timer: 'timer: '
+    expired: 'expired: '
+  error:
+    not-enough-args: '<red>You provided too few arguments. Pleas try again.<red>'
+    not-a-player: '<red>This command can only be called as a player.<red>'
+    unknown-player: "<red>Couldn't find this player. Did you type it right?.</red>"
+    no-sign-selected: '<red>Select a sign by right-clicking on it first.</red>'
+    sign-need-reselect: '<red>Please re-select the sign.</red>'
+    not-a-bool: '<red>The argument "<argument>" you provided is not a boolean.<red>'
   usage: '/lock <subcommand> <subcommand arguments> | see command refference in /lock help!'
+  not-a-subcommand: '<red>The argument "<argument>" you provided is not a subcommand.<red>'
 no-permission: "<red>You don't have permission to do that.</red>"
 lock:
   not-owner: "<red>Only the owner of this sign may do that.</red>"

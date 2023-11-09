@@ -6,6 +6,9 @@ import org.bukkit.permissions.PermissionDefault;
 
 import java.util.Map;
 
+/**
+ * manages all permissions used by this plugin
+ */
 public enum PermissionManager {
     CMD_HELP(new Permission("greenlocker.cmd.help", "", PermissionDefault.TRUE)),
     CMD_INFO(new Permission("greenlocker.cmd.info", "", PermissionDefault.TRUE)),

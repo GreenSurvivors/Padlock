@@ -1,13 +1,12 @@
 package de.greensurvivors.greenlocker.command;
 
 import de.greensurvivors.greenlocker.GreenLocker;
-import de.greensurvivors.greenlocker.GreenLockerAPI;
 import de.greensurvivors.greenlocker.config.MessageManager;
 import de.greensurvivors.greenlocker.config.PermissionManager;
 import de.greensurvivors.greenlocker.impl.SignSelection;
 import de.greensurvivors.greenlocker.impl.signdata.SignExpiration;
-import de.greensurvivors.greenlocker.impl.signdata.SignLock;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
@@ -39,8 +38,8 @@ public class SetCreated extends SubCommand {
     }
 
     @Override
-    protected boolean checkPermission(Permissible sender) {
-        return sender.hasPermission(PermissionManager.CMD_SET_CREATED.getPerm());
+    protected boolean checkPermission(@NotNull Permissible permissible) {
+        return permissible.hasPermission(PermissionManager.CMD_SET_CREATED.getPerm());
     }
 
     @Override
@@ -53,6 +52,11 @@ public class SetCreated extends SubCommand {
         return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_SETCREATED);
     }
 
+    /**
+     * Try to get milliseconds since epoch from String by checking against {@link #supportedFormats}
+     *
+     * @return millisconds since epoch or null if no format fits
+     */
     private @Nullable Long getEpochMillisFromString(@NotNull String string) {
         for (DateTimeFormatter formatter : supportedFormats) {
             try {
@@ -89,24 +93,18 @@ public class SetCreated extends SubCommand {
      */
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
-        if (sender instanceof Player player) {
-            if (sender.hasPermission(PermissionManager.CMD_SET_CREATED.getPerm())) {
+        if (this.checkPermission(sender)) {
+            if (sender instanceof Player player) {
                 if (args.length >= 2) {
                     Block block = SignSelection.getSelectedSign(player);
 
                     if (block != null) {
                         if (block.getState() instanceof Sign sign) {
-                            if (GreenLockerAPI.isAdditionalSign(sign) || SignLock.isLegacySign(sign)) {
-                                Sign otherSign = GreenLockerAPI.updateLegacySign(sign); //get main sign
-
-                                if (otherSign == null) {
-                                    GreenLockerAPI.setInvalid(sign);
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
-                                    return true;
-                                } else {
-                                    sign = otherSign;
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UPDATE_SIGN_SUCCESS);
-                                }
+                            //check for old Lockett(Pro) signs and try to update them
+                            sign = Command.checkAndUpdateLegacySign(sign, player);
+                            if (sign == null) {
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                                return true;
                             }
 
                             Long millisEpoch = getEpochMillisFromString(args[1]);
@@ -117,7 +115,8 @@ public class SetCreated extends SubCommand {
                                 plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_CREATED_SUCCESS);
                                 return true;
                             } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_CREATED_ERROR);
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_CREATED_ERROR,
+                                        Placeholder.unparsed(MessageManager.PlaceHolder.ARGUMENT.getPlaceholder(), args[1]));
                                 return false;
                             }
                         } else {
@@ -128,16 +127,16 @@ public class SetCreated extends SubCommand {
                     }
                 } else {
                     plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_ENOUGH_ARGS);
+                    return false;
                 }
             } else {
-                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
+                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_PLAYER);
+                return false;
             }
-
-            return true;
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_PLAYER);
-            return false;
+            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
         }
+        return true;
     }
 
     /**

@@ -13,14 +13,17 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * Add an owner to a lock sign
+ */
 public class AddOwner extends SubCommand {
     protected AddOwner(@NotNull GreenLocker plugin) {
         super(plugin);
     }
 
     @Override
-    protected boolean checkPermission(Permissible sender) {
-        return sender.hasPermission(PermissionManager.EDIT.getPerm()) && sender.hasPermission(PermissionManager.ADMIN_EDIT.getPerm());
+    protected boolean checkPermission(@NotNull Permissible permissible) {
+        return permissible.hasPermission(PermissionManager.ADMIN_EDIT.getPerm());
     }
 
     @Override
@@ -34,35 +37,20 @@ public class AddOwner extends SubCommand {
     }
 
     /**
-     * Executes the given command, returning its success.
-     * <br>
-     * If false is returned, then the "usage" plugin.yml entry for this command
-     * (if defined) will be sent to the player.
+     * since it shares most of the code with the subcommand addMember, both of them get executed in the main commands class
      *
      * @param sender Source of the command
-     * @param args   Passed command arguments
-     * @return true if a valid command, otherwise false
+     * @param args   Passed command arguments.
+     *               Please Note: The subcommand will ALWAYS be the first argument aka arg[0].
      */
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         return Command.onAddPlayer(sender, args, true);
     }
 
-    /**
-     * Requests a list of possible completions for a command argument.
-     * Please Note: The subcommand will ALWAYS be the first argument aka arg[0].
-     *
-     * @param sender Source of the command.  For players tab-completing a
-     *               command inside of a command block, this will be the player, not
-     *               the command block.
-     * @param args   The arguments passed to the command, including final
-     *               partial argument to be completed
-     * @return A List of possible completions for the final argument, or null
-     * to default to the command executor
-     */
     @Override
     protected @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
-        if (sender.hasPermission(PermissionManager.EDIT.getPerm())) {
+        if (this.checkPermission(sender)) {
             return plugin.getServer().getOnlinePlayers().stream().map(Player::getName).toList();
         } else {
             return null;

@@ -4,6 +4,7 @@ import de.greensurvivors.greenlocker.GreenLocker;
 import de.greensurvivors.greenlocker.config.MessageManager;
 import de.greensurvivors.greenlocker.config.PermissionManager;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.NotNull;
@@ -13,14 +14,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
+/**
+ * gives back a list of all for the cmd-sender available commands or information about a specific command.
+ */
 public class Help extends SubCommand {
     protected Help(@NotNull GreenLocker plugin) {
         super(plugin);
     }
 
     @Override
-    protected boolean checkPermission(Permissible sender) {
-        return sender.hasPermission(PermissionManager.CMD_HELP.getPerm());
+    protected boolean checkPermission(@NotNull Permissible permissible) {
+        return permissible.hasPermission(PermissionManager.CMD_HELP.getPerm());
     }
 
     @Override
@@ -33,64 +37,44 @@ public class Help extends SubCommand {
         return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_HELP);
     }
 
-    /**
-     * Executes the given command, returning its success.
-     * <br>
-     * If false is returned, then the "usage" plugin.yml entry for this command
-     * (if defined) will be sent to the player.
-     *
-     * @param sender Source of the command
-     * @param args   Passed command arguments
-     * @return true if a valid command, otherwise false
-     */
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
-        if (args.length >= 2) {
-            SubCommand command = Command.getSubCommandFromString(sender, args[1]);
+        if (this.checkPermission(sender)) {
+            if (args.length >= 2) {
+                SubCommand command = Command.getSubCommandFromString(sender, args[1]);
 
-            if (command != null) {
+                if (command != null) {
+                    Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_HEADER);
+                    component = component.append(Component.newline());
+                    component = component.append(command.getHelpText());
+
+                    sender.sendMessage(component);
+                } else { // didn't type a valid subcommand.
+                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.CMD_NOT_A_SUBCOMMAND,
+                            Placeholder.unparsed(MessageManager.PlaceHolder.ARGUMENT.getPlaceholder(), args[1]));
+                    return false;
+                }
+            } else { //todo maybe pages
                 Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_HEADER);
                 component = component.append(Component.newline());
-                component = component.append(command.getHelpText());
 
-                plugin.getMessageManager().sendMessages(sender, component);
-            } else {
-                //how did anyone manage to get the help command working without having the permission for it?
-                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.HELP_NO_PERMISSION_SUBCOMMAND);
-                return false;
-            }
-        } else {
-            Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_HEADER);
-            component = component.append(Component.newline());
+                for (SubCommand subCommand : Command.getSubCommands(sender)) {
+                    component = component.append(Component.text(" - "));
 
-            for (SubCommand subCommand : Command.getSubCommands(sender)) {
-                component = component.append(Component.text(" - "));
+                    for (String alias : subCommand.getAlias()) { //todo maybe get separator from config and don't add this on the last alias
+                        component = component.append(Component.text(alias).append(Component.text(", ")));
+                    }
 
-                for (String alias : subCommand.getAlias()) {
-                    component = component.append(Component.text(alias).append(Component.text(", ")));
+                    component = component.append(Component.newline());
                 }
 
-                component = component.append(Component.newline());
+                sender.sendMessage(component);
             }
-
-            plugin.getMessageManager().sendMessages(sender, component);
         }
 
         return true;
     }
 
-    /**
-     * Requests a list of possible completions for a command argument.
-     * Please Note: The subcommand will ALWAYS be the first argument aka arg[0].
-     *
-     * @param sender Source of the command.  For players tab-completing a
-     *               command inside of a command block, this will be the player, not
-     *               the command block.
-     * @param args   The arguments passed to the command, including final
-     *               partial argument to be completed
-     * @return A List of possible completions for the final argument, or null
-     * to default to the command executor
-     */
     @Override
     protected @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
         if (args.length == 2) {
