@@ -4,6 +4,7 @@ import de.greensurvivors.greenlocker.GreenLocker;
 import de.greensurvivors.greenlocker.GreenLockerAPI;
 import de.greensurvivors.greenlocker.config.ConfigManager;
 import de.greensurvivors.greenlocker.impl.doordata.Doors;
+import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.entity.*;
@@ -97,7 +98,7 @@ public class BlockEnvironmentListener implements Listener {
         if (plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.VILLAGER)) return;
         // Explicitly to villager vs all doors
         if (event.getEntity() instanceof Villager &&
-                (Doors.isSingleOpenable(event.getBlock()) || Doors.isDoubleDoorBlock(event.getBlock())) &&
+                (Doors.isSingleOpenable(event.getBlock().getType()) || Tag.DOORS.isTagged(event.getBlock().getType())) &&
                 GreenLockerAPI.isProtected(event.getBlock())) {
             event.setCancelled(true);
         }

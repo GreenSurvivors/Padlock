@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import de.greensurvivors.greenlocker.GreenLocker;
 import de.greensurvivors.greenlocker.config.MessageManager;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.apache.commons.collections4.set.ListOrderedSet;
 import org.bukkit.Bukkit;
 import org.bukkit.NamespacedKey;
@@ -171,7 +172,8 @@ public class SignLock {
                 Player player = Bukkit.getPlayer(UUID.fromString(firstOwner));
 
                 if (player != null) {
-                    sign.getSide(Side.FRONT).line(1, Component.text(player.getName()));
+                    sign.getSide(Side.FRONT).line(1, GreenLocker.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PLAYER_NAME_ON_SIGN,
+                            Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), player.getName())));
                 }
             }
         }

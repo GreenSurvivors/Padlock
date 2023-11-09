@@ -90,6 +90,7 @@ public class SetTimer extends SubCommand {
     protected @NotNull Component getHelpText() {
         return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_SETTIMER);
     }
+
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         if (sender instanceof Player player) {

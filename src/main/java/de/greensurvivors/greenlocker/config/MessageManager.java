@@ -192,7 +192,7 @@ public class MessageManager {
         EXPIRE_SIGN("sign.line.expired", "[<dark_aqua>Expired</dark_aqua>]"),
         ERROR_SIGN("sign.line.error", "[<dark_red>Error</dark_red>]"),
         INVALID_SIGN("sign.line.invalid", "[Invalid]"),
-        PLAYER_NAME_ON_SIGN("sign.line.player-name", PlaceHolder.PLAYER.getPlaceholder()), // used for formatting displayed player names
+        PLAYER_NAME_ON_SIGN("sign.line.player-name", "<" + PlaceHolder.PLAYER.getPlaceholder() + ">"), // used for formatting displayed player names
 
         HELP_HEADER("cmd.help.header"),
         HELP_ADD_MEMBER("cmd.help.add-member"),

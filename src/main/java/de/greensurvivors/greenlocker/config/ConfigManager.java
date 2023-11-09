@@ -2,9 +2,9 @@ package de.greensurvivors.greenlocker.config;
 
 import de.greensurvivors.greenlocker.GreenLocker;
 import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
 import org.bukkit.configuration.file.FileConfiguration;
-import org.jetbrains.annotations.ApiStatus;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -14,8 +14,8 @@ import java.util.*;
  * As the name might suggest: this will manage the config options of this plugin.
  */
 public class ConfigManager {
+    private final static @NotNull String MC_NAMESPACE = NamespacedKey.MINECRAFT.toUpperCase(Locale.ENGLISH) + ":";
     private final @NotNull GreenLocker plugin;
-
     // please note: While fallback values are defined here, these are in fact NOT the default options. They are just used in the unfortunate case loading them goes wrong.
     // if you want to change default options, have also a look into resources/config.yaml
     private final ConfigOption<Boolean> IMPORT_FROM_LOCKETTEPRO = new ConfigOption<>("import-fromLockettePro", false);
@@ -41,20 +41,17 @@ public class ConfigManager {
     /**
      * Try to get a member of the enum given as an argument by the name
      *
-     * @param name  name of the enum to find
-     * @param enums the enum to check
-     * @param <E>   the type of the enum to check
+     * @param enumName  name of the enum to find
+     * @param enumClass the enum to check
+     * @param <E>       the type of the enum to check
      * @return the member of the enum to check
      */
-    @ApiStatus.Experimental
-    protected static <E extends Enum<E>> @Nullable Enum<E> getEnumVal(@NotNull String name, @NotNull Enum<E>[] enums) {
-        for (Enum<E> value : enums) {
-            if (value.name().equalsIgnoreCase(name)) {
-                return value;
-            }
+    protected static @Nullable <E extends Enum<E>> E getEnum(final @NotNull Class<E> enumClass, final @NotNull String enumName) {
+        try {
+            return Enum.valueOf(enumClass, enumName);
+        } catch (final IllegalArgumentException ex) {
+            return null;
         }
-
-        return null;
     }
 
     /**
@@ -116,6 +113,13 @@ public class ConfigManager {
                             tagCache = plugin.getServer().getTags(Tag.REGISTRY_BLOCKS, Material.class);
                         }
 
+                        string = string.toUpperCase(java.util.Locale.ENGLISH);
+                        string = string.replaceAll("\\s+", "_");
+
+                        if (!string.startsWith(MC_NAMESPACE)) {
+                            string = MC_NAMESPACE + string;
+                        }
+
                         boolean found = false;
 
                         for (Tag<Material> tag : tagCache) {
@@ -170,6 +174,13 @@ public class ConfigManager {
                                 tagCache = plugin.getServer().getTags(Tag.REGISTRY_BLOCKS, Material.class);
                             }
 
+                            string = string.toUpperCase(java.util.Locale.ENGLISH);
+                            string = string.replaceAll("\\s+", "_");
+
+                            if (!string.startsWith(MC_NAMESPACE)) {
+                                string = MC_NAMESPACE + string;
+                            }
+
                             boolean found = false;
 
                             for (Tag<Material> tag : tagCache) {
@@ -203,7 +214,7 @@ public class ConfigManager {
         if (object instanceof QuickProtectOption quickProtectOption) {
             QUICKPROTECT_TYPE.setValue(quickProtectOption);
         } else if (object instanceof String string) {
-            QuickProtectOption setting = (QuickProtectOption) getEnumVal(string, QuickProtectOption.values());
+            QuickProtectOption setting = getEnum(QuickProtectOption.class, string);
 
             if (setting != null) {
                 QUICKPROTECT_TYPE.setValue(setting);
@@ -236,7 +247,7 @@ public class ConfigManager {
         if (Objects.requireNonNull(object) instanceof HopperMinecartBlockedOption quickProtectOption) {
             LOCK_BLOCKS_HOPPER_MINECART.setValue(quickProtectOption);
         } else if (object instanceof String string) {
-            HopperMinecartBlockedOption setting = (HopperMinecartBlockedOption) getEnumVal(string, HopperMinecartBlockedOption.values());
+            HopperMinecartBlockedOption setting = getEnum(HopperMinecartBlockedOption.class, string);
 
             if (setting != null) {
                 LOCK_BLOCKS_HOPPER_MINECART.setValue(setting);
@@ -270,7 +281,7 @@ public class ConfigManager {
             if (Objects.requireNonNull(exemptionObj) instanceof ProtectionExemption protectionExemtion) {
                 exemptions.add(protectionExemtion);
             } else if (exemptionObj instanceof String string) {
-                ProtectionExemption protectionExemtion = (ProtectionExemption) getEnumVal(string, ProtectionExemption.values());
+                ProtectionExemption protectionExemtion = getEnum(ProtectionExemption.class, string);
 
                 if (protectionExemtion != null) {
                     exemptions.add(protectionExemtion);
@@ -393,13 +404,21 @@ public class ConfigManager {
     }
 
     public enum QuickProtectOption {
-        /** only quick protect if the player is NOT sneaking**/
+        /**
+         * only quick protect if the player is NOT sneaking
+         **/
         NOT_SNEAKING_REQUIRED,
-        /** quick protect, regardless if the player is sneaking or not (not recommended) */
+        /**
+         * quick protect, regardless if the player is sneaking or not (not recommended)
+         */
         SNEAK_NONRELEVANT,
-        /** only quick protect if the player IS sneaking */
+        /**
+         * only quick protect if the player IS sneaking
+         */
         SNEAK_REQUIRED,
-        /** don't quick protect */
+        /**
+         * don't quick protect
+         */
         OFF,
     }
 
@@ -408,7 +427,9 @@ public class ConfigManager {
      * so you can turn it off.
      */
     public enum ProtectionExemption {
-        /** tnt, creeper, endcrystal, every explosion.**/
+        /**
+         * tnt, creeper, endcrystal, every explosion.
+         **/
         EXPLOSION,
         GROWTH,
         PISTON,
@@ -425,7 +446,9 @@ public class ConfigManager {
     public enum HopperMinecartBlockedOption {
         TRUE,
         FALSE,
-        /** breaks the mine-cart*/
+        /**
+         * breaks the mine-cart
+         */
         REMOVE
     }
 }

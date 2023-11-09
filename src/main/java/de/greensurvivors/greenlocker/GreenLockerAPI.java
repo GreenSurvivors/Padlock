@@ -23,10 +23,11 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 public class GreenLockerAPI {
-    public final static List<BlockFace> cardinalFaces = List.of(BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST);
-    public final static List<BlockFace> allFaces = List.of(BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN);
+    public final static Set<BlockFace> cardinalFaces = Set.of(BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST);
+    public final static Set<BlockFace> allFaces = Set.of(BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN);
 
     /**
      * returns lock sign of a block, sets all additional signs invalid
@@ -368,7 +369,7 @@ public class GreenLockerAPI {
     private static @Nullable Sign getFacingSign(@NotNull Block block, @NotNull BlockFace blockface) {
         Block relativeblock = block.getRelative(blockface);
 
-        if (relativeblock.getState() instanceof Sign sign && getFacing(block) == blockface) {
+        if (relativeblock.getState() instanceof Sign sign && getFacing(relativeblock) == blockface) {
             return sign;
         } else {
             return null;
@@ -419,7 +420,7 @@ public class GreenLockerAPI {
                 Sign sign = getFacingSign(block, blockface);
 
                 // Find [Private] sign?
-                if (sign != null && isLockSign(sign)) {
+                if (isValidLockSign(sign)) {
                     return sign;
                 }
             } // exempted blockface
@@ -578,7 +579,7 @@ public class GreenLockerAPI {
 
     private static boolean isValidLockSign(@Nullable Sign sign) {//Please mind, a private sign may have expired, but do how two locked blocks line up it's totally possible for more than one [Private] sign per block. However only the first valid found wil get used
         if (sign != null && isLockSign(sign)) {
-            // Found [Private] sign, is expire turned on and expired? (relativeblock is now sign)
+            // Found [Private] sign, is expiring turned on and expired? (relative block is now sign)
             return !GreenLocker.getPlugin().getConfigManager().doLocksExpire() || !isSignExpired(sign);
         } else {
             return false;

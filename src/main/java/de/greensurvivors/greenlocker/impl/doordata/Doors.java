@@ -7,8 +7,6 @@ import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Openable;
-import org.bukkit.block.data.type.Gate;
-import org.bukkit.block.data.type.TrapDoor;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -16,54 +14,55 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Doors {
-    public static void toggleOpenable(Block block) {
+    /**
+     * open/closes the openable block (door, fence gate, trapdoor,...)
+     * will do nothing if the block can't be opened.
+     */
+    public static void toggleOpenable(@NotNull Block block) {
         if (block.getBlockData() instanceof Openable openable) {
             boolean open = !openable.isOpen();
 
             openable.setOpen(open);
             block.setBlockData(openable);
-            block.getWorld().playSound(block.getLocation(), open ? DoorSound.getOpenSound(block.getType()) : DoorSound.getCloseSound(block.getType()), 1, 1);
+            block.getWorld().playSound(block.getLocation(), open ? OpenableSound.getOpenSound(block.getType()) : OpenableSound.getCloseSound(block.getType()), 1, 1);
         }
     }
 
+    /**
+     * @param block
+     * @return
+     */
     public static @Nullable DoorParts getDoorParts(@NotNull Block block) {
-        DoorParts door = null;
-        Block up = block.getRelative(BlockFace.UP), down = block.getRelative(BlockFace.DOWN);
-
-        if (up.getType() == block.getType()) {
-            door = new DoorParts(up, block);
-        }
-
-        if (down.getType() == block.getType()) {
-            if (door != null) { // error 3 doors
-                return null;
-            }
-
-            door = new DoorParts(block, down);
-        }
-
-        return door;
-    }
-
-    public static boolean isDoubleDoorBlock(@NotNull Block block) {
-        return Tag.DOORS.isTagged(block.getType());
-    }
-
-    public static boolean isSingleOpenable(@NotNull Block block) {
-        return block.getBlockData() instanceof TrapDoor || block.getBlockData() instanceof Gate;
-    }
-
-    public static Block getBottomDoorBlock(@NotNull Block block) { // Requires isDoubleDoorBlock || isSingleOpenable
         if (Tag.DOORS.isTagged(block.getType())) {
-            Block relative = block.getRelative(BlockFace.DOWN);
-            if (relative.getType() == block.getType()) {
-                return relative;
-            } else {
-                return block;
+            DoorParts door = null;
+            Block up = block.getRelative(BlockFace.UP), down = block.getRelative(BlockFace.DOWN);
+
+            if (up.getType() == block.getType()) {
+                door = new DoorParts(up, block);
             }
+
+            if (down.getType() == block.getType()) {
+                if (door != null) { // error 3 doors
+                    return null;
+                }
+
+                door = new DoorParts(block, down);
+            }
+
+            return door;
         } else {
-            return block;
+            return null;
         }
+    }
+
+    /**
+     * Note: Barrels are openable as well but this is just visual and closes itself.
+     *
+     * @param material
+     * @return
+     */
+    public static boolean isSingleOpenable(@NotNull Material material) {
+        return Tag.TRAPDOORS.isTagged(material) || Tag.FENCE_GATES.isTagged(material);
     }
 
     /**
@@ -72,7 +71,7 @@ public class Doors {
      * @param door
      * @return
      */
-    public static Map<BlockFace, DoorParts> getConnectedDoors(@NotNull DoorParts door) {
+    public static @NotNull Map<@NotNull BlockFace, @NotNull DoorParts> getConnectedDoors(@NotNull DoorParts door) {
         Map<BlockFace, DoorParts> adjacent = new HashMap<>();
 
         for (BlockFace doorface : GreenLockerAPI.cardinalFaces) {
@@ -86,7 +85,7 @@ public class Doors {
         return adjacent;
     }
 
-    private enum DoorSound { // todo find a way to use net.minecraft.world.level.block.state.properties.BlockSetType
+    private enum OpenableSound { // todo find a way to use net.minecraft.world.level.block.state.properties.BlockSetType
         OAK_DOOR(Material.OAK_DOOR),
         SPRUCE_DOOR(Material.SPRUCE_DOOR),
         BIRCH_DOOR(Material.BIRCH_DOOR),
@@ -127,7 +126,7 @@ public class Doors {
         private final Sound closeSound;
         private final Sound openSound;
 
-        DoorSound(@NotNull Material material) {
+        OpenableSound(@NotNull Material material) {
             this.material = material;
             if (Tag.DOORS.isTagged(material)) {
                 this.closeSound = Sound.BLOCK_WOODEN_DOOR_CLOSE;
@@ -144,14 +143,14 @@ public class Doors {
             }
         }
 
-        DoorSound(@NotNull Material material, @NotNull Sound closeSound, @NotNull Sound openSound) {
+        OpenableSound(@NotNull Material material, @NotNull Sound closeSound, @NotNull Sound openSound) {
             this.material = material;
             this.closeSound = closeSound;
             this.openSound = openSound;
         }
 
         public static @NotNull Sound getCloseSound(@NotNull Material material) {
-            for (DoorSound doorSound : DoorSound.values()) {
+            for (OpenableSound doorSound : OpenableSound.values()) {
                 if (doorSound.material.equals(material)) {
                     return doorSound.closeSound;
                 }
@@ -170,7 +169,7 @@ public class Doors {
         }
 
         public static @NotNull Sound getOpenSound(@NotNull Material material) {
-            for (DoorSound doorSound : DoorSound.values()) {
+            for (OpenableSound doorSound : OpenableSound.values()) {
                 if (doorSound.material.equals(material)) {
                     return doorSound.openSound;
                 }

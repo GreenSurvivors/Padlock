@@ -5,7 +5,7 @@ import com.google.gson.JsonParser;
 import de.greensurvivors.greenlocker.GreenLocker;
 import de.greensurvivors.greenlocker.config.MessageManager;
 import de.greensurvivors.greenlocker.impl.signdata.SignLock;
-import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -50,7 +50,8 @@ public class MiscUtils {
             sign.getSide(Side.FRONT).setColor(DyeColor.WHITE);
         }
         sign.getSide(Side.FRONT).line(0, GreenLocker.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PRIVATE_SIGN));
-        sign.getSide(Side.FRONT).line(1, Component.text(player.getName()));
+        sign.getSide(Side.FRONT).line(1, GreenLocker.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PLAYER_NAME_ON_SIGN,
+                Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), player.getName())));
         sign.setWaxed(true);
         sign.update();
 

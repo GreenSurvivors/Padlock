@@ -10,9 +10,9 @@ import de.greensurvivors.greenlocker.impl.Cache;
 import de.greensurvivors.greenlocker.impl.MiscUtils;
 import de.greensurvivors.greenlocker.impl.SignSelection;
 import de.greensurvivors.greenlocker.impl.doordata.Doors;
-import de.greensurvivors.greenlocker.impl.doordata.OpenableToggleTask;
 import de.greensurvivors.greenlocker.impl.signdata.*;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
@@ -36,13 +36,12 @@ import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerTakeLecternBookEvent;
 import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.metadata.FixedMetadataValue;
 import org.bukkit.scheduler.BukkitRunnable;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 public class BlockPlayerListener implements Listener {
     private final GreenLocker plugin;
@@ -53,7 +52,7 @@ public class BlockPlayerListener implements Listener {
 
     // Quick protect for chests
     @EventHandler(ignoreCancelled = true, priority = EventPriority.NORMAL)
-    public void onPlayerQuickLockChest(PlayerInteractEvent event) {
+    public void onPlayerQuickLock(PlayerInteractEvent event) {
         Player player = event.getPlayer();
 
         // Check quick lock status
@@ -159,7 +158,9 @@ public class BlockPlayerListener implements Listener {
                     PlainTextComponentSerializer plainTextComponentSerializer = PlainTextComponentSerializer.plainText();
 
                     if (!player.hasPermission(PermissionManager.ACTION_LOCK_OTHERS.getPerm())) { // Player with permission can lock with another name
-                        event.line(1, Component.text(player.getName()));
+                        event.line(1, GreenLocker.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PLAYER_NAME_ON_SIGN,
+                                Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), player.getName())));
+
                         SignLock.addPlayer(sign, true, player);
                     } else {
                         // first line is Owner
@@ -321,42 +322,55 @@ public class BlockPlayerListener implements Listener {
         }
         if (action == Action.LEFT_CLICK_BLOCK || action == Action.RIGHT_CLICK_BLOCK) {
             Player player = event.getPlayer();
-            if (((GreenLockerAPI.isLocked(block) && !GreenLockerAPI.isMember(block, player)) ||
-                    (GreenLockerAPI.isPartOfLockedDoor(block) && !GreenLockerAPI.isUserUpDownLockedDoor(block, player)))
-                    && !player.hasPermission(PermissionManager.ADMIN_USE.getPerm())) {
-                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
-                event.setCancelled(true);
-            } else { // Handle double doors
-                if (action == Action.RIGHT_CLICK_BLOCK) {
-                    if ((Doors.isDoubleDoorBlock(block) || Doors.isSingleOpenable(block)) && GreenLockerAPI.isLocked(block)) {
-                        Block doorblock = Doors.getBottomDoorBlock(block);
-                        long closetime = GreenLockerAPI.getTimerDoor(doorblock);
-                        List<Block> doors = new ArrayList<>();
-                        doors.add(doorblock);
-                        if (doorblock.getType() == Material.IRON_DOOR || doorblock.getType() == Material.IRON_TRAPDOOR) {
-                            Doors.toggleOpenable(doorblock);
+            Sign lockSign = GreenLockerAPI.getLockSign(block);
+
+            if (lockSign != null) {
+                if (SignLock.isMember(lockSign, player.getUniqueId()) || SignLock.isOwner(lockSign, player.getUniqueId()) ||
+                        player.hasPermission(PermissionManager.ADMIN_USE.getPerm())) {
+
+                    // Handle multi openables
+                    if (action == Action.RIGHT_CLICK_BLOCK &&
+                            // if a place attempt was prevented, this could register as a false positive and flip every block but the clicked one
+                            // therefor everything comes out of sync.
+                            (!player.isSneaking() || !event.hasItem())) {
+
+                        // get openable block
+                        Block openableBlock = null;
+                        if (Tag.DOORS.isTagged(block.getType())) {
+                            openableBlock = Doors.getDoorParts(block).downPart();
+                        } else if (Doors.isSingleOpenable(block.getType())) {
+                            openableBlock = block;
                         }
-                        for (BlockFace blockface : GreenLockerAPI.cardinalFaces) {
-                            Block relative = doorblock.getRelative(blockface);
-                            if (relative.getType() == doorblock.getType()) {
-                                doors.add(relative);
-                                Doors.toggleOpenable(relative);
-                            }
-                        }
-                        if (closetime > 0) {
-                            for (Block door : doors) {
-                                if (door.hasMetadata("greenlocker.toggle")) {
-                                    return;
+
+                        if (openableBlock != null) {
+                            Long closetime = SignTimer.getTimer(lockSign);
+
+                            if (closetime != null) {
+                                Set<Block> openables = new HashSet<>();
+                                openables.add(openableBlock);
+
+                                if (openableBlock.getType() == Material.IRON_DOOR || openableBlock.getType() == Material.IRON_TRAPDOOR) {
+                                    Doors.toggleOpenable(openableBlock);
                                 }
-                            }
-                            for (Block door : doors) {
-                                door.setMetadata("greenlocker.toggle", new FixedMetadataValue(plugin, true));
-                            }
-                            Bukkit.getScheduler().runTaskLater(plugin, new OpenableToggleTask(plugin, doors), closetime * 20L);
-                        }
-                    } // not door
-                } // not right-click
-            }
+                                for (BlockFace blockface : GreenLockerAPI.cardinalFaces) {
+                                    Block relative = openableBlock.getRelative(blockface);
+                                    if (relative.getType() == openableBlock.getType()) {
+                                        openables.add(relative);
+                                        Doors.toggleOpenable(relative);
+                                    }
+                                }
+
+                                if (closetime > 0) {
+                                    plugin.getOpenableToggleManager().toggleCancelRunning(openables, closetime);
+                                } // timer disabled
+                            } // no timer
+                        } // not openable
+                    } // not right-click
+                } else {// no permission
+                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
+                    event.setCancelled(true);
+                }
+            } // not locked
         }
     }
 

@@ -56,7 +56,7 @@ public class SignExpiration {
                 }
             }
 
-            return (createdTime <= 0 || System.currentTimeMillis() > createdTime + Duration.ofDays(GreenLocker.getPlugin().getConfigManager().getLockExpireDays()).toMillis());
+            return (createdTime > 0 && System.currentTimeMillis() > createdTime + Duration.ofDays(GreenLocker.getPlugin().getConfigManager().getLockExpireDays()).toMillis());
         } else {
             return false;
         }

@@ -3,6 +3,7 @@ package de.greensurvivors.greenlocker;
 import de.greensurvivors.greenlocker.command.Command;
 import de.greensurvivors.greenlocker.config.ConfigManager;
 import de.greensurvivors.greenlocker.config.MessageManager;
+import de.greensurvivors.greenlocker.impl.doordata.OpenableToggleManager;
 import de.greensurvivors.greenlocker.listener.BlockDebugListener;
 import de.greensurvivors.greenlocker.listener.BlockEnvironmentListener;
 import de.greensurvivors.greenlocker.listener.BlockInventoryMoveListener;
@@ -18,6 +19,7 @@ public class GreenLocker extends JavaPlugin {
     private final boolean debug = false;
     private ConfigManager configManager;
     private MessageManager messageManager;
+    private OpenableToggleManager openableToggleManager;
 
     public static GreenLocker getPlugin() {
         return plugin;
@@ -31,6 +33,8 @@ public class GreenLocker extends JavaPlugin {
         messageManager = new MessageManager(this);
         configManager = new ConfigManager(this);
         configManager.reload();
+
+        openableToggleManager = new OpenableToggleManager(this);
 
         // Register Listeners
         // If debug mode is not on, debug listener won't register
@@ -58,6 +62,7 @@ public class GreenLocker extends JavaPlugin {
 
     @Override
     public void onDisable() {
+        openableToggleManager.cancelAllTasks();
     }
 
     @NotNull
@@ -67,5 +72,9 @@ public class GreenLocker extends JavaPlugin {
 
     public MessageManager getMessageManager() {
         return messageManager;
+    }
+
+    public OpenableToggleManager getOpenableToggleManager() {
+        return openableToggleManager;
     }
 }
