@@ -9,8 +9,8 @@ import de.greensurvivors.greenlocker.config.PermissionManager;
 import de.greensurvivors.greenlocker.impl.Cache;
 import de.greensurvivors.greenlocker.impl.MiscUtils;
 import de.greensurvivors.greenlocker.impl.SignSelection;
-import de.greensurvivors.greenlocker.impl.doordata.DoorToggleTask;
 import de.greensurvivors.greenlocker.impl.doordata.Doors;
+import de.greensurvivors.greenlocker.impl.doordata.OpenableToggleTask;
 import de.greensurvivors.greenlocker.impl.signdata.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -328,19 +328,19 @@ public class BlockPlayerListener implements Listener {
                 event.setCancelled(true);
             } else { // Handle double doors
                 if (action == Action.RIGHT_CLICK_BLOCK) {
-                    if ((Doors.isDoubleDoorBlock(block) || Doors.isSingleDoorBlock(block)) && GreenLockerAPI.isLocked(block)) {
+                    if ((Doors.isDoubleDoorBlock(block) || Doors.isSingleOpenable(block)) && GreenLockerAPI.isLocked(block)) {
                         Block doorblock = Doors.getBottomDoorBlock(block);
                         long closetime = GreenLockerAPI.getTimerDoor(doorblock);
                         List<Block> doors = new ArrayList<>();
                         doors.add(doorblock);
                         if (doorblock.getType() == Material.IRON_DOOR || doorblock.getType() == Material.IRON_TRAPDOOR) {
-                            Doors.toggleDoor(doorblock);
+                            Doors.toggleOpenable(doorblock);
                         }
                         for (BlockFace blockface : GreenLockerAPI.cardinalFaces) {
                             Block relative = doorblock.getRelative(blockface);
                             if (relative.getType() == doorblock.getType()) {
                                 doors.add(relative);
-                                Doors.toggleDoor(relative);
+                                Doors.toggleOpenable(relative);
                             }
                         }
                         if (closetime > 0) {
@@ -352,7 +352,7 @@ public class BlockPlayerListener implements Listener {
                             for (Block door : doors) {
                                 door.setMetadata("greenlocker.toggle", new FixedMetadataValue(plugin, true));
                             }
-                            Bukkit.getScheduler().runTaskLater(plugin, new DoorToggleTask(plugin, doors), closetime * 20L);
+                            Bukkit.getScheduler().runTaskLater(plugin, new OpenableToggleTask(plugin, doors), closetime * 20L);
                         }
                     } // not door
                 } // not right-click

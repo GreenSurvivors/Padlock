@@ -1,6 +1,6 @@
 name: GreenLocker
 main: de.greensurvivors.greenlocker.GreenLocker
-author: connection_lost
+authors: [ connection_lost, GreensurvivorsTeam ]
 softdepend: [ WorldGuard, CoreProtect ]
 loadbefore: [ SignShop ]
 version: ${version}

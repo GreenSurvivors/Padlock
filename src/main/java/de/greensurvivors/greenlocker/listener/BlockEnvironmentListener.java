@@ -97,7 +97,7 @@ public class BlockEnvironmentListener implements Listener {
         if (plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.VILLAGER)) return;
         // Explicitly to villager vs all doors
         if (event.getEntity() instanceof Villager &&
-                (Doors.isSingleDoorBlock(event.getBlock()) || Doors.isDoubleDoorBlock(event.getBlock())) &&
+                (Doors.isSingleOpenable(event.getBlock()) || Doors.isDoubleDoorBlock(event.getBlock())) &&
                 GreenLockerAPI.isProtected(event.getBlock())) {
             event.setCancelled(true);
         }
