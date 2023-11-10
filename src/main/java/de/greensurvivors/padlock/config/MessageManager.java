@@ -29,7 +29,7 @@ public class MessageManager {
      */
     private final HashMap<LangPath, Component> langCache = new HashMap<>();
     private FileConfiguration lang;
-    private FileConfiguration fallback;
+    private FileConfiguration fallbackLangFile;
     private String langfilename = "lang/lang_en.yml";
 
     public MessageManager(Plugin plugin) {
@@ -41,7 +41,11 @@ public class MessageManager {
     }
 
     private @NotNull String getStringFromLang(@NotNull LangPath path) {
-        return lang.getString(path.getPath(), fallback.getString(path.getPath(), path.getDefaultValue()));
+        if (path == MessageManager.LangPath.SET_TIMER_SUCCESS_ON) {
+            plugin.getLogger().info(lang.getString(path.getPath(), fallbackLangFile.getString(path.getPath(), path.getDefaultValue())));
+        }
+
+        return lang.getString(path.getPath(), fallbackLangFile.getString(path.getPath(), path.getDefaultValue()));
     }
 
     /**
@@ -50,7 +54,7 @@ public class MessageManager {
     protected void reload() {
         initLangFiles();
         lang = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), langfilename));
-        fallback = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "lang/lang_en.yml")); //todo don't hardcode
+        fallbackLangFile = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "lang/lang_en.yml")); //todo don't hardcode
 
         langCache.put(LangPath.PLUGIN_PREFIX, MiniMessage.miniMessage().deserialize(getStringFromLang(LangPath.PLUGIN_PREFIX)));
 
@@ -218,8 +222,8 @@ public class MessageManager {
         SET_CREATED_SUCCESS("cmd.set-created.success"),
         SET_CREATED_ERROR("cmd.set-created.error"),
         SET_EVERYONE_SUCCESS("cmd.set-everyone.success"),
-        SET_TIMER_SUCCESS_ON("cmd.set-timer.success.on"),
-        SET_TIMER_SUCCESS_OFF("cmd.set-timer.success.off"),
+        SET_TIMER_SUCCESS_ON("cmd.set-timer.success.turned-on"),
+        SET_TIMER_SUCCESS_OFF("cmd.set-timer.success.turned-off"),
         SET_TIMER_ERROR("cmd.set-timer.error"),
         UPDATE_SIGN_SUCCESS("cmd.sign-update.success"),
         RELOAD_SUCCESS("cmd.reload.success"),

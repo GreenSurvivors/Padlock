@@ -4,7 +4,7 @@ import org.bukkit.block.Block;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * holds both parts of a door
+ * holds both parts of a two high block
  */
-public record DoorParts(@NotNull Block upPart, @NotNull Block downPart) {
+public record DoubleBlockParts(@NotNull Block upPart, @NotNull Block downPart) {
 }

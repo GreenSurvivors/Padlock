@@ -293,6 +293,7 @@ public class BlockPlayerListener implements Listener {
     // Protect block from being destroyed
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     private void onAttemptBreakLockedBlocks(@NotNull BlockBreakEvent event) {
+        Padlock.getPlugin().getLogger().info("break attempt!.");
         Block block = event.getBlock();
         Player player = event.getPlayer();
         if (PadlockAPI.isLocked(block) || PadlockAPI.isPartOfLockedDoor(block)) {
@@ -337,7 +338,7 @@ public class BlockPlayerListener implements Listener {
                         // get openable block
                         Block openableBlock = null;
                         if (Tag.DOORS.isTagged(block.getType())) {
-                            openableBlock = Openables.getDoorParts(block).downPart();
+                            openableBlock = Openables.getDoubleBlockParts(block).downPart();
                         } else if (Openables.isSingleOpenable(block.getType())) {
                             openableBlock = block;
                         }

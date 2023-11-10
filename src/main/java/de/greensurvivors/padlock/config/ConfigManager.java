@@ -278,7 +278,7 @@ public class ConfigManager {
         objects = config.getList(LOCK_EXEMPTIONS.getPath(), new ArrayList<>(LOCK_EXEMPTIONS.getFallbackValue()));
         Set<ProtectionExemption> exemptions = new HashSet<>();
         for (Object exemptionObj : objects) {
-            if (Objects.requireNonNull(exemptionObj) instanceof ProtectionExemption protectionExemtion) {
+            if (exemptionObj instanceof ProtectionExemption protectionExemtion) {
                 exemptions.add(protectionExemtion);
             } else if (exemptionObj instanceof String string) {
                 ProtectionExemption protectionExemtion = getEnum(ProtectionExemption.class, string);

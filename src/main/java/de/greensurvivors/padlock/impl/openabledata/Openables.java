@@ -13,6 +13,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Helper class for openables
+ */
 public class Openables {
     /**
      * open/closes the openable block (door, fence gate, trapdoor,...)
@@ -29,62 +32,85 @@ public class Openables {
     }
 
     /**
-     * @param block
-     * @return
-     */
-    public static @Nullable DoorParts getDoorParts(@NotNull Block block) {
-        if (Tag.DOORS.isTagged(block.getType())) {
-            DoorParts door = null;
-            Block up = block.getRelative(BlockFace.UP), down = block.getRelative(BlockFace.DOWN);
-
-            if (up.getType() == block.getType()) {
-                door = new DoorParts(up, block);
-            }
-
-            if (down.getType() == block.getType()) {
-                if (door != null) { // error 3 doors
-                    return null;
-                }
-
-                door = new DoorParts(block, down);
-            }
-
-            return door;
-        } else {
-            return null;
-        }
-    }
-
-    /**
+     * Get if a material is an openable, that we have to handle.
      * Note: Barrels are openable as well but this is just visual and closes itself.
      *
-     * @param material
-     * @return
+     * @param material the material to check
+     * @return true if it is a gate / trapdoor
      */
     public static boolean isSingleOpenable(@NotNull Material material) {
         return Tag.TRAPDOORS.isTagged(material) || Tag.FENCE_GATES.isTagged(material);
     }
 
     /**
-     * get mapping from cardinal directions to adjacent doors
-     *
-     * @param door
-     * @return
+     * get both parts of a tow block high block like doors *wink wink*
+     * @param block part of a two high block
+     * @return the block and it's upper / down part or null if not a double high block (1/3+)
      */
-    public static @NotNull Map<@NotNull BlockFace, @NotNull DoorParts> getConnectedDoors(@NotNull DoorParts door) {
-        Map<BlockFace, DoorParts> adjacent = new HashMap<>();
+    public static @Nullable DoubleBlockParts getDoubleBlockParts(@NotNull Block block) {
+        DoubleBlockParts parts = null;
+        Block up = block.getRelative(BlockFace.UP), down = block.getRelative(BlockFace.DOWN);
 
-        for (BlockFace doorface : PadlockAPI.cardinalFaces) {
-            Block relative0 = door.downPart().getRelative(doorface), relative1 = door.upPart().getRelative(doorface);
+        if (up.getType() == block.getType()) {
+            parts = new DoubleBlockParts(up, block);
+        }
 
-            if (relative0.getType() == door.downPart().getType() && relative1.getType() == door.upPart().getType()) {
-                adjacent.put(doorface, new DoorParts(relative0, relative1));
+        if (down.getType() == block.getType()) {
+            if (parts != null) { // error 3 high block!
+                return null;
+            }
+
+            parts = new DoubleBlockParts(block, down);
+        }
+
+        return parts;
+    }
+
+    /**
+     * get surrounding single high blocks of the same type as the block given
+     * @param block block to get surrounding blocks for
+     * @return mapping from all directions to adjacent to the block of the same type.
+     * A direction might be missing if there was no fitting block
+     */
+    public static @NotNull Map<@NotNull BlockFace, @NotNull Block> getConnectedSingle(Block block) {
+        Map<BlockFace, Block> adjacent = new HashMap<>();
+
+        for (BlockFace blockFace : PadlockAPI.allFaces) {
+            Block relative = block.getRelative(blockFace);
+
+            if (relative.getType() == block.getType()) {
+                adjacent.put(blockFace, relative);
             }
         }
 
         return adjacent;
     }
 
+    /**
+     * get surrounding single high blocks of the same type as the block given
+     *
+     * @param parts double block to get surrounding double blocks for
+     * @return get mapping from cardinal directions to adjacent double blocks of the same type.
+     * A direction might be missing if there was no fitting block
+     */
+    public static @NotNull Map<@NotNull BlockFace, @NotNull DoubleBlockParts> getConnectedBiParts(@NotNull DoubleBlockParts parts) {
+        Map<BlockFace, DoubleBlockParts> adjacent = new HashMap<>();
+
+        for (BlockFace blockFace : PadlockAPI.cardinalFaces) {
+            Block relative0 = parts.downPart().getRelative(blockFace), relative1 = parts.upPart().getRelative(blockFace);
+
+            if (relative0.getType() == parts.downPart().getType() && relative1.getType() == parts.upPart().getType()) {
+                adjacent.put(blockFace, new DoubleBlockParts(relative0, relative1));
+            }
+        }
+
+        return adjacent;
+    }
+
+    /**
+     * enum containing all the sounds to play, when an openable open/closes
+     * This is here because just setting the data of a block to open/close doesn't make a sound.
+     */
     private enum OpenableSound { // todo find a way to use net.minecraft.world.level.block.state.properties.BlockSetType
         OAK_DOOR(Material.OAK_DOOR),
         SPRUCE_DOOR(Material.SPRUCE_DOOR),

@@ -44,8 +44,8 @@ cmd:
     success: '<dark_green>Everyone is Member now: <boolean></dark_green>'
   set-timer:
     success:
-      on: '<dark_green>Successfully set timer to: <time>ms.</dark_green>'
-      off: '<dark_green>Successfully turned the timer off.</dark_green>'
+      turned-on: '<dark_green>Successfully set timer to: <time>ms.</dark_green>'
+      turned-off: '<dark_green>Successfully turned the timer off.</dark_green>'
     error: "<red>Couldn't get a period of time from your arguments.</red>"
   sign-update:
     success: '<dark_green>Successfully updated legacy lockette sign.</dark_green>'

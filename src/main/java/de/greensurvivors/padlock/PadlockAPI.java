@@ -1,7 +1,7 @@
 package de.greensurvivors.padlock;
 
 import de.greensurvivors.padlock.config.MessageManager;
-import de.greensurvivors.padlock.impl.openabledata.DoorParts;
+import de.greensurvivors.padlock.impl.openabledata.DoubleBlockParts;
 import de.greensurvivors.padlock.impl.openabledata.Openables;
 import de.greensurvivors.padlock.impl.signdata.EveryoneSign;
 import de.greensurvivors.padlock.impl.signdata.SignExpiration;
@@ -12,6 +12,7 @@ import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Tag;
 import org.bukkit.block.*;
+import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.type.Chest;
@@ -42,11 +43,11 @@ public class PadlockAPI {
         if (attachedTo != null) {
             BlockData data = attachedTo.getBlockData();
 
-            if (data instanceof Door) {
-                DoorParts attachedDoor = Openables.getDoorParts(attachedTo);
+            if (data instanceof Door) { // in ancient Lockette times, only doors did have special treatment like this
+                DoubleBlockParts attachedDoor = Openables.getDoubleBlockParts(attachedTo);
 
                 if (attachedDoor != null) {
-                    Sign lockSign = getLockSignDoor(attachedDoor);
+                    Sign lockSign = getNearLockDoubleBlock(attachedDoor);
 
                     if (lockSign != null) {
                         for (Sign additional : getAdditionalSignsDoor(attachedDoor)) {
@@ -59,13 +60,13 @@ public class PadlockAPI {
                         EveryoneSign.updateLegacy(lockSign);
                         return lockSign;
                     } else {
-                        Padlock.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the door at " + attachedTo.getLocation() + " is locked.");
+                        Padlock.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the double block at " + attachedTo.getLocation() + " is locked.");
                     }
                 } else {
-                    Padlock.getPlugin().getLogger().warning("Couldn't get door parts, but data says there should be one. Is it half? " + attachedTo.getLocation());
+                    Padlock.getPlugin().getLogger().warning("Couldn't get double block parts, but data says there should be one. Is it half? " + attachedTo.getLocation());
                 }
             } else if (data instanceof Chest) {
-                Sign lockSign = getLockSignChest(attachedTo);
+                Sign lockSign = getLockChest(attachedTo);
                 if (lockSign != null) {
                     for (Sign additional : getAdditionalSignsChest(attachedTo)) {
                         SignLock.updateSignFromAdditional(lockSign, additional);
@@ -107,57 +108,57 @@ public class PadlockAPI {
         SignLock.setInvalid(sign);
     }
 
-    private static @Nullable Sign getLockSignDoor(@NotNull DoorParts doorToCheck) {
-        Map<BlockFace, DoorParts> connectedDoors = Openables.getConnectedDoors(doorToCheck);
+    private static @Nullable Sign getNearLockDoubleBlock(@NotNull DoubleBlockParts doubleToCheck) {
+        Map<BlockFace, DoubleBlockParts> connectedBlocks = Openables.getConnectedBiParts(doubleToCheck);
 
         for (BlockFace blockFace : cardinalFaces) {
-            DoorParts doorInDirection = connectedDoors.get(blockFace);
+            DoubleBlockParts doubleInDirection = connectedBlocks.get(blockFace);
 
-            if (doorInDirection == null) {
+            if (doubleInDirection == null) {
                 //above
-                Sign sign = getFacingSign(doorToCheck.upPart().getRelative(0, 1, 0), blockFace);
+                Sign sign = getFacingSign(doubleToCheck.upPart().getRelative(0, 1, 0), blockFace);
                 if (isValidLockSign(sign)) {
                     return sign;
                 }
 
                 //up
-                sign = getFacingSign(doorToCheck.upPart(), blockFace);
+                sign = getFacingSign(doubleToCheck.upPart(), blockFace);
                 if (isValidLockSign(sign)) {
                     return sign;
                 }
 
                 //down
-                sign = getFacingSign(doorToCheck.downPart(), blockFace);
+                sign = getFacingSign(doubleToCheck.downPart(), blockFace);
                 if (isValidLockSign(sign)) {
                     return sign;
                 }
 
                 //below
-                sign = getFacingSign(doorToCheck.downPart().getRelative(0, -1, 0), blockFace);
+                sign = getFacingSign(doubleToCheck.downPart().getRelative(0, -1, 0), blockFace);
                 if (isValidLockSign(sign)) {
                     return sign;
                 }
             } else {
                 //above
-                Sign sign = getLockedSingleBlock(doorInDirection.upPart().getRelative(0, 1, 0), blockFace.getOppositeFace());
+                Sign sign = getLockedSingleBlock(doubleInDirection.upPart().getRelative(0, 1, 0), blockFace.getOppositeFace());
                 if (sign != null) {
                     return sign;
                 }
 
                 //up
-                sign = getLockedSingleBlock(doorInDirection.upPart(), blockFace.getOppositeFace());
+                sign = getLockedSingleBlock(doubleInDirection.upPart(), blockFace.getOppositeFace());
                 if (sign != null) {
                     return sign;
                 }
 
                 //down
-                sign = getLockedSingleBlock(doorInDirection.downPart(), blockFace.getOppositeFace());
+                sign = getLockedSingleBlock(doubleInDirection.downPart(), blockFace.getOppositeFace());
                 if (sign != null) {
                     return sign;
                 }
 
                 //below
-                sign = getLockedSingleBlock(doorInDirection.downPart().getRelative(0, -1, 0), blockFace.getOppositeFace());
+                sign = getLockedSingleBlock(doubleInDirection.downPart().getRelative(0, -1, 0), blockFace.getOppositeFace());
                 if (sign != null) {
                     return sign;
                 }
@@ -168,7 +169,55 @@ public class PadlockAPI {
         return null;
     }
 
-    private static @Nullable Sign getLockSignChest(Block chestBlock) {
+    private static @Nullable Sign getNearLockSingle(@NotNull Block blockToCheck) {
+        Map<BlockFace, Block> connectedBlocks = Openables.getConnectedSingle(blockToCheck);
+
+        for (BlockFace blockFace : cardinalFaces) {
+            Block blockInDirection = connectedBlocks.get(blockFace);
+
+            if (blockInDirection == null) {
+                //above
+                Sign sign = getFacingSign(blockToCheck.getRelative(0, 1, 0), blockFace);
+                if (isValidLockSign(sign)) {
+                    return sign;
+                }
+
+                //self
+                sign = getFacingSign(blockToCheck, blockFace);
+                if (isValidLockSign(sign)) {
+                    return sign;
+                }
+
+                //below
+                sign = getFacingSign(blockToCheck.getRelative(0, -1, 0), blockFace);
+                if (isValidLockSign(sign)) {
+                    return sign;
+                }
+            } else {
+                //above
+                Sign sign = getLockedSingleBlock(blockInDirection.getRelative(0, 1, 0), blockFace.getOppositeFace());
+                if (sign != null) {
+                    return sign;
+                }
+
+                //relative
+                sign = getLockedSingleBlock(blockInDirection, blockFace.getOppositeFace());
+                if (sign != null) {
+                    return sign;
+                }
+
+                //below
+                sign = getLockedSingleBlock(blockInDirection.getRelative(0, -1, 0), blockFace.getOppositeFace());
+                if (sign != null) {
+                    return sign;
+                }
+            }
+        }
+
+        return null;
+    }
+
+    private static @Nullable Sign getLockChest(Block chestBlock) {
         if (chestBlock.getBlockData() instanceof Chest chest && chest.getType() != Chest.Type.SINGLE) {
 
             // Check second chest sign
@@ -188,41 +237,41 @@ public class PadlockAPI {
     }
 
     @Deprecated(forRemoval = true)
-    private static @NotNull List<Sign> getAdditionalSignsDoor(@NotNull DoorParts doorToCheck) { //todo
+    private static @NotNull List<Sign> getAdditionalSignsDoor(@NotNull DoubleBlockParts parts) { //todo
         List<Sign> additionalSigns = new ArrayList<>();
-        Map<BlockFace, DoorParts> connectedDoors = Openables.getConnectedDoors(doorToCheck);
+        Map<BlockFace, DoubleBlockParts> connectedParts = Openables.getConnectedBiParts(parts);
 
         for (BlockFace blockFace : cardinalFaces) {
-            DoorParts doorInDirection = connectedDoors.get(blockFace);
+            DoubleBlockParts doubleBlockInDirection = connectedParts.get(blockFace);
 
-            if (doorInDirection == null) {
+            if (doubleBlockInDirection == null) {
                 //above
-                Sign sign = getFacingSign(doorToCheck.upPart().getRelative(0, 1, 0), blockFace);
+                Sign sign = getFacingSign(parts.upPart().getRelative(0, 1, 0), blockFace);
                 if (sign != null && isAdditionalSign(sign)) {
                     additionalSigns.add(sign);
                 }
 
                 //up
-                sign = getFacingSign(doorToCheck.upPart(), blockFace);
+                sign = getFacingSign(parts.upPart(), blockFace);
                 if (sign != null && isAdditionalSign(sign)) {
                     additionalSigns.add(sign);
                 }
 
                 //down
-                sign = getFacingSign(doorToCheck.downPart(), blockFace);
+                sign = getFacingSign(parts.downPart(), blockFace);
                 if (sign != null && isAdditionalSign(sign)) {
                     additionalSigns.add(sign);
                 }
 
                 //below
-                sign = getFacingSign(doorToCheck.downPart().getRelative(0, -1, 0), blockFace);
+                sign = getFacingSign(parts.downPart().getRelative(0, -1, 0), blockFace);
                 if (sign != null && isAdditionalSign(sign)) {
                     additionalSigns.add(sign);
                 }
             } else {
                 BlockFace exempt = blockFace.getOppositeFace();
-                Block above = doorInDirection.upPart().getRelative(0, 1, 0);
-                Block below = doorInDirection.downPart().getRelative(0, -1, 0);
+                Block above = doubleBlockInDirection.upPart().getRelative(0, 1, 0);
+                Block below = doubleBlockInDirection.downPart().getRelative(0, -1, 0);
 
                 for (BlockFace blockface : cardinalFaces) {
                     if (blockface != exempt) {
@@ -234,14 +283,14 @@ public class PadlockAPI {
                         }
 
                         //up
-                        sign = getFacingSign(doorInDirection.upPart(), blockface);
+                        sign = getFacingSign(doubleBlockInDirection.upPart(), blockface);
 
                         if (sign != null && isAdditionalSign(sign)) {
                             additionalSigns.add(sign);
                         }
 
                         //down
-                        sign = getFacingSign(doorInDirection.downPart(), blockface);
+                        sign = getFacingSign(doubleBlockInDirection.downPart(), blockface);
 
                         if (sign != null && isAdditionalSign(sign)) {
                             additionalSigns.add(sign);
@@ -281,31 +330,35 @@ public class PadlockAPI {
     }
 
     public static @Nullable Sign getLockSign(Block block) {
-        if (block.getBlockData() instanceof Door) {
-            DoorParts door = Openables.getDoorParts(block);
+        if (Openables.isSingleOpenable(block.getType())) { // stupid trapdoors being also bisected.
+            return getNearLockSingle(block);
+        } else if (block.getBlockData() instanceof Bisected && !Tag.STAIRS.isTagged(block.getType())) { // door, also stupid stairs
+            DoubleBlockParts doubleBlockParts = Openables.getDoubleBlockParts(block);
 
-            if (door != null) {
-                return getLockSignDoor(door);
+            if (doubleBlockParts != null) {
+                return getNearLockDoubleBlock(doubleBlockParts);
             } else {
                 return null;
             }
-        } else if (block.getState() instanceof Chest) {
-            return getLockSignChest(block);
+        } else if (block.getBlockData() instanceof Chest) {
+            return getLockChest(block);
         }
         return getLockSignSingleBlock(block, null);
     }
 
     public static boolean isLocked(@NotNull Block block) {
-        if (block.getBlockData() instanceof Door) {
-            DoorParts door = Openables.getDoorParts(block);
+        if (Openables.isSingleOpenable(block.getType())) { // stupid trapdoors being also bisected
+            return getNearLockSingle(block) != null;
+        } else if (block.getBlockData() instanceof Bisected && !Tag.STAIRS.isTagged(block.getType())) { // doors, also stupid stairs
+            DoubleBlockParts doubleBlockParts = Openables.getDoubleBlockParts(block);
 
-            if (door != null) {
-                return getLockSignDoor(door) != null;
+            if (doubleBlockParts != null) {
+                return getNearLockDoubleBlock(doubleBlockParts) != null;
             } else {
                 return false;
             }
         } else if (block.getBlockData() instanceof Chest) {
-            return getLockSignChest(block) != null;
+            return getLockChest(block) != null;
         }
         return isLockedSingleBlock(block, null);
     }
@@ -313,10 +366,16 @@ public class PadlockAPI {
     public static boolean isOwner(@NotNull Block block, @NotNull OfflinePlayer player) {
         if (block.getState() instanceof Sign sign && SignLock.isLockSign(sign)) {
             return SignLock.isOwner(sign, player.getUniqueId());
-        } else if (block.getBlockData() instanceof Door) {
-            DoorParts door = Openables.getDoorParts(block);
-            if (door != null) {
-                Sign sign = getLockSignDoor(door);
+        } else if (Openables.isSingleOpenable(block.getType())) { //stupid trapdoors being also bisected
+            Sign sign = getNearLockSingle(block);
+
+            if (sign != null) {
+                return SignLock.isOwner(sign, player.getUniqueId());
+            }
+        } else if (block.getBlockData() instanceof Bisected && !Tag.STAIRS.isTagged(block.getType())) { // doors, also stupid stairs
+            DoubleBlockParts doubleBlockParts = Openables.getDoubleBlockParts(block);
+            if (doubleBlockParts != null) {
+                Sign sign = getNearLockDoubleBlock(doubleBlockParts);
 
                 if (sign != null) {
                     return SignLock.isOwner(sign, player.getUniqueId());
@@ -324,9 +383,8 @@ public class PadlockAPI {
             } else {
                 return false;
             }
-
         } else if (block.getBlockData() instanceof Chest) {
-            Sign sign = getLockSignChest(block);
+            Sign sign = getLockChest(block);
 
             if (sign != null) {
                 return SignLock.isOwner(sign, player.getUniqueId());
@@ -338,11 +396,17 @@ public class PadlockAPI {
 
     public static boolean isMember(@NotNull Block block, @NotNull Player player) {
         if (block.getType().equals(Material.LECTERN)) return true; //Lecterns can be used, but not stolen from
-        if (block.getBlockData() instanceof Door) {
-            DoorParts door = Openables.getDoorParts(block);
+        if (Openables.isSingleOpenable(block.getType())) { // stupid trapdoors being also bisected
+            Sign sign = getNearLockSingle(block);
 
-            if (door != null) {
-                Sign sign = getLockSignDoor(door);
+            if (sign != null) {
+                return SignLock.isMember(sign, player.getUniqueId());
+            }
+        } else if (block.getBlockData() instanceof Bisected && !Tag.STAIRS.isTagged(block.getType())) { //doors, also stupid stairs
+            DoubleBlockParts doubleBlockParts = Openables.getDoubleBlockParts(block);
+
+            if (doubleBlockParts != null) {
+                Sign sign = getNearLockDoubleBlock(doubleBlockParts);
 
                 if (sign != null) {
                     return SignLock.isMember(sign, player.getUniqueId());
@@ -350,9 +414,8 @@ public class PadlockAPI {
             } else {
                 return false;
             }
-
         } else if (block.getBlockData() instanceof Chest) {
-            Sign sign = getLockSignChest(block);
+            Sign sign = getLockChest(block);
 
             if (sign != null) {
                 return SignLock.isMember(sign, player.getUniqueId());
@@ -487,10 +550,6 @@ public class PadlockAPI {
 
     public static boolean isLockable(Block block) {
         Material material = block.getType();
-        //Bad blocks
-        if (Tag.SIGNS.isTagged(material)) {
-            return false;
-        }
         if (Padlock.getPlugin().getConfigManager().isLockable(material)) { // Directly lockable
             return true;
         } else { // Indirectly lockable
@@ -653,7 +712,7 @@ public class PadlockAPI {
     }
 
     public static long getTimerSingleDoor(Block block) {
-        DoorParts doors = Openables.getDoorParts(block);
+        DoubleBlockParts doors = Openables.getDoubleBlockParts(block);
         if (doors == null) {
             return 0;
         }

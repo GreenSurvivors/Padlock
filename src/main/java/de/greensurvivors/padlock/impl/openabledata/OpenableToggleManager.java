@@ -12,14 +12,23 @@ import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+/**
+ * Manages all the toggle tasks for openables with timer on their locks
+ */
 public class OpenableToggleManager {
     private final @NotNull Padlock plugin;
+    /**
+     * every location maps to the task that will toggle the block there
+     */
     private final @NotNull Map<@NotNull Location, @NotNull BukkitTask> toggleTasks = new HashMap<>();
 
     public OpenableToggleManager(@NotNull Padlock plugin) {
         this.plugin = plugin;
     }
 
+    /**
+     * cancels all running tasks and cleans up
+     */
     public void cancelAllTasks() {
         Set<BukkitTask> canceledTasks = new HashSet<>();
 
@@ -36,6 +45,13 @@ public class OpenableToggleManager {
         }
     }
 
+    /**
+     * creates a new toggle task for all given blocks together.
+     * If at least one of the blocks already as a task for it running the task will be canceled and no new
+     * task will get created. That's because the block was already closed, and we would open it running any task at this point.
+     *
+     * @param timeUntilToggle time to wait until all the given blocks will get toggled in milliseconds
+     */
     public void toggleCancelRunning(final @NotNull Set<@NotNull Block> blocksToToggle, final long timeUntilToggle) {
         Set<Location> locationsToToggle = blocksToToggle.stream().map(Block::getLocation).collect(Collectors.toSet());
 
@@ -64,7 +80,7 @@ public class OpenableToggleManager {
                     Block openableBlock = location.getBlock();
 
                     if (Tag.DOORS.isTagged(openableBlock.getType())) {
-                        DoorParts doorParts = Openables.getDoorParts(openableBlock);
+                        DoubleBlockParts doorParts = Openables.getDoubleBlockParts(openableBlock);
 
                         if (doorParts != null) {
                             openableBlock = doorParts.downPart();

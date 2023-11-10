@@ -9,15 +9,29 @@ import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Sign;
 import org.bukkit.block.sign.Side;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Iterator;
 import java.util.Set;
 import java.util.UUID;
 import java.util.logging.Level;
 
+/**
+ * This class manages what is visible on a sign, it updates the lock line,
+ * manages visible names and timer / everyone lines.
+ * Please note: All but the first line is only visual sugar, as all data is saved in PersistentDateContainer of the sign.
+ */
 public class SignDisplay {
 
-    private static void fillWithPlayers(Component[] toFill, @NotNull Sign sign, boolean owners) {
+    /**
+     * fill empty components aka lines of a sign with owners / member names of a lock. Players without a name will be ignored
+     * (should still work regardless, as this is purely what gets displayed)
+     *
+     * @param toFill the component lines to fill
+     * @param sign   sign to get its users from
+     * @param owners if owners (true) or members (false) should get filled in
+     */
+    private static void fillWithPlayers(@Nullable Component @NotNull [] toFill, @NotNull Sign sign, boolean owners) {
         Set<String> players = SignLock.getUUIDs(sign, owners);
 
         if (!players.isEmpty()) {
@@ -55,13 +69,22 @@ public class SignDisplay {
 
     }
 
+    /**
+     * update the front side lines of a lock sign,
+     * fist line will always be the lock [private]
+     * from buttom up the rest will first get filled with settings like timer / everyone,
+     * after that from top down with owner to member names.
+     * @param sign the sign to update
+     */
     public static void updateDisplay(@NotNull Sign sign) {
         final int amountOfLines = sign.getSide(Side.FRONT).lines().size();
         int lastIndex = amountOfLines - 1;
         final Component[] linesToUpdate = new Component[amountOfLines];
 
+        // first line is always just the lock line
         linesToUpdate[0] = Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PRIVATE_SIGN);
 
+        //special settings
         boolean everyoneHasAccess = EveryoneSign.getAccessEveryone(sign);
 
         if (everyoneHasAccess) {
@@ -75,6 +98,7 @@ public class SignDisplay {
             lastIndex--;
         }
 
+        // fill with owners, then if there is still space, and this is not an everyone sign, the members
         fillWithPlayers(linesToUpdate, sign, true);
         if (!everyoneHasAccess) {
             fillWithPlayers(linesToUpdate, sign, false);
@@ -93,5 +117,4 @@ public class SignDisplay {
 
         sign.update();
     }
-
 }
