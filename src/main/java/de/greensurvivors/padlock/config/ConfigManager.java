@@ -9,6 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 /**
  * As the name might suggest: this will manage the config options of this plugin.
@@ -314,6 +315,7 @@ public class ConfigManager {
 
         CACHE_MILLISECONDS.setValue(config.getInt(CACHE_MILLISECONDS.getPath(), CACHE_MILLISECONDS.getFallbackValue()) * 1000);
         if (CACHE_MILLISECONDS.getValueOrFallback() > 0) {
+            plugin.getLockCacheManager().setExpirationTime(CACHE_MILLISECONDS.getValueOrFallback(), TimeUnit.MILLISECONDS);
             plugin.getLogger().info("Cache is enabled! In case of inconsistency, turn off immediately.");
         }
 

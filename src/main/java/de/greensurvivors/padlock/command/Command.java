@@ -158,39 +158,37 @@ public class Command implements CommandExecutor, TabCompleter {
             //check permission
             if (sender.hasPermission(PermissionManager.EDIT.getPerm())) {
                 //get and check selected sign
-                Block block = SignSelection.getSelectedSign(player);
+                Sign sign = SignSelection.getSelectedSign(player);
 
-                if (block != null) {
-                    if (block.getState() instanceof Sign sign) {
-                        //check for old Lockett(Pro) signs and try to update them
-                        sign = checkAndUpdateLegacySign(sign, player);
-                        if (sign == null) {
-                            return null;
-                        }
+                if (sign != null) {
+                    //check for old Lockett(Pro) signs and try to update them
+                    sign = checkAndUpdateLegacySign(sign, player);
+                    if (sign == null) {
+                        return null;
+                    }
 
-                        if (PadlockAPI.isLockSign(sign)) {
-                            // check sign or admin permission, since only admins can mess with owners
-                            if (sender.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()) || // /lock removeowner
-                                    (!removeOwner && SignLock.isOwner(sign, player.getUniqueId()))) { // /lock removemember
-                                // get all members/owners names of a sign as a result
-                                ListOrderedSet<String> uuidStrs = SignLock.getUUIDs(sign, removeOwner);
-                                List<String> result = new ArrayList<>();
+                    if (PadlockAPI.isLockSign(sign)) {
+                        // check sign or admin permission, since only admins can mess with owners
+                        if (sender.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()) || // /lock removeowner
+                                (!removeOwner && SignLock.isOwner(sign, player.getUniqueId()))) { // /lock removemember
+                            // get all members/owners names of a sign as a result
+                            ListOrderedSet<String> uuidStrs = SignLock.getUUIDs(sign, removeOwner);
+                            List<String> result = new ArrayList<>();
 
-                                for (String uuidStr : uuidStrs) {
-                                    try {
-                                        result.add(Bukkit.getOfflinePlayer(UUID.fromString(uuidStr)).getName());
-                                    } catch (IllegalArgumentException e) {
-                                        plugin.getLogger().log(Level.WARNING, "couldn't get UUID from String \"" + uuidStr + "\" of Sign at " + sign.getLocation(), e);
+                            for (String uuidStr : uuidStrs) {
+                                try {
+                                    result.add(Bukkit.getOfflinePlayer(UUID.fromString(uuidStr)).getName());
+                                } catch (IllegalArgumentException e) {
+                                    plugin.getLogger().log(Level.WARNING, "couldn't get UUID from String \"" + uuidStr + "\" of Sign at " + sign.getLocation(), e);
 
-                                        // invalid uuid. you can still remove it nevertheless, but just as an uuid
-                                        result.add(uuidStr);
-                                    }
+                                    // invalid uuid. you can still remove it nevertheless, but just as an uuid
+                                    result.add(uuidStr);
                                 }
+                            }
 
-                                return result;
-                            } // not an owner nor has admin permission
-                        } // not a lock sign --> sign needs reselect but calling the command will tell that, no need to spam the player here
-                    } // block is not a sign --> same as above
+                            return result;
+                        } // not an owner nor has admin permission
+                    } // not a lock sign --> sign needs reselect but calling the command will tell that, no need to spam the player here
                 } // no block was selected --> calling the command will tell that, no need to spam the player here
             } // no permission --> again the same
         } // sender is not a player
@@ -219,45 +217,41 @@ public class Command implements CommandExecutor, TabCompleter {
                 // check for name or uuid as argument of subcommand
                 if (args.length >= 2) {
                     //get and check selected sign
-                    Block block = SignSelection.getSelectedSign(player);
+                    Sign sign = SignSelection.getSelectedSign(player);
 
-                    if (block != null) {
-                        if (block.getState() instanceof Sign sign) {
-                            //check for old Lockett(Pro) signs and try to update them
-                            sign = checkAndUpdateLegacySign(sign, player);
-                            if (sign == null) {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
-                                return true;
-                            }
+                    if (sign != null) {
+                        //check for old Lockett(Pro) signs and try to update them
+                        sign = checkAndUpdateLegacySign(sign, player);
+                        if (sign == null) {
+                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                            return true;
+                        }
 
-                            if (PadlockAPI.isLockSign(sign)) {
-                                // check sign or admin permission, since only admins can mess with owners
-                                if (player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()) || // /lock addowner
-                                        (!addOwner && SignLock.isOwner(sign, player.getUniqueId()))) { // /lock addmember
+                        if (PadlockAPI.isLockSign(sign)) {
+                            // check sign or admin permission, since only admins can mess with owners
+                            if (player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()) || // /lock addowner
+                                    (!addOwner && SignLock.isOwner(sign, player.getUniqueId()))) { // /lock addmember
 
-                                    // try to get player from argument
-                                    OfflinePlayer offlinePlayer = Command.getPlayerFromArgument(args[1]);
-                                    if (offlinePlayer != null) {
-                                        //success!
-                                        SignLock.addPlayer(sign, addOwner, offlinePlayer);
+                                // try to get player from argument
+                                OfflinePlayer offlinePlayer = Command.getPlayerFromArgument(args[1]);
+                                if (offlinePlayer != null) {
+                                    //success!
+                                    SignLock.addPlayer(sign, addOwner, offlinePlayer);
 
-                                        TagResolver tagResolver = Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(),
-                                                offlinePlayer.getName() == null ? offlinePlayer.getUniqueId().toString() : offlinePlayer.getName());
-                                        // tell the player
-                                        if (addOwner) {
-                                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.ADD_OWNER_SUCCESS, tagResolver);
-                                        } else {
-                                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.ADD_MEMBER_SUCCESS, tagResolver);
-                                        }
+                                    TagResolver tagResolver = Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(),
+                                            offlinePlayer.getName() == null ? offlinePlayer.getUniqueId().toString() : offlinePlayer.getName());
+                                    // tell the player
+                                    if (addOwner) {
+                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.ADD_OWNER_SUCCESS, tagResolver);
                                     } else {
-                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UNKNOWN_PLAYER,
-                                                Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), args[1]));
+                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.ADD_MEMBER_SUCCESS, tagResolver);
                                     }
                                 } else {
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
+                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UNKNOWN_PLAYER,
+                                            Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), args[1]));
                                 }
                             } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
                             }
                         } else {
                             plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
@@ -301,53 +295,49 @@ public class Command implements CommandExecutor, TabCompleter {
                 // check for name or uuid as argument of subcommand
                 if (args.length >= 2) {
                     //get and check selected sign
-                    Block block = SignSelection.getSelectedSign(player);
+                    Sign sign = SignSelection.getSelectedSign(player);
 
-                    if (block != null) {
-                        if (block.getState() instanceof Sign sign) {
-                            //check for old Lockett(Pro) signs and try to update them
-                            sign = checkAndUpdateLegacySign(sign, player);
-                            if (sign == null) {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
-                                return true;
-                            }
+                    if (sign != null) {
+                        //check for old Lockett(Pro) signs and try to update them
+                        sign = checkAndUpdateLegacySign(sign, player);
+                        if (sign == null) {
+                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                            return true;
+                        }
 
-                            if (PadlockAPI.isLockSign(sign)) {
-                                // check sign or admin permission, since only admins can mess with owners
-                                if (player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()) || // /lock removeowner
-                                        (!removeOwner && SignLock.isOwner(sign, player.getUniqueId()))) { // /lock removemember
+                        if (PadlockAPI.isLockSign(sign)) {
+                            // check sign or admin permission, since only admins can mess with owners
+                            if (player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()) || // /lock removeowner
+                                    (!removeOwner && SignLock.isOwner(sign, player.getUniqueId()))) { // /lock removemember
 
-                                    // try to get player from argument
-                                    OfflinePlayer offlinePlayer = getPlayerFromArgument(args[1]);
-                                    if (offlinePlayer != null) {
-                                        //prepare resolber
-                                        TagResolver tagResolver = Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(),
-                                                offlinePlayer.getName() == null ? offlinePlayer.getUniqueId().toString() : offlinePlayer.getName());
+                                // try to get player from argument
+                                OfflinePlayer offlinePlayer = getPlayerFromArgument(args[1]);
+                                if (offlinePlayer != null) {
+                                    //prepare resolber
+                                    TagResolver tagResolver = Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(),
+                                            offlinePlayer.getName() == null ? offlinePlayer.getUniqueId().toString() : offlinePlayer.getName());
 
-                                        // try to remove the member/owner, may fail if the player is not a member/owner
-                                        if (SignLock.removePlayer(sign, removeOwner, offlinePlayer.getUniqueId())) {
-                                            //success
-                                            if (removeOwner) {
-                                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_OWNER_SUCCESS, tagResolver);
-                                            } else {
-                                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_MEMBER_SUCCESS, tagResolver);
-                                            }
+                                    // try to remove the member/owner, may fail if the player is not a member/owner
+                                    if (SignLock.removePlayer(sign, removeOwner, offlinePlayer.getUniqueId())) {
+                                        //success
+                                        if (removeOwner) {
+                                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_OWNER_SUCCESS, tagResolver);
                                         } else {
-                                            if (removeOwner) {
-                                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_OWNER_ERROR, tagResolver);
-                                            } else {
-                                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_MEMBER_ERROR, tagResolver);
-                                            }
+                                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_MEMBER_SUCCESS, tagResolver);
                                         }
                                     } else {
-                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UNKNOWN_PLAYER,
-                                                Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), args[1]));
+                                        if (removeOwner) {
+                                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_OWNER_ERROR, tagResolver);
+                                        } else {
+                                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_MEMBER_ERROR, tagResolver);
+                                        }
                                     }
                                 } else {
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
+                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UNKNOWN_PLAYER,
+                                            Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), args[1]));
                                 }
                             } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
                             }
                         } else {
                             plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);

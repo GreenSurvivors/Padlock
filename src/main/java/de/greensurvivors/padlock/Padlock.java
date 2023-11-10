@@ -3,6 +3,8 @@ package de.greensurvivors.padlock;
 import de.greensurvivors.padlock.command.Command;
 import de.greensurvivors.padlock.config.ConfigManager;
 import de.greensurvivors.padlock.config.MessageManager;
+import de.greensurvivors.padlock.impl.DependencyManager;
+import de.greensurvivors.padlock.impl.LockCacheManager;
 import de.greensurvivors.padlock.impl.openabledata.OpenableToggleManager;
 import de.greensurvivors.padlock.listener.BlockDebugListener;
 import de.greensurvivors.padlock.listener.BlockEnvironmentListener;
@@ -16,10 +18,15 @@ import java.util.logging.Level;
 
 public class Padlock extends JavaPlugin {
     private static Padlock plugin;
+    /**
+     * only for big problems or plugin development
+     */
     private final boolean debug = false;
     private ConfigManager configManager;
     private MessageManager messageManager;
     private OpenableToggleManager openableToggleManager;
+    private LockCacheManager lockCacheManager;
+    private DependencyManager dependencyManager;
 
     public static Padlock getPlugin() {
         return plugin;
@@ -35,6 +42,7 @@ public class Padlock extends JavaPlugin {
         configManager.reload();
 
         openableToggleManager = new OpenableToggleManager(this);
+        lockCacheManager = new LockCacheManager();
 
         // Register Listeners
         // If debug mode is not on, debug listener won't register
@@ -56,8 +64,8 @@ public class Padlock extends JavaPlugin {
             }
         }
 
-        // Dependency
-        Dependency.setPluginAndLoad(this);
+        // Dependencys
+        dependencyManager = new DependencyManager(this);
     }
 
     @Override
@@ -76,5 +84,13 @@ public class Padlock extends JavaPlugin {
 
     public OpenableToggleManager getOpenableToggleManager() {
         return openableToggleManager;
+    }
+
+    public LockCacheManager getLockCacheManager() {
+        return lockCacheManager;
+    }
+
+    public DependencyManager getDependencyManager() {
+        return dependencyManager;
     }
 }

@@ -48,38 +48,34 @@ public class SetEveryone extends SubCommand {
         if (this.checkPermission(sender)) {
             if (sender instanceof Player player) {
                 if (args.length >= 2) {
-                    Block block = SignSelection.getSelectedSign(player);
+                    Sign sign = SignSelection.getSelectedSign(player);
 
-                    if (block != null) {
-                        if (block.getState() instanceof Sign sign) {
-                            //check for old Lockett(Pro) signs and try to update them
-                            sign = Command.checkAndUpdateLegacySign(sign, player);
-                            if (sign == null) {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
-                                return true;
-                            }
+                    if (sign != null) {
+                        //check for old Lockett(Pro) signs and try to update them
+                        sign = Command.checkAndUpdateLegacySign(sign, player);
+                        if (sign == null) {
+                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                            return true;
+                        }
 
-                            // only admins and owners can change a signs properties
-                            if (SignLock.isOwner(sign, player.getUniqueId()) ||
-                                    player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm())) {
-                                // get and check bool from arg
-                                Boolean setting = BooleanUtils.toBooleanObject(args[1]);
+                        // only admins and owners can change a signs properties
+                        if (SignLock.isOwner(sign, player.getUniqueId()) ||
+                                player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm())) {
+                            // get and check bool from arg
+                            Boolean setting = BooleanUtils.toBooleanObject(args[1]);
 
-                                if (setting != null) {
-                                    // success!
-                                    EveryoneSign.setEveryone(sign, setting);
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_EVERYONE_SUCCESS,
-                                            Placeholder.component(MessageManager.PlaceHolder.ARGUMENT.getPlaceholder(), Component.text(setting)));
-                                } else {
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_BOOL,
-                                            Placeholder.unparsed(MessageManager.PlaceHolder.ARGUMENT.getPlaceholder(), args[1]));
-                                    return false;
-                                }
+                            if (setting != null) {
+                                // success!
+                                EveryoneSign.setEveryone(sign, setting);
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_EVERYONE_SUCCESS,
+                                        Placeholder.component(MessageManager.PlaceHolder.ARGUMENT.getPlaceholder(), Component.text(setting)));
                             } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_OWNER);
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_BOOL,
+                                        Placeholder.unparsed(MessageManager.PlaceHolder.ARGUMENT.getPlaceholder(), args[1]));
+                                return false;
                             }
                         } else {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_OWNER);
                         }
                     } else {
                         plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NOT_SELECTED);

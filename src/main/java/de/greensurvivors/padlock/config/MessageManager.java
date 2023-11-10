@@ -1,5 +1,9 @@
 package de.greensurvivors.padlock.config;
 
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.CacheLoader;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -25,9 +29,12 @@ public class MessageManager {
      */
     private final HashMap<LangPath, String> nakedSignLiness = new HashMap<>(); // path -> naked
     /**
-     * caches every component without placeholder for faster access in future
+     * caches every component without placeholder for faster access in future and loads missing values automatically
      */
-    private final HashMap<LangPath, Component> langCache = new HashMap<>();
+    private final LoadingCache<LangPath, Component> langCache = Caffeine.newBuilder().build(
+            path -> MiniMessage.miniMessage().deserialize(getStringFromLang(path)));
+
+    //private final HashMap<LangPath, Component> langCache = new HashMap<>();
     private FileConfiguration lang;
     private FileConfiguration fallbackLangFile;
     private String langfilename = "lang/lang_en.yml";
@@ -41,10 +48,6 @@ public class MessageManager {
     }
 
     private @NotNull String getStringFromLang(@NotNull LangPath path) {
-        if (path == MessageManager.LangPath.SET_TIMER_SUCCESS_ON) {
-            plugin.getLogger().info(lang.getString(path.getPath(), fallbackLangFile.getString(path.getPath(), path.getDefaultValue())));
-        }
-
         return lang.getString(path.getPath(), fallbackLangFile.getString(path.getPath(), path.getDefaultValue()));
     }
 
@@ -55,8 +58,6 @@ public class MessageManager {
         initLangFiles();
         lang = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), langfilename));
         fallbackLangFile = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "lang/lang_en.yml")); //todo don't hardcode
-
-        langCache.put(LangPath.PLUGIN_PREFIX, MiniMessage.miniMessage().deserialize(getStringFromLang(LangPath.PLUGIN_PREFIX)));
 
         nakedSignLiness.put(LangPath.PRIVATE_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.PRIVATE_SIGN)).toLowerCase());
         nakedSignLiness.put(LangPath.ADDITIONAL_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.ADDITIONAL_SIGN)).toLowerCase());
@@ -103,29 +104,14 @@ public class MessageManager {
      * get a component from lang file
      */
     public @NotNull Component getLang(@NotNull MessageManager.LangPath path) {
-        Component result = langCache.get(path);
-
-        if (result == null) {
-            result = MiniMessage.miniMessage().deserialize(getStringFromLang(path));
-
-            langCache.put(path, result);
-        }
-        return result;
+        return langCache.get(path);
     }
 
     /**
      * send a component from the lang file to the audience, prefixed with this plugins prefix.
      */
     public void sendLang(@NotNull Audience audience, @NotNull LangPath path) {
-        Component message = langCache.get(path);
-
-        if (message == null) {
-            message = MiniMessage.miniMessage().deserialize(getStringFromLang(path));
-
-            langCache.put(path, message);
-        }
-
-        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(message));
+        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(langCache.get(path)));
     }
 
     /**
@@ -254,6 +240,7 @@ public class MessageManager {
         BREAK_LOCK_SUCCESS("action.break-lock.success"),
         ACTION_PREVENTED_LOCKED("action.prevented.locked"),
         ACTION_PREVENTED_INTERFERE("action.prevented.interfere-with-others"),
+        ACTION_PREVENTED_USE_CMDS("action.prevented.use-commands"),
 
         NOTICE_QUICK_LOCK("notice.quick-lock"),
         NOTICE_MANUEL_LOCK("notice.manual-lock");
@@ -263,7 +250,7 @@ public class MessageManager {
 
         LangPath(String path) {
             this.path = path;
-            this.defaultValue = "";
+            this.defaultValue = path; // we don't need to define a default value, but if something couldn't get loaded we have to return at least helpful information
         }
 
         LangPath(String path, String defaultValue) {

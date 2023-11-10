@@ -44,6 +44,7 @@ public class Openables {
 
     /**
      * get both parts of a tow block high block like doors *wink wink*
+     *
      * @param block part of a two high block
      * @return the block and it's upper / down part or null if not a double high block (1/3+)
      */
@@ -68,6 +69,7 @@ public class Openables {
 
     /**
      * get surrounding single high blocks of the same type as the block given
+     *
      * @param block block to get surrounding blocks for
      * @return mapping from all directions to adjacent to the block of the same type.
      * A direction might be missing if there was no fitting block

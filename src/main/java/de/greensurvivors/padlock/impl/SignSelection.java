@@ -1,34 +1,38 @@
 package de.greensurvivors.padlock.impl;
 
-import com.google.common.cache.CacheBuilder;
-import com.google.common.cache.CacheLoader;
-import com.google.common.cache.LoadingCache;
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.bukkit.block.Block;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
+/**
+ * Caches
+ */
 public class SignSelection {
-    private static final LoadingCache<UUID, Block> selectedsign = CacheBuilder.newBuilder()
-            .expireAfterAccess(30, TimeUnit.SECONDS)
-            .build(new CacheLoader<>() { //todo test if a loader is really needed
-                public Block load(@NotNull UUID key) {
-                    return null;
-                }
-            });
+    private final static @NotNull Cache<UUID, Block> selectedSign =
+            Caffeine.newBuilder().expireAfterAccess(40, TimeUnit.SECONDS).build();
 
-    public static Block getSelectedSign(Player player) {
-        Block b = selectedsign.getIfPresent(player.getUniqueId());
-        if (b != null && !player.getWorld().getName().equals(b.getWorld().getName())) {
-            selectedsign.invalidate(player.getUniqueId());
-            return null;
+    public static @Nullable Sign getSelectedSign(@NotNull Player player) {
+        Block signBlock = selectedSign.getIfPresent(player.getUniqueId());
+
+        if (signBlock == null || player.getWorld().getName().equals(signBlock.getWorld().getName())) {
+            if (signBlock.getState() instanceof Sign sign) {
+                return sign;
+            }
+        } else {
+            selectedSign.invalidate(player.getUniqueId());
         }
-        return b;
+
+        return null;
     }
 
-    public static void selectSign(Player player, Block block) {
-        selectedsign.put(player.getUniqueId(), block);
+    public static void selectSign(@NotNull Player player, @NotNull Block signBlock) {
+        selectedSign.put(player.getUniqueId(), signBlock);
     }
 }

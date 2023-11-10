@@ -19,7 +19,6 @@ import java.util.Set;
 
 /**
  * updates a selected legacy or additional sign.
- * is more robust than other sub-commands update process.
  */
 @Deprecated(forRemoval = true)
 public class UpdateSign extends SubCommand {
@@ -46,26 +45,10 @@ public class UpdateSign extends SubCommand {
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         if (this.checkPermission(sender)) {
             if (sender instanceof Player player) {
-                Block block = SignSelection.getSelectedSign(player);
-                if (block != null) {
-                    if (block.getState() instanceof Sign sign) {
-                        if (PadlockAPI.updateLegacySign(sign) != null) {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UPDATE_SIGN_SUCCESS);
-                        } else {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
-                        }
-                    } else if (PadlockAPI.isLocked(block)) { //something went wrong, try to recover
-                        Sign sign = PadlockAPI.getLockSign(block);
-
-                        if (sign != null) {
-                            if (PadlockAPI.updateLegacySign(sign) != null) {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UPDATE_SIGN_SUCCESS);
-                            } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
-                            }
-                        } else {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
-                        }
+                Sign sign = SignSelection.getSelectedSign(player);
+                if (sign != null) {
+                    if (PadlockAPI.updateLegacySign(sign) != null) {
+                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UPDATE_SIGN_SUCCESS);
                     } else {
                         plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
                     }

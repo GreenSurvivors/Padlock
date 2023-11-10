@@ -96,31 +96,27 @@ public class SetCreated extends SubCommand {
         if (this.checkPermission(sender)) {
             if (sender instanceof Player player) {
                 if (args.length >= 2) {
-                    Block block = SignSelection.getSelectedSign(player);
+                    Sign sign = SignSelection.getSelectedSign(player);
 
-                    if (block != null) {
-                        if (block.getState() instanceof Sign sign) {
-                            //check for old Lockett(Pro) signs and try to update them
-                            sign = Command.checkAndUpdateLegacySign(sign, player);
-                            if (sign == null) {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
-                                return true;
-                            }
-
-                            Long millisEpoch = getEpochMillisFromString(args[1]);
-
-                            if (millisEpoch != null) {
-                                SignExpiration.updateWithTime(sign, millisEpoch);
-
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_CREATED_SUCCESS);
-                                return true;
-                            } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_CREATED_ERROR,
-                                        Placeholder.unparsed(MessageManager.PlaceHolder.ARGUMENT.getPlaceholder(), args[1]));
-                                return false;
-                            }
-                        } else {
+                    if (sign != null) {
+                        //check for old Lockett(Pro) signs and try to update them
+                        sign = Command.checkAndUpdateLegacySign(sign, player);
+                        if (sign == null) {
                             plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                            return true;
+                        }
+
+                        Long millisEpoch = getEpochMillisFromString(args[1]);
+
+                        if (millisEpoch != null) {
+                            SignExpiration.updateWithTime(sign, millisEpoch);
+
+                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_CREATED_SUCCESS);
+                            return true;
+                        } else {
+                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_CREATED_ERROR,
+                                    Placeholder.unparsed(MessageManager.PlaceHolder.ARGUMENT.getPlaceholder(), args[1]));
+                            return false;
                         }
                     } else {
                         plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NOT_SELECTED);

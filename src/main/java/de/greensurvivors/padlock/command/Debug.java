@@ -1,6 +1,6 @@
 package de.greensurvivors.padlock.command;
 
-import de.greensurvivors.padlock.Dependency;
+import de.greensurvivors.padlock.impl.DependencyManager;
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
@@ -52,12 +52,14 @@ public class Debug extends SubCommand {
             // Other
             sender.sendMessage("Linked plugins:");
             boolean linked = false;
-            if (Dependency.getWorldguard() != null) {
+
+            String worldguardVersion = plugin.getDependencyManager().getWorldguardVersion();
+            if (worldguardVersion != null) {
                 linked = true;
-                sender.sendMessage(" - Worldguard: " + Dependency.getWorldguard().getPluginMeta().getVersion());
+                sender.sendMessage(" - Worldguard: " + worldguardVersion);
             }
 
-            String CoreProtectAPIVersion = Dependency.getCoreProtectAPIVersion();
+            String CoreProtectAPIVersion = plugin.getDependencyManager().getCoreProtectAPIVersion();
 
             if (CoreProtectAPIVersion != null) {
                 linked = true;

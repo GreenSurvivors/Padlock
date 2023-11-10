@@ -96,48 +96,44 @@ public class SetTimer extends SubCommand {
         if (sender instanceof Player player) {
             if (sender.hasPermission(PermissionManager.CMD_SET_CREATED.getPerm())) {
                 if (args.length >= 2) {
-                    Block block = SignSelection.getSelectedSign(player);
+                    Sign sign = SignSelection.getSelectedSign(player);
 
-                    if (block != null) {
-                        if (block.getState() instanceof Sign sign) {
-                            //check for old Lockett(Pro) signs and try to update them
-                            sign = Command.checkAndUpdateLegacySign(sign, player);
-                            if (sign == null) {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
-                                return true;
+                    if (sign != null) {
+                        //check for old Lockett(Pro) signs and try to update them
+                        sign = Command.checkAndUpdateLegacySign(sign, player);
+                        if (sign == null) {
+                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                            return true;
+                        }
+
+                        // only owners and admins can change a signs properties
+                        if (SignLock.isOwner(sign, player.getUniqueId()) ||
+                                player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm())) {
+                            // get all durations of all arguments together
+                            // note: writing every time element in one argument,
+                            // would have the same effect as spreading them across multiple arguments.
+                            // using the same time unit more than once is permitted.
+                            long timerDuration = 0;
+                            for (int i = 1; i < args.length; i++) {
+                                timerDuration += parsePeriod(args[i]);
                             }
 
-                            // only owners and admins can change a signs properties
-                            if (SignLock.isOwner(sign, player.getUniqueId()) ||
-                                    player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm())) {
-                                // get all durations of all arguments together
-                                // note: writing every time element in one argument,
-                                // would have the same effect as spreading them across multiple arguments.
-                                // using the same time unit more than once is permitted.
-                                long timerDuration = 0;
-                                for (int i = 1; i < args.length; i++) {
-                                    timerDuration += parsePeriod(args[i]);
-                                }
+                            if (timerDuration != 0) {
+                                // success
+                                SignTimer.setTimer(sign, timerDuration);
 
-                                if (timerDuration != 0) {
-                                    // success
-                                    SignTimer.setTimer(sign, timerDuration);
-
-                                    if (timerDuration > 0) {
-                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_SUCCESS_ON,
-                                                Placeholder.component(MessageManager.PlaceHolder.TIME.getPlaceholder(), Component.text(timerDuration)));
-                                    } else {
-                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_SUCCESS_OFF);
-                                    }
+                                if (timerDuration > 0) {
+                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_SUCCESS_ON,
+                                            Placeholder.component(MessageManager.PlaceHolder.TIME.getPlaceholder(), Component.text(timerDuration)));
                                 } else {
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_ERROR);
-                                    return false;
+                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_SUCCESS_OFF);
                                 }
                             } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_OWNER);
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_ERROR);
+                                return false;
                             }
                         } else {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_OWNER);
                         }
                     } else {
                         plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NOT_SELECTED);

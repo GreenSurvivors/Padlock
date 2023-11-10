@@ -81,6 +81,7 @@ action:
   break-lock:
     success: '<dark_green>You broke the lock sign.</dark_green>'
   prevented:
+    use-commands: "<red>can't change this directly, please use /lock to change properties. </red>"
     locked: '<red>This block is locked.</red>'
     interfere-with-others: '<red>You cannot place a block that may interfere others.</red>'
 notice:

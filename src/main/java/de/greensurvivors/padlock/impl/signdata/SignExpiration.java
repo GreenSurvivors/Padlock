@@ -45,7 +45,8 @@ public class SignExpiration {
 
     /**
      * update the time this sign was created with the time now or disables expiation for this sign
-     * @param sign the sign to update
+     *
+     * @param sign     the sign to update
      * @param noexpire if this sign should never expire
      */
     public static void updateWithTimeNow(Sign sign, boolean noexpire) {

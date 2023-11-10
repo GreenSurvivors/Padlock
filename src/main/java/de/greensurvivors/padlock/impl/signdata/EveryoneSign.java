@@ -50,6 +50,17 @@ public class EveryoneSign {
     }
 
     /**
+     * checks if a line would be a line of an everyone sign.
+     * This is only available to make sure the line can safely interpreted as a username.
+     * Please don't use this to get data of a legacy sign.
+     * Use {@link #updateLegacy(Sign)} and then {@link #getAccessEveryone(Sign)}
+     */
+    @Deprecated(forRemoval = true)
+    protected static boolean isLegacyComp(@NotNull Component component) {
+        return Padlock.getPlugin().getMessageManager().isSignComp(component, MessageManager.LangPath.EVERYONE_SIGN);
+    }
+
+    /**
      * returns true if at least one sign is a legacy lockette everyone line.
      */
     @Deprecated(forRemoval = true)

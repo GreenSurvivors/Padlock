@@ -74,6 +74,7 @@ public class SignDisplay {
      * fist line will always be the lock [private]
      * from buttom up the rest will first get filled with settings like timer / everyone,
      * after that from top down with owner to member names.
+     *
      * @param sign the sign to update
      */
     public static void updateDisplay(@NotNull Sign sign) {

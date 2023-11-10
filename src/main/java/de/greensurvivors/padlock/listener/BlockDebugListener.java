@@ -15,6 +15,10 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.block.Action;
 import org.bukkit.event.player.PlayerInteractEvent;
 
+/**
+ * Debug listener, only important for developing this plugin or really heavy problem search.
+ * Must be enabled in {@link de.greensurvivors.padlock.Padlock}
+ */
 public class BlockDebugListener implements Listener {
 
     @SuppressWarnings("deprecation")
@@ -28,12 +32,9 @@ public class BlockDebugListener implements Listener {
             if (clickedBlock != null) {
                 player.sendMessage(Component.text("===========================").color(NamedTextColor.GREEN));
                 player.sendMessage(Component.text("isLockable: ").append(formatBoolean(PadlockAPI.isLockable(clickedBlock))));
-                player.sendMessage(Component.text("isLocked: ").append(formatBoolean(PadlockAPI.isLocked(clickedBlock))));
+                player.sendMessage(Component.text("isProtected: ").append(formatBoolean(PadlockAPI.isProtected(clickedBlock))));
                 player.sendMessage(Component.text(" - isOwner/User: ").append(formatBoolean(PadlockAPI.isOwner(clickedBlock, player))).append(Component.text("/")).append(formatBoolean(PadlockAPI.isMember(clickedBlock, player))));
-                player.sendMessage(Component.text("isLockedSingle: ").append(formatBoolean(PadlockAPI.isLockedSingleBlock(clickedBlock, null))));
-                player.sendMessage(Component.text(" - isOwner/UserSingle: ").append(formatBoolean(PadlockAPI.isOwnerSingleBlock(clickedBlock, null, player))).append(Component.text("/")).append(formatBoolean(PadlockAPI.isMemberSingleBlock(clickedBlock, null, player))));
                 player.sendMessage(Component.text("isLockedUpDownLockedDoor: ").append(formatBoolean(PadlockAPI.isPartOfLockedDoor(clickedBlock))));
-                player.sendMessage(Component.text(" - isOwner/UserSingle: ").append(formatBoolean(PadlockAPI.isOwnerUpDownLockedDoor(clickedBlock, player))).append(Component.text("/")).append(formatBoolean(PadlockAPI.isOwnerUpDownLockedDoor(clickedBlock, player))));
                 if (clickedBlock.getState() instanceof Sign sign && PadlockAPI.isLockSign(sign)) {
                     player.sendMessage(Component.text("isSignExpired: ").append(formatBoolean(PadlockAPI.isSignExpired(sign))));
                     Long timeStamp = SignExpiration.getCreatedTime(sign);
