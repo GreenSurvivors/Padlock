@@ -123,19 +123,25 @@ public class SignLock {
      */
     @Deprecated(forRemoval = true)
     public static void updateSignFromAdditional(@NotNull Sign main, @NotNull Sign additional) {
+        Padlock.getPlugin().getLogger().info("updating additional sign at " + additional.getLocation());
+        PlainTextComponentSerializer plainedText = PlainTextComponentSerializer.plainText();
         for (int i = 1; i <= 3; i++) {
-            String line = additional.getSide(Side.FRONT).getLine(i);
+            String line = plainedText.serialize(additional.getSide(Side.FRONT).line(i));
+
+            Padlock.getPlugin().getLogger().info("line: " + i + ", txt " + line);
 
             if (line.contains("#")) {
                 String[] splitted = line.split("#", 2);
 
                 if (splitted[1].length() == 36) { // uuid valid check
+                    Padlock.getPlugin().getLogger().info("member uuid");
                     addPlayer(main, false, Bukkit.getOfflinePlayer(UUID.fromString(splitted[1])));
                 }
             } else {
                 OfflinePlayer maybePlayer = tryGetPlayerJustFromNameComp(additional.getSide(Side.FRONT).line(i));
 
                 if (maybePlayer != null) {
+                    Padlock.getPlugin().getLogger().info("member");
                     addPlayer(main, false, maybePlayer);
                 }
             }
@@ -150,7 +156,7 @@ public class SignLock {
      * Will not update the Display of the sign afterwarts to not overwrite other unimported data like timers
      */
     @Deprecated(forRemoval = true)
-    public static void updateLegacyUUIDs(@NotNull Sign sign) {
+    public static void updateLegacyLock(@NotNull Sign sign) {
         PersistentDataContainer container = sign.getPersistentDataContainer();
 
         ListOrderedSet<String> owners = container.get(storedOwnersUUIDKey, uuidSetDataType);
@@ -162,8 +168,10 @@ public class SignLock {
             members = new ListOrderedSet<>();
         }
 
+        PlainTextComponentSerializer plainedText = PlainTextComponentSerializer.plainText();
+
         for (int i = 1; i <= 3; i++) {
-            String line = sign.getSide(Side.FRONT).getLine(i);
+            String line = plainedText.serialize(sign.getSide(Side.FRONT).line(i));
 
             if (line.contains("#")) {
                 String[] splitted = line.split("#", 2);

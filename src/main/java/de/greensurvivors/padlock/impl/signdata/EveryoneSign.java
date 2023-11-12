@@ -18,12 +18,15 @@ public class EveryoneSign {
 
     /**
      * Set if everyone should have member access or not.
+     * @param shouldUpdateDisplay if the display should get updated. is important to set to false for updating a lock sign from legacy
      */
-    public static void setEveryone(@NotNull Sign sign, boolean everyoneHasAccess) {
+    public static void setEveryone(@NotNull Sign sign, boolean everyoneHasAccess, boolean shouldUpdateDisplay) {
         sign.getPersistentDataContainer().set(everyoneKey, PersistentDataType.BOOLEAN, everyoneHasAccess);
         sign.update();
 
-        SignDisplay.updateDisplay(sign);
+        if (shouldUpdateDisplay) {
+            SignDisplay.updateDisplay(sign);
+        }
     }
 
     /**
@@ -42,11 +45,12 @@ public class EveryoneSign {
     }
 
     /**
-     * update a legacy lockette sign with potential an everyone line on it.
+     * update a legacy lockette lock sign with potential an everyone line on it.
+     * Will not update the Display of the sign afterwarts to not overwrite other unimported data like timers
      */
     @Deprecated(forRemoval = true)
     public static void updateLegacy(@NotNull Sign sign) {
-        setEveryone(sign, getLegacySetting(sign));
+        setEveryone(sign, getLegacySetting(sign), false);
     }
 
     /**
@@ -72,5 +76,12 @@ public class EveryoneSign {
         }
 
         return false;
+    }
+
+    /**
+     * update a legacy lockette additional sign with potential an everyone line on it.
+     */
+    public static void updateLegacyFromAdditional(Sign lockSign, Sign additional) {
+        setEveryone(lockSign, getLegacySetting(additional), true);
     }
 }

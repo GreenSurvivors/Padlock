@@ -1,34 +1,91 @@
 # German translation by HeartCore
 
-prefix: '&6[LockettePro] '
-command-usage: "&bLockettePro Plugin-Hilfe\n&c1. Um einen User einem Schild hinzuzufügen, rechtsklicke das Schild und gib anschließend /lock <Zeilennummer> <Text> ein, um den Text zu ändern\n&c2. Um die Konfiguration neu zu laden, gib /lock reload ein.\nLockettePro von connection_lost"
-you-can-quick-lock-it: '&aRechtsklicke den Block mit einem Schild, um ihn zu sichern.'
-you-can-manual-lock-it: ' &aPlatziere ein Schild und schreibe [Private] darauf, um es zu sichern.'
-config-reloaded: '&aKonfiguratio neu geladen..'
-no-permission: '&cDu hast keine Rechte, um dies zu tun.'
-no-sign-selected: '&cWähle zuerst ein Schild aus, indem du es rechtsklickst.'
-sign-need-reselect: '&cBitte wähle das Schild erneut aus.'
-line-is-too-long: '&cDiese Zeile ist zu lang!'
-cannot-change-this-line: '&cDu kannst diese Zeile nicht verändern.'
-sign-changed: '&aSchild erfolgreich bearbeitet.'
-locked-quick: '&aBlock erfolgreich gesichert.'
-additional-sign-added-quick: '&aZusätzliches Schild erfolgreich hinzugefügt.'
-cannot-lock-quick: '&cDu kannst das nicht sichern.'
-cannot-add-additional-sign-quick: '&cDu kannst hier kein Schild hinzufügen'
-locked-manual: '&aBlock erfolgreich gesichert.'
-additional-sign-added-manual: '&aZusätzliches Schild erfolgreich hinzugefügt.'
-cannot-lock-manual: '&cDu kannst das nicht sichern.'
-cannot-add-additional-sign-manual: '&cDu kannst hier kein Schild hinzufügen'
-not-locked-yet-manual: '&cDieser Block ist noch nicht gesichert.'
-cannot-lock-door-nearby-manual: '&cHier ist eine Tür in der Nähe.'
-block-already-locked-manual: '&cDieser Block ist bereits gesichert.'
-block-is-not-lockable: '&cDieser Block kann nicht gesichert werden.'
-sign-selected: '&aSchild ausgewählt.'
-break-own-lock-sign: '&aDu hast dein Sicherungsschild zerstört.'
-cannot-break-this-lock-sign: '&cDu kannst dieses Sicherungsschild nicht zerstören.'
-break-own-additional-sign: '&aDu hast dein zusätzliches Schild zerstört.'
-break-redundant-additional-sign: '&aDu hast ein redundantes zusätzliches Schild zerstört.'
-cannot-break-this-additional-sign: '&cDu kansnt dieses zusätzliche Schild nicht zerstören.'
-block-is-locked: '&cDieser Block ist gesichert.'
-cannot-interfere-with-others: '&cDu kannst keinen Block platzieren, der in andere eingreifen könnte.'
-sign-error: '&4[ERROR]'
+prefix: '<gold>[Padlock]</gold> '
+sign:
+  line:
+    private: '[Privat]'
+    additional: '[Mehr Spieler]'
+    everyone: '[Everyone]'
+    timer: '[Timer:<time>]'
+    expired: '[<dark_aqua>Ausgelaufen</dark_aqua>]'
+    error: '[<dark_red>Fehler</dark_red>]'
+    invalid: '[Invalid]'
+    # used for formatting displayed player names
+    player-name: '<player>'
+cmd:
+  help:
+    header: '----------------{Help}----------------'
+    no-perm-subcommand: 'Leider hast du keine Berechtigungen um Befehle zu sehen.'
+    add-member: '/lock addmember <player> | lets you grant other players basic access to the locked Block.'
+    remove-member: '/lock removemember <player> | revokes basic access to the locked Block.'
+    add-owner: '/lock addowner <player> | Fügt einen Besitzer hinzu.'
+    remove-owner: '/lock removeowner <player> | Entfernt einen Besitzer.'
+    set-created: '/lock setCreated <time> | Setzt wann ein Schild angeblich erstellt wurde. Mögliche Formate: "2011-12-03T10:15:30", "2011-12-03T10:15:30+01:00" or "2011-12-03T10:15:30+01:00[Europe/Paris]"'
+    set-everyone: '/lock seteveryone <true/false> Setzt ob jeder zugriff haben sollte oder nicht.'
+    set-timer: '/lock settimer 0t 0s 0m 0h| Setzt den timer, nachdem eine Tür/Zauntoor/Falltür schließen sollte in Ticks, Sekunden, Minuten, oder Stunden. Notiz: Türen können offen bleiben, wenn der Timer läuft und der Server neu startet.'
+    debug: '/lock debug | Admin werkzeug um Debug-Informationen zu erhalten.'
+    help: '/lock help | Dieser Befehl. Gibt weitere Information über Befehle, die du nutzen darfst.'
+    info: '/lock info | Wähle eine schild aus und erhalte weitere Informationen.'
+    reload: '/lock reload | Lade Sprach- und Konfigurationsdateien neu.'
+    update-sign: '/lock updatesign | Starte den Update prozess eines Lockette schildes manuell.'
+    version: '/lock version | Gibt die Version des Plugins zurück.'
+  add-owner:
+    success: '<dark_green><player> wurde erfolgreich als Besitzer hinzugefügt.</dark_green>'
+  remove-owner:
+    success: '<dark_green><player> wurde erfolgreich als Besitzer entfernt.</dark_green>'
+    error: "<red>Konnte nicht als Besitzer entfernt werden!</red>"
+  add-member:
+    success: '<dark_green>Successfully added <player> as member.</dark_green>'
+  remove-member:
+    success: '<dark_green>Successfully removed <player> as member.</dark_green>'
+    error: "<red>Couldn't remove <player> as an member!</red>"
+  set-created:
+    success: '<dark_green>Erfolgreich das Erstellungsdatum veränder.</dark_green>'
+    error: "<red>Konnte keine Zeit von deinen Argument <argument> ermitteln.</red>"
+  set-everyone:
+    success: '<dark_green>Everyone is Member now: <boolean></dark_green>'
+  set-timer:
+    success:
+      turned-on: '<dark_green>Erfolgreich den timer auf: <time>ms gesetzt.</dark_green>'
+      turned-off: '<dark_green>Erfolgreich den timer ausgeschaltet.</dark_green>'
+    error: "<red>Konnte keine Zeitspanne von deinen Argumenten ermitteln.</red>"
+  sign-update:
+    success: '<dark_green>Erfogreich altes lockette schild geupdated.</dark_green>'
+  reload:
+    success: '<dark_green>Konfiguration von Padlock neu geladen.</dark_green>'
+  info:
+    owners: 'Besitzer: '
+    members: 'members: '
+    timer: 'timer: '
+    expired: 'Ausgelaufen: '
+  error:
+    not-enough-args: '<red>You provided too few arguments. Pleas try again.<red>'
+    not-a-player: '<red>This command can only be called as a player.<red>'
+    unknown-player: "<red>Konnte Spieler <player> nicht finden. Ist es richtig geschrieben?.</red>"
+    no-sign-selected: '<red>Wähle zuerst ein Schild aus, indem du es rechts klickst.</red>'
+    sign-need-reselect: '<red>Bitte wähle das Schild erneut aus.</red>'
+    not-a-bool: '<red>The argument "<argument>" you provided is not a boolean.<red>'
+  usage: '/lock <subcommand> <subcommand arguments> | see command refference in /lock help!'
+  not-a-subcommand: '<red>The argument "<argument>" you provided is not a subcommand.<red>'
+no-permission: "<red>Du hast keine Rechte, um dies zu tun.</red>"
+lock:
+  not-owner: "<red>Nur der Besitzer kann dies tun.</red>"
+action:
+  lock:
+    success: '<dark_green>Block erfolgreich gesichert.</dark_green>'
+    error:
+      already-locked: '<red>Dieser Block ist bereits gesichert.</red>'
+      not-lockable: '<red>Dieser Block kann nicht gesichert werden.</red>'
+  quick-lock:
+    error: "<red>Du kannst das nicht sichern.</red>"
+  select-sign:
+    success: '<dark_green>Schild ausgewählt.</dark_green>'
+  break-lock:
+    success: '<dark_green>Du hast dein Sicherungsschild zerstört.</dark_green>'
+  prevented:
+    use-commands: "<red>Du kannst das nicht direkt bearbeiten, bitte benutze /padlock um Eigenschaften zu ändern.</red>"
+    locked: '<red>Dieser Block ist gesichert.</red>'
+    interfere-with-others: '<red>Du kannst keinen Block platzieren, der in andere eingreifen könnte.</red>'
+notice:
+  quick-lock: '<dark_green>Rechtsklicke den Block mit einem Schild, um ihn zu sichern.</dark_green>'
+  manual-lock: '<dark_green>Platziere ein Schild und schreibe [Privat] darauf, um es zu sichern.</dark_green>'

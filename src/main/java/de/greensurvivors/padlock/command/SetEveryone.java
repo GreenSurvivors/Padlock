@@ -65,7 +65,7 @@ public class SetEveryone extends SubCommand {
 
                             if (setting != null) {
                                 // success!
-                                EveryoneSign.setEveryone(sign, setting);
+                                EveryoneSign.setEveryone(sign, setting, true);
                                 plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_EVERYONE_SUCCESS,
                                         Placeholder.component(MessageManager.PlaceHolder.ARGUMENT.getPlaceholder(), Component.text(setting)));
                             } else {

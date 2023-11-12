@@ -3,10 +3,7 @@ package de.greensurvivors.padlock;
 import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.openabledata.DoubleBlockParts;
 import de.greensurvivors.padlock.impl.openabledata.Openables;
-import de.greensurvivors.padlock.impl.signdata.EveryoneSign;
-import de.greensurvivors.padlock.impl.signdata.SignExpiration;
-import de.greensurvivors.padlock.impl.signdata.SignLock;
-import de.greensurvivors.padlock.impl.signdata.SignTimer;
+import de.greensurvivors.padlock.impl.signdata.*;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Tag;
@@ -59,14 +56,19 @@ public class PadlockAPI { //todo this class needs a clean
                     Sign lockSign = getNearLockDoubleBlock(attachedDoor);
 
                     if (lockSign != null) {
-                        for (Sign additional : getAdditionalSignsDoor(attachedDoor)) {
-                            SignLock.updateSignFromAdditional(lockSign, additional);
-                        }
-
-                        SignLock.updateLegacyUUIDs(lockSign);
+                        SignLock.updateLegacyLock(lockSign);
                         SignExpiration.updateLegacyTime(lockSign);
                         SignTimer.updateLegacyTimer(lockSign);
                         EveryoneSign.updateLegacy(lockSign);
+                        SignDisplay.updateDisplay(lockSign);
+
+                        for (Sign additional : getAdditionalSignsDoor(attachedDoor)) {
+                            SignLock.updateSignFromAdditional(lockSign, additional);
+                            SignExpiration.updateLegacyTimeFromAdditional(lockSign, additional);
+                            SignTimer.updateLegacyTimerFromAdditional(lockSign, additional);
+                            EveryoneSign.updateLegacyFromAdditional(lockSign, additional);
+                        }
+
                         return lockSign;
                     } else {
                         Padlock.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the double block at " + attachedTo.getLocation() + " is locked.");
@@ -77,14 +79,19 @@ public class PadlockAPI { //todo this class needs a clean
             } else if (data instanceof Chest) {
                 Sign lockSign = getLockChest(attachedTo);
                 if (lockSign != null) {
-                    for (Sign additional : getAdditionalSignsChest(attachedTo)) {
-                        SignLock.updateSignFromAdditional(lockSign, additional);
-                    }
-
-                    SignLock.updateLegacyUUIDs(lockSign);
+                    SignLock.updateLegacyLock(lockSign);
                     SignExpiration.updateLegacyTime(lockSign);
                     SignTimer.updateLegacyTimer(lockSign);
                     EveryoneSign.updateLegacy(lockSign);
+                    SignDisplay.updateDisplay(lockSign);
+
+                    for (Sign additional : getAdditionalSignsChest(attachedTo)) {
+                        SignLock.updateSignFromAdditional(lockSign, additional);
+                        SignExpiration.updateLegacyTimeFromAdditional(lockSign, additional);
+                        SignTimer.updateLegacyTimerFromAdditional(lockSign, additional);
+                        EveryoneSign.updateLegacyFromAdditional(lockSign, additional);
+                    }
+
                     return lockSign;
                 } else {
                     Padlock.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the door at " + attachedTo.getLocation() + "is locked.");
@@ -93,14 +100,19 @@ public class PadlockAPI { //todo this class needs a clean
                 Sign lockSign = getLockSignSingleBlock(attachedTo, null);
 
                 if (lockSign != null) {
-                    for (Sign additional : getAdditionalSignsSingleBlock(attachedTo, null)) {
-                        SignLock.updateSignFromAdditional(lockSign, additional);
-                    }
-
-                    SignLock.updateLegacyUUIDs(lockSign);
+                    SignLock.updateLegacyLock(lockSign);
                     SignExpiration.updateLegacyTime(lockSign);
                     SignTimer.updateLegacyTimer(lockSign);
                     EveryoneSign.updateLegacy(lockSign);
+                    SignDisplay.updateDisplay(lockSign);
+
+                    for (Sign additional : getAdditionalSignsSingleBlock(attachedTo, null)) {
+                        SignLock.updateSignFromAdditional(lockSign, additional);
+                        SignExpiration.updateLegacyTimeFromAdditional(lockSign, additional);
+                        SignTimer.updateLegacyTimerFromAdditional(lockSign, additional);
+                        EveryoneSign.updateLegacyFromAdditional(lockSign, additional);
+                    }
+
                     return lockSign;
                 } else {
                     Padlock.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the block at " + attachedTo.getLocation() + "is locked.");

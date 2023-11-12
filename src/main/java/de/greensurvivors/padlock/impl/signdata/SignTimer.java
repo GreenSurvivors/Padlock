@@ -58,12 +58,15 @@ public class SignTimer {
      * set the timer to toggle
      *
      * @param timerDuration time duration in milliseconds
+     * @param shouldUpdateDisplay if the display should get updated. is important to set to false for updating a lock sign from legacy
      */
-    public static void setTimer(@NotNull Sign sign, long timerDuration) {
+    public static void setTimer(@NotNull Sign sign, long timerDuration, boolean shouldUpdateDisplay) {
         sign.getPersistentDataContainer().set(timerKey, PersistentDataType.LONG, timerDuration);
         sign.update();
 
-        SignDisplay.updateDisplay(sign);
+        if (shouldUpdateDisplay) {
+            SignDisplay.updateDisplay(sign);
+        }
     }
 
     /**
@@ -108,13 +111,14 @@ public class SignTimer {
 
     /**
      * update from a legacy timer, purely written on the sign to one in the getPersistentDataContainer.
+     * Will not update the Display of the sign afterwarts to not overwrite other unimported data like timers
      */
     @Deprecated(forRemoval = true)
     public static void updateLegacyTimer(@NotNull Sign sign) {
         Long legacyTimer = getLegacyTimer(sign);
 
         if (legacyTimer != null) {
-            setTimer(sign, legacyTimer);
+            setTimer(sign, legacyTimer, false);
         }
     }
 
@@ -134,5 +138,16 @@ public class SignTimer {
         }
 
         return null;
+    }
+
+    /**
+     * update from a legacy timer, purely written on the lock sign to one in the getPersistentDataContainer.
+     */
+    public static void updateLegacyTimerFromAdditional(Sign lockSign, Sign additional) {
+        Long legacyTimer = getLegacyTimer(additional);
+
+        if (legacyTimer != null) {
+            setTimer(lockSign, legacyTimer, true);
+        }
     }
 }

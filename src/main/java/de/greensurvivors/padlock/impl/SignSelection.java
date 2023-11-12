@@ -21,7 +21,7 @@ public class SignSelection {
     public static @Nullable Sign getSelectedSign(@NotNull Player player) {
         Block signBlock = selectedSign.getIfPresent(player.getUniqueId());
 
-        if (signBlock == null || player.getWorld().getName().equals(signBlock.getWorld().getName())) {
+        if (signBlock != null && player.getWorld().getName().equals(signBlock.getWorld().getName())) {
             if (signBlock.getState() instanceof Sign sign) {
                 return sign;
             }

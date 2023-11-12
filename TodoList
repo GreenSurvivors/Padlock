@@ -8,3 +8,4 @@ todo dokument whole plugin
 todo permission group support
 todo all langfiles except english are out of date.
 todo make multi door opening/closing together configurable per sign
+todo load additional legacy private/everyone/timer names to update legacy signs better

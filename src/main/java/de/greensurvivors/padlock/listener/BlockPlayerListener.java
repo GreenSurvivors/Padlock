@@ -179,7 +179,8 @@ public class BlockPlayerListener implements Listener {
                             } else if (strLine.isBlank() && player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm())) { // failsafe: only allow setting a sign without owner if you could break it!
                                 SignLock.addPlayer(sign, true, null);
                             } else {
-                                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.UNKNOWN_PLAYER);
+                                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.UNKNOWN_PLAYER,
+                                        Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), strLine));
                                 event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN));
                                 return;
                             }
@@ -203,9 +204,9 @@ public class BlockPlayerListener implements Listener {
                         Long timer = SignTimer.getTimerFromComp(line);
 
                         if (timer != null) {
-                            SignTimer.setTimer(sign, timer);
+                            SignTimer.setTimer(sign, timer, true);
                         } else if (plugin.getMessageManager().isSignComp(line, MessageManager.LangPath.EVERYONE_SIGN)) {
-                            EveryoneSign.setEveryone(sign, true);
+                            EveryoneSign.setEveryone(sign, true, true);
                         } else if (MiscUtils.isUserName(strLine)) {
                             SignLock.addPlayer(sign, false, Bukkit.getOfflinePlayer(strLine));
                         } // else invalid line
@@ -294,7 +295,8 @@ public class BlockPlayerListener implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
     private void onAttemptChangeLockSign(@NotNull SignChangeEvent event) {
         Block block = event.getBlock();
-        if (block.getState() instanceof Sign sign && (PadlockAPI.isLockSign(sign))) {
+        if (block.getState() instanceof Sign sign &&
+                (PadlockAPI.isLockSign(sign) || PadlockAPI.isAdditionalSign(sign))) {
             plugin.getMessageManager().sendLang(event.getPlayer(), MessageManager.LangPath.ACTION_PREVENTED_USE_CMDS);
             sign.setWaxed(true);
             sign.update();

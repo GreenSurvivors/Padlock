@@ -10,7 +10,9 @@ import de.greensurvivors.padlock.listener.BlockDebugListener;
 import de.greensurvivors.padlock.listener.BlockEnvironmentListener;
 import de.greensurvivors.padlock.listener.BlockInventoryMoveListener;
 import de.greensurvivors.padlock.listener.BlockPlayerListener;
+import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
+import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -35,6 +37,14 @@ public class Padlock extends JavaPlugin {
     @Override
     public void onEnable() {
         plugin = this;
+
+        // don't allow
+        Plugin lockettePro = Bukkit.getPluginManager().getPlugin("LockettePro");
+        if (lockettePro != null) {
+            Bukkit.getPluginManager().disablePlugin(lockettePro);
+        } else {
+            plugin.getLogger().info("no lockette found.");
+        }
 
         // Read config
         messageManager = new MessageManager(this);

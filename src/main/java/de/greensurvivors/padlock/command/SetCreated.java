@@ -108,7 +108,7 @@ public class SetCreated extends SubCommand {
                         Long millisEpoch = getEpochMillisFromString(args[1]);
 
                         if (millisEpoch != null) {
-                            SignExpiration.updateWithTime(sign, millisEpoch);
+                            SignExpiration.updateWithTime(sign, millisEpoch, true);
 
                             plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_CREATED_SUCCESS);
                             return true;

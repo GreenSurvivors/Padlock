@@ -37,10 +37,15 @@ public class SignExpiration {
      *
      * @param sign       to update
      * @param epochMilli milliseconds since Epoch
+     * @param shouldUpdateDisplay if the display should get updated. is important to set to false for updating a lock sign from legacy
      */
-    public static void updateWithTime(Sign sign, long epochMilli) {
+    public static void updateWithTime(Sign sign, long epochMilli, boolean shouldUpdateDisplay) {
         sign.getPersistentDataContainer().set(createdKey, PersistentDataType.LONG, epochMilli);
         sign.update();
+
+        if (shouldUpdateDisplay) {
+            SignDisplay.updateDisplay(sign);
+        }
     }
 
     /**
@@ -90,7 +95,8 @@ public class SignExpiration {
     }
 
     /**
-     * update a sign from lockette times to modern padlock data storage
+     * update a lock sign from lockette times to modern padlock data storage
+     * Will not update the Display of the sign afterwarts to not overwrite other unimported data like everyone
      */
     @Deprecated(forRemoval = true)
     public static void updateLegacyTime(@NotNull Sign sign) {
@@ -100,7 +106,21 @@ public class SignExpiration {
         if (matcher.matches()) {
             // note that we already test if it could be a number by matching against our pattern.
             // While the number still could be out of bounds, I'm willing to risk it here. Nothing should break anyway.
-            updateWithTime(sign, Long.parseLong(matcher.group(2)));
+            updateWithTime(sign, Long.parseLong(matcher.group(2)), false);
+        }
+    }
+
+    /**
+     * update a additional sign from lockette times to modern padlock data storage
+     */
+    public static void updateLegacyTimeFromAdditional(Sign lockSign, Sign additional) {
+        String text = PlainTextComponentSerializer.plainText().serialize(lockSign.getSide(Side.FRONT).line(0));
+        Matcher matcher = legacyPattern.matcher(text);
+
+        if (matcher.matches()) {
+            // note that we already test if it could be a number by matching against our pattern.
+            // While the number still could be out of bounds, I'm willing to risk it here. Nothing should break anyway.
+            updateWithTime(additional, Long.parseLong(matcher.group(2)), true);
         }
     }
 }

@@ -59,7 +59,7 @@ cmd:
   error:
     not-enough-args: '<red>You provided too few arguments. Pleas try again.<red>'
     not-a-player: '<red>This command can only be called as a player.<red>'
-    unknown-player: "<red>Couldn't find this player. Did you type it right?.</red>"
+    unknown-player: "<red>Couldn't find this player <player>. Did you type it right?.</red>"
     no-sign-selected: '<red>Select a sign by right-clicking on it first.</red>'
     sign-need-reselect: '<red>Please re-select the sign.</red>'
     not-a-bool: '<red>The argument "<argument>" you provided is not a boolean.<red>'

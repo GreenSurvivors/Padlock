@@ -119,7 +119,7 @@ public class SetTimer extends SubCommand {
 
                             if (timerDuration != 0) {
                                 // success
-                                SignTimer.setTimer(sign, timerDuration);
+                                SignTimer.setTimer(sign, timerDuration, true);
 
                                 if (timerDuration > 0) {
                                     plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_SUCCESS_ON,
