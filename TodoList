@@ -6,4 +6,5 @@ todo wiki
 todo permission group support
 todo make multi door opening/closing together configurable per sign
 todo load additional legacy private/everyone/timer names to update legacy signs better
+todo permission?
 todo better API

@@ -4,7 +4,7 @@
 
 # will turn itself off after imported the old config once. Will not import language files
 import-fromLockettePro: false
-language-file-name: 'lang/lang_en.yml'
+language-file-name: 'en'
 enable-quick-protect: true
 dependency:
   worldguard:

@@ -7,15 +7,21 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
+import net.kyori.adventure.util.UTF8ResourceBundleControl;
+import org.apache.commons.io.FileUtils;
 import org.bukkit.plugin.Plugin;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.util.HashMap;
+import java.io.*;
+import java.net.JarURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.logging.Level;
 
 /**
  * manages all translatable and placeholders used by this plugin.
@@ -26,9 +32,7 @@ public class MessageManager {
      * contains all sign lines without any decorations like color but still with every placeholder
      */
     private final HashMap<LangPath, String> nakedSignLiness = new HashMap<>(); // path -> naked
-    //private final HashMap<LangPath, Component> langCache = new HashMap<>();
-    private FileConfiguration lang;
-    private FileConfiguration fallbackLangFile;
+    private ResourceBundle lang;
     /**
      * caches every component without placeholder for faster access in future and loads missing values automatically
      */
@@ -45,17 +49,50 @@ public class MessageManager {
     }
 
     private @NotNull String getStringFromLang(@NotNull LangPath path) {
-        return lang.getString(path.getPath(), fallbackLangFile.getString(path.getPath(), path.getDefaultValue()));
+        try {
+            lang.getString(path.getPath());
+            return lang.getString(path.getPath());
+        } catch (MissingResourceException | ClassCastException e) {
+            plugin.getLogger().log(Level.WARNING, "couldn't find path: \"" + path.getPath() + "\" in lang files using fallback.", e);
+            return path.getDefaultValue();
+        }
     }
 
     /**
      * reload language file. Please call {@link #setLangFileName(String)} before calling this for the first time
      */
     protected void reload() {
-        initLangFiles();
-        lang = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), langfilename));
+        Locale locale = Locale.forLanguageTag(langfilename);
+        plugin.getLogger().info("Locale set to language: " + locale.toLanguageTag());
+        File langFile = new File(new File(plugin.getDataFolder(), "lang"), UTF8ResourceBundleControl.get().toBundleName("lang", locale) + ".properties");
+
+        if (!langFile.exists()) {
+            // save all of them
+            initLangFiles();
+        }
+
+        lang = null;
+        if (langFile.exists()) {
+            try (InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(langFile), StandardCharsets.UTF_8)) {
+                lang = new PropertyResourceBundle(inputStreamReader);
+            } catch (FileNotFoundException ignored) {
+                plugin.getLogger().info("No translation file found. Using internal");
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.WARNING, "IO exception while reading lang bundle", e);
+            }
+        }
+
+        if (lang == null) {
+            try {
+                lang = PropertyResourceBundle.getBundle("lang", locale, plugin.getClass().getClassLoader(), new UTF8ResourceBundleControl());
+            } catch (MissingResourceException e) {
+                plugin.getLogger().log(Level.SEVERE, "Couldn't get Ressource bundle \"lang\" for locale \"" + locale.toLanguageTag() + "\". Messages WILL be broken!", e);
+            }
+        }
+
+        // clear component cache
         langCache.invalidateAll();
-        fallbackLangFile = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "lang/lang_en.yml")); //todo don't hardcode
+        langCache.asMap().clear();
 
         nakedSignLiness.put(LangPath.PRIVATE_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.PRIVATE_SIGN)).toLowerCase());
         nakedSignLiness.put(LangPath.ADDITIONAL_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.ADDITIONAL_SIGN)).toLowerCase());
@@ -71,23 +108,51 @@ public class MessageManager {
      * saves lang files from resources to the plugins datafolder
      */
     private void initLangFiles() {
-        //todo don't hardcode them
-        String[] availablefiles = {"lang/lang_de.yml", "lang/lang_en.yml", "lang/lang_es.yml", "lang/lang_hu.yml", "lang/lang_it.yml", "lang/lang_zh-cn.yml"};
-        for (String filename : availablefiles) {
-            File langfile = new File(plugin.getDataFolder(), filename);
-            if (!langfile.exists()) {
-                plugin.saveResource(filename, false);
+        Enumeration<URL> en;
+        try {
+            en = plugin.getClass().getClassLoader().getResources("lang.properties");
+
+            while (en.hasMoreElements()) {
+                URL url = en.nextElement();
+                JarURLConnection urlcon;
+                urlcon = (JarURLConnection) (url.openConnection());
+
+                JarFile jar = urlcon.getJarFile();
+                Enumeration<JarEntry> entries = jar.entries();
+                boolean found = false;
+
+                while (entries.hasMoreElements()) {
+                    JarEntry jarEntry = entries.nextElement();
+
+                    String entry = jarEntry.getName();
+
+                    if (entry.startsWith("lang_")) { // never save the fallback
+                        try {
+                            InputStream inputStream = plugin.getResource(entry);
+                            File langFile = new File(new File(plugin.getDataFolder(), "lang"), entry);
+                            FileUtils.copyInputStreamToFile(inputStream, langFile); // It should never be null, we already found the resource!
+                        } catch (IllegalArgumentException e) {
+                            plugin.getLogger().log(Level.WARNING, "Couldn't save lang file \"" + entry + "\".", e);
+                        }
+
+                        found = true;
+                    } else if (found && entry.contains("/")) {
+                        break; // already over it
+                    }
+                }
+
+                jar.close();
             }
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.WARNING, "Couldn't save lang files", e);
         }
     }
 
     /**
      * prepend the message with the plugins prefix before sending it to the audience.
      */
-    public void sendMessageWithPrefix(@NotNull Audience audience, @Nullable Component messages) {
-        if (messages != null) {
-            audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(messages));
-        }
+    public void sendMessageWithPrefix(@NotNull Audience audience, @NotNull Component messages) {
+        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(messages));
     }
 
     /**
