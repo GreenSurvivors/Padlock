@@ -1,6 +1,5 @@
 package de.greensurvivors.padlock;
 
-import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.openabledata.DoubleBlockParts;
 import de.greensurvivors.padlock.impl.openabledata.Openables;
@@ -8,7 +7,6 @@ import de.greensurvivors.padlock.impl.signdata.EveryoneSign;
 import de.greensurvivors.padlock.impl.signdata.SignExpiration;
 import de.greensurvivors.padlock.impl.signdata.SignLock;
 import de.greensurvivors.padlock.impl.signdata.SignTimer;
-import net.kyori.adventure.text.Component;
 import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Tag;
@@ -448,6 +446,7 @@ public class PadlockAPI { //todo this class needs a clean
 
     /**
      * checks if the player is an owner of the locked block
+     *
      * @return will also true if the block is not protected
      */
     public static boolean isOwner(@NotNull Block block, @NotNull OfflinePlayer player) {
@@ -498,7 +497,7 @@ public class PadlockAPI { //todo this class needs a clean
     /**
      * return true, if interference is forbidden, true otherwise
      */
-    public static boolean mayNotInterfere(@NotNull Block block, @NotNull Player player) { //todo
+    public static boolean isInterfering(@NotNull Block block, @NotNull Player player) { //todo
         Sign lock = getLock(block);
 
         if (lock != null && !SignLock.isOwner(lock, player.getUniqueId())) {
@@ -512,6 +511,8 @@ public class PadlockAPI { //todo this class needs a clean
             }
         }
 
+
+        Padlock.getPlugin().getLogger().info("no.");
         return false;
     }
 
@@ -521,7 +522,7 @@ public class PadlockAPI { //todo this class needs a clean
      * but do how two locked blocks line up it's totally possible for more than one [Private] sign per block.
      * However only the first valid found wil get used
      */
-    private static boolean isValidLockSign(@Nullable Sign sign) {
+    public static boolean isValidLockSign(@Nullable Sign sign) {
         if (sign != null && isLockSign(sign)) {
             // Found [Private] sign, is expiring turned on and expired? (relative block is now sign)
             return !Padlock.getPlugin().getConfigManager().doLocksExpire() || !isSignExpired(sign);
@@ -598,9 +599,5 @@ public class PadlockAPI { //todo this class needs a clean
             }
         }
         return relativeFace;
-    }
-
-    public static boolean isLockComp(Component line) {
-        return Padlock.getPlugin().getMessageManager().isSignComp(line, MessageManager.LangPath.PRIVATE_SIGN);
     }
 }

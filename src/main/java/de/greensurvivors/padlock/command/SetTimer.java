@@ -8,7 +8,6 @@ import de.greensurvivors.padlock.impl.signdata.SignLock;
 import de.greensurvivors.padlock.impl.signdata.SignTimer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;

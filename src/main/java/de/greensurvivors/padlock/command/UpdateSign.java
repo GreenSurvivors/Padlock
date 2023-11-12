@@ -6,7 +6,6 @@ import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
 import de.greensurvivors.padlock.impl.SignSelection;
 import net.kyori.adventure.text.Component;
-import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;

@@ -3,7 +3,6 @@ package de.greensurvivors.padlock.command;
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
-import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.SignSelection;
 import de.greensurvivors.padlock.impl.signdata.EveryoneSign;
 import de.greensurvivors.padlock.impl.signdata.SignExpiration;
@@ -11,7 +10,6 @@ import de.greensurvivors.padlock.impl.signdata.SignLock;
 import de.greensurvivors.padlock.impl.signdata.SignTimer;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
-import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -19,7 +17,10 @@ import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.UUID;
 import java.util.logging.Level;
 
 /**
@@ -30,22 +31,6 @@ public class Info extends SubCommand {
     protected Info(@NotNull Padlock plugin) {
         super(plugin);
     }
-
-    @Override
-    protected boolean checkPermission(@NotNull Permissible permissible) {
-        return permissible.hasPermission(PermissionManager.CMD_INFO.getPerm());
-    }
-
-    @Override
-    protected @NotNull Set<String> getAlias() {
-        return Set.of("info");
-    }
-
-    @Override
-    protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_INFO);
-    }
-
 
     /**
      * Try to get a list of names from the set of string versions of uuids given back by the lock.
@@ -63,6 +48,21 @@ public class Info extends SubCommand {
         }
 
         return players;
+    }
+
+    @Override
+    protected boolean checkPermission(@NotNull Permissible permissible) {
+        return permissible.hasPermission(PermissionManager.CMD_INFO.getPerm());
+    }
+
+    @Override
+    protected @NotNull Set<String> getAlias() {
+        return Set.of("info");
+    }
+
+    @Override
+    protected @NotNull Component getHelpText() {
+        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_INFO);
     }
 
     @Override

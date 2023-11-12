@@ -24,12 +24,12 @@ public enum PermissionManager {
 
     NO_EXPIRE(new Permission("padlock.noexpire", "", PermissionDefault.OP)),
 
-    EDIT(new Permission("padlock.edit", "Edit sign permission", PermissionDefault.TRUE)),
-    ADMIN_EDIT(new Permission("padlock.admin.edit", "", PermissionDefault.OP, Map.of(EDIT.getPerm().getName(), true))),
-    ADMIN_BREAK(new Permission("padlock.admin.break", "", PermissionDefault.OP)),
-    ADMIN_USE(new Permission("padlock.admin.use", "", PermissionDefault.OP)),
-    ADMIN_INTERFERE(new Permission("padlock.admin.interfere", "", PermissionDefault.OP)),
-    ADMIN_COMMANDS(new Permission("padlock.admin.cmds", "", PermissionDefault.OP,
+    EDIT(new Permission("padlock.edit", "Edit your own lock", PermissionDefault.TRUE)),
+    ADMIN_EDIT(new Permission("padlock.admin.edit", "Edit locks of other players", PermissionDefault.OP, Map.of(EDIT.getPerm().getName(), true))),
+    ADMIN_BREAK(new Permission("padlock.admin.break", "Break locks of other players", PermissionDefault.OP)),
+    ADMIN_USE(new Permission("padlock.admin.use", "Use locked blocks of other players", PermissionDefault.OP)),
+    ADMIN_INTERFERE(new Permission("padlock.admin.interfere", "Place blocks that would interfere", PermissionDefault.OP)),
+    ADMIN_COMMANDS(new Permission("padlock.admin.cmds", "Permission to use all Commands.", PermissionDefault.OP,
             Map.of(
                     CMD_HELP.perm.getName(), true,
                     CMD_INFO.perm.getName(), true,
@@ -40,10 +40,10 @@ public enum PermissionManager {
                     CMD_SET_EVERYONE.perm.getName(), true,
                     CMD_VERSION.perm.getName(), true
             ))),
-    DEBUG(new Permission("padlock.debug", "", PermissionDefault.OP)),
+    DEBUG(new Permission("padlock.debug", "Debug permission. Only for development/serious problems.", PermissionDefault.OP)),
 
     // last so it can call all the others
-    WILDCARD_ALL(new Permission("padlock.admin.*", "", PermissionDefault.OP,
+    WILDCARD_ALL(new Permission("padlock.admin.*", "All permission", PermissionDefault.OP,
             Map.of(
                     ADMIN_EDIT.perm.getName(), true,
                     ADMIN_BREAK.perm.getName(), true,

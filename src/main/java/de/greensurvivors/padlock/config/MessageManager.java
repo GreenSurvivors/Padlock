@@ -1,7 +1,5 @@
 package de.greensurvivors.padlock.config;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.CacheLoader;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import net.kyori.adventure.audience.Audience;
@@ -28,15 +26,14 @@ public class MessageManager {
      * contains all sign lines without any decorations like color but still with every placeholder
      */
     private final HashMap<LangPath, String> nakedSignLiness = new HashMap<>(); // path -> naked
+    //private final HashMap<LangPath, Component> langCache = new HashMap<>();
+    private FileConfiguration lang;
+    private FileConfiguration fallbackLangFile;
     /**
      * caches every component without placeholder for faster access in future and loads missing values automatically
      */
     private final LoadingCache<LangPath, Component> langCache = Caffeine.newBuilder().build(
             path -> MiniMessage.miniMessage().deserialize(getStringFromLang(path)));
-
-    //private final HashMap<LangPath, Component> langCache = new HashMap<>();
-    private FileConfiguration lang;
-    private FileConfiguration fallbackLangFile;
     private String langfilename = "lang/lang_en.yml";
 
     public MessageManager(Plugin plugin) {
@@ -57,6 +54,7 @@ public class MessageManager {
     protected void reload() {
         initLangFiles();
         lang = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), langfilename));
+        langCache.invalidateAll();
         fallbackLangFile = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "lang/lang_en.yml")); //todo don't hardcode
 
         nakedSignLiness.put(LangPath.PRIVATE_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.PRIVATE_SIGN)).toLowerCase());

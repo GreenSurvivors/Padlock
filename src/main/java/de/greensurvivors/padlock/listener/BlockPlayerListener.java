@@ -143,7 +143,7 @@ public class BlockPlayerListener implements Listener {
         if (topline == null) return;
         Player player = event.getPlayer();
 
-        if (PadlockAPI.isLockComp(topline)) {
+        if (plugin.getMessageManager().isSignComp(topline, MessageManager.LangPath.PRIVATE_SIGN)) {
             //check attached block
             Block attachedBlock = PadlockAPI.getAttachedBlock(event.getBlock());
             if (attachedBlock != null && PadlockAPI.isLockable(attachedBlock)) {
@@ -176,12 +176,14 @@ public class BlockPlayerListener implements Listener {
 
                             if (MiscUtils.isUserName(strLine)) {
                                 SignLock.addPlayer(sign, true, Bukkit.getOfflinePlayer(strLine));
+                            } else if (strLine.isBlank() && player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm())) { // failsafe: only allow setting a sign without owner if you could break it!
+                                SignLock.addPlayer(sign, true, null);
                             } else {
                                 plugin.getMessageManager().sendLang(player, MessageManager.LangPath.UNKNOWN_PLAYER);
                                 event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN));
                                 return;
                             }
-                        } else if (player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm())) { // failsafe: only allow setting a sign without owner if you could break it!
+                        } else if (player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm())) { // failsafe: only allow setting a sign without owner if you could break it! (this event should never return null here anyway)
                             SignLock.addPlayer(sign, true, null);
                         } else {
                             plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_ERROR_NO_OWNER);
@@ -202,7 +204,6 @@ public class BlockPlayerListener implements Listener {
 
                         if (timer != null) {
                             SignTimer.setTimer(sign, timer);
-                            plugin.getLogger().warning("did set timer.");
                         } else if (plugin.getMessageManager().isSignComp(line, MessageManager.LangPath.EVERYONE_SIGN)) {
                             EveryoneSign.setEveryone(sign, true);
                         } else if (MiscUtils.isUserName(strLine)) {
@@ -258,7 +259,7 @@ public class BlockPlayerListener implements Listener {
         Player player = event.getPlayer();
 
         if (block.getState() instanceof Sign sign) {
-            if (PadlockAPI.isLockSign(sign)) {
+            if (PadlockAPI.isValidLockSign(sign)) {
                 if (SignLock.isOwner(sign, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm())) {
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.BREAK_LOCK_SUCCESS);
                     plugin.getLockCacheManager().resetCache(PadlockAPI.getAttachedBlock(block));
@@ -289,6 +290,7 @@ public class BlockPlayerListener implements Listener {
     /**
      * protect sign from being changed
      */
+    @Deprecated(forRemoval = true) // only needed for legacy signs.
     @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
     private void onAttemptChangeLockSign(@NotNull SignChangeEvent event) {
         Block block = event.getBlock();
@@ -351,7 +353,9 @@ public class BlockPlayerListener implements Listener {
                     if (action == Action.RIGHT_CLICK_BLOCK &&
                             // if a place attempt was prevented, this could register as a false positive and flip every block but the clicked one
                             // therefor everything comes out of sync.
-                            (!player.isSneaking() || !event.hasItem())) {
+                            !(player.isSneaking() && event.hasItem()) &&
+                            // event gets fired for both hands, ignore offhand
+                            event.getHand() == EquipmentSlot.HAND) {
 
                         // get openable block
                         Block openableBlock = null;
@@ -401,10 +405,8 @@ public class BlockPlayerListener implements Listener {
         Block block = event.getBlock();
         Player player = event.getPlayer();
 
-        if (!player.hasPermission(PermissionManager.ADMIN_INTERFERE.getPerm()) ||
-                PadlockAPI.mayNotInterfere(block, player)) {
+        if (!player.hasPermission(PermissionManager.ADMIN_INTERFERE.getPerm()) && PadlockAPI.isInterfering(block, player)) {
             // no permission
-
             plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_INTERFERE);
             event.setCancelled(true);
         }
@@ -419,7 +421,7 @@ public class BlockPlayerListener implements Listener {
         Player player = event.getPlayer();
         if (player.hasPermission(PermissionManager.ACTION_LOCK.getPerm())) {
             if (MiscUtils.shouldNotify(player) && plugin.getConfigManager().isLockable(block.getType())) {
-                //notice me sempai (o//_//o)
+                //notice me Senpai (o//_//o)
                 if (Objects.requireNonNull(plugin.getConfigManager().getQuickProtectAction()) == ConfigManager.QuickProtectOption.OFF) {
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.NOTICE_MANUEL_LOCK);
                 } else {
@@ -437,8 +439,7 @@ public class BlockPlayerListener implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlockClicked().getRelative(event.getBlockFace());
 
-        Sign lock = PadlockAPI.getLock(block);
-        if (lock != null && (SignLock.isOwner(lock, player.getUniqueId()) ||
+        if (!(PadlockAPI.isOwner(block, player) ||
                 player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
 
             plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
@@ -461,10 +462,7 @@ public class BlockPlayerListener implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlockClicked().getRelative(event.getBlockFace());
 
-        Sign lock = PadlockAPI.getLock(block);
-        if (lock != null && (SignLock.isOwner(lock, player.getUniqueId()) ||
-                player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
-
+        if (!(PadlockAPI.isOwner(block, player) || player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
             plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
             event.setCancelled(true);
         } // has permission
@@ -476,10 +474,8 @@ public class BlockPlayerListener implements Listener {
     @EventHandler(priority = EventPriority.HIGH)
     private void onLecternTake(@NotNull PlayerTakeLecternBookEvent event) {
         Player player = event.getPlayer();
-        Block block = event.getLectern().getBlock();
 
-        Sign lock = PadlockAPI.getLock(block);
-        if (lock != null && (SignLock.isOwner(lock, player.getUniqueId()) ||
+        if (!(PadlockAPI.isOwner(event.getLectern().getBlock(), player) ||
                 player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
 
             plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);

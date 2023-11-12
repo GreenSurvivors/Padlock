@@ -32,7 +32,7 @@ public class SignTimer {
      * casing should not matter and the placeholder should be a
      * group of any number to receive later
      */
-    private final static Pattern legacyPattern = Pattern.compile(Padlock.getPlugin().getMessageManager().getNakedSignText(MessageManager.LangPath.TIMER_SIGN).replace("[", "\\[(i?)").replace("<time>", "(-?[0-9]+)"));
+    private final static Pattern legacyPattern = Pattern.compile(Padlock.getPlugin().getMessageManager().getNakedSignText(MessageManager.LangPath.TIMER_SIGN).replace("[", "\\[(?i)").replace("<time>", "(-?[0-9]+)"));
     private final static NamespacedKey timerKey = new NamespacedKey(Padlock.getPlugin(), "timer");
 
     /**
@@ -100,7 +100,7 @@ public class SignTimer {
         Matcher matcher = legacyPattern.matcher(strToTest);
 
         if (matcher.matches()) {
-            return Long.parseLong(matcher.group(2));
+            return Long.parseLong(matcher.group(1));
         } else {
             return null;
         }

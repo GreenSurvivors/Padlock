@@ -255,6 +255,52 @@ public class SignLock {
     }
 
     /**
+     * sets a new lock sign with the player as the owner
+     *
+     * @param newsign   the block where the new sign should get created in (Note: does not check for any existing blocks at this place!)
+     * @param blockface the direction the new sign should face
+     * @param material  Material of the sign
+     * @param player    new Owner
+     * @return the updated block
+     */
+    public static @NotNull Block putPrivateSignOn(@NotNull Block newsign, @NotNull BlockFace blockface, @NotNull Material material, @NotNull Player player) {
+        // set type
+        Material blockType = Material.getMaterial(material.name().replace("_SIGN", "_WALL_SIGN"));
+        if (blockType != null && Tag.WALL_SIGNS.isTagged(blockType)) {
+            newsign.setType(blockType);
+        } else {
+            newsign.setType(Material.OAK_WALL_SIGN);
+        }
+
+        //set facing
+        BlockData data = newsign.getBlockData();
+        if (data instanceof Directional directional) {
+            directional.setFacing(blockface);
+            newsign.setBlockData(directional, true);
+        }
+
+        Sign sign = (Sign) newsign.getState();
+
+        // default color is hardly visible on dark signs
+        if (newsign.getType() == Material.DARK_OAK_WALL_SIGN) {
+            sign.getSide(Side.FRONT).setColor(DyeColor.WHITE);
+        }
+
+        // set lock and it's owner
+        sign.getSide(Side.FRONT).line(0, Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PRIVATE_SIGN));
+        sign.getSide(Side.FRONT).line(1, Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PLAYER_NAME_ON_SIGN,
+                Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), player.getName())));
+
+        addPlayer(sign, true, player);
+
+        //set waxed and finally make all the changes happen by updating the state
+        sign.setWaxed(true);
+        sign.update();
+
+        return newsign;
+    }
+
+    /**
      * Data type to store an ordered set of Strings.
      * The order is important to keep the names displayed by {@link SignDisplay} consistent,
      * and not display a new member / owner every time the sign was updated.
@@ -313,51 +359,5 @@ public class SignLock {
         public ListOrderedSet<String> fromPrimitive(@NotNull String primitive, @NotNull PersistentDataAdapterContext context) {
             return gson.fromJson(primitive, type);
         }
-    }
-
-    /**
-     * sets a new lock sign with the player as the owner
-     *
-     * @param newsign   the block where the new sign should get created in (Note: does not check for any existing blocks at this place!)
-     * @param blockface the direction the new sign should face
-     * @param material  Material of the sign
-     * @param player    new Owner
-     * @return the updated block
-     */
-    public static @NotNull Block putPrivateSignOn(@NotNull Block newsign, @NotNull BlockFace blockface, @NotNull Material material, @NotNull Player player) {
-        // set type
-        Material blockType = Material.getMaterial(material.name().replace("_SIGN", "_WALL_SIGN"));
-        if (blockType != null && Tag.WALL_SIGNS.isTagged(blockType)) {
-            newsign.setType(blockType);
-        } else {
-            newsign.setType(Material.OAK_WALL_SIGN);
-        }
-
-        //set facing
-        BlockData data = newsign.getBlockData();
-        if (data instanceof Directional directional) {
-            directional.setFacing(blockface);
-            newsign.setBlockData(directional, true);
-        }
-
-        Sign sign = (Sign) newsign.getState();
-
-        // default color is hardly visible on dark signs
-        if (newsign.getType() == Material.DARK_OAK_WALL_SIGN) {
-            sign.getSide(Side.FRONT).setColor(DyeColor.WHITE);
-        }
-
-        // set lock and it's owner
-        sign.getSide(Side.FRONT).line(0, Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PRIVATE_SIGN));
-        sign.getSide(Side.FRONT).line(1, Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PLAYER_NAME_ON_SIGN,
-                Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), player.getName())));
-
-        addPlayer(sign, true, player);
-
-        //set waxed and finally make all the changes happen by updating the state
-        sign.setWaxed(true);
-        sign.update();
-
-        return newsign;
     }
 }

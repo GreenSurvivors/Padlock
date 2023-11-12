@@ -1,6 +1,5 @@
 package de.greensurvivors.padlock.command;
 
-import de.greensurvivors.padlock.impl.DependencyManager;
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;

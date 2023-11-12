@@ -13,7 +13,7 @@ import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.apache.commons.collections4.set.ListOrderedSet;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
-import org.bukkit.block.Block;
+import org.bukkit.Sound;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -436,6 +436,10 @@ public class Command implements CommandExecutor, TabCompleter {
 
             if (subCommand != null) {
                 return subCommand.onCommand(sender, args);
+            } else if (args[0].equalsIgnoreCase("cow") && sender instanceof Player player) {
+                // little harmless Easter egg, don't worry about it
+                player.playSound(player, Sound.ENTITY_COW_AMBIENT, 1, 1);
+                return true;
             }
 
             plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.CMD_USAGE);
