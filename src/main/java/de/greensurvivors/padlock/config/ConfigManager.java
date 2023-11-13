@@ -35,7 +35,6 @@ public class ConfigManager {
     //while this works intern with milliseconds, configurable are only seconds for easier handling of the config
     private final ConfigOption<Integer> CACHE_SECONDS = new ConfigOption<>("cache.seconds", 0);
     private final ConfigOption<String> USERNAME_PATTERN = new ConfigOption<>("username-pattern", "^.?[a-zA-Z0-9_]{3,16}$");
-    private final ConfigOption<Long> DEFAULT_CREATETIME = new ConfigOption<>("lock-default-create-time-unix", -1L);
 
     public ConfigManager(@NotNull Padlock plugin) {
         this.plugin = plugin;
@@ -321,8 +320,6 @@ public class ConfigManager {
             plugin.getLogger().info("Cache is enabled! In case of inconsistency, turn off immediately.");
         }
 
-        DEFAULT_CREATETIME.setValue(config.getLong(DEFAULT_CREATETIME.getPath(), DEFAULT_CREATETIME.getFallbackValue()));
-
         USERNAME_PATTERN.setValue(config.getString(USERNAME_PATTERN.getPath(), USERNAME_PATTERN.getFallbackValue()));
         MiscUtils.setUsernamePattern(USERNAME_PATTERN.getValueOrFallback());
     }
@@ -348,7 +345,6 @@ public class ConfigManager {
         config.set(LOCK_EXEMPTIONS.getPath(), adapter.getProtectionExemptions());
         config.set(LOCK_EXPIRE_DAYS.getPath(), adapter.getLockExpireDays());
         config.set(CACHE_SECONDS.getPath(), adapter.getCacheTimeSeconds());
-        config.set(DEFAULT_CREATETIME.getPath(), adapter.getLockDefaultCreateTimeUnix());
 
         plugin.saveConfig();
         plugin.reloadConfig();
@@ -380,10 +376,6 @@ public class ConfigManager {
 
     public @NotNull Long getLockExpireDays() {
         return LOCK_EXPIRE_DAYS.getValueOrFallback();
-    }
-
-    public long getLockDefaultCreateTimeEpoch() {
-        return DEFAULT_CREATETIME.getValueOrFallback();
     }
 
     public boolean isLockable(Material material) {

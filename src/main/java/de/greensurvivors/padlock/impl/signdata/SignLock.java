@@ -135,7 +135,10 @@ public class SignLock {
 
                 if (splitted[1].length() == 36) { // uuid valid check
                     Padlock.getPlugin().getLogger().info("member uuid");
-                    addPlayer(main, false, Bukkit.getOfflinePlayer(UUID.fromString(splitted[1])));
+                    try {
+                        addPlayer(main, false, Bukkit.getOfflinePlayer(UUID.fromString(splitted[1])));
+                    } catch (IllegalArgumentException ignored) {
+                    }
                 }
             } else {
                 OfflinePlayer maybePlayer = tryGetPlayerJustFromNameComp(additional.getSide(Side.FRONT).line(i));

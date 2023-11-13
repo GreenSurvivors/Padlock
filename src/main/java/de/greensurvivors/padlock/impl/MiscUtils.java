@@ -22,12 +22,12 @@ import java.util.regex.Pattern;
  * Utilitys that don't fit anywhere else
  */
 public class MiscUtils {
-    // the point at the beginning is for bedrock player if the proxy supports them.
-    private static Pattern usernamePattern = Pattern.compile("^.?[a-zA-Z0-9_]{3,16}$");
     /**
      * Set containing all players that have been notified about being able to lock things
      */
     private static final Set<UUID> notified = new HashSet<>();
+    // the point at the beginning is for bedrock player if the proxy supports them.
+    private static Pattern usernamePattern = Pattern.compile("^.?[a-zA-Z0-9_]{3,16}$");
 
     /**
      * removes one item of the players main hand.
