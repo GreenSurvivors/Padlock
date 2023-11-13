@@ -1,31 +1,25 @@
-# LockettePro [![Build Status](https://ci.nyaacat.com/job/LockettePro/job/1.17/badge/icon?style=flat-square)](https://ci.nyaacat.com/job/LockettePro/job/1.17/)
-
-***WARNING: Versions for Minecraft 1.15.x are not fully tested yet.***
+***WARNING: Versions for Minecraft 1.20.x are not fully tested yet.***
 Please create an issus if you find anything wrong. Thank you.
-For Minecraft 1.14.4, please download [build \#9](https://ci.nyaacat.com/job/LockettePro/9/).
 
-All versions can be found at [Nyaa CI server](https://ci.nyaacat.com/job/LockettePro/) and
-[Github Release Page](https://github.com/NyaaCat/LockettePro/releases).
+All versions can be found at [Github Release Page](https://github.com/GreenSurvivors/Padlock/releases).
 
-### LockettePro - A much better Lockette plugin for Bukkit
+### Padlock - A much better Lockette(Pro) plugin for Paper
 
-LockettePro is a block-protection plugin based on Lockette (https://github.com/Acru/Lockette), the code base is entirely re-written. It is 100% compatable with original Lockette, and the plugin behaviors are also 100% same.
+Padlock is a block-protection plugin based on LockettePro () witch itself is based on
+Lockette (https://github.com/Acru/Lockette), the code base is entirely re-written.
+It will be 100% backwards compatible with Lockette(Pro) but do to how it saves all the data does not support downgrading
+back to Lockette(Pro).
 
-### LockettePro has a lot of enhancements compared to Lockette:
+### Padlock has a lot of enhancements compared to Lockette(Pro):
 
 1. Much better codebase and performance, fixed a lot of issues and glitches.
 2. Real UUID support.
 3. All blocks can be set to lockable or not. You can even prevent players from locking a chest.
-4. Unlimited [Private], [More Users], [Timer:x] signs format.
-5. Alert messages are editable, and UTF-8 characters are supported.
-6. Lock expircy feature, locks can expire after a certain amount of time.
-
-### Links
-Spigot release page: https://www.spigotmc.org/resources/lockettepro.20427/  
-Bukkit release page: http://dev.bukkit.org/bukkit-plugins/lockettepro/  
-MCBBS release page: http://www.mcbbs.net/thread-567962-1-1.html    
-MC 1.6~1.7 Port: https://github.com/connection-lost/LockettePro/releases/tag/v1.9.4
-
-### Version history
-- 2.9.x-1.15.1: Minecraft 1.15.1, since build 10
-- 2.9.x-1.14.4: Minecraft 1.14.4, until build 9
+4. Alert messages are editable, and UTF-8 characters are supported.
+5. Lock expircy feature, locks can expire after a certain amount of time.
+6. All propertys like members, owners, timers, everyone access is saved in persistentDataContainer. This way we do not
+   need to hide anything via ProtocollLib, witch has proven to be error prone and hard to work with.
+7. Allowing tags in config for future proofing. Want to protect all doors not having to update everytime mojang adds a
+   new one? We got you covert!
+8. Don't support Spigot or further downstream anymore. Is this really a pro argument? Yes, since this enables us to use
+   cutting edge API and no longer get slowed down by supporting old code.
