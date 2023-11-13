@@ -18,6 +18,7 @@ public class EveryoneSign {
 
     /**
      * Set if everyone should have member access or not.
+     *
      * @param shouldUpdateDisplay if the display should get updated. is important to set to false for updating a lock sign from legacy
      */
     public static void setEveryone(@NotNull Sign sign, boolean everyoneHasAccess, boolean shouldUpdateDisplay) {

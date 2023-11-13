@@ -57,7 +57,7 @@ public class SignTimer {
     /**
      * set the timer to toggle
      *
-     * @param timerDuration time duration in milliseconds
+     * @param timerDuration       time duration in milliseconds
      * @param shouldUpdateDisplay if the display should get updated. is important to set to false for updating a lock sign from legacy
      */
     public static void setTimer(@NotNull Sign sign, long timerDuration, boolean shouldUpdateDisplay) {

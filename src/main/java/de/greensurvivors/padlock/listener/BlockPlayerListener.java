@@ -281,10 +281,17 @@ public class BlockPlayerListener implements Listener {
                     event.setCancelled(true);
                 }
             }
-        } else if (PadlockAPI.isProtected(block)) {// not a sign
-            //todo I feel like if you are owner / admin you shouldn't be prevented of breaking it
-            plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
-            event.setCancelled(true);
+        } else { // not a sign
+            Sign lock = PadlockAPI.getLock(block);
+            if (lock != null) {
+                if (!(SignLock.isOwner(lock, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm()))) {
+                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
+                    event.setCancelled(true);
+                } else if (!plugin.getDependencyManager().isProtectedFrom(block, player)) { // if the player is allowed to break the block
+                    // break lock sign in case it wasn't attached to the block
+                    lock.getBlock().breakNaturally();
+                }
+            }
         }
     }
 

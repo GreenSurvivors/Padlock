@@ -35,8 +35,8 @@ public class SignExpiration {
     /**
      * update the time this sign was "created" with a new time
      *
-     * @param sign       to update
-     * @param epochMilli milliseconds since Epoch
+     * @param sign                to update
+     * @param epochMilli          milliseconds since Epoch
      * @param shouldUpdateDisplay if the display should get updated. is important to set to false for updating a lock sign from legacy
      */
     public static void updateWithTime(Sign sign, long epochMilli, boolean shouldUpdateDisplay) {

@@ -3,6 +3,7 @@ package de.greensurvivors.padlock.listener;
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.PadlockAPI;
 import de.greensurvivors.padlock.config.ConfigManager;
+import org.bukkit.Material;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.DoubleChest;
@@ -13,11 +14,12 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
+import org.bukkit.inventory.ItemStack;
 
 /**
  * protects against blocks / non player entities taking items out / putting in a locked block
  */
-public class BlockInventoryMoveListener implements Listener { //todo maybe disable the hopper(minecart) for a short amount of time instead of using cache to save resources. But there also might be danger ahead if there are possibilities the hopper doesn't get correctly enabled again
+public class BlockInventoryMoveListener implements Listener {
     private final Padlock plugin;
 
     public BlockInventoryMoveListener(Padlock plugin) {
@@ -41,7 +43,9 @@ public class BlockInventoryMoveListener implements Listener { //todo maybe disab
                                 event.setCancelled(true);
                         case REMOVE -> { // Extra action - HopperMinecart removal
                             event.setCancelled(true);
-                            hopperMinecart.remove(); //todo test if this drops the cart and its items --> it drops the items inside but not the cart, maybe kill it some other way?
+                            // just removing the entity doesn't drop the minecart-item itself, so we dropping it manually
+                            hopperMinecart.getWorld().dropItemNaturally(hopperMinecart.getLocation(), new ItemStack(Material.HOPPER_MINECART));
+                            hopperMinecart.remove();
                         }
                     }
                 }

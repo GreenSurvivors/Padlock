@@ -28,7 +28,7 @@ import java.util.Set;
 /**
  *
  */
-public class PadlockAPI { //todo this class needs a clean
+public class PadlockAPI {
     public final static Set<BlockFace> cardinalFaces = Set.of(BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST);
     public final static Set<BlockFace> allFaces = Set.of(BlockFace.NORTH, BlockFace.EAST, BlockFace.SOUTH, BlockFace.WEST, BlockFace.UP, BlockFace.DOWN);
 
@@ -426,7 +426,7 @@ public class PadlockAPI { //todo this class needs a clean
     }
 
     /**
-     * get the lock sign of a block, might be null if no where found.
+     * get the not expired lock sign of a block, might be null if no where found.
      */
     public static @Nullable Sign getLock(Block block) {
         if (block.getState() instanceof Sign sign) {
@@ -509,7 +509,7 @@ public class PadlockAPI { //todo this class needs a clean
     /**
      * return true, if interference is forbidden, true otherwise
      */
-    public static boolean isInterfering(@NotNull Block block, @NotNull Player player) { //todo
+    public static boolean isInterfering(@NotNull Block block, @NotNull Player player) {
         Sign lock = getLock(block);
 
         if (lock != null && !SignLock.isOwner(lock, player.getUniqueId())) {
