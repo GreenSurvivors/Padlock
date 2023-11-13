@@ -1,6 +1,7 @@
 package de.greensurvivors.padlock.config;
 
 import de.greensurvivors.padlock.Padlock;
+import de.greensurvivors.padlock.impl.MiscUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
@@ -32,7 +33,8 @@ public class ConfigManager {
     private final ConfigOption<Set<ProtectionExemption>> LOCK_EXEMPTIONS = new ConfigOption<>("lock.exemptions", Set.of());
     private final ConfigOption<Long> LOCK_EXPIRE_DAYS = new ConfigOption<>("lock.expire.days", 999L);
     //while this works intern with milliseconds, configurable are only seconds for easier handling of the config
-    private final ConfigOption<Integer> CACHE_MILLISECONDS = new ConfigOption<>("cache.seconds", 0);
+    private final ConfigOption<Integer> CACHE_SECONDS = new ConfigOption<>("cache.seconds", 0);
+    private final ConfigOption<String> USERNAME_PATTERN = new ConfigOption<>("username-pattern", "^.?[a-zA-Z0-9_]{3,16}$");
     private final ConfigOption<Long> DEFAULT_CREATETIME = new ConfigOption<>("lock-default-create-time-unix", -1L);
 
     public ConfigManager(@NotNull Padlock plugin) {
@@ -313,13 +315,16 @@ public class ConfigManager {
 
         LOCK_EXPIRE_DAYS.setValue(config.getLong(LOCK_EXPIRE_DAYS.getPath(), LOCK_EXPIRE_DAYS.getFallbackValue()));
 
-        CACHE_MILLISECONDS.setValue(config.getInt(CACHE_MILLISECONDS.getPath(), CACHE_MILLISECONDS.getFallbackValue()) * 1000);
-        if (CACHE_MILLISECONDS.getValueOrFallback() > 0) {
-            plugin.getLockCacheManager().setExpirationTime(CACHE_MILLISECONDS.getValueOrFallback(), TimeUnit.MILLISECONDS);
+        CACHE_SECONDS.setValue(config.getInt(CACHE_SECONDS.getPath(), CACHE_SECONDS.getFallbackValue()));
+        if (CACHE_SECONDS.getValueOrFallback() > 0) {
+            plugin.getLockCacheManager().setExpirationTime(CACHE_SECONDS.getValueOrFallback(), TimeUnit.SECONDS);
             plugin.getLogger().info("Cache is enabled! In case of inconsistency, turn off immediately.");
         }
 
         DEFAULT_CREATETIME.setValue(config.getLong(DEFAULT_CREATETIME.getPath(), DEFAULT_CREATETIME.getFallbackValue()));
+
+        USERNAME_PATTERN.setValue(config.getString(USERNAME_PATTERN.getPath(), USERNAME_PATTERN.getFallbackValue()));
+        MiscUtils.setUsernamePattern(USERNAME_PATTERN.getValueOrFallback());
     }
 
     /**
@@ -342,7 +347,7 @@ public class ConfigManager {
         config.set(LOCK_BLOCKS_HOPPER_MINECART.getPath(), adapter.isItemTransferOutBlocked());
         config.set(LOCK_EXEMPTIONS.getPath(), adapter.getProtectionExemptions());
         config.set(LOCK_EXPIRE_DAYS.getPath(), adapter.getLockExpireDays());
-        config.set(CACHE_MILLISECONDS.getPath(), adapter.getCacheTimeSeconds());
+        config.set(CACHE_SECONDS.getPath(), adapter.getCacheTimeSeconds());
         config.set(DEFAULT_CREATETIME.getPath(), adapter.getLockDefaultCreateTimeUnix());
 
         plugin.saveConfig();
@@ -385,12 +390,12 @@ public class ConfigManager {
         return LOCKABLES.getValueOrFallback().contains(material);
     }
 
-    public int getCacheTimeMillis() {
-        return CACHE_MILLISECONDS.getValueOrFallback();
+    public int getCacheTimeSeconds() {
+        return CACHE_SECONDS.getValueOrFallback();
     }
 
     public boolean isCacheEnabled() {
-        return CACHE_MILLISECONDS.getValueOrFallback() > 0;
+        return CACHE_SECONDS.getValueOrFallback() > 0;
     }
 
     public boolean isProtectionExempted(ProtectionExemption against) {

@@ -1,7 +1,9 @@
 package de.greensurvivors.padlock.impl;
 
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
@@ -20,8 +22,8 @@ import java.util.regex.Pattern;
  * Utilitys that don't fit anywhere else
  */
 public class MiscUtils {
-    // the point at the beginning is for bedrock player if the proxy supports them. //todo make this configurable as it should be in the proxy
-    private static final Pattern usernamePattern = Pattern.compile("^.?[a-zA-Z0-9_]{3,16}$");
+    // the point at the beginning is for bedrock player if the proxy supports them.
+    private static Pattern usernamePattern = Pattern.compile("^.?[a-zA-Z0-9_]{3,16}$");
     /**
      * Set containing all players that have been notified about being able to lock things
      */
@@ -81,5 +83,26 @@ public class MiscUtils {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Set the new userNamePattern, to account for other settings in the proxy for bedrock players
+     */
+    public static void setUsernamePattern(@NotNull String newUsernamePattern) {
+        usernamePattern = Pattern.compile(newUsernamePattern);
+    }
+
+    public static @NotNull Set<@NotNull OfflinePlayer> getPlayersFromUUIDStrings(@NotNull Set<@NotNull String> uuidStrs) {
+        Set<OfflinePlayer> result = new HashSet<>();
+
+        for (String uuidStr : uuidStrs) {
+            try {
+                UUID uuid = UUID.fromString(uuidStr);
+                result.add(Bukkit.getOfflinePlayer(uuid));
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+
+        return result;
     }
 }
