@@ -3,11 +3,12 @@ package de.greensurvivors.padlock.command;
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
+import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.SignSelection;
+import de.greensurvivors.padlock.impl.signdata.SignAccessType;
 import de.greensurvivors.padlock.impl.signdata.SignLock;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
-import org.apache.commons.lang3.BooleanUtils;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -15,12 +16,11 @@ import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
-/**
- * set the everyone-property so everyone has (no) member access (anymore)
- */
 public class SetAccessType extends SubCommand {
     protected SetAccessType(@NotNull Padlock plugin) {
         super(plugin);
@@ -28,17 +28,17 @@ public class SetAccessType extends SubCommand {
 
     @Override
     protected boolean checkPermission(@NotNull Permissible permissible) {
-        return permissible.hasPermission(PermissionManager.CMD_SET_EVERYONE.getPerm());
+        return permissible.hasPermission(PermissionManager.CMD_SET_ACCESS_TYPE.getPerm());
     }
 
     @Override
     protected @NotNull Set<String> getAliases() {
-        return Set.of("seteveryone", "everyone");
+        return Set.of("setaccesstype", "settype", "setaccess", "seta", "sa", "sat");
     }
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_SETEVERYONE);
+        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_SET_ACCESS_TYPE);
     }
 
     @Override
@@ -59,16 +59,17 @@ public class SetAccessType extends SubCommand {
                         // only admins and owners can change a signs properties
                         if (SignLock.isOwner(sign, player.getUniqueId()) ||
                                 player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm())) {
-                            // get and check bool from arg
-                            Boolean setting = BooleanUtils.toBooleanObject(args[1]);
+                            // get and check type from arg
+                            //todo lang mapping
+                            SignAccessType.AccessType accessType = MiscUtils.getEnum(SignAccessType.AccessType.class, args[1]);
 
-                            if (setting != null) {
+                            if (accessType != null) {
                                 // success!
-                                //SignAccessType.setAccessType(sign, setting, true); //todo
+                                SignAccessType.setAccessType(sign, accessType, true);
                                 plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_ACCESS_TYPE_SUCCESS,
-                                        Placeholder.component(MessageManager.PlaceHolder.ARGUMENT.getPlaceholder(), Component.text(setting)));
+                                        Placeholder.component(MessageManager.PlaceHolder.ARGUMENT.getPlaceholder(), Component.text(accessType.name().toLowerCase(Locale.ENGLISH))));
                             } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_BOOL,
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_BOOL, //todo
                                         Placeholder.unparsed(MessageManager.PlaceHolder.ARGUMENT.getPlaceholder(), args[1]));
                                 return false;
                             }
@@ -96,7 +97,8 @@ public class SetAccessType extends SubCommand {
     @Override
     protected @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
         if (this.checkPermission(sender) && args.length == 2) {
-            return List.of(Boolean.TRUE.toString(), Boolean.FALSE.toString());
+            //todo lang mapping
+            return Arrays.stream(SignAccessType.AccessType.values()).map(type -> type.name().toLowerCase()).toList();
         } else {
             return null;
         }

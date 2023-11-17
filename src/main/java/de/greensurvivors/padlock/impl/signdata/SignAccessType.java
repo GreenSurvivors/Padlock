@@ -17,12 +17,12 @@ import org.jetbrains.annotations.Nullable;
 
 
 public final class SignAccessType {
-    private final static NamespacedKey lockTypeKey = new NamespacedKey(Padlock.getPlugin(), "LockAccessType");
+    private final static NamespacedKey accessTypeKey = new NamespacedKey(Padlock.getPlugin(), "LockAccessType");
 
-    public static void setAccessType(@NotNull Sign sign, AccessType accessType, boolean shouldUpdateDisplay) {
+    public static void setAccessType(@NotNull Sign sign, @NotNull AccessType accessType, boolean shouldUpdateDisplay) {
         PersistentDataContainer container = sign.getPersistentDataContainer();
 
-        container.set(lockTypeKey, PersistentDataType.STRING, accessType.name());
+        container.set(accessTypeKey, PersistentDataType.STRING, accessType.name());
         sign.update();
 
         if (shouldUpdateDisplay) {
@@ -30,6 +30,12 @@ public final class SignAccessType {
         }
     }
 
+    /**
+     * unless you work with player input or legacy signs use {@link #getAccessType(Sign)} instead!
+     *
+     * @param line
+     * @return
+     */
     public static AccessType getAccessTypeFromComp(@NotNull Component line) {
         MessageManager manager = Padlock.getPlugin().getMessageManager();
 
@@ -41,6 +47,8 @@ public final class SignAccessType {
             return AccessType.DONATION;
         } else if (manager.isSignComp(line, MessageManager.LangPath.DISPLAY_SIGN)) {
             return AccessType.DISPLAY;
+        } else if (manager.isSignComp(line, MessageManager.LangPath.SUPPLY_SIGN)) {
+            return AccessType.SUPPLY;
         } else {
             return null;
         }
@@ -50,15 +58,18 @@ public final class SignAccessType {
      * will start an update process, if the sign is a legacy sign
      */
     public static @Nullable AccessType getAccessType(@NotNull Sign sign) {
-        String hasEveryOneAccess = sign.getPersistentDataContainer().get(lockTypeKey, PersistentDataType.STRING);
+        String accessTypeStr = sign.getPersistentDataContainer().get(accessTypeKey, PersistentDataType.STRING);
 
         AccessType accessType;
-        if (hasEveryOneAccess == null) {
+        if (accessTypeStr == null) {
             accessType = getLegacySetting(sign);
-
-            PadlockAPI.updateLegacySign(sign);
+            if (accessType != null) {
+                PadlockAPI.updateLegacySign(sign);
+            } else {
+                return null;
+            }
         } else {
-            accessType = MiscUtils.getEnum(AccessType.class, hasEveryOneAccess);
+            accessType = MiscUtils.getEnum(AccessType.class, accessTypeStr);
 
             if (accessType == null) {
                 accessType = AccessType.PRIVATE;
@@ -69,15 +80,20 @@ public final class SignAccessType {
         return accessType;
     }
 
-    //public static Component get //todo
-
     /**
      * update a legacy lockette lock sign with potential an everyone line on it.
      * Will not update the Display of the sign afterwarts to not overwrite other unimported data like timers
      */
     @Deprecated(forRemoval = true)
     public static void updateLegacy(@NotNull Sign sign) {
-        setAccessType(sign, getLegacySetting(sign), false);
+        AccessType type = getLegacySetting(sign);
+
+        if (type != null) {
+            setAccessType(sign, type, false);
+        } else {
+            Padlock.getPlugin().getLogger().warning("couldn't get an access type to update from. Using private. sign at: " + sign.getLocation());
+            setAccessType(sign, AccessType.PRIVATE, false);
+        }
     }
 
     /**
@@ -87,7 +103,7 @@ public final class SignAccessType {
      * Use {@link #updateLegacy(Sign)} and then {@link #getAccessType(Sign)}
      */
     @Deprecated(forRemoval = true)
-    private static boolean isLegacyEveryOneComp(@NotNull Component component) {
+    public static boolean isLegacyEveryOneComp(@NotNull Component component) {
         return Padlock.getPlugin().getMessageManager().isSignComp(component, MessageManager.LangPath.EVERYONE_SIGN);
     }
 
@@ -95,28 +111,36 @@ public final class SignAccessType {
      * returns {@link AccessType#PUBLIC} if at least one sign is a legacy lockette everyone line.
      */
     @Deprecated(forRemoval = true)
-    private static AccessType getLegacySetting(@NotNull Sign sign) {
+    private static @Nullable AccessType getLegacySetting(@NotNull Sign sign) {
         for (Component line : sign.getSide(Side.FRONT).lines()) {
-            if (Padlock.getPlugin().getMessageManager().isSignComp(line, MessageManager.LangPath.EVERYONE_SIGN)) {
+            if (Padlock.getPlugin().getMessageManager().isSignComp(line, MessageManager.LangPath.PRIVATE_SIGN)) {
+                return AccessType.PRIVATE;
+            } else if (Padlock.getPlugin().getMessageManager().isSignComp(line, MessageManager.LangPath.EVERYONE_SIGN)) {
                 return AccessType.PUBLIC;
             }
         }
 
-        return AccessType.PRIVATE;
+        return null;
     }
 
     /**
      * update a legacy lockette additional sign with potential an everyone line on it.
      */
     public static void updateLegacyFromAdditional(Sign lockSign, Sign additional) {
-        setAccessType(lockSign, getLegacySetting(additional), true);
+        AccessType type = getLegacySetting(additional);
+
+        // not every additional sign has an "everyone" on it, and this is the only access type they can have
+        if (type != null) {
+            setAccessType(lockSign, type, true);
+        }
     }
 
     public enum AccessType {
         PRIVATE(false),
         PUBLIC(false), // everyone is member
         DONATION(true),
-        DISPLAY(true);
+        DISPLAY(true),
+        SUPPLY(true);
 
         private final boolean isInventoryHolderOnly;
 
@@ -124,7 +148,7 @@ public final class SignAccessType {
             this.isInventoryHolderOnly = isInventoryHolderOnly;
         }
 
-        public boolean doesQualifyAs(Block block) {
+        public boolean doesQualifyAs(Block block) { //todo
             return !isInventoryHolderOnly || block.getState() instanceof InventoryHolder;
         }
     }

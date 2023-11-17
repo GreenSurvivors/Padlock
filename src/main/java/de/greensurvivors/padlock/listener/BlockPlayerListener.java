@@ -8,10 +8,7 @@ import de.greensurvivors.padlock.config.PermissionManager;
 import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.SignSelection;
 import de.greensurvivors.padlock.impl.openabledata.Openables;
-import de.greensurvivors.padlock.impl.signdata.SignAccessType;
-import de.greensurvivors.padlock.impl.signdata.SignDisplay;
-import de.greensurvivors.padlock.impl.signdata.SignLock;
-import de.greensurvivors.padlock.impl.signdata.SignTimer;
+import de.greensurvivors.padlock.impl.signdata.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -25,6 +22,7 @@ import org.bukkit.block.DoubleChest;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.type.Chest;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -32,11 +30,16 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerTakeLecternBookEvent;
+import org.bukkit.inventory.BlockInventoryHolder;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
@@ -141,7 +144,8 @@ public class BlockPlayerListener implements Listener {
         if (topline == null) return;
         Player player = event.getPlayer();
 
-        if (SignAccessType.getAccessTypeFromComp(topline) != null) {
+        SignAccessType.AccessType accessType = SignAccessType.getAccessTypeFromComp(topline);
+        if (accessType != null) {
             //check attached block
             Block attachedBlock = PadlockAPI.getAttachedBlock(event.getBlock());
             if (attachedBlock != null && PadlockAPI.isLockable(attachedBlock)) {
@@ -155,6 +159,7 @@ public class BlockPlayerListener implements Listener {
                     }
                 } else { // all good
                     Sign sign = (Sign) event.getBlock().getState();
+                    SignAccessType.setAccessType(sign, accessType, false);
                     sign.setWaxed(true);
                     sign.update();
 
@@ -328,7 +333,7 @@ public class BlockPlayerListener implements Listener {
      * & handle connected openables
      */
     @EventHandler(priority = EventPriority.HIGH)
-    private void onAttemptInteractLockedBlocks(@NotNull PlayerInteractEvent event) { //todo new access types
+    private void onAttemptInteractLockedBlocks(@NotNull PlayerInteractEvent event) {
         Action action = event.getAction();
         Block block = event.getClickedBlock();
 
@@ -352,15 +357,10 @@ public class BlockPlayerListener implements Listener {
             if (lockSign != null) {
                 if (SignSelection.getSelectedSign(player) != lockSign) {
                     if (SignLock.isMember(lockSign, player.getUniqueId()) || SignLock.isOwner(lockSign, player.getUniqueId()) ||
-                            player.hasPermission(PermissionManager.ADMIN_USE.getPerm())) {
+                            player.hasPermission(PermissionManager.ADMIN_USE.getPerm()) || SignAccessType.getAccessType(lockSign) != SignAccessType.AccessType.PRIVATE) {
 
                         // Handle multi openables
-                        if (action == Action.RIGHT_CLICK_BLOCK &&
-                                // if a place attempt was prevented, this could register as a false positive and flip every block but the clicked one
-                                // therefor everything comes out of sync.
-                                !(player.isSneaking() && event.hasItem()) &&
-                                // event gets fired for both hands, ignore offhand
-                                event.getHand() == EquipmentSlot.HAND) {
+                        if (action == Action.RIGHT_CLICK_BLOCK) {
 
                             // get openable block
                             Block openableBlock = null;
@@ -370,7 +370,12 @@ public class BlockPlayerListener implements Listener {
                                 openableBlock = block;
                             }
 
-                            if (openableBlock != null) {
+                            if (openableBlock != null &&
+                                    // if a place attempt was prevented, this could register as a false positive and flip every block but the clicked one
+                                    // therefor everything comes out of sync.
+                                    !(player.isSneaking() && event.hasItem()) &&
+                                    // event gets fired for both hands, ignore offhand
+                                    event.getHand() == EquipmentSlot.HAND) {
                                 Long closetime = SignTimer.getTimer(lockSign);
 
                                 if (closetime != null) {
@@ -478,14 +483,144 @@ public class BlockPlayerListener implements Listener {
      * prevent non owners / admins from taking books of locked lecterns
      */
     @EventHandler(priority = EventPriority.HIGH)
-    private void onLecternTake(@NotNull PlayerTakeLecternBookEvent event) { //todo new access types
+    private void onLecternTake(@NotNull PlayerTakeLecternBookEvent event) {
         Player player = event.getPlayer();
 
-        if (!(PadlockAPI.isOwner(event.getLectern().getBlock(), player) ||
-                player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
+        Sign lock = PadlockAPI.getLock(event.getLectern().getBlock());
 
-            plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
-            event.setCancelled(true);
+        if (lock != null) {
+            if (!(SignLock.isOwner(lock, player.getUniqueId()) || SignLock.isMember(lock, player.getUniqueId()) ||
+                    SignPasswords.hasStillAccess(player.getUniqueId(), lock.getLocation()) ||
+                    player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
+                SignAccessType.AccessType accessType = SignAccessType.getAccessType(lock);
+
+                if (!(accessType == SignAccessType.AccessType.SUPPLY || accessType == SignAccessType.AccessType.PUBLIC)) {
+                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
+                    event.setCancelled(true);
+                }
+            }
+        }
+    }
+
+    private void onPlaceItem(InventoryInteractEvent event, Inventory topInventory) {
+        Block block = null;
+        if (topInventory.getHolder() instanceof BlockInventoryHolder blockInventoryHolder) {
+            block = blockInventoryHolder.getBlock();
+        } else if (topInventory.getHolder() instanceof DoubleChest doubleChest) {
+            block = doubleChest.getLocation().getBlock();
+        }
+
+        if (block != null) {
+            Sign lock = PadlockAPI.getLock(block);
+
+            if (lock != null) {
+                // if a player should have access there is no need to cancel the event
+                if (event.getWhoClicked() instanceof Player player) {
+                    if (SignLock.isMember(lock, player.getUniqueId()) || SignLock.isOwner(lock, player.getUniqueId()) ||
+                            SignPasswords.hasStillAccess(player.getUniqueId(), lock.getLocation()) ||
+                            player.hasPermission(PermissionManager.ADMIN_USE.getPerm())) {
+                        return;
+                    }
+                }
+
+                SignAccessType.AccessType type = SignAccessType.getAccessType(lock);
+
+                switch (type) {
+                    case PRIVATE, PUBLIC, DONATION -> {
+                    }
+                    case DISPLAY, SUPPLY -> {
+                        event.setResult(Event.Result.DENY);
+                    }
+                    /*case null, // todo next java update */
+                    default -> {
+                    }
+                }
+            }
+        }
+
+    }
+
+    private void onTakeItem(InventoryInteractEvent event, Inventory topInventory) {
+        Block block = null;
+        if (topInventory.getHolder() instanceof BlockInventoryHolder blockInventoryHolder) {
+            block = blockInventoryHolder.getBlock();
+        } else if (topInventory.getHolder() instanceof DoubleChest doubleChest) {
+            block = doubleChest.getLocation().getBlock();
+        }
+
+        if (block != null) {
+            Sign lock = PadlockAPI.getLock(block);
+
+            if (lock != null) {
+                // if a player should have access there is no need to cancel the event
+                if (event.getWhoClicked() instanceof Player player) {
+                    if (SignLock.isMember(lock, player.getUniqueId()) || SignLock.isOwner(lock, player.getUniqueId()) ||
+                            SignPasswords.hasStillAccess(player.getUniqueId(), lock.getLocation()) ||
+                            player.hasPermission(PermissionManager.ADMIN_USE.getPerm())) {
+                        return;
+                    }
+                }
+
+                SignAccessType.AccessType type = SignAccessType.getAccessType(lock);
+
+                switch (type) {
+                    case PRIVATE, PUBLIC, SUPPLY -> {
+                    }
+                    case DISPLAY, DONATION -> {
+                        event.setResult(Event.Result.DENY);
+                    }
+                    /*case null, // todo next java update */
+                    default -> {
+                    }
+                }
+            }
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    private void onInventoryClick(InventoryClickEvent event) { // todo warn people when opening what they are opening best with cache to not annoy
+        Inventory topInv = event.getView().getTopInventory();
+
+        switch (event.getAction()) {
+            case NOTHING, DROP_ALL_CURSOR, DROP_ONE_CURSOR, UNKNOWN -> {
+            } // nothing
+            case PICKUP_ALL, PICKUP_SOME, PICKUP_HALF, PICKUP_ONE, DROP_ALL_SLOT, DROP_ONE_SLOT, HOTBAR_MOVE_AND_READD -> { // may take
+                if (event.getClickedInventory() == topInv) {
+                    onTakeItem(event, topInv);
+                }
+            }
+            case PLACE_ALL, PLACE_SOME, PLACE_ONE -> { // may place
+                if (event.getClickedInventory() == topInv) {
+                    onPlaceItem(event, topInv);
+                }
+            }
+            case SWAP_WITH_CURSOR, HOTBAR_SWAP -> { // may give and take
+                if (event.getClickedInventory() == topInv) {
+                    onPlaceItem(event, topInv);
+                    onTakeItem(event, topInv);
+                }
+            }
+            case COLLECT_TO_CURSOR -> { // may take complex
+                if (topInv.contains(event.getCursor().getType())) {
+                    onTakeItem(event, topInv);
+                }
+            }
+            case MOVE_TO_OTHER_INVENTORY -> { // definitely one or the other
+                if (event.getClickedInventory() == topInv) {
+                    onTakeItem(event, topInv);
+                } else {
+                    onPlaceItem(event, topInv);
+                }
+            }
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    private void onInventoryDrag(InventoryDragEvent event) {
+        for (int rawSlotId : event.getRawSlots()) {
+            if (rawSlotId < event.getView().getTopInventory().getSize()) {
+                onPlaceItem(event, event.getView().getTopInventory());
+            }
         }
     }
 }

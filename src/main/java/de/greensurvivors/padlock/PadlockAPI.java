@@ -1,7 +1,7 @@
 package de.greensurvivors.padlock;
 
 import de.greensurvivors.padlock.impl.MiscUtils;
-import de.greensurvivors.padlock.impl.openabledata.DoubleBlockParts;
+import de.greensurvivors.padlock.impl.dataTypes.DoubleBlockParts;
 import de.greensurvivors.padlock.impl.openabledata.Openables;
 import de.greensurvivors.padlock.impl.signdata.*;
 import org.bukkit.Material;
@@ -63,7 +63,6 @@ public class PadlockAPI {
 
                         for (Sign additional : getAdditionalSignsDoor(attachedDoor)) {
                             SignLock.updateSignFromAdditional(lockSign, additional);
-                            // SignExpiration.updateLegacyTimeFromAdditional(lockSign, additional);
                             SignTimer.updateLegacyTimerFromAdditional(lockSign, additional);
                             SignAccessType.updateLegacyFromAdditional(lockSign, additional);
                         }
@@ -79,14 +78,12 @@ public class PadlockAPI {
                 Sign lockSign = getLockChest(attachedTo);
                 if (lockSign != null) {
                     SignLock.updateLegacyLock(lockSign);
-                    //SignExpiration.updateLegacyTime(lockSign);
                     SignTimer.updateLegacyTimer(lockSign);
                     SignAccessType.updateLegacy(lockSign);
                     SignDisplay.updateDisplay(lockSign);
 
                     for (Sign additional : getAdditionalSignsChest(attachedTo)) {
                         SignLock.updateSignFromAdditional(lockSign, additional);
-                        // SignExpiration.updateLegacyTimeFromAdditional(lockSign, additional);
                         SignTimer.updateLegacyTimerFromAdditional(lockSign, additional);
                         SignAccessType.updateLegacyFromAdditional(lockSign, additional);
                     }
@@ -100,14 +97,12 @@ public class PadlockAPI {
 
                 if (lockSign != null) {
                     SignLock.updateLegacyLock(lockSign);
-                    //SignExpiration.updateLegacyTime(lockSign);
                     SignTimer.updateLegacyTimer(lockSign);
                     SignAccessType.updateLegacy(lockSign);
                     SignDisplay.updateDisplay(lockSign);
 
                     for (Sign additional : getAdditionalSignsSingleBlock(attachedTo, null)) {
                         SignLock.updateSignFromAdditional(lockSign, additional);
-                        // SignExpiration.updateLegacyTimeFromAdditional(lockSign, additional);
                         SignTimer.updateLegacyTimerFromAdditional(lockSign, additional);
                         SignAccessType.updateLegacyFromAdditional(lockSign, additional);
                     }

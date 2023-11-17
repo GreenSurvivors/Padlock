@@ -1,6 +1,7 @@
 package de.greensurvivors.padlock.impl.openabledata;
 
 import de.greensurvivors.padlock.Padlock;
+import de.greensurvivors.padlock.impl.dataTypes.DoubleBlockParts;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Tag;

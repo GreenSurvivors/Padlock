@@ -83,16 +83,17 @@ public class SignDisplay {
         final Component[] linesToUpdate = new Component[amountOfLines];
 
         // first line is always just the lock line
-        linesToUpdate[0] = Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PRIVATE_SIGN); //todo
+        linesToUpdate[0] = switch (SignAccessType.getAccessType(sign)) {
+            case PRIVATE -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PRIVATE_SIGN);
+            case PUBLIC -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PUBLIC_SIGN);
+            case DONATION -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.DONATION_SIGN);
+            case DISPLAY -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.DISPLAY_SIGN);
+            case SUPPLY -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SUPPLY_SIGN);
+            /*case null, // todo next java version*/
+            default -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN);
+        };
 
         //special settings
-        boolean everyoneHasAccess = false; //SignAccessType.getAccessType(sign); //todo
-
-        if (everyoneHasAccess) {
-            linesToUpdate[lastIndex] = Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.EVERYONE_SIGN);
-            lastIndex--;
-        }
-
         Component timerComponent = SignTimer.getTimerComponent(sign);
         if (timerComponent != null) {
             linesToUpdate[lastIndex] = timerComponent;
@@ -101,9 +102,7 @@ public class SignDisplay {
 
         // fill with owners, then if there is still space, and this is not an everyone sign, the members
         fillWithPlayers(linesToUpdate, sign, true);
-        if (!everyoneHasAccess) {
-            fillWithPlayers(linesToUpdate, sign, false);
-        }
+        fillWithPlayers(linesToUpdate, sign, false);
 
         //got everything. Update.
         for (int i = 0; i < amountOfLines; i++) {

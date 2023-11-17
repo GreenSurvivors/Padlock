@@ -99,6 +99,7 @@ public class MessageManager {
         nakedSignLiness.put(LangPath.PUBLIC_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.PUBLIC_SIGN)).toLowerCase());
         nakedSignLiness.put(LangPath.DONATION_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.DONATION_SIGN)).toLowerCase());
         nakedSignLiness.put(LangPath.DISPLAY_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.DISPLAY_SIGN)).toLowerCase());
+        nakedSignLiness.put(LangPath.SUPPLY_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.SUPPLY_SIGN)).toLowerCase());
         nakedSignLiness.put(LangPath.ADDITIONAL_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.ADDITIONAL_SIGN)).toLowerCase()); // todo deprecated
         nakedSignLiness.put(LangPath.EVERYONE_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.EVERYONE_SIGN)).toLowerCase()); // todo deprecated
         nakedSignLiness.put(LangPath.TIMER_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.TIMER_SIGN)).toLowerCase());
@@ -245,6 +246,7 @@ public class MessageManager {
         PUBLIC_SIGN("sign.line.public", "[Public]"),
         DONATION_SIGN("sign.line.donation", "[Donation]"),
         DISPLAY_SIGN("sign.line.display", "[Display]"),
+        SUPPLY_SIGN("sign.line.supply", "[Supply]"),
         @Deprecated(forRemoval = true)
         ADDITIONAL_SIGN("sign.line.additional", "[More Users]"),
         @Deprecated(forRemoval = true)
@@ -260,8 +262,8 @@ public class MessageManager {
         HELP_REMOVE_MEMBER("cmd.help.remove-member"),
         HELP_ADD_OWNER("cmd.help.add-owner"),
         HELP_REMOVE_OWNER("cmd.help.remove-owner"),
-        HELP_SETEVERYONE("cmd.help.set-everyone"), //todo
-        HELP_SET_PASSWORD("cmd.help.set-password"),
+        HELP_SET_ACCESS_TYPE("cmd.help.set-access-type"),
+        HELP_SET_PASSWORD("cmd.help.set-password"), //todo
         HELP_SET_TIMER("cmd.help.set-timer"),
         HELP_DEBUG("cmd.help.debug"),
         HELP_HELP("cmd.help.help"),
@@ -277,7 +279,7 @@ public class MessageManager {
         ADD_MEMBER_SUCCESS("cmd.add-member.success"),
         REMOVE_MEMBER_SUCCESS("cmd.remove-member.success"),
         REMOVE_MEMBER_ERROR("cmd.remove-member.error"),
-        SET_ACCESS_TYPE_SUCCESS("cmd.set-everyone.success"), // todo
+        SET_ACCESS_TYPE_SUCCESS("cmd.set-access-type.success"),
         SET_PASSWORD_SUCCESS("cmd.set-password.set.success"),
         SET_PASSWORD_REMOVE_SUCCESS("cmd.set-password.remove.success"),
         SET_TIMER_SUCCESS_ON("cmd.set-timer.success.turned-on"),

@@ -3,6 +3,7 @@ package de.greensurvivors.padlock.impl.signdata;
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.PadlockAPI;
 import de.greensurvivors.padlock.config.MessageManager;
+import de.greensurvivors.padlock.impl.MiscUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -13,6 +14,7 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -32,7 +34,12 @@ public class SignTimer {
      * casing should not matter and the placeholder should be a
      * group of any number to receive later
      */
+    @Deprecated(forRemoval = true)
     private final static Pattern legacyPattern = Pattern.compile(Padlock.getPlugin().getMessageManager().getNakedSignText(MessageManager.LangPath.TIMER_SIGN).replace("[", "\\[(?i)").replace("<time>", "(-?[0-9]+)"));
+    // pretty complex stuff [timer:<timer>] and timer can be any number of digits with their timeunit (t, s, h, d, w or M) optionally delimited by whitespace and commas, all ignoring case.
+    // valid lines would be "[timer:2h]", "[TIMER:2D, 3w2t 555s]", "[tiMeR: 100W,,,  -8t]", "[timer:2h5h99h]"
+    // invalid lines would be "timer:3d]", "[timer24w]", "[time:0x77Q]", "[banana]", "[timer:34ttt]"
+    private final static Pattern modernPattern = Pattern.compile(Padlock.getPlugin().getMessageManager().getNakedSignText(MessageManager.LangPath.TIMER_SIGN).replace("[", "\\[(?i)").replace("<time>", "\\s?((" + MiscUtils.getPeriodPattern().pattern() + "[\\s,]*?)+)"));
     private final static NamespacedKey timerKey = new NamespacedKey(Padlock.getPlugin(), "timer");
 
     /**
@@ -43,12 +50,43 @@ public class SignTimer {
      *
      * @return might be null if no timer was configured
      */
-    protected static @Nullable Component getTimerComponent(@NotNull Sign sign) { //todo maybe build a better display by calculating seconds, minutes, etc?
+    protected static @Nullable Component getTimerComponent(@NotNull Sign sign) {
         Long timerDuration = getTimer(sign);
 
         if (timerDuration != null && timerDuration > 0) {
+
+
+            Duration duration = Duration.ofMillis(timerDuration);
+
+            String timeStr = "";
+
+            final long days = duration.toDaysPart();
+            if (days != 0) {
+                timeStr += days + "d";
+            }
+
+            final int hours = duration.toHoursPart();
+            if (hours != 0) {
+                timeStr += hours + "h";
+            }
+
+            final int minutes = duration.toMinutesPart();
+            if (minutes != 0) {
+                timeStr += minutes + "m";
+            }
+
+            final int seconds = duration.toSecondsPart();
+            if (seconds != 0) {
+                timeStr += seconds + "s";
+            }
+
+            final int ticks = duration.toMillisPart() / 50;
+            if (ticks != 0) {
+                timeStr += ticks + "t";
+            }
+
             return Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.TIMER_SIGN,
-                    Placeholder.unparsed(MessageManager.PlaceHolder.TIME.getPlaceholder(), String.valueOf(timerDuration)));
+                    Placeholder.unparsed(MessageManager.PlaceHolder.TIME.getPlaceholder(), timeStr));
         } else {
             return null;
         }
@@ -105,7 +143,13 @@ public class SignTimer {
         if (matcher.matches()) {
             return Long.parseLong(matcher.group(1));
         } else {
-            return null;
+            matcher = modernPattern.matcher(strToTest);
+            if (matcher.matches()) {
+
+                return MiscUtils.parsePeriod(matcher.group(1));
+            } else {
+                return null;
+            }
         }
     }
 

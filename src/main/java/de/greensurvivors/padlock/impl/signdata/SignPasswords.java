@@ -213,7 +213,7 @@ public final class SignPasswords {
 
         if (hash != null) {
             Bukkit.getScheduler().runTaskAsynchronously(Padlock.getPlugin(), () -> {
-                boolean doesMatch = matches(password, hash); //todo null
+                boolean doesMatch = matches(password, hash);
 
                 if (doesMatch) {
                     cacheAccess(player.getUniqueId(), sign.getLocation());

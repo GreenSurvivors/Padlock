@@ -4,6 +4,7 @@ import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
 import de.greensurvivors.padlock.impl.SignSelection;
+import de.greensurvivors.padlock.impl.signdata.SignAccessType;
 import de.greensurvivors.padlock.impl.signdata.SignExpiration;
 import de.greensurvivors.padlock.impl.signdata.SignLock;
 import de.greensurvivors.padlock.impl.signdata.SignTimer;
@@ -92,14 +93,14 @@ public class Info extends SubCommand {
                         // members
                         component = component.append(Component.newline());
                         component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_MEMBERS));
-                        //if (SignAccessType.getAccessType(sign)) { //todo
-                        component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.EVERYONE_SIGN));
-                        // } else {
-                        for (String name : getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, false))) {
-                            component = component.append(Component.text(name));
-                            component = component.append(Component.text(", "));
+                        if (SignAccessType.getAccessType(sign) == SignAccessType.AccessType.PUBLIC) {
+                            for (String name : getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, false))) {
+                                component = component.append(Component.text(name));
+                                component = component.append(Component.text(", "));
+                            }
                         }
-                        //}
+
+                        //todo display access type
 
                         // timer
                         Long timer = SignTimer.getTimer(sign);

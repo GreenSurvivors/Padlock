@@ -6,7 +6,6 @@ import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.impl.MiscUtils;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.apache.commons.collections4.set.ListOrderedSet;
 import org.bukkit.*;
@@ -55,7 +54,8 @@ public class SignLock {
      * Check if the sign is a lock sign by checking it's first line against the line configured in the lang file.
      */
     public static boolean isLockSign(@NotNull Sign sign) {
-        return SignAccessType.getAccessTypeFromComp(sign.getSide(Side.FRONT).line(0)) != null;
+        //todo second part is deprecated
+        return SignAccessType.getAccessType(sign) != null || (SignAccessType.getAccessTypeFromComp(sign.getSide(Side.FRONT).line(0)) != null);
     }
 
     /**
@@ -77,7 +77,9 @@ public class SignLock {
      * Check if the sign grants everyone member access or if the uuid is a registered member of the lock sign.
      */
     public static boolean isMember(@NotNull final Sign sign, UUID uuid) {
-        return /*SignAccessType.getAccessType(sign) ||*/ SignPasswords.hasStillAccess(uuid, sign.getLocation()) || getUUIDs(sign, false).contains(uuid.toString()); //todo
+        return (SignAccessType.getAccessType(sign) == SignAccessType.AccessType.PUBLIC) ||
+                SignPasswords.hasStillAccess(uuid, sign.getLocation()) ||
+                getUUIDs(sign, false).contains(uuid.toString());
     }
 
     /**
@@ -107,7 +109,7 @@ public class SignLock {
     private static @Nullable OfflinePlayer tryGetPlayerJustFromNameComp(@NotNull Component component) {
         String line = PlainTextComponentSerializer.plainText().serialize(component);
 
-        if (/*SignAccessType.isLegacyComp(component) ||*/ SignTimer.getTimerFromComp(component) != null) { //todo
+        if (SignAccessType.isLegacyEveryOneComp(component) || SignTimer.getTimerFromComp(component) != null) {
             return null;
         } else if (MiscUtils.isUserName(line)) {
             return Bukkit.getOfflinePlayer(line);
@@ -298,15 +300,14 @@ public class SignLock {
         }
 
         // set lock and it's owner
-        sign.getSide(Side.FRONT).line(0, Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PRIVATE_SIGN));
-        sign.getSide(Side.FRONT).line(1, Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PLAYER_NAME_ON_SIGN,
-                Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), player.getName())));
-
+        SignAccessType.setAccessType(sign, SignAccessType.AccessType.PRIVATE, false);
         addPlayer(sign, true, player);
 
         //set waxed and finally make all the changes happen by updating the state
         sign.setWaxed(true);
         sign.update();
+
+        SignDisplay.updateDisplay(sign);
 
         return newsign;
     }
