@@ -7,7 +7,6 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -34,27 +33,12 @@ public class ConfigManager {
     private final ConfigOption<Long> LOCK_EXPIRE_DAYS = new ConfigOption<>("lock.expire.days", 999L);
     //while this works intern with milliseconds, configurable are only seconds for easier handling of the config
     private final ConfigOption<Integer> CACHE_SECONDS = new ConfigOption<>("cache.seconds", 0);
-    private final ConfigOption<String> USERNAME_PATTERN = new ConfigOption<>("username-pattern", "^.?[a-zA-Z0-9_]{3,16}$");
+    private final ConfigOption<String> BEDROCK_PREFIX = new ConfigOption<>("bedrock-prefix", "."); // todo only use .<name> for config
 
     public ConfigManager(@NotNull Padlock plugin) {
         this.plugin = plugin;
     }
 
-    /**
-     * Try to get a member of the enum given as an argument by the name
-     *
-     * @param enumName  name of the enum to find
-     * @param enumClass the enum to check
-     * @param <E>       the type of the enum to check
-     * @return the member of the enum to check
-     */
-    protected static @Nullable <E extends Enum<E>> E getEnum(final @NotNull Class<E> enumClass, final @NotNull String enumName) {
-        try {
-            return Enum.valueOf(enumClass, enumName);
-        } catch (final IllegalArgumentException ex) {
-            return null;
-        }
-    }
 
     /**
      * reload the config and language files,
@@ -216,7 +200,7 @@ public class ConfigManager {
         if (object instanceof QuickProtectOption quickProtectOption) {
             QUICKPROTECT_TYPE.setValue(quickProtectOption);
         } else if (object instanceof String string) {
-            QuickProtectOption setting = getEnum(QuickProtectOption.class, string);
+            QuickProtectOption setting = MiscUtils.getEnum(QuickProtectOption.class, string);
 
             if (setting != null) {
                 QUICKPROTECT_TYPE.setValue(setting);
@@ -249,7 +233,7 @@ public class ConfigManager {
         if (Objects.requireNonNull(object) instanceof HopperMinecartBlockedOption quickProtectOption) {
             LOCK_BLOCKS_HOPPER_MINECART.setValue(quickProtectOption);
         } else if (object instanceof String string) {
-            HopperMinecartBlockedOption setting = getEnum(HopperMinecartBlockedOption.class, string);
+            HopperMinecartBlockedOption setting = MiscUtils.getEnum(HopperMinecartBlockedOption.class, string);
 
             if (setting != null) {
                 LOCK_BLOCKS_HOPPER_MINECART.setValue(setting);
@@ -283,7 +267,7 @@ public class ConfigManager {
             if (exemptionObj instanceof ProtectionExemption protectionExemtion) {
                 exemptions.add(protectionExemtion);
             } else if (exemptionObj instanceof String string) {
-                ProtectionExemption protectionExemtion = getEnum(ProtectionExemption.class, string);
+                ProtectionExemption protectionExemtion = MiscUtils.getEnum(ProtectionExemption.class, string);
 
                 if (protectionExemtion != null) {
                     exemptions.add(protectionExemtion);
@@ -320,8 +304,8 @@ public class ConfigManager {
             plugin.getLogger().info("Cache is enabled! In case of inconsistency, turn off immediately.");
         }
 
-        USERNAME_PATTERN.setValue(config.getString(USERNAME_PATTERN.getPath(), USERNAME_PATTERN.getFallbackValue()));
-        MiscUtils.setUsernamePattern(USERNAME_PATTERN.getValueOrFallback());
+        BEDROCK_PREFIX.setValue(config.getString(BEDROCK_PREFIX.getPath(), BEDROCK_PREFIX.getFallbackValue()));
+        MiscUtils.setBedrockPrefix(BEDROCK_PREFIX.getValueOrFallback());
     }
 
     /**

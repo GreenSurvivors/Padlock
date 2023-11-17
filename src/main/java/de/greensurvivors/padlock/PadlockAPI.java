@@ -57,16 +57,16 @@ public class PadlockAPI {
 
                     if (lockSign != null) {
                         SignLock.updateLegacyLock(lockSign);
-                        SignExpiration.updateLegacyTime(lockSign);
+                        //SignExpiration.updateLegacyTime(lockSign);//todo
                         SignTimer.updateLegacyTimer(lockSign);
-                        EveryoneSign.updateLegacy(lockSign);
+                        SignAccessType.updateLegacy(lockSign);
                         SignDisplay.updateDisplay(lockSign);
 
                         for (Sign additional : getAdditionalSignsDoor(attachedDoor)) {
                             SignLock.updateSignFromAdditional(lockSign, additional);
-                            SignExpiration.updateLegacyTimeFromAdditional(lockSign, additional);
+                            // SignExpiration.updateLegacyTimeFromAdditional(lockSign, additional);
                             SignTimer.updateLegacyTimerFromAdditional(lockSign, additional);
-                            EveryoneSign.updateLegacyFromAdditional(lockSign, additional);
+                            SignAccessType.updateLegacyFromAdditional(lockSign, additional);
                         }
 
                         return lockSign;
@@ -80,16 +80,16 @@ public class PadlockAPI {
                 Sign lockSign = getLockChest(attachedTo);
                 if (lockSign != null) {
                     SignLock.updateLegacyLock(lockSign);
-                    SignExpiration.updateLegacyTime(lockSign);
+                    //SignExpiration.updateLegacyTime(lockSign);
                     SignTimer.updateLegacyTimer(lockSign);
-                    EveryoneSign.updateLegacy(lockSign);
+                    SignAccessType.updateLegacy(lockSign);
                     SignDisplay.updateDisplay(lockSign);
 
                     for (Sign additional : getAdditionalSignsChest(attachedTo)) {
                         SignLock.updateSignFromAdditional(lockSign, additional);
-                        SignExpiration.updateLegacyTimeFromAdditional(lockSign, additional);
+                        // SignExpiration.updateLegacyTimeFromAdditional(lockSign, additional);
                         SignTimer.updateLegacyTimerFromAdditional(lockSign, additional);
-                        EveryoneSign.updateLegacyFromAdditional(lockSign, additional);
+                        SignAccessType.updateLegacyFromAdditional(lockSign, additional);
                     }
 
                     return lockSign;
@@ -101,16 +101,16 @@ public class PadlockAPI {
 
                 if (lockSign != null) {
                     SignLock.updateLegacyLock(lockSign);
-                    SignExpiration.updateLegacyTime(lockSign);
+                    //SignExpiration.updateLegacyTime(lockSign);
                     SignTimer.updateLegacyTimer(lockSign);
-                    EveryoneSign.updateLegacy(lockSign);
+                    SignAccessType.updateLegacy(lockSign);
                     SignDisplay.updateDisplay(lockSign);
 
                     for (Sign additional : getAdditionalSignsSingleBlock(attachedTo, null)) {
                         SignLock.updateSignFromAdditional(lockSign, additional);
-                        SignExpiration.updateLegacyTimeFromAdditional(lockSign, additional);
+                        // SignExpiration.updateLegacyTimeFromAdditional(lockSign, additional);
                         SignTimer.updateLegacyTimerFromAdditional(lockSign, additional);
-                        EveryoneSign.updateLegacyFromAdditional(lockSign, additional);
+                        SignAccessType.updateLegacyFromAdditional(lockSign, additional);
                     }
 
                     return lockSign;

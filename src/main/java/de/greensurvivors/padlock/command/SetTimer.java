@@ -81,13 +81,13 @@ public class SetTimer extends SubCommand {
     }
 
     @Override
-    protected @NotNull Set<String> getAlias() {
+    protected @NotNull Set<String> getAliases() {
         return Set.of("settimer", "timer");
     }
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_SETTIMER);
+        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_SET_TIMER);
     }
 
     @Override

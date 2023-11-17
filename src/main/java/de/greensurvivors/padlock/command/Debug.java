@@ -27,7 +27,7 @@ public class Debug extends SubCommand {
     }
 
     @Override
-    protected @NotNull Set<String> getAlias() {
+    protected @NotNull Set<String> getAliases() {
         return Set.of("debug");
     }
 

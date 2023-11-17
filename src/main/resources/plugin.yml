@@ -10,6 +10,8 @@ description: >
 libraries:
   - org.apache.commons:commons-collections4:4.4
   - org.apache.commons:commons-lang3:3.13.0
+  - org.springframework.security:spring-security-crypto:6.1.5
+  - org.bouncycastle:bcprov-jdk15on:1.70
   - com.github.ben-manes.caffeine:caffeine:3.1.8
 
 commands:
@@ -17,4 +19,8 @@ commands:
     usage: |
       /lock
     aliases: [ lock, padlock, lockit ]
+  password:
+    usage: |
+      /password
+    aliases: [ pw, applypassword ]
 #Permissions are handled in Permission Manager

@@ -88,8 +88,8 @@ public class MiscUtils {
     /**
      * Set the new userNamePattern, to account for other settings in the proxy for bedrock players
      */
-    public static void setUsernamePattern(@NotNull String newUsernamePattern) {
-        usernamePattern = Pattern.compile(newUsernamePattern);
+    public static void setBedrockPrefix(@NotNull String bedrockPrefix) {
+        usernamePattern = Pattern.compile("^" + bedrockPrefix + "?[a-zA-Z0-9_]{3,16}$");
     }
 
     public static @NotNull Set<@NotNull OfflinePlayer> getPlayersFromUUIDStrings(@NotNull Set<@NotNull String> uuidStrs) {
@@ -104,5 +104,22 @@ public class MiscUtils {
         }
 
         return result;
+    }
+
+
+    /**
+     * Try to get a member of the enum given as an argument by the name
+     *
+     * @param enumName  name of the enum to find
+     * @param enumClass the enum to check
+     * @param <E>       the type of the enum to check
+     * @return the member of the enum to check
+     */
+    public static @Nullable <E extends Enum<E>> E getEnum(final @NotNull Class<E> enumClass, final @NotNull String enumName) {
+        try {
+            return Enum.valueOf(enumClass, enumName);
+        } catch (final IllegalArgumentException ex) {
+            return null;
+        }
     }
 }

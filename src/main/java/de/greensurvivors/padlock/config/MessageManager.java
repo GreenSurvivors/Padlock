@@ -92,6 +92,7 @@ public class MessageManager {
 
         // clear component cache
         langCache.invalidateAll();
+        langCache.cleanUp();
         langCache.asMap().clear();
 
         nakedSignLiness.put(LangPath.PRIVATE_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.PRIVATE_SIGN)).toLowerCase());
@@ -152,7 +153,7 @@ public class MessageManager {
      * prepend the message with the plugins prefix before sending it to the audience.
      */
     public void sendMessageWithPrefix(@NotNull Audience audience, @NotNull Component messages) {
-        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(messages));
+        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(Component.text(" ")).append(messages));
     }
 
     /**
@@ -174,7 +175,7 @@ public class MessageManager {
      * send a component from the lang file to the audience, prefixed with this plugins prefix.
      */
     public void sendLang(@NotNull Audience audience, @NotNull LangPath path) {
-        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(langCache.get(path)));
+        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(Component.text(" ")).append(langCache.get(path)));
     }
 
     /**
@@ -182,7 +183,7 @@ public class MessageManager {
      * Note: might be slightly slower than {@link #sendLang(Audience, LangPath)} since this can not use cache.
      */
     public void sendLang(@NotNull Audience audience, @NotNull LangPath path, @NotNull TagResolver resolver) {
-        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(
+        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(Component.text(" ")).append(
                 MiniMessage.miniMessage().deserialize(getStringFromLang(path), resolver)));
     }
 
@@ -240,6 +241,7 @@ public class MessageManager {
         PRIVATE_SIGN("sign.line.private", "[Private]"),
         @Deprecated(forRemoval = true)
         ADDITIONAL_SIGN("sign.line.additional", "[More Users]"),
+        @Deprecated(forRemoval = true)
         EVERYONE_SIGN("sign.line.everyone", "[Everyone]"),
         TIMER_SIGN("sign.line.timer", "[Timer:<" + PlaceHolder.TIME.getPlaceholder() + ">]"),
         EXPIRE_SIGN("sign.line.expired", "[<dark_aqua>Expired</dark_aqua>]"),
@@ -252,10 +254,12 @@ public class MessageManager {
         HELP_REMOVE_MEMBER("cmd.help.remove-member"),
         HELP_ADD_OWNER("cmd.help.add-owner"),
         HELP_REMOVE_OWNER("cmd.help.remove-owner"),
-        HELP_SETEVERYONE("cmd.help.set-everyone"),
-        HELP_SETTIMER("cmd.help.set-timer"),
+        HELP_SETEVERYONE("cmd.help.set-everyone"), //todo
+        HELP_SET_PASSWORD("cmd.help.set-password"),
+        HELP_SET_TIMER("cmd.help.set-timer"),
         HELP_DEBUG("cmd.help.debug"),
         HELP_HELP("cmd.help.help"),
+        HELP_PASSWORD("cmd.help.password"),
         HELP_INFO("cmd.help.info"),
         HELP_RELOAD("cmd.help.reload"),
         HELP_UPDATE_SIGN("cmd.help.update-sign"),
@@ -267,11 +271,17 @@ public class MessageManager {
         ADD_MEMBER_SUCCESS("cmd.add-member.success"),
         REMOVE_MEMBER_SUCCESS("cmd.remove-member.success"),
         REMOVE_MEMBER_ERROR("cmd.remove-member.error"),
-        SET_EVERYONE_SUCCESS("cmd.set-everyone.success"),
+        SET_ACCESS_TYPE_SUCCESS("cmd.set-everyone.success"), // todo
+        SET_PASSWORD_SUCCESS("cmd.set-password.set.success"),
+        SET_PASSWORD_REMOVE_SUCCESS("cmd.set-password.remove.success"),
         SET_TIMER_SUCCESS_ON("cmd.set-timer.success.turned-on"),
         SET_TIMER_SUCCESS_OFF("cmd.set-timer.success.turned-off"),
         SET_TIMER_ERROR("cmd.set-timer.error"),
         UPDATE_SIGN_SUCCESS("cmd.sign-update.success"),
+        PASSWORD_ACCESS_GRANTED("cmd.password.access-granted"),
+        PASSWORD_WRONG_PASSWORD("cmd.password.wrong-password"),
+        PASSWORD_ON_COOLDOWN("cmd.password.on-cooldown"),
+        PASSWORD_START_PROCESSING("cmd.password.start-processing"),
         RELOAD_SUCCESS("cmd.reload.success"),
 
         INFO_OWNERS("cmd.info.owners"),
@@ -290,6 +300,7 @@ public class MessageManager {
 
         NO_PERMISSION("no-permission"),
         NOT_OWNER("lock.not-owner"),
+        NEEDS_PASSWORD("lock.needs-password"),
 
         LOCK_SUCCESS("action.lock.success"),
         LOCK_ERROR_ALREADY_LOCKED("action.lock.error.already-locked"),

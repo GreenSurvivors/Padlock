@@ -28,7 +28,7 @@ cache:
   seconds: 0
 cache-time-seconds: 0
 lock-default-create-time-unix: -1
-username-pattern: "^.?[a-zA-Z0-9_]{3,16}$"
+#username-pattern:#todo
 
 
 # material name see: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html

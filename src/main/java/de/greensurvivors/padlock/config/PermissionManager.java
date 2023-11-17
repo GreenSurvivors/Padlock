@@ -14,8 +14,10 @@ public enum PermissionManager {
     CMD_INFO(new Permission("padlock.cmd.info", "", PermissionDefault.TRUE)),
     CMD_RELOAD(new Permission("padlock.cmd.reload", "", PermissionDefault.OP)),
     CMD_UPDATE_SIGN(new Permission("padlock.cmd.updatesign", "", PermissionDefault.OP)),
+    CMD_PASSWORD(new Permission("padlock.cmd.password", "", PermissionDefault.TRUE)),
     CMD_SET_TIMER(new Permission("padlock.cmd.setTimer", PermissionDefault.TRUE)),
     CMD_SET_CREATED(new Permission("padlock.cmd.setcreated", "", PermissionDefault.OP)),
+    @Deprecated(forRemoval = true)
     CMD_SET_EVERYONE(new Permission("padlock.cmd.everyone", "", PermissionDefault.TRUE)),
     CMD_VERSION(new Permission("padlock.cmd.version", "", PermissionDefault.OP)),
 
@@ -35,6 +37,7 @@ public enum PermissionManager {
                     CMD_INFO.perm.getName(), true,
                     CMD_RELOAD.perm.getName(), true,
                     CMD_UPDATE_SIGN.perm.getName(), true,
+                    CMD_PASSWORD.perm.getName(), true,
                     CMD_SET_TIMER.perm.getName(), true,
                     CMD_SET_CREATED.perm.getName(), true,
                     CMD_SET_EVERYONE.perm.getName(), true,

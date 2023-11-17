@@ -4,7 +4,6 @@ import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
 import de.greensurvivors.padlock.impl.SignSelection;
-import de.greensurvivors.padlock.impl.signdata.EveryoneSign;
 import de.greensurvivors.padlock.impl.signdata.SignLock;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
@@ -22,8 +21,8 @@ import java.util.Set;
 /**
  * set the everyone-property so everyone has (no) member access (anymore)
  */
-public class SetEveryone extends SubCommand {
-    protected SetEveryone(@NotNull Padlock plugin) {
+public class SetAccessType extends SubCommand {
+    protected SetAccessType(@NotNull Padlock plugin) {
         super(plugin);
     }
 
@@ -33,7 +32,7 @@ public class SetEveryone extends SubCommand {
     }
 
     @Override
-    protected @NotNull Set<String> getAlias() {
+    protected @NotNull Set<String> getAliases() {
         return Set.of("seteveryone", "everyone");
     }
 
@@ -65,8 +64,8 @@ public class SetEveryone extends SubCommand {
 
                             if (setting != null) {
                                 // success!
-                                EveryoneSign.setEveryone(sign, setting, true);
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_EVERYONE_SUCCESS,
+                                //SignAccessType.setAccessType(sign, setting, true); //todo
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_ACCESS_TYPE_SUCCESS,
                                         Placeholder.component(MessageManager.PlaceHolder.ARGUMENT.getPlaceholder(), Component.text(setting)));
                             } else {
                                 plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_BOOL,

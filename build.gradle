@@ -6,7 +6,7 @@ plugins {
 }
 // Suppiled by Jenkins
 ext.majorVersion = 1
-ext.minorVersion = 1
+ext.minorVersion = 2
 ext.minecraftVersion = "1.20.1"
 
 ext.buildNumber = System.env.BUILD_NUMBER == null ? "x"                : "build" + "$System.env.BUILD_NUMBER"
@@ -40,11 +40,14 @@ repositories {
 
 dependencies {
     implementation 'org.apache.commons:commons-collections4:4.4'
+    implementation('org.springframework.security:spring-security-crypto:6.1.5')
+    implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
     implementation 'org.jetbrains:annotations:23.0.0'
+    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
+
     paperweight.paperDevBundle("1.20.2-R0.1-SNAPSHOT")
     compileOnly ('com.sk89q.worldguard:worldguard-bukkit:7.1.0-SNAPSHOT') { transitive = false }
     compileOnly ('net.coreprotect:coreprotect:21.0'){ transitive = false}
-    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
 }
 
 processResources {

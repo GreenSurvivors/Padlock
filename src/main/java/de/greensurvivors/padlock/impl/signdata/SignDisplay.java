@@ -83,10 +83,10 @@ public class SignDisplay {
         final Component[] linesToUpdate = new Component[amountOfLines];
 
         // first line is always just the lock line
-        linesToUpdate[0] = Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PRIVATE_SIGN);
+        linesToUpdate[0] = Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PRIVATE_SIGN); //todo
 
         //special settings
-        boolean everyoneHasAccess = EveryoneSign.getAccessEveryone(sign);
+        boolean everyoneHasAccess = false; //SignAccessType.getAccessType(sign); //todo
 
         if (everyoneHasAccess) {
             linesToUpdate[lastIndex] = Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.EVERYONE_SIGN);

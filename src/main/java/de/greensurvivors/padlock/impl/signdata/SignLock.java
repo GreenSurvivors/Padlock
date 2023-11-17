@@ -55,6 +55,7 @@ public class SignLock {
      * Check if the sign is a lock sign by checking it's first line against the line configured in the lang file.
      */
     public static boolean isLockSign(@NotNull Sign sign) {
+        //SignAccessType.getAccessType() //todo
         return Padlock.getPlugin().getMessageManager().isSignComp(sign.getSide(Side.FRONT).line(0), MessageManager.LangPath.PRIVATE_SIGN);
     }
 
@@ -77,7 +78,7 @@ public class SignLock {
      * Check if the sign grants everyone member access or if the uuid is a registered member of the lock sign.
      */
     public static boolean isMember(@NotNull final Sign sign, UUID uuid) {
-        return EveryoneSign.getAccessEveryone(sign) || getUUIDs(sign, false).contains(uuid.toString());
+        return /*SignAccessType.getAccessType(sign) ||*/ SignPasswords.hasStillAccess(uuid, sign.getLocation()) || getUUIDs(sign, false).contains(uuid.toString()); //todo
     }
 
     /**
@@ -107,7 +108,7 @@ public class SignLock {
     private static @Nullable OfflinePlayer tryGetPlayerJustFromNameComp(@NotNull Component component) {
         String line = PlainTextComponentSerializer.plainText().serialize(component);
 
-        if (EveryoneSign.isLegacyComp(component) || SignTimer.getTimerFromComp(component) != null) {
+        if (/*SignAccessType.isLegacyComp(component) ||*/ SignTimer.getTimerFromComp(component) != null) { //todo
             return null;
         } else if (MiscUtils.isUserName(line)) {
             return Bukkit.getOfflinePlayer(line);

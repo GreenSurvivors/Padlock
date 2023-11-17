@@ -45,7 +45,7 @@ public abstract class SubCommand {
      * <p> Every alias has to registered as lower case, so the casing when called
      * doesn't matter.
      */
-    abstract protected @NotNull Set<String> getAlias();
+    abstract protected @NotNull Set<String> getAliases();
 
     /**
      * get information how the command works, like

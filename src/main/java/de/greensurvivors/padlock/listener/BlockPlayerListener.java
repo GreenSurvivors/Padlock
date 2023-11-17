@@ -8,7 +8,9 @@ import de.greensurvivors.padlock.config.PermissionManager;
 import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.SignSelection;
 import de.greensurvivors.padlock.impl.openabledata.Openables;
-import de.greensurvivors.padlock.impl.signdata.*;
+import de.greensurvivors.padlock.impl.signdata.SignDisplay;
+import de.greensurvivors.padlock.impl.signdata.SignLock;
+import de.greensurvivors.padlock.impl.signdata.SignTimer;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -117,7 +119,8 @@ public class BlockPlayerListener implements Listener {
                                     // Cleanups - Expiracy
                                     if (plugin.getConfigManager().doLocksExpire()) {
                                         // set created to now
-                                        SignExpiration.updateWithTimeNow((Sign) newsign.getState(), player.hasPermission(PermissionManager.NO_EXPIRE.getPerm())); // set created to -1 (no expire) or now
+                                        //todo --> last login
+                                        // SignExpiration.updateWithTimeNow((Sign) newsign.getState(), player.hasPermission(PermissionManager.NO_EXPIRE.getPerm())); // set created to -1 (no expire) or now
                                     }
                                     plugin.getDependencyManager().logPlacement(player, newsign);
                                 } else {
@@ -143,7 +146,7 @@ public class BlockPlayerListener implements Listener {
         if (topline == null) return;
         Player player = event.getPlayer();
 
-        if (plugin.getMessageManager().isSignComp(topline, MessageManager.LangPath.PRIVATE_SIGN)) {
+        if (plugin.getMessageManager().isSignComp(topline, MessageManager.LangPath.PRIVATE_SIGN)) { //todo
             //check attached block
             Block attachedBlock = PadlockAPI.getAttachedBlock(event.getBlock());
             if (attachedBlock != null && PadlockAPI.isLockable(attachedBlock)) {
@@ -205,8 +208,6 @@ public class BlockPlayerListener implements Listener {
 
                         if (timer != null) {
                             SignTimer.setTimer(sign, timer, true);
-                        } else if (plugin.getMessageManager().isSignComp(line, MessageManager.LangPath.EVERYONE_SIGN)) {
-                            EveryoneSign.setEveryone(sign, true, true);
                         } else if (MiscUtils.isUserName(strLine)) {
                             SignLock.addPlayer(sign, false, Bukkit.getOfflinePlayer(strLine));
                         } // else invalid line
@@ -239,9 +240,9 @@ public class BlockPlayerListener implements Listener {
 
             // check permission: owner or admin
             if (clickedBlock.getState() instanceof Sign sign &&
-                    (PadlockAPI.isLockSign(sign) || PadlockAPI.isAdditionalSign(sign)) &&
-                    (PadlockAPI.isOwner(clickedBlock, player) ||
-                            player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()))) {
+                    (PadlockAPI.isLockSign(sign) || PadlockAPI.isAdditionalSign(sign)) /*&&
+                    (PadlockAPI.isMember(clickedBlock, player) ||
+                            player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()))*/) {
 
                 SignSelection.selectSign(player, clickedBlock);
                 plugin.getMessageManager().sendLang(player, MessageManager.LangPath.SELECT_SIGN);
@@ -333,7 +334,7 @@ public class BlockPlayerListener implements Listener {
      * & handle connected openables
      */
     @EventHandler(priority = EventPriority.HIGH)
-    private void onAttemptInteractLockedBlocks(@NotNull PlayerInteractEvent event) {
+    private void onAttemptInteractLockedBlocks(@NotNull PlayerInteractEvent event) { //todo players need to select even if they have no access right now for passwords
         Action action = event.getAction();
         Block block = event.getClickedBlock();
 

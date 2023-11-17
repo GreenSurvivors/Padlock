@@ -27,6 +27,7 @@ public class DependencyManager {
             worldguard = (WorldGuardPlugin) worldguardplugin;
         }
 
+        //core protect
         if (plugin.getConfigManager().shouldUseCoreprotect() && Bukkit.getPluginManager().getPlugin("CoreProtect") != null && CoreProtect.getInstance().getAPI().APIVersion() >= 6) {
             coreProtectAPI = CoreProtect.getInstance().getAPI();
             if (!coreProtectAPI.isEnabled()) {
