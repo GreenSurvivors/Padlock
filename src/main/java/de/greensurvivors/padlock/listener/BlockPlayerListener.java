@@ -8,6 +8,7 @@ import de.greensurvivors.padlock.config.PermissionManager;
 import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.SignSelection;
 import de.greensurvivors.padlock.impl.openabledata.Openables;
+import de.greensurvivors.padlock.impl.signdata.SignAccessType;
 import de.greensurvivors.padlock.impl.signdata.SignDisplay;
 import de.greensurvivors.padlock.impl.signdata.SignLock;
 import de.greensurvivors.padlock.impl.signdata.SignTimer;
@@ -116,12 +117,6 @@ public class BlockPlayerListener implements Listener {
                                     plugin.getLockCacheManager().resetCache(block);
                                     // Send message
                                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
-                                    // Cleanups - Expiracy
-                                    if (plugin.getConfigManager().doLocksExpire()) {
-                                        // set created to now
-                                        //todo --> last login
-                                        // SignExpiration.updateWithTimeNow((Sign) newsign.getState(), player.hasPermission(PermissionManager.NO_EXPIRE.getPerm())); // set created to -1 (no expire) or now
-                                    }
                                     plugin.getDependencyManager().logPlacement(player, newsign);
                                 } else {
                                     // Cannot lock this block
@@ -146,7 +141,7 @@ public class BlockPlayerListener implements Listener {
         if (topline == null) return;
         Player player = event.getPlayer();
 
-        if (plugin.getMessageManager().isSignComp(topline, MessageManager.LangPath.PRIVATE_SIGN)) { //todo
+        if (SignAccessType.getAccessTypeFromComp(topline) != null) {
             //check attached block
             Block attachedBlock = PadlockAPI.getAttachedBlock(event.getBlock());
             if (attachedBlock != null && PadlockAPI.isLockable(attachedBlock)) {
@@ -240,9 +235,7 @@ public class BlockPlayerListener implements Listener {
 
             // check permission: owner or admin
             if (clickedBlock.getState() instanceof Sign sign &&
-                    (PadlockAPI.isLockSign(sign) || PadlockAPI.isAdditionalSign(sign)) /*&&
-                    (PadlockAPI.isMember(clickedBlock, player) ||
-                            player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()))*/) {
+                    (PadlockAPI.isLockSign(sign) || PadlockAPI.isAdditionalSign(sign))) {
 
                 SignSelection.selectSign(player, clickedBlock);
                 plugin.getMessageManager().sendLang(player, MessageManager.LangPath.SELECT_SIGN);
@@ -305,6 +298,7 @@ public class BlockPlayerListener implements Listener {
         Block block = event.getBlock();
         if (block.getState() instanceof Sign sign &&
                 (PadlockAPI.isLockSign(sign) || PadlockAPI.isAdditionalSign(sign))) {
+            PadlockAPI.updateLegacySign(sign);
             plugin.getMessageManager().sendLang(event.getPlayer(), MessageManager.LangPath.ACTION_PREVENTED_USE_CMDS);
             sign.setWaxed(true);
             sign.update();
@@ -334,7 +328,7 @@ public class BlockPlayerListener implements Listener {
      * & handle connected openables
      */
     @EventHandler(priority = EventPriority.HIGH)
-    private void onAttemptInteractLockedBlocks(@NotNull PlayerInteractEvent event) { //todo players need to select even if they have no access right now for passwords
+    private void onAttemptInteractLockedBlocks(@NotNull PlayerInteractEvent event) { //todo new access types
         Action action = event.getAction();
         Block block = event.getClickedBlock();
 
@@ -356,53 +350,55 @@ public class BlockPlayerListener implements Listener {
             Sign lockSign = PadlockAPI.getLock(block);
 
             if (lockSign != null) {
-                if (SignLock.isMember(lockSign, player.getUniqueId()) || SignLock.isOwner(lockSign, player.getUniqueId()) ||
-                        player.hasPermission(PermissionManager.ADMIN_USE.getPerm())) {
+                if (SignSelection.getSelectedSign(player) != lockSign) {
+                    if (SignLock.isMember(lockSign, player.getUniqueId()) || SignLock.isOwner(lockSign, player.getUniqueId()) ||
+                            player.hasPermission(PermissionManager.ADMIN_USE.getPerm())) {
 
-                    // Handle multi openables
-                    if (action == Action.RIGHT_CLICK_BLOCK &&
-                            // if a place attempt was prevented, this could register as a false positive and flip every block but the clicked one
-                            // therefor everything comes out of sync.
-                            !(player.isSneaking() && event.hasItem()) &&
-                            // event gets fired for both hands, ignore offhand
-                            event.getHand() == EquipmentSlot.HAND) {
+                        // Handle multi openables
+                        if (action == Action.RIGHT_CLICK_BLOCK &&
+                                // if a place attempt was prevented, this could register as a false positive and flip every block but the clicked one
+                                // therefor everything comes out of sync.
+                                !(player.isSneaking() && event.hasItem()) &&
+                                // event gets fired for both hands, ignore offhand
+                                event.getHand() == EquipmentSlot.HAND) {
 
-                        // get openable block
-                        Block openableBlock = null;
-                        if (Tag.DOORS.isTagged(block.getType())) {
-                            openableBlock = Openables.getDoubleBlockParts(block).downPart();
-                        } else if (Openables.isSingleOpenable(block.getType())) {
-                            openableBlock = block;
-                        }
+                            // get openable block
+                            Block openableBlock = null;
+                            if (Tag.DOORS.isTagged(block.getType())) {
+                                openableBlock = Openables.getDoubleBlockParts(block).downPart();
+                            } else if (Openables.isSingleOpenable(block.getType())) {
+                                openableBlock = block;
+                            }
 
-                        if (openableBlock != null) {
-                            Long closetime = SignTimer.getTimer(lockSign);
+                            if (openableBlock != null) {
+                                Long closetime = SignTimer.getTimer(lockSign);
 
-                            if (closetime != null) {
-                                Set<Block> openables = new HashSet<>();
-                                openables.add(openableBlock);
+                                if (closetime != null) {
+                                    Set<Block> openables = new HashSet<>();
+                                    openables.add(openableBlock);
 
-                                if (openableBlock.getType() == Material.IRON_DOOR || openableBlock.getType() == Material.IRON_TRAPDOOR) {
-                                    Openables.toggleOpenable(openableBlock);
-                                }
-                                for (BlockFace blockface : PadlockAPI.cardinalFaces) {
-                                    Block relative = openableBlock.getRelative(blockface);
-                                    if (relative.getType() == openableBlock.getType()) {
-                                        openables.add(relative);
-                                        Openables.toggleOpenable(relative);
+                                    if (openableBlock.getType() == Material.IRON_DOOR || openableBlock.getType() == Material.IRON_TRAPDOOR) {
+                                        Openables.toggleOpenable(openableBlock);
                                     }
-                                }
+                                    for (BlockFace blockface : PadlockAPI.cardinalFaces) {
+                                        Block relative = openableBlock.getRelative(blockface);
+                                        if (relative.getType() == openableBlock.getType()) {
+                                            openables.add(relative);
+                                            Openables.toggleOpenable(relative);
+                                        }
+                                    }
 
-                                if (closetime > 0) {
-                                    plugin.getOpenableToggleManager().toggleCancelRunning(openables, closetime);
-                                } // timer disabled
-                            } // no timer
-                        } // not openable
-                    } // not right-click
-                } else {// no permission
-                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
-                    event.setCancelled(true);
-                }
+                                    if (closetime > 0) {
+                                        plugin.getOpenableToggleManager().toggleCancelRunning(openables, closetime);
+                                    } // timer disabled
+                                } // no timer
+                            } // not openable
+                        } // not right-click
+                    } else {// no permission
+                        plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
+                        event.setCancelled(true);
+                    }
+                } // sign was selected. ignoring
             } // not locked
         }
     }
@@ -482,7 +478,7 @@ public class BlockPlayerListener implements Listener {
      * prevent non owners / admins from taking books of locked lecterns
      */
     @EventHandler(priority = EventPriority.HIGH)
-    private void onLecternTake(@NotNull PlayerTakeLecternBookEvent event) {
+    private void onLecternTake(@NotNull PlayerTakeLecternBookEvent event) { //todo new access types
         Player player = event.getPlayer();
 
         if (!(PadlockAPI.isOwner(event.getLectern().getBlock(), player) ||

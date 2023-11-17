@@ -55,8 +55,7 @@ public class SignLock {
      * Check if the sign is a lock sign by checking it's first line against the line configured in the lang file.
      */
     public static boolean isLockSign(@NotNull Sign sign) {
-        //SignAccessType.getAccessType() //todo
-        return Padlock.getPlugin().getMessageManager().isSignComp(sign.getSide(Side.FRONT).line(0), MessageManager.LangPath.PRIVATE_SIGN);
+        return SignAccessType.getAccessTypeFromComp(sign.getSide(Side.FRONT).line(0)) != null;
     }
 
     /**

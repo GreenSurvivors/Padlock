@@ -30,10 +30,20 @@ public final class SignAccessType {
         }
     }
 
-    public static boolean isAnyAccessComp(@NotNull Component line) {
+    public static AccessType getAccessTypeFromComp(@NotNull Component line) {
         MessageManager manager = Padlock.getPlugin().getMessageManager();
 
-        return manager.isSignComp(line, MessageManager.LangPath.PRIVATE_SIGN); //todo
+        if (manager.isSignComp(line, MessageManager.LangPath.PRIVATE_SIGN)) {
+            return AccessType.PRIVATE;
+        } else if (manager.isSignComp(line, MessageManager.LangPath.PUBLIC_SIGN)) {
+            return AccessType.PUBLIC;
+        } else if (manager.isSignComp(line, MessageManager.LangPath.DONATION_SIGN)) {
+            return AccessType.DONATION;
+        } else if (manager.isSignComp(line, MessageManager.LangPath.DISPLAY_SIGN)) {
+            return AccessType.DISPLAY;
+        } else {
+            return null;
+        }
     }
 
     /**

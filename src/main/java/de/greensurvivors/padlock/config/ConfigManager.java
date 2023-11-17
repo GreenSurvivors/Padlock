@@ -33,7 +33,7 @@ public class ConfigManager {
     private final ConfigOption<Long> LOCK_EXPIRE_DAYS = new ConfigOption<>("lock.expire.days", 999L);
     //while this works intern with milliseconds, configurable are only seconds for easier handling of the config
     private final ConfigOption<Integer> CACHE_SECONDS = new ConfigOption<>("cache.seconds", 0);
-    private final ConfigOption<String> BEDROCK_PREFIX = new ConfigOption<>("bedrock-prefix", "."); // todo only use .<name> for config
+    private final ConfigOption<String> BEDROCK_PREFIX = new ConfigOption<>("bedrock-prefix", ".");
 
     public ConfigManager(@NotNull Padlock plugin) {
         this.plugin = plugin;

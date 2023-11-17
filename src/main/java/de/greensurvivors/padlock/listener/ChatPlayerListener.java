@@ -19,7 +19,6 @@ import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.*;
-import java.util.regex.Pattern;
 
 public final class ChatPlayerListener implements Listener {
     private static final Set<String> mainCmdStrings = new HashSet<>();
@@ -84,6 +83,7 @@ public final class ChatPlayerListener implements Listener {
                     SetPassword.onExternalCommand(newPassword, event.getPlayer());
 
                     //invalidate char array
+                    // yes I know I invalidate the arrays at multiple places, but in terms of password safety it's better to be double and tripple safe then sorry.
                     Arrays.fill(newPassword, '*');
                 });
 
@@ -101,6 +101,7 @@ public final class ChatPlayerListener implements Listener {
                     Password.onExternalCommand(password, event.getPlayer());
 
                     //invalidate char array
+                    // yes I know I invalidate the arrays at multiple places, but in terms of password safety it's better to be double and tripple safe then sorry.
                     Arrays.fill(password, '*');
                 });
 

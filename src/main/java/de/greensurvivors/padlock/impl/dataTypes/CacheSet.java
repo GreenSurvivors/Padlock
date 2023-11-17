@@ -3,14 +3,15 @@ package de.greensurvivors.padlock.impl.dataTypes;
 import com.github.benmanes.caffeine.cache.Cache;
 import org.jetbrains.annotations.NotNull;
 
-import java.util.*;
+import java.util.AbstractSet;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.Set;
 
 public class CacheSet<E> extends AbstractSet<E> implements Set<E> {
-
-    private final Cache<E, Object> cache;
-
     // Dummy value to associate with an Object in the backing Cache
     private static final Object PRESENT = new Object();
+    private final Cache<E, Object> cache;
 
     public CacheSet(Cache<E, Object> newCache) {
         this.cache = newCache;

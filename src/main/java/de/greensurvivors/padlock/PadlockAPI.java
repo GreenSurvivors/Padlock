@@ -57,7 +57,6 @@ public class PadlockAPI {
 
                     if (lockSign != null) {
                         SignLock.updateLegacyLock(lockSign);
-                        //SignExpiration.updateLegacyTime(lockSign);//todo
                         SignTimer.updateLegacyTimer(lockSign);
                         SignAccessType.updateLegacy(lockSign);
                         SignDisplay.updateDisplay(lockSign);

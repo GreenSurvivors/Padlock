@@ -35,15 +35,13 @@ repositories {
     maven { name 'Paper'; url 'https://repo.papermc.io/repository/maven-public/' }
     maven { name 'sk89q-repo'; url "https://maven.enginehub.org/repo/" } //worldguard
     maven { name 'playpro'; url 'https://maven.playpro.com/' } //coreProtect
-    maven {name 'dmulloy2';   url 'https://repo.dmulloy2.net/repository/public/'}
 }
 
 dependencies {
     implementation 'org.apache.commons:commons-collections4:4.4'
-    implementation('org.springframework.security:spring-security-crypto:6.1.5')
-    implementation 'org.bouncycastle:bcprov-jdk15on:1.70'
     implementation 'org.jetbrains:annotations:23.0.0'
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
+    implementation("de.mkammerer:argon2-jvm:2.11")
 
     paperweight.paperDevBundle("1.20.2-R0.1-SNAPSHOT")
     compileOnly ('com.sk89q.worldguard:worldguard-bukkit:7.1.0-SNAPSHOT') { transitive = false }

@@ -14,8 +14,8 @@ import java.time.Duration;
  */
 public class SignExpiration {
     /**
-     * get the time, in millis since Epoch, a sign was created at
-     * or null if expiration wasn't enabled at time of its creation
+     * get the time, in millis since Epoch, a signs owner was seen last
+     * or -1 if this isn't a lock sign.
      */
     public static long getLastUsed(Sign sign) {
         if (PadlockAPI.isLockSign(sign)) {

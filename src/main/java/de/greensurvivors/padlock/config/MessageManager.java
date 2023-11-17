@@ -96,8 +96,11 @@ public class MessageManager {
         langCache.asMap().clear();
 
         nakedSignLiness.put(LangPath.PRIVATE_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.PRIVATE_SIGN)).toLowerCase());
-        nakedSignLiness.put(LangPath.ADDITIONAL_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.ADDITIONAL_SIGN)).toLowerCase());
-        nakedSignLiness.put(LangPath.EVERYONE_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.EVERYONE_SIGN)).toLowerCase());
+        nakedSignLiness.put(LangPath.PUBLIC_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.PUBLIC_SIGN)).toLowerCase());
+        nakedSignLiness.put(LangPath.DONATION_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.DONATION_SIGN)).toLowerCase());
+        nakedSignLiness.put(LangPath.DISPLAY_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.DISPLAY_SIGN)).toLowerCase());
+        nakedSignLiness.put(LangPath.ADDITIONAL_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.ADDITIONAL_SIGN)).toLowerCase()); // todo deprecated
+        nakedSignLiness.put(LangPath.EVERYONE_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.EVERYONE_SIGN)).toLowerCase()); // todo deprecated
         nakedSignLiness.put(LangPath.TIMER_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.TIMER_SIGN)).toLowerCase());
         nakedSignLiness.put(LangPath.ERROR_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.ERROR_SIGN)).toLowerCase());
         nakedSignLiness.put(LangPath.INVALID_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.INVALID_SIGN)).toLowerCase());
@@ -239,6 +242,9 @@ public class MessageManager {
         PLUGIN_PREFIX("prefix", "<gold>[Padlock]</gold> "),
 
         PRIVATE_SIGN("sign.line.private", "[Private]"),
+        PUBLIC_SIGN("sign.line.public", "[Public]"),
+        DONATION_SIGN("sign.line.donation", "[Donation]"),
+        DISPLAY_SIGN("sign.line.display", "[Display]"),
         @Deprecated(forRemoval = true)
         ADDITIONAL_SIGN("sign.line.additional", "[More Users]"),
         @Deprecated(forRemoval = true)
@@ -281,6 +287,7 @@ public class MessageManager {
         PASSWORD_ACCESS_GRANTED("cmd.password.access-granted"),
         PASSWORD_WRONG_PASSWORD("cmd.password.wrong-password"),
         PASSWORD_ON_COOLDOWN("cmd.password.on-cooldown"),
+        PASSWORD_SAFETY_WARNING("cmd.password.safety-warning", "<dark_red>Warning: never use a password, you are using anywhere else! While I did everything I could for your safety, there <bold>ARE</bold> ways your password could get leaked!</dark_red>"),
         PASSWORD_START_PROCESSING("cmd.password.start-processing"),
         RELOAD_SUCCESS("cmd.reload.success"),
 

@@ -8,7 +8,6 @@ import de.greensurvivors.padlock.impl.SignSelection;
 import de.greensurvivors.padlock.impl.signdata.SignLock;
 import de.greensurvivors.padlock.impl.signdata.SignPasswords;
 import net.kyori.adventure.text.Component;
-import org.bukkit.Bukkit;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -20,7 +19,6 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.CompletableFuture;
 
 /**
  * But since we are handling passwords, we want to leak them as less as possible,
@@ -84,7 +82,7 @@ public final class SetPassword extends SubCommand {
             Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.NO_PERMISSION);
         }
 
-
+        // yes I know I invalidate the arrays at multiple places, but in terms of password safety it's better to be double and tripple safe then sorry.
         Arrays.fill(newPassword, '*');
     }
 
@@ -106,6 +104,7 @@ public final class SetPassword extends SubCommand {
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         if (sender instanceof Player player) {
+            plugin.getMessageManager().sendLang(player, MessageManager.LangPath.PASSWORD_SAFETY_WARNING);
             plugin.getMessageManager().sendLang(player, MessageManager.LangPath.PASSWORD_START_PROCESSING);
             return true;
         } else {

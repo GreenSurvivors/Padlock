@@ -10,9 +10,8 @@ description: >
 libraries:
   - org.apache.commons:commons-collections4:4.4
   - org.apache.commons:commons-lang3:3.13.0
-  - org.springframework.security:spring-security-crypto:6.1.5
-  - org.bouncycastle:bcprov-jdk15on:1.70
   - com.github.ben-manes.caffeine:caffeine:3.1.8
+  - de.mkammerer:argon2-jvm:2.11
 
 commands:
   padlock:
