@@ -100,7 +100,25 @@ public class Info extends SubCommand {
                             }
                         }
 
-                        //todo display access type
+                        // access type
+                        component = component.append(Component.newline());
+                        component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_ACCESS_TYPE));
+
+                        switch (SignAccessType.getAccessType(sign, false)) {
+                            case PRIVATE ->
+                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PRIVATE_SIGN));
+                            case PUBLIC ->
+                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PUBLIC_SIGN));
+                            case DONATION ->
+                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.DONATION_SIGN));
+                            case DISPLAY ->
+                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.DISPLAY_SIGN));
+                            case SUPPLY ->
+                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SUPPLY_SIGN));
+                            /*case null, // todo next java version*/
+                            default ->
+                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN));
+                        }
 
                         // timer
                         Long timer = SignTimer.getTimer(sign, false);

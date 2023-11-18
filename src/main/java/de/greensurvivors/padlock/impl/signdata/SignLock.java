@@ -5,7 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.impl.MiscUtils;
-import de.greensurvivors.padlock.impl.dataTypes.LazySignPropertys;
+import de.greensurvivors.padlock.impl.dataTypes.LazySignProperties;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.apache.commons.collections4.set.ListOrderedSet;
@@ -84,7 +84,7 @@ public class SignLock {
      */
     public static boolean isMember(@NotNull final Sign sign, UUID uuid) {
         if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
-            LazySignPropertys lazySignPropertys = Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(sign.getLocation());
+            LazySignProperties lazySignPropertys = Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(sign.getLocation());
             Set<String> memberUUIDStrs = lazySignPropertys.getMemberUUIDStrs();
 
             return (lazySignPropertys.getAccessType() == SignAccessType.AccessType.PUBLIC) ||
@@ -106,7 +106,7 @@ public class SignLock {
         ListOrderedSet<String> set;
 
         if (!ignoreCache && Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
-            LazySignPropertys lazySignPropertys = Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(sign.getLocation());
+            LazySignProperties lazySignPropertys = Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(sign.getLocation());
             set = owners ? lazySignPropertys.getOwnerUUIDStrs() : lazySignPropertys.getMemberUUIDStrs();
         } else {
             set = sign.getPersistentDataContainer().get(owners ? storedOwnersUUIDKey : storedMembersUUIDKey, uuidSetDataType);

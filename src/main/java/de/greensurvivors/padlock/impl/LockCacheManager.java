@@ -5,7 +5,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.Policy;
 import com.github.benmanes.caffeine.cache.RemovalListener;
 import de.greensurvivors.padlock.PadlockAPI;
-import de.greensurvivors.padlock.impl.dataTypes.LazySignPropertys;
+import de.greensurvivors.padlock.impl.dataTypes.LazySignProperties;
 import org.bukkit.Location;
 import org.bukkit.block.Sign;
 import org.checkerframework.checker.index.qual.NonNegative;
@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit;
  */
 public class LockCacheManager {
     // default cache should never get used, but if it does, it has at least a maximum size to not grow unlimited
-    Map<Location, LazySignPropertys> lockLazyProps = new HashMap<>();
+    Map<Location, LazySignProperties> lockLazyProps = new HashMap<>();
     private final @NotNull Cache<@NotNull Location, @NotNull LockWrapper> lockStateCache = Caffeine.newBuilder().
             evictionListener((RemovalListener<Location, LockWrapper>) (loc, lockWrapper, cause) -> {
                 if (lockWrapper != null) {
@@ -44,15 +44,15 @@ public class LockCacheManager {
         policy.ifPresent(expiration -> expiration.setExpiresAfter(duration, unit));
     }
 
-    public @NotNull LazySignPropertys getProtectedFromCache(@NotNull Location location) {
+    public @NotNull LazySignProperties getProtectedFromCache(@NotNull Location location) {
         LockWrapper lockWrapper = lockStateCache.getIfPresent(location);
 
         if (lockWrapper != null) {
             if (lockWrapper.lockLoc() != null) {
-                LazySignPropertys lazySignPropertys = lockLazyProps.get(lockWrapper.lockLoc());
+                LazySignProperties lazySignPropertys = lockLazyProps.get(lockWrapper.lockLoc());
 
                 if (lazySignPropertys == null) {
-                    lazySignPropertys = new LazySignPropertys(PadlockAPI.getLock(lockWrapper.lockLoc().getBlock(), true));
+                    lazySignPropertys = new LazySignProperties(PadlockAPI.getLock(lockWrapper.lockLoc().getBlock(), true));
 
                     lockLazyProps.put(lockWrapper.lockLoc(), lazySignPropertys);
                 }
@@ -64,10 +64,10 @@ public class LockCacheManager {
             if (lock != null) {
                 lockStateCache.put(location, new LockWrapper(lock.getLocation()));
 
-                LazySignPropertys lazySignPropertys = lockLazyProps.get(lock);
+                LazySignProperties lazySignPropertys = lockLazyProps.get(lock);
 
                 if (lazySignPropertys == null) {
-                    lazySignPropertys = new LazySignPropertys(lock);
+                    lazySignPropertys = new LazySignProperties(lock);
                     lockLazyProps.put(lock.getLocation(), lazySignPropertys);
                 }
 
@@ -77,7 +77,7 @@ public class LockCacheManager {
             }
         }
 
-        return new LazySignPropertys(null);
+        return new LazySignProperties(null);
     }
 
     /**

@@ -3,7 +3,6 @@ package de.greensurvivors.padlock.command;
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
-import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.SignSelection;
 import de.greensurvivors.padlock.impl.signdata.SignAccessType;
 import de.greensurvivors.padlock.impl.signdata.SignLock;
@@ -16,14 +15,25 @@ import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Locale;
-import java.util.Set;
+import java.util.*;
 
 public class SetAccessType extends SubCommand {
+    private final HashMap<String, SignAccessType.AccessType> accessTypeStrs = new HashMap<>();
+
     protected SetAccessType(@NotNull Padlock plugin) {
         super(plugin);
+
+        MessageManager manager = Padlock.getPlugin().getMessageManager();
+        accessTypeStrs.put(manager.getNakedSignText(MessageManager.LangPath.PRIVATE_SIGN).toLowerCase().
+                replace("[", "").replace("]", "").trim(), SignAccessType.AccessType.PRIVATE);
+        accessTypeStrs.put(manager.getNakedSignText(MessageManager.LangPath.PUBLIC_SIGN).toLowerCase().
+                replace("[", "").replace("]", "").trim(), SignAccessType.AccessType.PUBLIC);
+        accessTypeStrs.put(manager.getNakedSignText(MessageManager.LangPath.DONATION_SIGN).toLowerCase().
+                replace("[", "").replace("]", "").trim(), SignAccessType.AccessType.DONATION);
+        accessTypeStrs.put(manager.getNakedSignText(MessageManager.LangPath.DISPLAY_SIGN).toLowerCase().
+                replace("[", "").replace("]", "").trim(), SignAccessType.AccessType.DISPLAY);
+        accessTypeStrs.put(manager.getNakedSignText(MessageManager.LangPath.SUPPLY_SIGN).toLowerCase().
+                replace("[", "").replace("]", "").trim(), SignAccessType.AccessType.SUPPLY);
     }
 
     @Override
@@ -60,8 +70,7 @@ public class SetAccessType extends SubCommand {
                         if (SignLock.isOwner(sign, player.getUniqueId()) ||
                                 player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm())) {
                             // get and check type from arg
-                            //todo lang mapping
-                            SignAccessType.AccessType accessType = MiscUtils.getEnum(SignAccessType.AccessType.class, args[1]);
+                            SignAccessType.AccessType accessType = accessTypeStrs.get(args[1].toLowerCase().trim());
 
                             if (accessType != null) {
                                 // success!
@@ -97,8 +106,7 @@ public class SetAccessType extends SubCommand {
     @Override
     protected @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
         if (this.checkPermission(sender) && args.length == 2) {
-            //todo lang mapping
-            return Arrays.stream(SignAccessType.AccessType.values()).map(type -> type.name().toLowerCase()).toList();
+            return new ArrayList<>(accessTypeStrs.keySet());
         } else {
             return null;
         }

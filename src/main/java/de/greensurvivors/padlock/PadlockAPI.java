@@ -2,7 +2,7 @@ package de.greensurvivors.padlock;
 
 import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.dataTypes.DoubleBlockParts;
-import de.greensurvivors.padlock.impl.dataTypes.LazySignPropertys;
+import de.greensurvivors.padlock.impl.dataTypes.LazySignProperties;
 import de.greensurvivors.padlock.impl.openabledata.Openables;
 import de.greensurvivors.padlock.impl.signdata.*;
 import org.bukkit.Material;
@@ -487,7 +487,7 @@ public class PadlockAPI {
      */
     public static boolean isMember(@NotNull Block block, @NotNull Player player) {
         if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
-            LazySignPropertys lazySignPropertys = Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(block.getLocation());
+            LazySignProperties lazySignPropertys = Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(block.getLocation());
 
             if (lazySignPropertys.isLock()) {
                 return SignLock.isMember(lazySignPropertys.getLock(), player.getUniqueId());

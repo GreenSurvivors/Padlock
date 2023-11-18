@@ -5,6 +5,5 @@ Hoppers (minecart hoppers too!) cannot take or put items, unless a [Redstone] ta
 todo wiki
 todo permission group support
 todo make multi door opening/closing together configurable per sign
-todo permission?
 todo better API
 todo check what applies for access type / timer

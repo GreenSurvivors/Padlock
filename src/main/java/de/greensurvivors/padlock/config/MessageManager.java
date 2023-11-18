@@ -331,6 +331,7 @@ public class MessageManager {
         INFO_OWNERS("cmd.info.owners"),
         INFO_MEMBERS("cmd.info.members"),
         INFO_TIMER("cmd.info.timer"),
+        INFO_ACCESS_TYPE("cmd.info.access-type"),
         INFO_EXPIRED("cmd.info.expired"),
 
         SIGN_NEED_RESELECT("cmd.error.sign-need-reselect"),

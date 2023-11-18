@@ -3,18 +3,18 @@ package de.greensurvivors.padlock.listener;
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.PadlockAPI;
 import de.greensurvivors.padlock.config.ConfigManager;
+import de.greensurvivors.padlock.impl.dataTypes.LazySignProperties;
 import de.greensurvivors.padlock.impl.openabledata.Openables;
+import de.greensurvivors.padlock.impl.signdata.SignAccessType;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
+import org.bukkit.block.Sign;
 import org.bukkit.entity.*;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
-import org.bukkit.event.block.BlockExplodeEvent;
-import org.bukkit.event.block.BlockPistonExtendEvent;
-import org.bukkit.event.block.BlockPistonRetractEvent;
-import org.bukkit.event.block.BlockRedstoneEvent;
+import org.bukkit.event.block.*;
 import org.bukkit.event.entity.EntityChangeBlockEvent;
 import org.bukkit.event.entity.EntityExplodeEvent;
 import org.bukkit.event.entity.EntityInteractEvent;
@@ -34,8 +34,8 @@ public class BlockEnvironmentListener implements Listener {
     /**
      * Prevent explosion break block
      */
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onEntityExplode(EntityExplodeEvent event) {
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    private void onEntityExplode(EntityExplodeEvent event) {
         if (!plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.EXPLOSION)) {
             event.blockList().removeIf(PadlockAPI::isProtected);
         }
@@ -44,8 +44,8 @@ public class BlockEnvironmentListener implements Listener {
     /**
      * Prevent bed / respawn anchor break block
      */
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onBlockExplode(BlockExplodeEvent event) {
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    private void onBlockExplode(BlockExplodeEvent event) {
         if (!plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.EXPLOSION)) {
             event.blockList().removeIf(PadlockAPI::isProtected);
         }
@@ -54,8 +54,8 @@ public class BlockEnvironmentListener implements Listener {
     /**
      * Prevent trees / mushroom growth break block
      */
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onStructureGrow(StructureGrowEvent event) {
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    private void onStructureGrow(StructureGrowEvent event) {
         if (!plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.GROWTH)) {
             for (BlockState blockstate : event.getBlocks()) {
                 if (PadlockAPI.isProtected(blockstate.getBlock())) {
@@ -69,8 +69,8 @@ public class BlockEnvironmentListener implements Listener {
     /**
      * Prevent piston extend break lock
      */
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onPistonExtend(BlockPistonExtendEvent event) {
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    private void onPistonExtend(BlockPistonExtendEvent event) {
         if (!plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.PISTON)) {
             for (Block block : event.getBlocks()) {
                 if (PadlockAPI.isProtected(block)) {
@@ -84,8 +84,8 @@ public class BlockEnvironmentListener implements Listener {
     /**
      * Prevent piston retract break lock
      */
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onPistonRetract(BlockPistonRetractEvent event) {
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    private void onPistonRetract(BlockPistonRetractEvent event) {
         if (!plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.PISTON)) {
             for (Block block : event.getBlocks()) {
                 if (PadlockAPI.isProtected(block)) {
@@ -100,16 +100,52 @@ public class BlockEnvironmentListener implements Listener {
      * Prevent redstone current open (tap)doors / fence gates,
      * however does not prevent dispensers / droppers to do their thing.
      */
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onBlockRedstoneChange(BlockRedstoneEvent event) {
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    private void onBlockRedstoneChange(BlockRedstoneEvent event) {
         if (!plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.REDSTONE)) {
             Block block = event.getBlock();
 
-            if (plugin.getConfigManager().isCacheEnabled() &&
-                    plugin.getLockCacheManager().getProtectedFromCache(block.getLocation()).isLock()) { // Cache is enabled
-                event.setNewCurrent(event.getOldCurrent());
-            } else if (PadlockAPI.isProtected(block)) { // Cache is disabled
-                event.setNewCurrent(event.getOldCurrent());
+            if (plugin.getConfigManager().isCacheEnabled()) {
+                LazySignProperties lazySignProperty = plugin.getLockCacheManager().getProtectedFromCache(block.getLocation());
+
+                if (lazySignProperty.isLock() && !(lazySignProperty.getAccessType() == SignAccessType.AccessType.PUBLIC)) {
+                    event.setNewCurrent(event.getOldCurrent());
+                }
+            } else {
+                Sign lock = PadlockAPI.getLock(event.getBlock(), true);
+
+                if (lock != null && !(SignAccessType.getAccessType(lock, true) == SignAccessType.AccessType.PUBLIC)) {// Cache is disabled
+                    event.setNewCurrent(event.getOldCurrent());
+                }
+            }
+        } // redstone exempted
+    }
+
+    /**
+     * Prevent Dispenser/droppers to dispense/drop
+     */
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    private void onDispense(BlockDispenseEvent event) {
+        if (!plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.REDSTONE)) {
+            Block block = event.getBlock();
+
+            if (plugin.getConfigManager().isCacheEnabled()) { // Cache is enabled
+                LazySignProperties lazySignProperty = plugin.getLockCacheManager().getProtectedFromCache(block.getLocation());
+
+                if (lazySignProperty.isLock() && !(lazySignProperty.getAccessType() == SignAccessType.AccessType.PUBLIC ||
+                        lazySignProperty.getAccessType() == SignAccessType.AccessType.SUPPLY)) {
+                    event.setCancelled(true);
+                }
+            } else {
+                Sign lock = PadlockAPI.getLock(event.getBlock(), true);
+
+                if (lock != null) {
+                    SignAccessType.AccessType accessType = SignAccessType.getAccessType(lock, true);
+
+                    if (!(accessType == SignAccessType.AccessType.PUBLIC || accessType == SignAccessType.AccessType.SUPPLY)) {// Cache is disabled
+                        event.setCancelled(true);
+                    }
+                }
             }
         } // redstone exempted
     }
@@ -117,8 +153,8 @@ public class BlockEnvironmentListener implements Listener {
     /**
      * Prevent villager open door
      */
-    @EventHandler(priority = EventPriority.HIGH)
-    public void onVillagerOpenDoor(EntityInteractEvent event) {
+    @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
+    private void onVillagerOpenDoor(EntityInteractEvent event) {
         if (plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.VILLAGER)) return;
         // Explicitly to villager vs all doors
         if (event.getEntity() instanceof Villager &&
@@ -132,7 +168,7 @@ public class BlockEnvironmentListener implements Listener {
      * Prevent mob change block
      */
     @EventHandler(priority = EventPriority.HIGH)
-    public void onMobChangeBlock(EntityChangeBlockEvent event) {
+    private void onMobChangeBlock(EntityChangeBlockEvent event) {
         if ((event.getEntity() instanceof Enderman && !plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.ENDERMAN)) ||// enderman pick up/place block
                 (event.getEntity() instanceof EnderDragon && !plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.ENDER_DRAGON)) || // ender dragons break blocks
                 (event.getEntity() instanceof Wither && !plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.WITHER)) ||// wither break block
