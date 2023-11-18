@@ -105,7 +105,8 @@ public class BlockEnvironmentListener implements Listener {
         if (!plugin.getConfigManager().isProtectionExempted(ConfigManager.ProtectionExemption.REDSTONE)) {
             Block block = event.getBlock();
 
-            if (plugin.getConfigManager().isCacheEnabled() && plugin.getLockCacheManager().tryGetProtectedFromCache(block)) { // Cache is enabled
+            if (plugin.getConfigManager().isCacheEnabled() &&
+                    plugin.getLockCacheManager().getProtectedFromCache(block.getLocation()).isLock()) { // Cache is enabled
                 event.setNewCurrent(event.getOldCurrent());
             } else if (PadlockAPI.isProtected(block)) { // Cache is disabled
                 event.setNewCurrent(event.getOldCurrent());

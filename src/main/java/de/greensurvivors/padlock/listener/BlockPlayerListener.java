@@ -117,7 +117,7 @@ public class BlockPlayerListener implements Listener {
                                     MiscUtils.removeAItemMainHand(player);
                                     // Put sign on
                                     Block newsign = SignLock.putPrivateSignOn(signLocBlock, blockface, signType, player);
-                                    plugin.getLockCacheManager().resetCache(block);
+                                    plugin.getLockCacheManager().removeFromCache(block.getLocation());
                                     // Send message
                                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
                                     plugin.getDependencyManager().logPlacement(player, newsign);
@@ -217,7 +217,7 @@ public class BlockPlayerListener implements Listener {
                     Bukkit.getScheduler().runTaskLater(plugin, () -> SignDisplay.updateDisplay(sign), 2);
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
 
-                    plugin.getLockCacheManager().resetCache(attachedBlock);
+                    plugin.getLockCacheManager().removeFromCache(attachedBlock.getLocation());
                 }
             } else {
                 plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_ERROR_NOT_LOCKABLE);
@@ -262,7 +262,7 @@ public class BlockPlayerListener implements Listener {
             if (PadlockAPI.isValidLockSign(sign)) {
                 if (SignLock.isOwner(sign, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm())) {
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.BREAK_LOCK_SUCCESS);
-                    plugin.getLockCacheManager().resetCache(PadlockAPI.getAttachedBlock(block));
+                    plugin.getLockCacheManager().removeFromCache(sign);
                 } else { // not allowed to break
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.NOT_OWNER);
                     event.setCancelled(true);
@@ -507,7 +507,9 @@ public class BlockPlayerListener implements Listener {
         if (topInventory.getHolder() instanceof BlockInventoryHolder blockInventoryHolder) {
             block = blockInventoryHolder.getBlock();
         } else if (topInventory.getHolder() instanceof DoubleChest doubleChest) {
-            block = doubleChest.getLocation().getBlock();
+            if (doubleChest.getLeftSide() instanceof BlockInventoryHolder blockInventoryHolder) {
+                block = blockInventoryHolder.getBlock();
+            }
         }
 
         if (block != null) {

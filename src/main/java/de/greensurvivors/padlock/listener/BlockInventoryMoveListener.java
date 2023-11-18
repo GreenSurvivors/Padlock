@@ -4,7 +4,6 @@ import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.PadlockAPI;
 import de.greensurvivors.padlock.config.ConfigManager;
 import org.bukkit.Material;
-import org.bukkit.block.Block;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.entity.minecart.HopperMinecart;
@@ -74,11 +73,10 @@ public class BlockInventoryMoveListener implements Listener {
 
         // get lock
         if (inventoryholder instanceof BlockState blockState) {
-            Block block = blockState.getBlock();
             if (plugin.getConfigManager().isCacheEnabled()) { // Cache is enabled
-                return plugin.getLockCacheManager().tryGetProtectedFromCache(block);
+                return plugin.getLockCacheManager().getProtectedFromCache(blockState.getLocation()).isLock();
             } else { // Cache is disabled
-                return PadlockAPI.isProtected(block);
+                return PadlockAPI.isProtected(blockState.getBlock());
             }
         } //entities are not lockable
         return false;
