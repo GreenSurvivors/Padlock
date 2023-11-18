@@ -5,7 +5,7 @@ plugins {
     id("xyz.jpenilla.run-paper") version "1.0.6"
 }
 // Suppiled by Jenkins
-ext.majorVersion = 1
+ext.majorVersion = 2
 ext.minorVersion = 0
 ext.minecraftVersion = "1.20.1"
 
@@ -35,16 +35,17 @@ repositories {
     maven { name 'Paper'; url 'https://repo.papermc.io/repository/maven-public/' }
     maven { name 'sk89q-repo'; url "https://maven.enginehub.org/repo/" } //worldguard
     maven { name 'playpro'; url 'https://maven.playpro.com/' } //coreProtect
-    maven {name 'dmulloy2';   url 'https://repo.dmulloy2.net/repository/public/'}
 }
 
 dependencies {
     implementation 'org.apache.commons:commons-collections4:4.4'
     implementation 'org.jetbrains:annotations:23.0.0'
+    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8") // caches
+    implementation("de.mkammerer:argon2-jvm:2.11") // native password hashing with argon2
+
     paperweight.paperDevBundle("1.20.2-R0.1-SNAPSHOT")
     compileOnly ('com.sk89q.worldguard:worldguard-bukkit:7.1.0-SNAPSHOT') { transitive = false }
     compileOnly ('net.coreprotect:coreprotect:21.0'){ transitive = false}
-    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8")
 }
 
 processResources {

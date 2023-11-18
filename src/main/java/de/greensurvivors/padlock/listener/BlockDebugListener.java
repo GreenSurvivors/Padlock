@@ -34,11 +34,10 @@ public class BlockDebugListener implements Listener {
                 player.sendMessage(Component.text("isLockable: ").append(formatBoolean(PadlockAPI.isLockable(clickedBlock))));
                 player.sendMessage(Component.text("isProtected: ").append(formatBoolean(PadlockAPI.isProtected(clickedBlock))));
                 player.sendMessage(Component.text(" - isOwner/User: ").append(formatBoolean(PadlockAPI.isOwner(clickedBlock, player))).append(Component.text("/")).append(formatBoolean(PadlockAPI.isMember(clickedBlock, player))));
-                player.sendMessage(Component.text("isLockedUpDownLockedDoor: ").append(formatBoolean(PadlockAPI.isPartOfLockedDoor(clickedBlock))));
                 if (clickedBlock.getState() instanceof Sign sign && PadlockAPI.isLockSign(sign)) {
                     player.sendMessage(Component.text("isSignExpired: ").append(formatBoolean(PadlockAPI.isSignExpired(sign))));
-                    Long timeStamp = SignExpiration.getCreatedTime(sign);
-                    player.sendMessage(Component.text(" - created: ").append(Component.text(timeStamp == null ? -1L : timeStamp)));
+                    Long timeStamp = SignExpiration.getLastUsed(sign);
+                    player.sendMessage(Component.text(" - last used: ").append(Component.text(timeStamp == null ? -1L : timeStamp)));
                     player.sendMessage(Component.text(" - now     : ").append(Component.text((int) (System.currentTimeMillis() / 1000))));
                 }
 

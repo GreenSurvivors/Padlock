@@ -4,7 +4,7 @@ import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
 import de.greensurvivors.padlock.impl.SignSelection;
-import de.greensurvivors.padlock.impl.signdata.EveryoneSign;
+import de.greensurvivors.padlock.impl.signdata.SignAccessType;
 import de.greensurvivors.padlock.impl.signdata.SignExpiration;
 import de.greensurvivors.padlock.impl.signdata.SignLock;
 import de.greensurvivors.padlock.impl.signdata.SignTimer;
@@ -56,7 +56,7 @@ public class Info extends SubCommand {
     }
 
     @Override
-    protected @NotNull Set<String> getAlias() {
+    protected @NotNull Set<String> getAliases() {
         return Set.of("info");
     }
 
@@ -85,7 +85,7 @@ public class Info extends SubCommand {
 
                         // owners
                         Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_OWNERS);
-                        for (String name : getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, true))) {
+                        for (String name : getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, true, false))) {
                             component = component.append(Component.text(name));
                             component = component.append(Component.text(", "));
                         }
@@ -93,17 +93,35 @@ public class Info extends SubCommand {
                         // members
                         component = component.append(Component.newline());
                         component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_MEMBERS));
-                        if (EveryoneSign.getAccessEveryone(sign)) {
-                            component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.EVERYONE_SIGN));
-                        } else {
-                            for (String name : getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, false))) {
+                        if (SignAccessType.getAccessType(sign, false) == SignAccessType.AccessType.PUBLIC) {
+                            for (String name : getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, false, false))) {
                                 component = component.append(Component.text(name));
                                 component = component.append(Component.text(", "));
                             }
                         }
 
+                        // access type
+                        component = component.append(Component.newline());
+                        component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_ACCESS_TYPE));
+
+                        switch (SignAccessType.getAccessType(sign, false)) {
+                            case PRIVATE ->
+                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PRIVATE_SIGN));
+                            case PUBLIC ->
+                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PUBLIC_SIGN));
+                            case DONATION ->
+                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.DONATION_SIGN));
+                            case DISPLAY ->
+                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.DISPLAY_SIGN));
+                            case SUPPLY ->
+                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SUPPLY_SIGN));
+                            /*case null, // todo next java version*/
+                            default ->
+                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN));
+                        }
+
                         // timer
-                        Long timer = SignTimer.getTimer(sign);
+                        Long timer = SignTimer.getTimer(sign, false);
                         if (timer != null) {
                             component = component.append(Component.newline());
                             component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_TIMER));

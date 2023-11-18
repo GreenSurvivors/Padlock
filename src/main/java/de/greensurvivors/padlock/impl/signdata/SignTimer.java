@@ -3,6 +3,7 @@ package de.greensurvivors.padlock.impl.signdata;
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.PadlockAPI;
 import de.greensurvivors.padlock.config.MessageManager;
+import de.greensurvivors.padlock.impl.MiscUtils;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -13,8 +14,11 @@ import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * A timer on a lock determines how many milliseconds it takes until the openable,
@@ -32,7 +36,19 @@ public class SignTimer {
      * casing should not matter and the placeholder should be a
      * group of any number to receive later
      */
-    private final static Pattern legacyPattern = Pattern.compile(Padlock.getPlugin().getMessageManager().getNakedSignText(MessageManager.LangPath.TIMER_SIGN).replace("[", "\\[(?i)").replace("<time>", "(-?[0-9]+)"));
+    @Deprecated(forRemoval = true)
+    private final static Set<Pattern> legacyPatterns = Padlock.getPlugin().getMessageManager().
+            getNakedLegacyText(MessageManager.LangPath.TIMER_SIGN).stream().
+            map(s -> Pattern.compile(s.replace("[", "\\[(?i)").
+                    replace("<time>", "(-?[0-9]+)"))).collect(Collectors.toSet());
+    // pretty complex stuff [timer:<timer>] and timer can be any number of digits with their timeunit (t, s, h, d, w or M)
+    // optionally delimited by whitespace and commas, all ignoring case.
+    // valid lines would be "[timer:2h]", "[TIMER:2D, 3w2t 555s]", "[tiMeR: 100W,,,  -8t]", "[timer:2h5h99h]"
+    // invalid lines would be "timer:3d]", "[timer24w]", "[time:0x77Q]", "[banana]", "[timer:34ttt]"
+    private final static Pattern modernPattern = Pattern.compile(Padlock.getPlugin().getMessageManager().
+            getNakedSignText(MessageManager.LangPath.TIMER_SIGN).replace("[", "\\[(?i)").
+            replace("<" + MessageManager.PlaceHolder.TIME.getPlaceholder() + ">",
+                    "\\s?((" + MiscUtils.getPeriodPattern().pattern() + "[\\s,]*?)+)"));
     private final static NamespacedKey timerKey = new NamespacedKey(Padlock.getPlugin(), "timer");
 
     /**
@@ -43,12 +59,43 @@ public class SignTimer {
      *
      * @return might be null if no timer was configured
      */
-    protected static @Nullable Component getTimerComponent(@NotNull Sign sign) { //todo maybe build a better display by calculating seconds, minutes, etc?
-        Long timerDuration = getTimer(sign);
+    protected static @Nullable Component getTimerComponent(@NotNull Sign sign) {
+        Long timerDuration = getTimer(sign, false);
 
         if (timerDuration != null && timerDuration > 0) {
+
+
+            Duration duration = Duration.ofMillis(timerDuration);
+
+            String timeStr = "";
+
+            final long days = duration.toDaysPart();
+            if (days != 0) {
+                timeStr += days + "d";
+            }
+
+            final int hours = duration.toHoursPart();
+            if (hours != 0) {
+                timeStr += hours + "h";
+            }
+
+            final int minutes = duration.toMinutesPart();
+            if (minutes != 0) {
+                timeStr += minutes + "m";
+            }
+
+            final int seconds = duration.toSecondsPart();
+            if (seconds != 0) {
+                timeStr += seconds + "s";
+            }
+
+            final int ticks = duration.toMillisPart() / 50;
+            if (ticks != 0) {
+                timeStr += ticks + "t";
+            }
+
             return Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.TIMER_SIGN,
-                    Placeholder.unparsed(MessageManager.PlaceHolder.TIME.getPlaceholder(), String.valueOf(timerDuration)));
+                    Placeholder.unparsed(MessageManager.PlaceHolder.TIME.getPlaceholder(), timeStr));
         } else {
             return null;
         }
@@ -61,6 +108,10 @@ public class SignTimer {
      * @param shouldUpdateDisplay if the display should get updated. is important to set to false for updating a lock sign from legacy
      */
     public static void setTimer(@NotNull Sign sign, long timerDuration, boolean shouldUpdateDisplay) {
+        if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
+            Padlock.getPlugin().getLockCacheManager().removeFromCache(sign);
+        }
+
         sign.getPersistentDataContainer().set(timerKey, PersistentDataType.LONG, timerDuration);
         sign.update();
 
@@ -75,19 +126,23 @@ public class SignTimer {
      *
      * @return might be null if no timer was configured
      */
-    public static @Nullable Long getTimer(@NotNull Sign sign) {
-        Long timerDuration = sign.getPersistentDataContainer().get(timerKey, PersistentDataType.LONG);
-
-        if (timerDuration != null) {
-            return timerDuration;
+    public static @Nullable Long getTimer(@NotNull Sign sign, boolean ignoreCache) {
+        if (!ignoreCache && Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
+            return Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(sign.getLocation()).getTimer();
         } else {
-            timerDuration = getLegacyTimer(sign);
+            Long timerDuration = sign.getPersistentDataContainer().get(timerKey, PersistentDataType.LONG);
 
             if (timerDuration != null) {
-                PadlockAPI.updateLegacySign(sign);
                 return timerDuration;
             } else {
-                return null;
+                timerDuration = getLegacyTimer(sign);
+
+                if (timerDuration != null) {
+                    PadlockAPI.updateLegacySign(sign);
+                    return timerDuration;
+                } else {
+                    return null;
+                }
             }
         }
     }
@@ -100,10 +155,20 @@ public class SignTimer {
      */
     public static @Nullable Long getTimerFromComp(@NotNull Component line) {
         String strToTest = PlainTextComponentSerializer.plainText().serialize(line).trim();
-        Matcher matcher = legacyPattern.matcher(strToTest);
+        Matcher matcher;
 
+        for (Pattern legacyPattern : legacyPatterns) {
+            matcher = legacyPattern.matcher(strToTest);
+
+            if (matcher.matches()) {
+                return Long.parseLong(matcher.group(1));
+            }
+        }
+
+        matcher = modernPattern.matcher(strToTest);
         if (matcher.matches()) {
-            return Long.parseLong(matcher.group(1));
+
+            return MiscUtils.parsePeriod(matcher.group(1));
         } else {
             return null;
         }

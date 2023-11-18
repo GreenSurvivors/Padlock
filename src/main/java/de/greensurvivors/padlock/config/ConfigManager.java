@@ -1,12 +1,12 @@
 package de.greensurvivors.padlock.config;
 
 import de.greensurvivors.padlock.Padlock;
+import de.greensurvivors.padlock.impl.MiscUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -32,28 +32,13 @@ public class ConfigManager {
     private final ConfigOption<Set<ProtectionExemption>> LOCK_EXEMPTIONS = new ConfigOption<>("lock.exemptions", Set.of());
     private final ConfigOption<Long> LOCK_EXPIRE_DAYS = new ConfigOption<>("lock.expire.days", 999L);
     //while this works intern with milliseconds, configurable are only seconds for easier handling of the config
-    private final ConfigOption<Integer> CACHE_MILLISECONDS = new ConfigOption<>("cache.seconds", 0);
-    private final ConfigOption<Long> DEFAULT_CREATETIME = new ConfigOption<>("lock-default-create-time-unix", -1L);
+    private final ConfigOption<Integer> CACHE_SECONDS = new ConfigOption<>("cache.seconds", 0);
+    private final ConfigOption<String> BEDROCK_PREFIX = new ConfigOption<>("bedrock-prefix", ".");
 
     public ConfigManager(@NotNull Padlock plugin) {
         this.plugin = plugin;
     }
 
-    /**
-     * Try to get a member of the enum given as an argument by the name
-     *
-     * @param enumName  name of the enum to find
-     * @param enumClass the enum to check
-     * @param <E>       the type of the enum to check
-     * @return the member of the enum to check
-     */
-    protected static @Nullable <E extends Enum<E>> E getEnum(final @NotNull Class<E> enumClass, final @NotNull String enumName) {
-        try {
-            return Enum.valueOf(enumClass, enumName);
-        } catch (final IllegalArgumentException ex) {
-            return null;
-        }
-    }
 
     /**
      * reload the config and language files,
@@ -215,7 +200,7 @@ public class ConfigManager {
         if (object instanceof QuickProtectOption quickProtectOption) {
             QUICKPROTECT_TYPE.setValue(quickProtectOption);
         } else if (object instanceof String string) {
-            QuickProtectOption setting = getEnum(QuickProtectOption.class, string);
+            QuickProtectOption setting = MiscUtils.getEnum(QuickProtectOption.class, string);
 
             if (setting != null) {
                 QUICKPROTECT_TYPE.setValue(setting);
@@ -248,7 +233,7 @@ public class ConfigManager {
         if (Objects.requireNonNull(object) instanceof HopperMinecartBlockedOption quickProtectOption) {
             LOCK_BLOCKS_HOPPER_MINECART.setValue(quickProtectOption);
         } else if (object instanceof String string) {
-            HopperMinecartBlockedOption setting = getEnum(HopperMinecartBlockedOption.class, string);
+            HopperMinecartBlockedOption setting = MiscUtils.getEnum(HopperMinecartBlockedOption.class, string);
 
             if (setting != null) {
                 LOCK_BLOCKS_HOPPER_MINECART.setValue(setting);
@@ -282,7 +267,7 @@ public class ConfigManager {
             if (exemptionObj instanceof ProtectionExemption protectionExemtion) {
                 exemptions.add(protectionExemtion);
             } else if (exemptionObj instanceof String string) {
-                ProtectionExemption protectionExemtion = getEnum(ProtectionExemption.class, string);
+                ProtectionExemption protectionExemtion = MiscUtils.getEnum(ProtectionExemption.class, string);
 
                 if (protectionExemtion != null) {
                     exemptions.add(protectionExemtion);
@@ -313,13 +298,14 @@ public class ConfigManager {
 
         LOCK_EXPIRE_DAYS.setValue(config.getLong(LOCK_EXPIRE_DAYS.getPath(), LOCK_EXPIRE_DAYS.getFallbackValue()));
 
-        CACHE_MILLISECONDS.setValue(config.getInt(CACHE_MILLISECONDS.getPath(), CACHE_MILLISECONDS.getFallbackValue()) * 1000);
-        if (CACHE_MILLISECONDS.getValueOrFallback() > 0) {
-            plugin.getLockCacheManager().setExpirationTime(CACHE_MILLISECONDS.getValueOrFallback(), TimeUnit.MILLISECONDS);
+        CACHE_SECONDS.setValue(config.getInt(CACHE_SECONDS.getPath(), CACHE_SECONDS.getFallbackValue()));
+        if (CACHE_SECONDS.getValueOrFallback() > 0) {
+            plugin.getLockCacheManager().setExpirationTime(CACHE_SECONDS.getValueOrFallback(), TimeUnit.SECONDS);
             plugin.getLogger().info("Cache is enabled! In case of inconsistency, turn off immediately.");
         }
 
-        DEFAULT_CREATETIME.setValue(config.getLong(DEFAULT_CREATETIME.getPath(), DEFAULT_CREATETIME.getFallbackValue()));
+        BEDROCK_PREFIX.setValue(config.getString(BEDROCK_PREFIX.getPath(), BEDROCK_PREFIX.getFallbackValue()));
+        MiscUtils.setBedrockPrefix(BEDROCK_PREFIX.getValueOrFallback());
     }
 
     /**
@@ -342,8 +328,7 @@ public class ConfigManager {
         config.set(LOCK_BLOCKS_HOPPER_MINECART.getPath(), adapter.isItemTransferOutBlocked());
         config.set(LOCK_EXEMPTIONS.getPath(), adapter.getProtectionExemptions());
         config.set(LOCK_EXPIRE_DAYS.getPath(), adapter.getLockExpireDays());
-        config.set(CACHE_MILLISECONDS.getPath(), adapter.getCacheTimeSeconds());
-        config.set(DEFAULT_CREATETIME.getPath(), adapter.getLockDefaultCreateTimeUnix());
+        config.set(CACHE_SECONDS.getPath(), adapter.getCacheTimeSeconds());
 
         plugin.saveConfig();
         plugin.reloadConfig();
@@ -377,20 +362,16 @@ public class ConfigManager {
         return LOCK_EXPIRE_DAYS.getValueOrFallback();
     }
 
-    public long getLockDefaultCreateTimeEpoch() {
-        return DEFAULT_CREATETIME.getValueOrFallback();
-    }
-
     public boolean isLockable(Material material) {
         return LOCKABLES.getValueOrFallback().contains(material);
     }
 
-    public int getCacheTimeMillis() {
-        return CACHE_MILLISECONDS.getValueOrFallback();
+    public int getCacheTimeSeconds() {
+        return CACHE_SECONDS.getValueOrFallback();
     }
 
     public boolean isCacheEnabled() {
-        return CACHE_MILLISECONDS.getValueOrFallback() > 0;
+        return CACHE_SECONDS.getValueOrFallback() > 0;
     }
 
     public boolean isProtectionExempted(ProtectionExemption against) {

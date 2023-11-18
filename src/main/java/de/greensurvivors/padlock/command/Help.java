@@ -28,7 +28,7 @@ public class Help extends SubCommand {
     }
 
     @Override
-    protected @NotNull Set<String> getAlias() {
+    protected @NotNull Set<String> getAliases() {
         return Set.of("help");
     }
 
@@ -61,7 +61,7 @@ public class Help extends SubCommand {
                 for (SubCommand subCommand : Command.getSubCommands(sender)) {
                     component = component.append(Component.text(" - "));
 
-                    for (String alias : subCommand.getAlias()) { //todo maybe get separator from config and don't add this on the last alias
+                    for (String alias : subCommand.getAliases()) { //todo maybe get separator from config and don't add this on the last alias
                         component = component.append(Component.text(alias).append(Component.text(", ")));
                     }
 
@@ -81,7 +81,7 @@ public class Help extends SubCommand {
             List<String> result = new ArrayList<>();
 
             for (SubCommand subCommand : Command.getSubCommands(sender)) {
-                result.addAll(subCommand.getAlias());
+                result.addAll(subCommand.getAliases());
             }
 
             return result;

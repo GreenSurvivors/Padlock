@@ -1,18 +1,17 @@
 package de.greensurvivors.padlock;
 
 import de.greensurvivors.padlock.command.Command;
+import de.greensurvivors.padlock.command.Password;
 import de.greensurvivors.padlock.config.ConfigManager;
 import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.impl.DependencyManager;
 import de.greensurvivors.padlock.impl.LockCacheManager;
 import de.greensurvivors.padlock.impl.openabledata.OpenableToggleManager;
-import de.greensurvivors.padlock.listener.BlockDebugListener;
-import de.greensurvivors.padlock.listener.BlockEnvironmentListener;
-import de.greensurvivors.padlock.listener.BlockInventoryMoveListener;
-import de.greensurvivors.padlock.listener.BlockPlayerListener;
+import de.greensurvivors.padlock.listener.*;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
 
@@ -46,33 +45,45 @@ public class Padlock extends JavaPlugin {
             plugin.getLogger().info("no lockette found.");
         }
 
+        openableToggleManager = new OpenableToggleManager(this);
+        lockCacheManager = new LockCacheManager();
+
         // Read config
         messageManager = new MessageManager(this);
         configManager = new ConfigManager(this);
         configManager.reload();
 
-        openableToggleManager = new OpenableToggleManager(this);
-        lockCacheManager = new LockCacheManager();
-
         // Register Listeners
         // If debug mode is not on, debug listener won't register
-        if (debug) getServer().getPluginManager().registerEvents(new BlockDebugListener(), this);
-        getServer().getPluginManager().registerEvents(new BlockPlayerListener(this), this);
-        getServer().getPluginManager().registerEvents(new BlockEnvironmentListener(this), this);
-        getServer().getPluginManager().registerEvents(new BlockInventoryMoveListener(this), this);
+        PluginManager pluginManager = getServer().getPluginManager();
+        if (debug) pluginManager.registerEvents(new BlockDebugListener(), this);
+        pluginManager.registerEvents(new BlockPlayerListener(this), this);
+        pluginManager.registerEvents(new BlockEnvironmentListener(this), this);
+        pluginManager.registerEvents(new BlockInventoryMoveListener(this), this);
+        pluginManager.registerEvents(new ChatPlayerListener(this), this);
 
-        //register command
-        for (String commandStr : this.getDescription().getCommands().keySet()) {
-            PluginCommand mainCommand = getCommand(commandStr);
-            if (mainCommand != null) {
-                Command lockCmd = new Command(this);
+        //register commands
+        Command lockCmd = new Command(this);
 
-                mainCommand.setExecutor(lockCmd);
-                mainCommand.setTabCompleter(lockCmd);
-            } else {
-                getLogger().log(Level.SEVERE, "Couldn't register command '" + commandStr + "'!");
-            }
+        PluginCommand mainCommand = getCommand("padlock");
+        if (mainCommand != null) {
+
+            mainCommand.setExecutor(lockCmd);
+            mainCommand.setTabCompleter(lockCmd);
+        } else {
+            getLogger().log(Level.SEVERE, "Couldn't register command 'padlock'!");
         }
+
+        Password pwCmd = new Password(plugin);
+        PluginCommand pwCommand = getCommand("password");
+        if (pwCommand != null) {
+
+            pwCommand.setExecutor(pwCmd);
+            pwCommand.setTabCompleter(pwCmd);
+        } else {
+            getLogger().log(Level.SEVERE, "Couldn't register command 'password'!");
+        }
+
 
         // Dependencys
         dependencyManager = new DependencyManager(this);

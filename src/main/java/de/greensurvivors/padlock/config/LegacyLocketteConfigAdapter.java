@@ -1,5 +1,6 @@
 package de.greensurvivors.padlock.config;
 
+import de.greensurvivors.padlock.impl.MiscUtils;
 import org.bukkit.Material;
 import org.bukkit.Tag;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -57,7 +58,7 @@ class LegacyLocketteConfigAdapter {
         List<String> stringList = config.getStringList("protection-exempt");
         protectionexempt = new HashSet<>();
         for (String string : stringList) {
-            ConfigManager.ProtectionExemption protectionExemtion = ConfigManager.getEnum(ConfigManager.ProtectionExemption.class, string);
+            ConfigManager.ProtectionExemption protectionExemtion = MiscUtils.getEnum(ConfigManager.ProtectionExemption.class, string);
 
             if (protectionExemtion != null) {
                 protectionexempt.add(protectionExemtion);

@@ -48,15 +48,16 @@ public class Command implements CommandExecutor, TabCompleter {
         SUBCOMMANDS.add(new AddMember(plugin));
         SUBCOMMANDS.add(new RemoveMember(plugin));
         SUBCOMMANDS.add(new SetTimer(plugin));
-        SUBCOMMANDS.add(new SetEveryone(plugin));
+        SUBCOMMANDS.add(new SetAccessType(plugin));
         // admin sub commands
         SUBCOMMANDS.add(new AddOwner(plugin));
         SUBCOMMANDS.add(new RemoveOwner(plugin));
-        SUBCOMMANDS.add(new SetCreated(plugin));
         SUBCOMMANDS.add(new UpdateSign(plugin));
         SUBCOMMANDS.add(new Version(plugin));
         SUBCOMMANDS.add(new Debug(plugin));
         SUBCOMMANDS.add(new Reload(plugin));
+        SUBCOMMANDS.add(new SetPassword(plugin));
+        SUBCOMMANDS.add(new Password(plugin));
     }
 
     /**
@@ -98,7 +99,7 @@ public class Command implements CommandExecutor, TabCompleter {
         String subCmdStr = string.toLowerCase();
 
         for (SubCommand subCommand : SUBCOMMANDS) {
-            if (subCommand.getAlias().contains(subCmdStr) && subCommand.checkPermission(permissible)) {
+            if (subCommand.getAliases().contains(subCmdStr) && subCommand.checkPermission(permissible)) {
                 return subCommand;
             }
         }
@@ -172,7 +173,7 @@ public class Command implements CommandExecutor, TabCompleter {
                         if (sender.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()) || // /lock removeowner
                                 (!removeOwner && SignLock.isOwner(sign, player.getUniqueId()))) { // /lock removemember
                             // get all members/owners names of a sign as a result
-                            ListOrderedSet<String> uuidStrs = SignLock.getUUIDs(sign, removeOwner);
+                            ListOrderedSet<String> uuidStrs = SignLock.getUUIDs(sign, removeOwner, false);
                             List<String> result = new ArrayList<>();
 
                             for (String uuidStr : uuidStrs) {
@@ -386,7 +387,7 @@ public class Command implements CommandExecutor, TabCompleter {
             // return all alias of all subcommands the sender has permission to use
             for (SubCommand subCommand : SUBCOMMANDS) {
                 if (subCommand.checkPermission(sender)) {
-                    suggestionList.addAll(subCommand.getAlias());
+                    suggestionList.addAll(subCommand.getAliases());
                 }
             }
         } else {

@@ -22,6 +22,7 @@ import org.bukkit.block.DoubleChest;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.type.Chest;
 import org.bukkit.entity.Player;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -29,11 +30,16 @@ import org.bukkit.event.block.Action;
 import org.bukkit.event.block.BlockBreakEvent;
 import org.bukkit.event.block.BlockPlaceEvent;
 import org.bukkit.event.block.SignChangeEvent;
+import org.bukkit.event.inventory.InventoryClickEvent;
+import org.bukkit.event.inventory.InventoryDragEvent;
+import org.bukkit.event.inventory.InventoryInteractEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerTakeLecternBookEvent;
+import org.bukkit.inventory.BlockInventoryHolder;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.HashSet;
@@ -106,19 +112,14 @@ public class BlockPlayerListener implements Listener {
                                 // Cancel event here
                                 event.setCancelled(true);
                                 // Check lock info
-                                if (!locked && !PadlockAPI.isPartOfLockedDoor(block)) {
+                                if (!locked) {
                                     // Not locked, not a locked door nearby
                                     MiscUtils.removeAItemMainHand(player);
                                     // Put sign on
                                     Block newsign = SignLock.putPrivateSignOn(signLocBlock, blockface, signType, player);
-                                    plugin.getLockCacheManager().resetCache(block);
+                                    plugin.getLockCacheManager().removeFromCache(block.getLocation());
                                     // Send message
                                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
-                                    // Cleanups - Expiracy
-                                    if (plugin.getConfigManager().doLocksExpire()) {
-                                        // set created to now
-                                        SignExpiration.updateWithTimeNow((Sign) newsign.getState(), player.hasPermission(PermissionManager.NO_EXPIRE.getPerm())); // set created to -1 (no expire) or now
-                                    }
                                     plugin.getDependencyManager().logPlacement(player, newsign);
                                 } else {
                                     // Cannot lock this block
@@ -143,7 +144,8 @@ public class BlockPlayerListener implements Listener {
         if (topline == null) return;
         Player player = event.getPlayer();
 
-        if (plugin.getMessageManager().isSignComp(topline, MessageManager.LangPath.PRIVATE_SIGN)) {
+        SignAccessType.AccessType accessType = SignAccessType.getAccessTypeFromComp(topline);
+        if (accessType != null) {
             //check attached block
             Block attachedBlock = PadlockAPI.getAttachedBlock(event.getBlock());
             if (attachedBlock != null && PadlockAPI.isLockable(attachedBlock)) {
@@ -157,6 +159,7 @@ public class BlockPlayerListener implements Listener {
                     }
                 } else { // all good
                     Sign sign = (Sign) event.getBlock().getState();
+                    SignAccessType.setAccessType(sign, accessType, false);
                     sign.setWaxed(true);
                     sign.update();
 
@@ -205,8 +208,6 @@ public class BlockPlayerListener implements Listener {
 
                         if (timer != null) {
                             SignTimer.setTimer(sign, timer, true);
-                        } else if (plugin.getMessageManager().isSignComp(line, MessageManager.LangPath.EVERYONE_SIGN)) {
-                            EveryoneSign.setEveryone(sign, true, true);
                         } else if (MiscUtils.isUserName(strLine)) {
                             SignLock.addPlayer(sign, false, Bukkit.getOfflinePlayer(strLine));
                         } // else invalid line
@@ -216,7 +217,7 @@ public class BlockPlayerListener implements Listener {
                     Bukkit.getScheduler().runTaskLater(plugin, () -> SignDisplay.updateDisplay(sign), 2);
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
 
-                    plugin.getLockCacheManager().resetCache(attachedBlock);
+                    plugin.getLockCacheManager().removeFromCache(attachedBlock.getLocation());
                 }
             } else {
                 plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_ERROR_NOT_LOCKABLE);
@@ -239,9 +240,7 @@ public class BlockPlayerListener implements Listener {
 
             // check permission: owner or admin
             if (clickedBlock.getState() instanceof Sign sign &&
-                    (PadlockAPI.isLockSign(sign) || PadlockAPI.isAdditionalSign(sign)) &&
-                    (PadlockAPI.isOwner(clickedBlock, player) ||
-                            player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()))) {
+                    (PadlockAPI.isLockSign(sign) || PadlockAPI.isAdditionalSign(sign))) {
 
                 SignSelection.selectSign(player, clickedBlock);
                 plugin.getMessageManager().sendLang(player, MessageManager.LangPath.SELECT_SIGN);
@@ -263,14 +262,14 @@ public class BlockPlayerListener implements Listener {
             if (PadlockAPI.isValidLockSign(sign)) {
                 if (SignLock.isOwner(sign, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm())) {
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.BREAK_LOCK_SUCCESS);
-                    plugin.getLockCacheManager().resetCache(PadlockAPI.getAttachedBlock(block));
+                    plugin.getLockCacheManager().removeFromCache(sign);
                 } else { // not allowed to break
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.NOT_OWNER);
                     event.setCancelled(true);
                 }
             } else if (PadlockAPI.isAdditionalSign(sign)) {
                 if (PadlockAPI.isOwner(block, player) || player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm())) {
-                    final Sign lockSign = PadlockAPI.getLock(PadlockAPI.getAttachedBlock(block));
+                    final Sign lockSign = PadlockAPI.getLock(PadlockAPI.getAttachedBlock(block), false);
 
                     //let the additional sign break but update the others
                     Bukkit.getScheduler().runTaskLater(plugin, () -> PadlockAPI.updateLegacySign(lockSign), 2);
@@ -282,7 +281,7 @@ public class BlockPlayerListener implements Listener {
                 }
             }
         } else { // not a sign
-            Sign lock = PadlockAPI.getLock(block);
+            Sign lock = PadlockAPI.getLock(block, false);
             if (lock != null) {
                 if (!(SignLock.isOwner(lock, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm()))) {
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
@@ -304,6 +303,7 @@ public class BlockPlayerListener implements Listener {
         Block block = event.getBlock();
         if (block.getState() instanceof Sign sign &&
                 (PadlockAPI.isLockSign(sign) || PadlockAPI.isAdditionalSign(sign))) {
+            PadlockAPI.updateLegacySign(sign);
             plugin.getMessageManager().sendLang(event.getPlayer(), MessageManager.LangPath.ACTION_PREVENTED_USE_CMDS);
             sign.setWaxed(true);
             sign.update();
@@ -352,56 +352,58 @@ public class BlockPlayerListener implements Listener {
         }
         if (action == Action.LEFT_CLICK_BLOCK || action == Action.RIGHT_CLICK_BLOCK) {
             Player player = event.getPlayer();
-            Sign lockSign = PadlockAPI.getLock(block);
+            Sign lockSign = PadlockAPI.getLock(block, false);
 
             if (lockSign != null) {
-                if (SignLock.isMember(lockSign, player.getUniqueId()) || SignLock.isOwner(lockSign, player.getUniqueId()) ||
-                        player.hasPermission(PermissionManager.ADMIN_USE.getPerm())) {
+                if (SignSelection.getSelectedSign(player) != lockSign) {
+                    if (SignLock.isMember(lockSign, player.getUniqueId()) || SignLock.isOwner(lockSign, player.getUniqueId()) ||
+                            player.hasPermission(PermissionManager.ADMIN_USE.getPerm()) || SignAccessType.getAccessType(lockSign, false) != SignAccessType.AccessType.PRIVATE) {
 
-                    // Handle multi openables
-                    if (action == Action.RIGHT_CLICK_BLOCK &&
-                            // if a place attempt was prevented, this could register as a false positive and flip every block but the clicked one
-                            // therefor everything comes out of sync.
-                            !(player.isSneaking() && event.hasItem()) &&
-                            // event gets fired for both hands, ignore offhand
-                            event.getHand() == EquipmentSlot.HAND) {
+                        // Handle multi openables
+                        if (action == Action.RIGHT_CLICK_BLOCK) {
 
-                        // get openable block
-                        Block openableBlock = null;
-                        if (Tag.DOORS.isTagged(block.getType())) {
-                            openableBlock = Openables.getDoubleBlockParts(block).downPart();
-                        } else if (Openables.isSingleOpenable(block.getType())) {
-                            openableBlock = block;
-                        }
+                            // get openable block
+                            Block openableBlock = null;
+                            if (Tag.DOORS.isTagged(block.getType())) {
+                                openableBlock = Openables.getDoubleBlockParts(block).downPart();
+                            } else if (Openables.isSingleOpenable(block.getType())) {
+                                openableBlock = block;
+                            }
 
-                        if (openableBlock != null) {
-                            Long closetime = SignTimer.getTimer(lockSign);
+                            if (openableBlock != null &&
+                                    // if a place attempt was prevented, this could register as a false positive and flip every block but the clicked one
+                                    // therefor everything comes out of sync.
+                                    !(player.isSneaking() && event.hasItem()) &&
+                                    // event gets fired for both hands, ignore offhand
+                                    event.getHand() == EquipmentSlot.HAND) {
+                                Long closetime = SignTimer.getTimer(lockSign, false);
 
-                            if (closetime != null) {
-                                Set<Block> openables = new HashSet<>();
-                                openables.add(openableBlock);
+                                if (closetime != null) {
+                                    Set<Block> openables = new HashSet<>();
+                                    openables.add(openableBlock);
 
-                                if (openableBlock.getType() == Material.IRON_DOOR || openableBlock.getType() == Material.IRON_TRAPDOOR) {
-                                    Openables.toggleOpenable(openableBlock);
-                                }
-                                for (BlockFace blockface : PadlockAPI.cardinalFaces) {
-                                    Block relative = openableBlock.getRelative(blockface);
-                                    if (relative.getType() == openableBlock.getType()) {
-                                        openables.add(relative);
-                                        Openables.toggleOpenable(relative);
+                                    if (openableBlock.getType() == Material.IRON_DOOR || openableBlock.getType() == Material.IRON_TRAPDOOR) {
+                                        Openables.toggleOpenable(openableBlock);
                                     }
-                                }
+                                    for (BlockFace blockface : PadlockAPI.cardinalFaces) {
+                                        Block relative = openableBlock.getRelative(blockface);
+                                        if (relative.getType() == openableBlock.getType()) {
+                                            openables.add(relative);
+                                            Openables.toggleOpenable(relative);
+                                        }
+                                    }
 
-                                if (closetime > 0) {
-                                    plugin.getOpenableToggleManager().toggleCancelRunning(openables, closetime);
-                                } // timer disabled
-                            } // no timer
-                        } // not openable
-                    } // not right-click
-                } else {// no permission
-                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
-                    event.setCancelled(true);
-                }
+                                    if (closetime > 0) {
+                                        plugin.getOpenableToggleManager().toggleCancelRunning(openables, closetime);
+                                    } // timer disabled
+                                } // no timer
+                            } // not openable
+                        } // not right-click
+                    } else {// no permission
+                        plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
+                        event.setCancelled(true);
+                    }
+                } // sign was selected. ignoring
             } // not locked
         }
     }
@@ -484,11 +486,143 @@ public class BlockPlayerListener implements Listener {
     private void onLecternTake(@NotNull PlayerTakeLecternBookEvent event) {
         Player player = event.getPlayer();
 
-        if (!(PadlockAPI.isOwner(event.getLectern().getBlock(), player) ||
-                player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
+        Sign lock = PadlockAPI.getLock(event.getLectern().getBlock(), false);
 
-            plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
-            event.setCancelled(true);
+        if (lock != null) {
+            if (!(SignLock.isOwner(lock, player.getUniqueId()) || SignLock.isMember(lock, player.getUniqueId()) ||
+                    SignPasswords.hasStillAccess(player.getUniqueId(), lock.getLocation()) ||
+                    player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
+                SignAccessType.AccessType accessType = SignAccessType.getAccessType(lock, false);
+
+                if (!(accessType == SignAccessType.AccessType.SUPPLY || accessType == SignAccessType.AccessType.PUBLIC)) {
+                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
+                    event.setCancelled(true);
+                }
+            }
+        }
+    }
+
+    private void onPlaceItem(InventoryInteractEvent event, Inventory topInventory) {
+        Block block = null;
+        if (topInventory.getHolder() instanceof BlockInventoryHolder blockInventoryHolder) {
+            block = blockInventoryHolder.getBlock();
+        } else if (topInventory.getHolder() instanceof DoubleChest doubleChest) {
+            if (doubleChest.getLeftSide() instanceof BlockInventoryHolder blockInventoryHolder) {
+                block = blockInventoryHolder.getBlock();
+            }
+        }
+
+        if (block != null) {
+            Sign lock = PadlockAPI.getLock(block, false);
+
+            if (lock != null) {
+                // if a player should have access there is no need to cancel the event
+                if (event.getWhoClicked() instanceof Player player) {
+                    if (SignLock.isMember(lock, player.getUniqueId()) || SignLock.isOwner(lock, player.getUniqueId()) ||
+                            SignPasswords.hasStillAccess(player.getUniqueId(), lock.getLocation()) ||
+                            player.hasPermission(PermissionManager.ADMIN_USE.getPerm())) {
+                        return;
+                    }
+                }
+
+                SignAccessType.AccessType type = SignAccessType.getAccessType(lock, false);
+
+                switch (type) {
+                    case PRIVATE, PUBLIC, DONATION -> {
+                    }
+                    case DISPLAY, SUPPLY -> {
+                        event.setResult(Event.Result.DENY);
+                    }
+                    /*case null, // todo next java update */
+                    default -> {
+                    }
+                }
+            }
+        }
+
+    }
+
+    private void onTakeItem(InventoryInteractEvent event, Inventory topInventory) {
+        Block block = null;
+        if (topInventory.getHolder() instanceof BlockInventoryHolder blockInventoryHolder) {
+            block = blockInventoryHolder.getBlock();
+        } else if (topInventory.getHolder() instanceof DoubleChest doubleChest) {
+            block = doubleChest.getLocation().getBlock();
+        }
+
+        if (block != null) {
+            Sign lock = PadlockAPI.getLock(block, false);
+
+            if (lock != null) {
+                // if a player should have access there is no need to cancel the event
+                if (event.getWhoClicked() instanceof Player player) {
+                    if (SignLock.isMember(lock, player.getUniqueId()) || SignLock.isOwner(lock, player.getUniqueId()) ||
+                            SignPasswords.hasStillAccess(player.getUniqueId(), lock.getLocation()) ||
+                            player.hasPermission(PermissionManager.ADMIN_USE.getPerm())) {
+                        return;
+                    }
+                }
+
+                SignAccessType.AccessType type = SignAccessType.getAccessType(lock, false);
+
+                switch (type) {
+                    case PRIVATE, PUBLIC, SUPPLY -> {
+                    }
+                    case DISPLAY, DONATION -> {
+                        event.setResult(Event.Result.DENY);
+                    }
+                    /*case null, // todo next java update */
+                    default -> {
+                    }
+                }
+            }
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    private void onInventoryClick(InventoryClickEvent event) { // todo warn people when opening what they are opening best with cache to not annoy
+        Inventory topInv = event.getView().getTopInventory();
+
+        switch (event.getAction()) {
+            case NOTHING, DROP_ALL_CURSOR, DROP_ONE_CURSOR, UNKNOWN -> {
+            } // nothing
+            case PICKUP_ALL, PICKUP_SOME, PICKUP_HALF, PICKUP_ONE, DROP_ALL_SLOT, DROP_ONE_SLOT, HOTBAR_MOVE_AND_READD -> { // may take
+                if (event.getClickedInventory() == topInv) {
+                    onTakeItem(event, topInv);
+                }
+            }
+            case PLACE_ALL, PLACE_SOME, PLACE_ONE -> { // may place
+                if (event.getClickedInventory() == topInv) {
+                    onPlaceItem(event, topInv);
+                }
+            }
+            case SWAP_WITH_CURSOR, HOTBAR_SWAP -> { // may give and take
+                if (event.getClickedInventory() == topInv) {
+                    onPlaceItem(event, topInv);
+                    onTakeItem(event, topInv);
+                }
+            }
+            case COLLECT_TO_CURSOR -> { // may take complex
+                if (topInv.contains(event.getCursor().getType())) {
+                    onTakeItem(event, topInv);
+                }
+            }
+            case MOVE_TO_OTHER_INVENTORY -> { // definitely one or the other
+                if (event.getClickedInventory() == topInv) {
+                    onTakeItem(event, topInv);
+                } else {
+                    onPlaceItem(event, topInv);
+                }
+            }
+        }
+    }
+
+    @EventHandler(ignoreCancelled = true)
+    private void onInventoryDrag(InventoryDragEvent event) {
+        for (int rawSlotId : event.getRawSlots()) {
+            if (rawSlotId < event.getView().getTopInventory().getSize()) {
+                onPlaceItem(event, event.getView().getTopInventory());
+            }
         }
     }
 }

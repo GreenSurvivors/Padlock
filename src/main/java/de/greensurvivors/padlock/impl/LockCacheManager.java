@@ -2,13 +2,19 @@ package de.greensurvivors.padlock.impl;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.Policy;
+import com.github.benmanes.caffeine.cache.RemovalListener;
 import de.greensurvivors.padlock.PadlockAPI;
+import de.greensurvivors.padlock.impl.dataTypes.LazySignProperties;
 import org.bukkit.Location;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
+import org.bukkit.block.Sign;
 import org.checkerframework.checker.index.qual.NonNegative;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -21,45 +27,77 @@ import java.util.concurrent.TimeUnit;
  */
 public class LockCacheManager {
     // default cache should never get used, but if it does, it has at least a maximum size to not grow unlimited
-    private @NotNull Cache<@NotNull Location, @NotNull Boolean> lockStateCache = Caffeine.newBuilder().maximumSize(100).build();
+    Map<Location, LazySignProperties> lockLazyProps = new HashMap<>();
+    private final @NotNull Cache<@NotNull Location, @NotNull LockWrapper> lockStateCache = Caffeine.newBuilder().
+            evictionListener((RemovalListener<Location, LockWrapper>) (loc, lockWrapper, cause) -> {
+                if (lockWrapper != null) {
+                    lockLazyProps.remove(lockWrapper.lockLoc());
+                }
+            }).expireAfterAccess(10, TimeUnit.MINUTES).maximumSize(500).build();
 
     /**
      * set a new time after witch the cache should expire; invalidates every already cached value.
      */
     public void setExpirationTime(@NonNegative long duration, @NotNull TimeUnit unit) {
         lockStateCache.invalidateAll();
-        lockStateCache = Caffeine.newBuilder().expireAfterAccess(duration, unit).build();
+        Optional<Policy.FixedExpiration<@NotNull Location, @NotNull LockWrapper>> policy = lockStateCache.policy().expireAfterAccess();
+        policy.ifPresent(expiration -> expiration.setExpiresAfter(duration, unit));
     }
 
-    /**
-     * tries to get locked status from cache, if it fails,
-     * it takes the value from the API and caches it.
-     */
-    public boolean tryGetProtectedFromCache(@NotNull Block block) {
-        Boolean cachedLockState = lockStateCache.getIfPresent(block.getLocation());
+    public @NotNull LazySignProperties getProtectedFromCache(@NotNull Location location) {
+        LockWrapper lockWrapper = lockStateCache.getIfPresent(location);
 
-        if (cachedLockState == null) {
-            boolean newState = PadlockAPI.isProtected(block);
-            lockStateCache.put(block.getLocation(), newState);
-            return newState;
+        if (lockWrapper != null) {
+            if (lockWrapper.lockLoc() != null) {
+                LazySignProperties lazySignPropertys = lockLazyProps.get(lockWrapper.lockLoc());
+
+                if (lazySignPropertys == null) {
+                    lazySignPropertys = new LazySignProperties(PadlockAPI.getLock(lockWrapper.lockLoc().getBlock(), true));
+
+                    lockLazyProps.put(lockWrapper.lockLoc(), lazySignPropertys);
+                }
+                return lazySignPropertys;
+            }
         } else {
-            return cachedLockState;
+            @Nullable Sign lock = PadlockAPI.getLock(location.getBlock(), true);
+
+            if (lock != null) {
+                lockStateCache.put(location, new LockWrapper(lock.getLocation()));
+
+                LazySignProperties lazySignPropertys = lockLazyProps.get(lock);
+
+                if (lazySignPropertys == null) {
+                    lazySignPropertys = new LazySignProperties(lock);
+                    lockLazyProps.put(lock.getLocation(), lazySignPropertys);
+                }
+
+                return lazySignPropertys;
+            } else {
+                lockStateCache.put(location, new LockWrapper(null));
+            }
         }
+
+        return new LazySignProperties(null);
     }
 
     /**
      * reset the cache of a block and the ones next to it as well.
      */
-    public void resetCache(@NotNull Block block) {
-        lockStateCache.invalidate(block.getLocation());
+    public void removeFromCache(@NotNull Location location) {
+        final LockWrapper signWrapper = lockStateCache.getIfPresent(location);
 
-        // if one block changes next to another the chances are high, that the last cache entry might get out of date.
-        for (BlockFace blockface : PadlockAPI.cardinalFaces) {
-            Block relative = block.getRelative(blockface);
-
-            if (relative.getType() == block.getType()) {
-                lockStateCache.invalidate(relative.getLocation());
-            }
+        if (signWrapper != null && signWrapper.lockLoc() != null) {
+            lockStateCache.asMap().entrySet().removeIf(entry -> signWrapper.lockLoc().equals(entry.getValue().lockLoc()));
         }
+    }
+
+    public void removeFromCache(@NotNull Sign changedLock) {
+        lockStateCache.asMap().entrySet().removeIf(entry -> entry.getValue().lockLoc() != null && changedLock.getLocation().equals(entry.getValue().lockLoc()));
+    }
+
+    /**
+     * we need a value that represents "cached but still null" in contrast to "not cached yet aka null.
+     */
+    private record LockWrapper(@Nullable Location lockLoc) {
     }
 }

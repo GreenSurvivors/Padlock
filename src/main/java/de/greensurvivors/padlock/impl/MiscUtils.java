@@ -1,7 +1,10 @@
 package de.greensurvivors.padlock.impl;
 
+import de.greensurvivors.padlock.Padlock;
+import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
 import org.bukkit.Material;
+import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.Sign;
@@ -11,26 +14,38 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
+import java.time.Period;
+import java.time.format.DateTimeParseException;
 import java.util.HashSet;
+import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
  * Utilitys that don't fit anywhere else
  */
 public class MiscUtils {
-    // the point at the beginning is for bedrock player if the proxy supports them. //todo make this configurable as it should be in the proxy
-    private static final Pattern usernamePattern = Pattern.compile("^.?[a-zA-Z0-9_]{3,16}$");
+    private static final @NotNull Pattern periodPattern = Pattern.compile("(-?[0-9]+)([tTsSmhHdDwWM])");
     /**
      * Set containing all players that have been notified about being able to lock things
      */
     private static final Set<UUID> notified = new HashSet<>();
+    // the point at the beginning is for bedrock player if the proxy supports them.
+    private static Pattern usernamePattern = Pattern.compile("^.?[a-zA-Z0-9_]{3,16}$");
+
+    public static @NotNull Pattern getPeriodPattern() {
+        return periodPattern;
+    }
 
     /**
      * removes one item of the players main hand.
      */
-    public static void removeAItemMainHand(Player player) {
+    public static void removeAItemMainHand(@NotNull Player player) {
         if (player.getGameMode() == GameMode.CREATIVE) return;
         if (player.getInventory().getItemInMainHand().getAmount() == 1) {
             player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
@@ -42,7 +57,7 @@ public class MiscUtils {
     /**
      * checks if a player has not been notified before and adds them to the notified list if not
      */
-    public static boolean shouldNotify(Player player) {
+    public static boolean shouldNotify(@NotNull Player player) {
         if (notified.contains(player.getUniqueId())) {
             return false;
         } else {
@@ -54,7 +69,7 @@ public class MiscUtils {
     /**
      * check if a string is a valid username
      */
-    public static boolean isUserName(String text) {
+    public static boolean isUserName(@NotNull String text) {
         return usernamePattern.matcher(text).matches();
     }
 
@@ -81,5 +96,84 @@ public class MiscUtils {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Set the new userNamePattern, to account for other settings in the proxy for bedrock players
+     */
+    public static void setBedrockPrefix(@NotNull String bedrockPrefix) {
+        usernamePattern = Pattern.compile("^" + bedrockPrefix + "?[a-zA-Z0-9_]{3,16}$");
+    }
+
+    public static @NotNull Set<@NotNull OfflinePlayer> getPlayersFromUUIDStrings(@NotNull Set<@NotNull String> uuidStrs) {
+        Set<OfflinePlayer> result = new HashSet<>();
+
+        for (String uuidStr : uuidStrs) {
+            try {
+                UUID uuid = UUID.fromString(uuidStr);
+                result.add(Bukkit.getOfflinePlayer(uuid));
+            } catch (IllegalArgumentException ignored) {
+            }
+        }
+
+        return result;
+    }
+
+    /**
+     * Try to get a member of the enum given as an argument by the name
+     *
+     * @param enumName  name of the enum to find
+     * @param enumClass the enum to check
+     * @param <E>       the type of the enum to check
+     * @return the member of the enum to check
+     */
+    public static @Nullable <E extends Enum<E>> E getEnum(final @NotNull Class<E> enumClass, final @NotNull String enumName) {
+        try {
+            return Enum.valueOf(enumClass, enumName.toUpperCase(Locale.ENGLISH));
+        } catch (final IllegalArgumentException ex) {
+            return null;
+        }
+    }
+
+    /**
+     * Try to get a time period of a string.
+     * First try ISO-8601 duration, and afterward our own implementation
+     * using the same time unit more than once is permitted.
+     *
+     * @return the duration in milliseconds, or zero if not possible
+     */
+    public static long parsePeriod(@NotNull String period) {
+        Padlock.getPlugin().getLogger().info(period);
+
+        try { //try Iso
+            return Duration.parse(period).toMillis();
+        } catch (DateTimeParseException e) {
+            Padlock.getPlugin().getLogger().log(Level.FINE, "Couldn't get time period \"" + period + "\" as duration. Trying to parse manual next.", e);
+        }
+
+        Matcher matcher = periodPattern.matcher(period);
+        long millis = 0;
+
+        while (matcher.find()) {
+            try {
+                Padlock.getPlugin().getLogger().info("num: " + matcher.group(1) + ", type: " + matcher.group(2));
+                Padlock.getPlugin().getLogger().info(period);
+                long num = Long.parseLong(matcher.group(1));
+                String typ = matcher.group(2);
+                millis += switch (typ) { // from periodPattern
+                    case "t", "T" -> Math.round(50D * num); // ticks
+                    case "s", "S" -> TimeUnit.SECONDS.toMillis(num);
+                    case "m" -> TimeUnit.MINUTES.toMillis(num);
+                    case "h", "H" -> TimeUnit.HOURS.toMillis(num);
+                    case "d", "D" -> TimeUnit.DAYS.toMillis(num);
+                    case "w", "W" -> TimeUnit.DAYS.toMillis(Period.ofWeeks((int) num).getDays());
+                    case "M" -> TimeUnit.DAYS.toMillis(Period.ofMonths((int) num).getDays());
+                    default -> 0;
+                };
+            } catch (NumberFormatException e) {
+                Padlock.getPlugin().getLogger().log(Level.WARNING, "Couldn't get time period for " + period, e);
+            }
+        }
+        return millis;
     }
 }

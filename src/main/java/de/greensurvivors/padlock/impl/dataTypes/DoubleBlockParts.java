@@ -1,4 +1,4 @@
-package de.greensurvivors.padlock.impl.openabledata;
+package de.greensurvivors.padlock.impl.dataTypes;
 
 import org.bukkit.block.Block;
 import org.jetbrains.annotations.NotNull;

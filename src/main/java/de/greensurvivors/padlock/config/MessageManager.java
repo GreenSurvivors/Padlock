@@ -7,15 +7,22 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import org.bukkit.configuration.file.FileConfiguration;
-import org.bukkit.configuration.file.YamlConfiguration;
+import net.kyori.adventure.util.UTF8ResourceBundleControl;
+import org.apache.commons.io.FileUtils;
 import org.bukkit.plugin.Plugin;
 import org.intellij.lang.annotations.Subst;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.File;
-import java.util.HashMap;
+import java.io.*;
+import java.net.JarURLConnection;
+import java.net.URL;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 /**
  * manages all translatable and placeholders used by this plugin.
@@ -25,10 +32,10 @@ public class MessageManager {
     /**
      * contains all sign lines without any decorations like color but still with every placeholder
      */
-    private final HashMap<LangPath, String> nakedSignLiness = new HashMap<>(); // path -> naked
-    //private final HashMap<LangPath, Component> langCache = new HashMap<>();
-    private FileConfiguration lang;
-    private FileConfiguration fallbackLangFile;
+    private final HashMap<LangPath, String> nakedSignLines = new HashMap<>(); // path -> naked
+    @Deprecated(forRemoval = true)
+    private final HashMap<LangPath, Set<String>> nakedLegacySignLines = new HashMap<>();
+    private ResourceBundle lang;
     /**
      * caches every component without placeholder for faster access in future and loads missing values automatically
      */
@@ -45,49 +52,125 @@ public class MessageManager {
     }
 
     private @NotNull String getStringFromLang(@NotNull LangPath path) {
-        return lang.getString(path.getPath(), fallbackLangFile.getString(path.getPath(), path.getDefaultValue()));
+        try {
+            return lang.getString(path.getPath());
+        } catch (MissingResourceException | ClassCastException e) {
+            plugin.getLogger().log(Level.WARNING, "couldn't find path: \"" + path.getPath() + "\" in lang files using fallback.", e);
+            return path.getDefaultValue();
+        }
+    }
+
+    private @NotNull Set<@NotNull String> getStringSetFromLang(@NotNull LangPath path) {
+        String value;
+        try {
+            value = lang.getString(path.getPath());
+        } catch (MissingResourceException | ClassCastException e) {
+            plugin.getLogger().log(Level.WARNING, "couldn't find path: \"" + path.getPath() + "\" in lang files using fallback.", e);
+            value = path.getDefaultValue();
+        }
+
+        return Set.of(value.split("\\s?+,\\s?+"));
     }
 
     /**
      * reload language file. Please call {@link #setLangFileName(String)} before calling this for the first time
      */
     protected void reload() {
-        initLangFiles();
-        lang = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), langfilename));
-        langCache.invalidateAll();
-        fallbackLangFile = YamlConfiguration.loadConfiguration(new File(plugin.getDataFolder(), "lang/lang_en.yml")); //todo don't hardcode
+        Locale locale = Locale.forLanguageTag(langfilename);
+        plugin.getLogger().info("Locale set to language: " + locale.toLanguageTag());
+        File langFile = new File(new File(plugin.getDataFolder(), "lang"), UTF8ResourceBundleControl.get().toBundleName("lang", locale) + ".properties");
 
-        nakedSignLiness.put(LangPath.PRIVATE_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.PRIVATE_SIGN)).toLowerCase());
-        nakedSignLiness.put(LangPath.ADDITIONAL_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.ADDITIONAL_SIGN)).toLowerCase());
-        nakedSignLiness.put(LangPath.EVERYONE_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.EVERYONE_SIGN)).toLowerCase());
-        nakedSignLiness.put(LangPath.TIMER_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.TIMER_SIGN)).toLowerCase());
-        nakedSignLiness.put(LangPath.ERROR_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.ERROR_SIGN)).toLowerCase());
-        nakedSignLiness.put(LangPath.INVALID_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.INVALID_SIGN)).toLowerCase());
-        nakedSignLiness.put(LangPath.EXPIRE_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.EXPIRE_SIGN)).toLowerCase());
-        nakedSignLiness.put(LangPath.PLAYER_NAME_ON_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.PLAYER_NAME_ON_SIGN)).toLowerCase());
+        if (!langFile.exists()) {
+            // save all of them
+            initLangFiles();
+        }
+
+        lang = null;
+        if (langFile.exists()) {
+            try (InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(langFile), StandardCharsets.UTF_8)) {
+                lang = new PropertyResourceBundle(inputStreamReader);
+            } catch (FileNotFoundException ignored) {
+                plugin.getLogger().info("No translation file found. Using internal");
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.WARNING, "IO exception while reading lang bundle", e);
+            }
+        }
+
+        if (lang == null) {
+            try {
+                lang = PropertyResourceBundle.getBundle("lang", locale, plugin.getClass().getClassLoader(), new UTF8ResourceBundleControl());
+            } catch (MissingResourceException e) {
+                plugin.getLogger().log(Level.SEVERE, "Couldn't get Ressource bundle \"lang\" for locale \"" + locale.toLanguageTag() + "\". Messages WILL be broken!", e);
+            }
+        }
+
+        // clear component cache
+        langCache.invalidateAll();
+        langCache.cleanUp();
+        langCache.asMap().clear();
+
+        nakedSignLines.put(LangPath.PRIVATE_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.PRIVATE_SIGN)).toLowerCase());
+        nakedSignLines.put(LangPath.PUBLIC_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.PUBLIC_SIGN)).toLowerCase());
+        nakedSignLines.put(LangPath.DONATION_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.DONATION_SIGN)).toLowerCase());
+        nakedSignLines.put(LangPath.DISPLAY_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.DISPLAY_SIGN)).toLowerCase());
+        nakedSignLines.put(LangPath.SUPPLY_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.SUPPLY_SIGN)).toLowerCase());
+        nakedSignLines.put(LangPath.TIMER_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.TIMER_SIGN)).toLowerCase());
+
+        nakedLegacySignLines.put(LangPath.LEGACY_ADDITIONAL_SIGN, getStringSetFromLang(LangPath.LEGACY_ADDITIONAL_SIGN).stream().map(s -> MiniMessage.miniMessage().stripTags(s).toLowerCase()).collect(Collectors.toSet()));
+        nakedLegacySignLines.put(LangPath.LEGACY_EVERYONE_SIGN, getStringSetFromLang(LangPath.LEGACY_EVERYONE_SIGN).stream().map(s -> MiniMessage.miniMessage().stripTags(s).toLowerCase()).collect(Collectors.toSet()));
+        nakedLegacySignLines.put(LangPath.LEGACY_PRIVATE_SIGN, getStringSetFromLang(LangPath.LEGACY_PRIVATE_SIGN).stream().map(s -> MiniMessage.miniMessage().stripTags(s).toLowerCase()).collect(Collectors.toSet()));
+        nakedLegacySignLines.put(LangPath.LEGACY_TIMER_SIGN, getStringSetFromLang(LangPath.LEGACY_TIMER_SIGN).stream().map(s -> MiniMessage.miniMessage().stripTags(s).toLowerCase()).collect(Collectors.toSet()));
     }
 
     /**
      * saves lang files from resources to the plugins datafolder
      */
     private void initLangFiles() {
-        //todo don't hardcode them
-        String[] availablefiles = {"lang/lang_de.yml", "lang/lang_en.yml", "lang/lang_es.yml", "lang/lang_hu.yml", "lang/lang_it.yml", "lang/lang_zh-cn.yml"};
-        for (String filename : availablefiles) {
-            File langfile = new File(plugin.getDataFolder(), filename);
-            if (!langfile.exists()) {
-                plugin.saveResource(filename, false);
+        Enumeration<URL> en;
+        try {
+            en = plugin.getClass().getClassLoader().getResources("lang.properties");
+
+            while (en.hasMoreElements()) {
+                URL url = en.nextElement();
+                JarURLConnection urlcon;
+                urlcon = (JarURLConnection) (url.openConnection());
+
+                JarFile jar = urlcon.getJarFile();
+                Enumeration<JarEntry> entries = jar.entries();
+                boolean found = false;
+
+                while (entries.hasMoreElements()) {
+                    JarEntry jarEntry = entries.nextElement();
+
+                    String entry = jarEntry.getName();
+
+                    if (entry.startsWith("lang_")) { // never save the fallback
+                        try {
+                            InputStream inputStream = plugin.getResource(entry);
+                            File langFile = new File(new File(plugin.getDataFolder(), "lang"), entry);
+                            FileUtils.copyInputStreamToFile(inputStream, langFile); // It should never be null, we already found the resource!
+                        } catch (IllegalArgumentException e) {
+                            plugin.getLogger().log(Level.WARNING, "Couldn't save lang file \"" + entry + "\".", e);
+                        }
+
+                        found = true;
+                    } else if (found && entry.contains("/")) {
+                        break; // already over it
+                    }
+                }
+
+                jar.close();
             }
+        } catch (IOException e) {
+            plugin.getLogger().log(Level.WARNING, "Couldn't save lang files", e);
         }
     }
 
     /**
      * prepend the message with the plugins prefix before sending it to the audience.
      */
-    public void sendMessageWithPrefix(@NotNull Audience audience, @Nullable Component messages) {
-        if (messages != null) {
-            audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(messages));
-        }
+    public void sendMessageWithPrefix(@NotNull Audience audience, @NotNull Component messages) {
+        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(Component.text(" ")).append(messages));
     }
 
     /**
@@ -109,7 +192,7 @@ public class MessageManager {
      * send a component from the lang file to the audience, prefixed with this plugins prefix.
      */
     public void sendLang(@NotNull Audience audience, @NotNull LangPath path) {
-        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(langCache.get(path)));
+        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(Component.text(" ")).append(langCache.get(path)));
     }
 
     /**
@@ -117,7 +200,7 @@ public class MessageManager {
      * Note: might be slightly slower than {@link #sendLang(Audience, LangPath)} since this can not use cache.
      */
     public void sendLang(@NotNull Audience audience, @NotNull LangPath path, @NotNull TagResolver resolver) {
-        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(
+        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(Component.text(" ")).append(
                 MiniMessage.miniMessage().deserialize(getStringFromLang(path), resolver)));
     }
 
@@ -130,7 +213,20 @@ public class MessageManager {
     public boolean isSignComp(@NotNull Component compToTest, @NotNull LangPath langPath) {
         String strToTest = PlainTextComponentSerializer.plainText().serialize(compToTest).trim();
 
-        return strToTest.toLowerCase().startsWith(nakedSignLiness.get(langPath));
+        return strToTest.equalsIgnoreCase(nakedSignLines.get(langPath));
+    }
+
+    @Deprecated(forRemoval = true)
+    public boolean isLegacySignComp(@NotNull Component compToTest, @NotNull LangPath langPath) {
+        String strToTest = PlainTextComponentSerializer.plainText().serialize(compToTest).toLowerCase().trim();
+
+        for (String legacyLine : nakedLegacySignLines.get(langPath)) {
+            if (strToTest.startsWith(legacyLine)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -139,7 +235,12 @@ public class MessageManager {
      * @param langPath defines the type of line we need
      */
     public @Nullable String getNakedSignText(@NotNull LangPath langPath) {
-        return nakedSignLiness.get(langPath);
+        return nakedSignLines.get(langPath);
+    }
+
+    @Deprecated(forRemoval = true)
+    public @Nullable Set<@NotNull String> getNakedLegacyText(@NotNull LangPath langPath) {
+        return nakedLegacySignLines.get(langPath);
     }
 
     /**
@@ -173,25 +274,35 @@ public class MessageManager {
         PLUGIN_PREFIX("prefix", "<gold>[Padlock]</gold> "),
 
         PRIVATE_SIGN("sign.line.private", "[Private]"),
-        @Deprecated(forRemoval = true)
-        ADDITIONAL_SIGN("sign.line.additional", "[More Users]"),
-        EVERYONE_SIGN("sign.line.everyone", "[Everyone]"),
+        PUBLIC_SIGN("sign.line.public", "[Public]"),
+        DONATION_SIGN("sign.line.donation", "[Donation]"),
+        DISPLAY_SIGN("sign.line.display", "[Display]"),
+        SUPPLY_SIGN("sign.line.supply", "[Supply]"),
         TIMER_SIGN("sign.line.timer", "[Timer:<" + PlaceHolder.TIME.getPlaceholder() + ">]"),
-        EXPIRE_SIGN("sign.line.expired", "[<dark_aqua>Expired</dark_aqua>]"),
         ERROR_SIGN("sign.line.error", "[<dark_red>Error</dark_red>]"),
         INVALID_SIGN("sign.line.invalid", "[Invalid]"),
         PLAYER_NAME_ON_SIGN("sign.line.player-name", "<" + PlaceHolder.PLAYER.getPlaceholder() + ">"), // used for formatting displayed player names
+
+        @Deprecated(forRemoval = true)
+        LEGACY_ADDITIONAL_SIGN("sign.legacy.additional", "[More Users]"),
+        @Deprecated(forRemoval = true)
+        LEGACY_EVERYONE_SIGN("sign.legacy.everyone", "[Everyone]"),
+        @Deprecated(forRemoval = true)
+        LEGACY_PRIVATE_SIGN("sign.legacy.private", "[Private]"),
+        @Deprecated(forRemoval = true)
+        LEGACY_TIMER_SIGN("sign.legacy.timer", "[Timer:<timer>]"),
 
         HELP_HEADER("cmd.help.header"),
         HELP_ADD_MEMBER("cmd.help.add-member"),
         HELP_REMOVE_MEMBER("cmd.help.remove-member"),
         HELP_ADD_OWNER("cmd.help.add-owner"),
         HELP_REMOVE_OWNER("cmd.help.remove-owner"),
-        HELP_SETCREATED("cmd.help.set-created"),
-        HELP_SETEVERYONE("cmd.help.set-everyone"),
-        HELP_SETTIMER("cmd.help.set-timer"),
+        HELP_SET_ACCESS_TYPE("cmd.help.set-access-type"),
+        HELP_SET_PASSWORD("cmd.help.set-password"),
+        HELP_SET_TIMER("cmd.help.set-timer"),
         HELP_DEBUG("cmd.help.debug"),
         HELP_HELP("cmd.help.help"),
+        HELP_PASSWORD("cmd.help.password"),
         HELP_INFO("cmd.help.info"),
         HELP_RELOAD("cmd.help.reload"),
         HELP_UPDATE_SIGN("cmd.help.update-sign"),
@@ -203,18 +314,24 @@ public class MessageManager {
         ADD_MEMBER_SUCCESS("cmd.add-member.success"),
         REMOVE_MEMBER_SUCCESS("cmd.remove-member.success"),
         REMOVE_MEMBER_ERROR("cmd.remove-member.error"),
-        SET_CREATED_SUCCESS("cmd.set-created.success"),
-        SET_CREATED_ERROR("cmd.set-created.error"),
-        SET_EVERYONE_SUCCESS("cmd.set-everyone.success"),
+        SET_ACCESS_TYPE_SUCCESS("cmd.set-access-type.success"),
+        SET_PASSWORD_SUCCESS("cmd.set-password.set.success"),
+        SET_PASSWORD_REMOVE_SUCCESS("cmd.set-password.remove.success"),
         SET_TIMER_SUCCESS_ON("cmd.set-timer.success.turned-on"),
         SET_TIMER_SUCCESS_OFF("cmd.set-timer.success.turned-off"),
         SET_TIMER_ERROR("cmd.set-timer.error"),
         UPDATE_SIGN_SUCCESS("cmd.sign-update.success"),
+        PASSWORD_ACCESS_GRANTED("cmd.password.access-granted"),
+        PASSWORD_WRONG_PASSWORD("cmd.password.wrong-password"),
+        PASSWORD_ON_COOLDOWN("cmd.password.on-cooldown"),
+        PASSWORD_SAFETY_WARNING("cmd.password.safety-warning", "<dark_red>Warning: never use a password, you are using anywhere else! While I did everything I could for your safety, there <bold>ARE</bold> ways your password could get leaked!</dark_red>"),
+        PASSWORD_START_PROCESSING("cmd.password.start-processing"),
         RELOAD_SUCCESS("cmd.reload.success"),
 
         INFO_OWNERS("cmd.info.owners"),
         INFO_MEMBERS("cmd.info.members"),
         INFO_TIMER("cmd.info.timer"),
+        INFO_ACCESS_TYPE("cmd.info.access-type"),
         INFO_EXPIRED("cmd.info.expired"),
 
         SIGN_NEED_RESELECT("cmd.error.sign-need-reselect"),
@@ -222,12 +339,13 @@ public class MessageManager {
         UNKNOWN_PLAYER("cmd.error.unknown-player"),
         NOT_A_PLAYER("cmd.error.not-a-player"),
         NOT_ENOUGH_ARGS("cmd.error.not-enough-args"),
-        NOT_A_BOOL("cmd.error.not-a-bool"),
+        NOT_ACCESS_TYPE("cmd.error.not-access-type"),
         CMD_USAGE("cmd.usage"),
         CMD_NOT_A_SUBCOMMAND("cmd.not-a-subcommand"),
 
         NO_PERMISSION("no-permission"),
         NOT_OWNER("lock.not-owner"),
+        NEEDS_PASSWORD("lock.needs-password"),
 
         LOCK_SUCCESS("action.lock.success"),
         LOCK_ERROR_ALREADY_LOCKED("action.lock.error.already-locked"),
