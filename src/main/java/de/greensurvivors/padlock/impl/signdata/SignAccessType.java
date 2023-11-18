@@ -20,6 +20,10 @@ public final class SignAccessType {
     private final static NamespacedKey accessTypeKey = new NamespacedKey(Padlock.getPlugin(), "LockAccessType");
 
     public static void setAccessType(@NotNull Sign sign, @NotNull AccessType accessType, boolean shouldUpdateDisplay) {
+        if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
+            Padlock.getPlugin().getLockCacheManager().removeFromCache(sign);
+        }
+
         PersistentDataContainer container = sign.getPersistentDataContainer();
 
         container.set(accessTypeKey, PersistentDataType.STRING, accessType.name());
@@ -57,27 +61,33 @@ public final class SignAccessType {
     /**
      * will start an update process, if the sign is a legacy sign
      */
-    public static @Nullable AccessType getAccessType(@NotNull Sign sign) {
-        String accessTypeStr = sign.getPersistentDataContainer().get(accessTypeKey, PersistentDataType.STRING);
-
-        AccessType accessType;
-        if (accessTypeStr == null) {
-            accessType = getLegacySetting(sign);
-            if (accessType != null) {
-                PadlockAPI.updateLegacySign(sign);
-            } else {
-                return null;
-            }
+    public static @Nullable AccessType getAccessType(@NotNull Sign sign, boolean ignoreCache) {
+        Padlock.getPlugin().getLogger().info("get access-type " + ignoreCache);
+        if (!ignoreCache && Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
+            return Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(sign.getLocation()).getAccessType();
         } else {
-            accessType = MiscUtils.getEnum(AccessType.class, accessTypeStr);
+            String accessTypeStr = sign.getPersistentDataContainer().get(accessTypeKey, PersistentDataType.STRING);
 
-            if (accessType == null) {
-                accessType = AccessType.PRIVATE;
+            AccessType accessType;
+            if (accessTypeStr == null) {
+                accessType = getLegacySetting(sign);
+                if (accessType != null) {
+                    PadlockAPI.updateLegacySign(sign);
+                } else {
+                    return null;
+                }
+            } else {
+                accessType = MiscUtils.getEnum(AccessType.class, accessTypeStr);
+
+                if (accessType == null) {
+                    accessType = AccessType.PRIVATE;
+                }
+
             }
 
+            Padlock.getPlugin().getLogger().info("returned");
+            return accessType;
         }
-
-        return accessType;
     }
 
     /**

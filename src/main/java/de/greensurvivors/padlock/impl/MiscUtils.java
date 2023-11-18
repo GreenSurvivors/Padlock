@@ -38,14 +38,14 @@ public class MiscUtils {
     // the point at the beginning is for bedrock player if the proxy supports them.
     private static Pattern usernamePattern = Pattern.compile("^.?[a-zA-Z0-9_]{3,16}$");
 
-    public static Pattern getPeriodPattern() {
+    public static @NotNull Pattern getPeriodPattern() {
         return periodPattern;
     }
 
     /**
      * removes one item of the players main hand.
      */
-    public static void removeAItemMainHand(Player player) {
+    public static void removeAItemMainHand(@NotNull Player player) {
         if (player.getGameMode() == GameMode.CREATIVE) return;
         if (player.getInventory().getItemInMainHand().getAmount() == 1) {
             player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
@@ -57,7 +57,7 @@ public class MiscUtils {
     /**
      * checks if a player has not been notified before and adds them to the notified list if not
      */
-    public static boolean shouldNotify(Player player) {
+    public static boolean shouldNotify(@NotNull Player player) {
         if (notified.contains(player.getUniqueId())) {
             return false;
         } else {
@@ -69,7 +69,7 @@ public class MiscUtils {
     /**
      * check if a string is a valid username
      */
-    public static boolean isUserName(String text) {
+    public static boolean isUserName(@NotNull String text) {
         return usernamePattern.matcher(text).matches();
     }
 
@@ -118,7 +118,6 @@ public class MiscUtils {
 
         return result;
     }
-
 
     /**
      * Try to get a member of the enum given as an argument by the name

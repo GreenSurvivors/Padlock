@@ -5,7 +5,6 @@
 # will turn itself off after imported the old config once. Will not import language files
 import-fromLockettePro: false
 language-file-name: 'en'
-enable-quick-protect: true
 dependency:
   worldguard:
     enabled: true
@@ -26,7 +25,6 @@ lock:
     days: 999
 cache:
   seconds: 0
-cache-time-seconds: 0
 lock-default-create-time-unix: -1
 bedrock-prefix: "."
 

@@ -21,7 +21,7 @@ public class SignExpiration {
         if (PadlockAPI.isLockSign(sign)) {
             long lastUsed = -1;
 
-            for (OfflinePlayer player : MiscUtils.getPlayersFromUUIDStrings(SignLock.getUUIDs(sign, true))) {
+            for (OfflinePlayer player : MiscUtils.getPlayersFromUUIDStrings(SignLock.getUUIDs(sign, true, true))) {
                 lastUsed = Math.max(player.getLastSeen(), lastUsed);
             }
 

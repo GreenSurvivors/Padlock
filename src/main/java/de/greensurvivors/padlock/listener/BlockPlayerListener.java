@@ -112,7 +112,7 @@ public class BlockPlayerListener implements Listener {
                                 // Cancel event here
                                 event.setCancelled(true);
                                 // Check lock info
-                                if (!locked && !PadlockAPI.isPartOfLockedDoor(block)) {
+                                if (!locked) {
                                     // Not locked, not a locked door nearby
                                     MiscUtils.removeAItemMainHand(player);
                                     // Put sign on
@@ -269,7 +269,7 @@ public class BlockPlayerListener implements Listener {
                 }
             } else if (PadlockAPI.isAdditionalSign(sign)) {
                 if (PadlockAPI.isOwner(block, player) || player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm())) {
-                    final Sign lockSign = PadlockAPI.getLock(PadlockAPI.getAttachedBlock(block));
+                    final Sign lockSign = PadlockAPI.getLock(PadlockAPI.getAttachedBlock(block), false);
 
                     //let the additional sign break but update the others
                     Bukkit.getScheduler().runTaskLater(plugin, () -> PadlockAPI.updateLegacySign(lockSign), 2);
@@ -281,7 +281,7 @@ public class BlockPlayerListener implements Listener {
                 }
             }
         } else { // not a sign
-            Sign lock = PadlockAPI.getLock(block);
+            Sign lock = PadlockAPI.getLock(block, false);
             if (lock != null) {
                 if (!(SignLock.isOwner(lock, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm()))) {
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
@@ -352,12 +352,12 @@ public class BlockPlayerListener implements Listener {
         }
         if (action == Action.LEFT_CLICK_BLOCK || action == Action.RIGHT_CLICK_BLOCK) {
             Player player = event.getPlayer();
-            Sign lockSign = PadlockAPI.getLock(block);
+            Sign lockSign = PadlockAPI.getLock(block, false);
 
             if (lockSign != null) {
                 if (SignSelection.getSelectedSign(player) != lockSign) {
                     if (SignLock.isMember(lockSign, player.getUniqueId()) || SignLock.isOwner(lockSign, player.getUniqueId()) ||
-                            player.hasPermission(PermissionManager.ADMIN_USE.getPerm()) || SignAccessType.getAccessType(lockSign) != SignAccessType.AccessType.PRIVATE) {
+                            player.hasPermission(PermissionManager.ADMIN_USE.getPerm()) || SignAccessType.getAccessType(lockSign, false) != SignAccessType.AccessType.PRIVATE) {
 
                         // Handle multi openables
                         if (action == Action.RIGHT_CLICK_BLOCK) {
@@ -376,7 +376,7 @@ public class BlockPlayerListener implements Listener {
                                     !(player.isSneaking() && event.hasItem()) &&
                                     // event gets fired for both hands, ignore offhand
                                     event.getHand() == EquipmentSlot.HAND) {
-                                Long closetime = SignTimer.getTimer(lockSign);
+                                Long closetime = SignTimer.getTimer(lockSign, false);
 
                                 if (closetime != null) {
                                     Set<Block> openables = new HashSet<>();
@@ -486,13 +486,13 @@ public class BlockPlayerListener implements Listener {
     private void onLecternTake(@NotNull PlayerTakeLecternBookEvent event) {
         Player player = event.getPlayer();
 
-        Sign lock = PadlockAPI.getLock(event.getLectern().getBlock());
+        Sign lock = PadlockAPI.getLock(event.getLectern().getBlock(), false);
 
         if (lock != null) {
             if (!(SignLock.isOwner(lock, player.getUniqueId()) || SignLock.isMember(lock, player.getUniqueId()) ||
                     SignPasswords.hasStillAccess(player.getUniqueId(), lock.getLocation()) ||
                     player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
-                SignAccessType.AccessType accessType = SignAccessType.getAccessType(lock);
+                SignAccessType.AccessType accessType = SignAccessType.getAccessType(lock, false);
 
                 if (!(accessType == SignAccessType.AccessType.SUPPLY || accessType == SignAccessType.AccessType.PUBLIC)) {
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
@@ -513,7 +513,7 @@ public class BlockPlayerListener implements Listener {
         }
 
         if (block != null) {
-            Sign lock = PadlockAPI.getLock(block);
+            Sign lock = PadlockAPI.getLock(block, false);
 
             if (lock != null) {
                 // if a player should have access there is no need to cancel the event
@@ -525,7 +525,7 @@ public class BlockPlayerListener implements Listener {
                     }
                 }
 
-                SignAccessType.AccessType type = SignAccessType.getAccessType(lock);
+                SignAccessType.AccessType type = SignAccessType.getAccessType(lock, false);
 
                 switch (type) {
                     case PRIVATE, PUBLIC, DONATION -> {
@@ -551,7 +551,7 @@ public class BlockPlayerListener implements Listener {
         }
 
         if (block != null) {
-            Sign lock = PadlockAPI.getLock(block);
+            Sign lock = PadlockAPI.getLock(block, false);
 
             if (lock != null) {
                 // if a player should have access there is no need to cancel the event
@@ -563,7 +563,7 @@ public class BlockPlayerListener implements Listener {
                     }
                 }
 
-                SignAccessType.AccessType type = SignAccessType.getAccessType(lock);
+                SignAccessType.AccessType type = SignAccessType.getAccessType(lock, false);
 
                 switch (type) {
                     case PRIVATE, PUBLIC, SUPPLY -> {

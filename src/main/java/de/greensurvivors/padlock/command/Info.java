@@ -85,7 +85,7 @@ public class Info extends SubCommand {
 
                         // owners
                         Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_OWNERS);
-                        for (String name : getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, true))) {
+                        for (String name : getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, true, false))) {
                             component = component.append(Component.text(name));
                             component = component.append(Component.text(", "));
                         }
@@ -93,8 +93,8 @@ public class Info extends SubCommand {
                         // members
                         component = component.append(Component.newline());
                         component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_MEMBERS));
-                        if (SignAccessType.getAccessType(sign) == SignAccessType.AccessType.PUBLIC) {
-                            for (String name : getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, false))) {
+                        if (SignAccessType.getAccessType(sign, false) == SignAccessType.AccessType.PUBLIC) {
+                            for (String name : getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, false, false))) {
                                 component = component.append(Component.text(name));
                                 component = component.append(Component.text(", "));
                             }
@@ -103,7 +103,7 @@ public class Info extends SubCommand {
                         //todo display access type
 
                         // timer
-                        Long timer = SignTimer.getTimer(sign);
+                        Long timer = SignTimer.getTimer(sign, false);
                         if (timer != null) {
                             component = component.append(Component.newline());
                             component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_TIMER));

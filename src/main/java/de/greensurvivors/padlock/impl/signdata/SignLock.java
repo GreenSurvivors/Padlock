@@ -5,6 +5,7 @@ import com.google.gson.reflect.TypeToken;
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.impl.MiscUtils;
+import de.greensurvivors.padlock.impl.dataTypes.LazySignPropertys;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.apache.commons.collections4.set.ListOrderedSet;
@@ -23,6 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.reflect.Type;
+import java.util.Set;
 import java.util.UUID;
 
 /**
@@ -55,7 +57,7 @@ public class SignLock {
      */
     public static boolean isLockSign(@NotNull Sign sign) {
         //todo second part is deprecated
-        return SignAccessType.getAccessType(sign) != null || (SignAccessType.getAccessTypeFromComp(sign.getSide(Side.FRONT).line(0)) != null);
+        return SignAccessType.getAccessType(sign, true) != null || (SignAccessType.getAccessTypeFromComp(sign.getSide(Side.FRONT).line(0)) != null);
     }
 
     /**
@@ -70,16 +72,29 @@ public class SignLock {
      * Check if a given uuid is a registered owner uuid of a lock sign.
      */
     public static boolean isOwner(final @NotNull Sign sign, final @NotNull UUID uuid) {
-        return getUUIDs(sign, true).contains(uuid.toString());
+        if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
+            return Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(sign.getLocation()).getOwnerUUIDStrs().contains(uuid.toString());
+        } else {
+            return getUUIDs(sign, true, true).contains(uuid.toString());
+        }
     }
 
     /**
      * Check if the sign grants everyone member access or if the uuid is a registered member of the lock sign.
      */
     public static boolean isMember(@NotNull final Sign sign, UUID uuid) {
-        return (SignAccessType.getAccessType(sign) == SignAccessType.AccessType.PUBLIC) ||
-                SignPasswords.hasStillAccess(uuid, sign.getLocation()) ||
-                getUUIDs(sign, false).contains(uuid.toString());
+        if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
+            LazySignPropertys lazySignPropertys = Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(sign.getLocation());
+            Set<String> memberUUIDStrs = lazySignPropertys.getMemberUUIDStrs();
+
+            return (lazySignPropertys.getAccessType() == SignAccessType.AccessType.PUBLIC) ||
+                    SignPasswords.hasStillAccess(uuid, sign.getLocation()) ||
+                    (memberUUIDStrs != null && memberUUIDStrs.contains(uuid.toString()));
+        } else {
+            return (SignAccessType.getAccessType(sign, true) == SignAccessType.AccessType.PUBLIC) ||
+                    SignPasswords.hasStillAccess(uuid, sign.getLocation()) ||
+                    getUUIDs(sign, false, true).contains(uuid.toString());
+        }
     }
 
     /**
@@ -87,10 +102,16 @@ public class SignLock {
      *
      * @param owners true if you want the set of owner uuids, false for members
      */
-    public static @NotNull ListOrderedSet<String> getUUIDs(@NotNull final Sign sign, boolean owners) {
-        PersistentDataContainer container = sign.getPersistentDataContainer();
+    public static @NotNull ListOrderedSet<String> getUUIDs(@NotNull final Sign sign, boolean owners, boolean ignoreCache) {
+        ListOrderedSet<String> set;
 
-        ListOrderedSet<String> set = container.get(owners ? storedOwnersUUIDKey : storedMembersUUIDKey, uuidSetDataType);
+        if (!ignoreCache && Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
+            LazySignPropertys lazySignPropertys = Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(sign.getLocation());
+            set = owners ? lazySignPropertys.getOwnerUUIDStrs() : lazySignPropertys.getMemberUUIDStrs();
+        } else {
+            set = sign.getPersistentDataContainer().get(owners ? storedOwnersUUIDKey : storedMembersUUIDKey, uuidSetDataType);
+        }
+
         if (set == null) {
             set = new ListOrderedSet<>();
         }
@@ -227,6 +248,10 @@ public class SignLock {
      * @param player  the offline player to add, might be null.
      */
     public static void addPlayer(@NotNull final Sign sign, boolean isOwner, @Nullable OfflinePlayer player) {
+        if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
+            Padlock.getPlugin().getLockCacheManager().removeFromCache(sign);
+        }
+
         PersistentDataContainer container = sign.getPersistentDataContainer();
 
         ListOrderedSet<String> set = container.get(isOwner ? storedOwnersUUIDKey : storedMembersUUIDKey, uuidSetDataType);
@@ -260,6 +285,10 @@ public class SignLock {
 
         boolean success = set.remove(uuid.toString());
         if (success) {
+            if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
+                Padlock.getPlugin().getLockCacheManager().removeFromCache(sign);
+            }
+
             sign.getPersistentDataContainer().set(isOwner ? storedOwnersUUIDKey : storedMembersUUIDKey, uuidSetDataType, set);
             SignDisplay.updateDisplay(sign);// update the block to make the UUID change effective
         }

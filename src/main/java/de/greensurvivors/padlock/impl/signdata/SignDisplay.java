@@ -32,10 +32,10 @@ public class SignDisplay {
      * @param owners if owners (true) or members (false) should get filled in
      */
     private static void fillWithPlayers(@Nullable Component @NotNull [] toFill, @NotNull Sign sign, boolean owners) {
-        Set<String> players = SignLock.getUUIDs(sign, owners);
+        Set<String> uuidStrs = SignLock.getUUIDs(sign, owners, false);
 
-        if (!players.isEmpty()) {
-            Iterator<String> it = players.iterator();
+        if (!uuidStrs.isEmpty()) {
+            Iterator<String> it = uuidStrs.iterator();
 
             for (int i = 0; i < toFill.length; i++) {
                 if (toFill[i] == null) {
@@ -83,7 +83,7 @@ public class SignDisplay {
         final Component[] linesToUpdate = new Component[amountOfLines];
 
         // first line is always just the lock line
-        linesToUpdate[0] = switch (SignAccessType.getAccessType(sign)) {
+        linesToUpdate[0] = switch (SignAccessType.getAccessType(sign, false)) {
             case PRIVATE -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PRIVATE_SIGN);
             case PUBLIC -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PUBLIC_SIGN);
             case DONATION -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.DONATION_SIGN);

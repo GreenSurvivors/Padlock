@@ -4,6 +4,7 @@ import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.signdata.SignAccessType;
 import de.greensurvivors.padlock.impl.signdata.SignLock;
 import de.greensurvivors.padlock.impl.signdata.SignTimer;
+import org.apache.commons.collections4.set.ListOrderedSet;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Sign;
 import org.jetbrains.annotations.Nullable;
@@ -14,9 +15,9 @@ public class LazySignPropertys {
     private final @Nullable Sign lock;
     private final boolean isLock;
 
-    private Set<String> ownerUUIDStrs;
+    private ListOrderedSet<String> ownerUUIDStrs;
     private Set<OfflinePlayer> owners;
-    private Set<String> memberUUIDStrs;
+    private ListOrderedSet<String> memberUUIDStrs;
     private Set<OfflinePlayer> members;
     private Long timer;
     private SignAccessType.AccessType accessType;
@@ -36,18 +37,18 @@ public class LazySignPropertys {
         return isLock;
     }
 
-    public @Nullable Set<String> getOwnerUUIDStrs() {
+    public @Nullable ListOrderedSet<String> getOwnerUUIDStrs() {
         if (isLock && ownerUUIDStrs == null) {
-            ownerUUIDStrs = SignLock.getUUIDs(lock, true);
+            ownerUUIDStrs = SignLock.getUUIDs(lock, true, true);
         }
 
         return ownerUUIDStrs;
     }
 
-    public @Nullable Set<OfflinePlayer> getOwners() {
+    public @Nullable Set<OfflinePlayer> getOwners() { //todo
         if (isLock && owners == null) {
             if (ownerUUIDStrs == null) {
-                ownerUUIDStrs = SignLock.getUUIDs(lock, true);
+                ownerUUIDStrs = SignLock.getUUIDs(lock, true, true);
             }
 
             owners = MiscUtils.getPlayersFromUUIDStrings(ownerUUIDStrs);
@@ -56,18 +57,18 @@ public class LazySignPropertys {
         return owners;
     }
 
-    public @Nullable Set<String> getMemberUUIDStrs() {
+    public @Nullable ListOrderedSet<String> getMemberUUIDStrs() {
         if (isLock && memberUUIDStrs == null) {
-            memberUUIDStrs = SignLock.getUUIDs(lock, false);
+            memberUUIDStrs = SignLock.getUUIDs(lock, false, true);
         }
 
-        return ownerUUIDStrs;
+        return memberUUIDStrs;
     }
 
-    public @Nullable Set<OfflinePlayer> getMembers() {
+    public @Nullable Set<OfflinePlayer> getMembers() { //todo
         if (isLock && members == null) {
             if (memberUUIDStrs == null) {
-                memberUUIDStrs = SignLock.getUUIDs(lock, false);
+                memberUUIDStrs = SignLock.getUUIDs(lock, false, true);
             }
 
             members = MiscUtils.getPlayersFromUUIDStrings(ownerUUIDStrs);
@@ -78,7 +79,7 @@ public class LazySignPropertys {
 
     public @Nullable Long getTimer() {
         if (isLock && timer == null) {
-            timer = SignTimer.getTimer(lock);
+            timer = SignTimer.getTimer(lock, true);
         }
 
         return timer;
@@ -86,7 +87,7 @@ public class LazySignPropertys {
 
     public @Nullable SignAccessType.AccessType getAccessType() {
         if (isLock && accessType == null) {
-            accessType = SignAccessType.getAccessType(lock);
+            accessType = SignAccessType.getAccessType(lock, true);
         }
 
         return accessType;

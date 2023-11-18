@@ -173,7 +173,7 @@ public class Command implements CommandExecutor, TabCompleter {
                         if (sender.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()) || // /lock removeowner
                                 (!removeOwner && SignLock.isOwner(sign, player.getUniqueId()))) { // /lock removemember
                             // get all members/owners names of a sign as a result
-                            ListOrderedSet<String> uuidStrs = SignLock.getUUIDs(sign, removeOwner);
+                            ListOrderedSet<String> uuidStrs = SignLock.getUUIDs(sign, removeOwner, false);
                             List<String> result = new ArrayList<>();
 
                             for (String uuidStr : uuidStrs) {

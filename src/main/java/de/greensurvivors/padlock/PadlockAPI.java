@@ -2,6 +2,7 @@ package de.greensurvivors.padlock;
 
 import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.dataTypes.DoubleBlockParts;
+import de.greensurvivors.padlock.impl.dataTypes.LazySignPropertys;
 import de.greensurvivors.padlock.impl.openabledata.Openables;
 import de.greensurvivors.padlock.impl.signdata.*;
 import org.bukkit.Material;
@@ -123,12 +124,14 @@ public class PadlockAPI {
      * get the lock sign of a simple single block
      */
     public static @Nullable Sign getLockSignSingleBlock(Block block, @Nullable BlockFace exempt) {
+        Padlock.getPlugin().getLogger().info("single block ");
         for (BlockFace blockface : cardinalFaces) {
             if (blockface != exempt) {
                 Sign sign = MiscUtils.getFacingSign(block, blockface);
 
                 // Find [Private] sign?
                 if (isValidLockSign(sign)) {
+                    Padlock.getPlugin().getLogger().info("valid?");
                     return sign;
                 }
             } // exempted blockface
@@ -422,32 +425,36 @@ public class PadlockAPI {
     /**
      * get the not expired lock sign of a block, might be null if no where found.
      */
-    public static @Nullable Sign getLock(Block block) {
-        if (block.getState() instanceof Sign sign) {
-            if (isValidLockSign(sign)) {
-                return sign;
-            } else {
-                Block attatchedTo = getAttachedBlock(block);
-                if (attatchedTo != null) {
-                    return getLock(attatchedTo);
+    public static @Nullable Sign getLock(Block block, boolean ignoreCache) {
+        if (!ignoreCache && Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
+            return Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(block.getLocation()).getLock();
+        } else {
+            if (block.getState() instanceof Sign sign) {
+                if (isValidLockSign(sign)) {
+                    return sign;
                 } else {
-                    return getLockSignSingleBlock(block, null);
+                    Block attatchedTo = getAttachedBlock(block);
+                    if (attatchedTo != null) {
+                        return getLock(attatchedTo, ignoreCache);
+                    } else {
+                        return getLockSignSingleBlock(block, null);
+                    }
                 }
-            }
-        } else if (Openables.isSingleOpenable(block.getType())) { // stupid trapdoors being also bisected.
-            return getNearLockSingle(block);
-        } else if (block.getBlockData() instanceof Bisected && !Tag.STAIRS.isTagged(block.getType())) { // door, also stupid stairs
-            DoubleBlockParts doubleBlockParts = Openables.getDoubleBlockParts(block);
+            } else if (Openables.isSingleOpenable(block.getType())) { // stupid trapdoors being also bisected.
+                return getNearLockSingle(block);
+            } else if (block.getBlockData() instanceof Bisected && !Tag.STAIRS.isTagged(block.getType())) { // door, also stupid stairs
+                DoubleBlockParts doubleBlockParts = Openables.getDoubleBlockParts(block);
 
-            if (doubleBlockParts != null) {
-                return getNearLockDoubleBlock(doubleBlockParts);
-            } else {
-                return null;
+                if (doubleBlockParts != null) {
+                    return getNearLockDoubleBlock(doubleBlockParts);
+                } else {
+                    return null;
+                }
+            } else if (block.getBlockData() instanceof Chest) {
+                return getLockChest(block);
             }
-        } else if (block.getBlockData() instanceof Chest) {
-            return getLockChest(block);
+            return getLockSignSingleBlock(block, null);
         }
-        return getLockSignSingleBlock(block, null);
     }
 
     /**
@@ -456,15 +463,40 @@ public class PadlockAPI {
      * @return will also true if the block is not protected
      */
     public static boolean isOwner(@NotNull Block block, @NotNull OfflinePlayer player) {
-        Sign lock = getLock(block);
-        return lock != null && SignLock.isOwner(lock, player.getUniqueId());
+        if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
+            Set<String> ownerUUIDStrs = Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(block.getLocation()).getOwnerUUIDStrs();
+            String playerUUIDStr = player.getUniqueId().toString();
+
+            if (ownerUUIDStrs != null) {
+                for (String ownerUUIDStr : ownerUUIDStrs) {
+                    if (playerUUIDStr.equals(ownerUUIDStr)) {
+                        return true;
+                    }
+                }
+            }
+
+            return false;
+        } else {
+            Sign lock = getLock(block, true);
+            return lock != null && SignLock.isOwner(lock, player.getUniqueId());
+        }
     }
 
     /**
      * checks if the player is a member of the locked block.
      */
     public static boolean isMember(@NotNull Block block, @NotNull Player player) {
-        Sign lock = getLock(block);
+        if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
+            LazySignPropertys lazySignPropertys = Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(block.getLocation());
+
+            if (lazySignPropertys.isLock()) {
+                return SignLock.isMember(lazySignPropertys.getLock(), player.getUniqueId());
+            } else {
+                return false;
+            }
+        }
+
+        Sign lock = getLock(block, true);
         return lock != null && SignLock.isMember(lock, player.getUniqueId());
     }
 
@@ -472,7 +504,11 @@ public class PadlockAPI {
      * get if the block is locked or a lock sign itself
      */
     public static boolean isProtected(@NotNull Block block) {
-        return getLock(block) != null;
+        if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
+            return Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(block.getLocation()).isLock();
+        } else {
+            return getLock(block, true) != null;
+        }
     }
 
     /**
@@ -504,13 +540,17 @@ public class PadlockAPI {
      * return true, if interference is forbidden, true otherwise
      */
     public static boolean isInterfering(@NotNull Block block, @NotNull Player player) {
-        Sign lock = getLock(block);
+        if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
+            return Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(block.getLocation()).isLock();
+        }
+
+        Sign lock = getLock(block, true);
 
         if (lock != null && !SignLock.isOwner(lock, player.getUniqueId())) {
             return true;
         } else if (block.getState() instanceof Container && Padlock.getPlugin().getConfigManager().isInterferePlacementBlocked()) { // container need additional space because of hopper / minecarts
             for (BlockFace blockface : allFaces) {
-                lock = getLock(block.getRelative(blockface));
+                lock = getLock(block.getRelative(blockface), false);
                 if (lock != null && !SignLock.isOwner(lock, player.getUniqueId())) {
                     return true;
                 }
@@ -559,13 +599,6 @@ public class PadlockAPI {
         return SignExpiration.isSignExpired(sign);
     }
 
-    public static boolean isPartOfLockedDoor(Block block) {
-        Block blockup = block.getRelative(BlockFace.UP);
-        if (isUpDownAlsoLockableBlock(blockup) && isProtected(blockup)) return true;
-        Block blockdown = block.getRelative(BlockFace.DOWN);
-        return isUpDownAlsoLockableBlock(blockdown) && isProtected(blockdown);
-    }
-
     /**
      * get the block a sign is attached to or null if not possible
      */
@@ -580,7 +613,7 @@ public class PadlockAPI {
     /**
      * get the face where the second half of a double chest is
      */
-    public static @Nullable BlockFace getRelativeChestFace(@NotNull Chest chest) {
+    private static @Nullable BlockFace getRelativeChestFace(@NotNull Chest chest) {
         BlockFace face = chest.getFacing();
         BlockFace relativeFace = null;
         if (chest.getType() == Chest.Type.LEFT) {

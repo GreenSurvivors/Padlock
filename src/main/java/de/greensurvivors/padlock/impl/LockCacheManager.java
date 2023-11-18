@@ -25,49 +25,55 @@ import java.util.concurrent.TimeUnit;
  * Normally not, no. But with many Inventory movement attempts like big hopper contraptions or
  * heavy redstone wire use might be.
  */
-public class LockCacheManager { //todo use
+public class LockCacheManager {
     // default cache should never get used, but if it does, it has at least a maximum size to not grow unlimited
-    Map<Sign, LazySignPropertys> lockLazyProps = new HashMap<>();
-    private final @NotNull Cache<@NotNull Location, @NotNull SignWrapper> lockStateCache = Caffeine.newBuilder().
-            evictionListener((RemovalListener<Location, SignWrapper>) (loc, lockWrapper, cause) -> {
+    Map<Location, LazySignPropertys> lockLazyProps = new HashMap<>();
+    private final @NotNull Cache<@NotNull Location, @NotNull LockWrapper> lockStateCache = Caffeine.newBuilder().
+            evictionListener((RemovalListener<Location, LockWrapper>) (loc, lockWrapper, cause) -> {
                 if (lockWrapper != null) {
-                    lockLazyProps.remove(lockWrapper.lock());
+                    lockLazyProps.remove(lockWrapper.lockLoc());
                 }
-            }).expireAfterAccess(10, TimeUnit.MINUTES).maximumSize(200).build();
+            }).expireAfterAccess(10, TimeUnit.MINUTES).maximumSize(500).build();
 
     /**
      * set a new time after witch the cache should expire; invalidates every already cached value.
      */
     public void setExpirationTime(@NonNegative long duration, @NotNull TimeUnit unit) {
         lockStateCache.invalidateAll();
-        Optional<Policy.FixedExpiration<@NotNull Location, @NotNull SignWrapper>> policy = lockStateCache.policy().expireAfterAccess();
+        Optional<Policy.FixedExpiration<@NotNull Location, @NotNull LockWrapper>> policy = lockStateCache.policy().expireAfterAccess();
         policy.ifPresent(expiration -> expiration.setExpiresAfter(duration, unit));
     }
 
     public @NotNull LazySignPropertys getProtectedFromCache(@NotNull Location location) {
-        SignWrapper lockWrapper = lockStateCache.getIfPresent(location);
+        LockWrapper lockWrapper = lockStateCache.getIfPresent(location);
 
         if (lockWrapper != null) {
-            if (lockWrapper.lock() != null) {
-                LazySignPropertys lazySignPropertys = lockLazyProps.get(lockWrapper.lock());
+            if (lockWrapper.lockLoc() != null) {
+                LazySignPropertys lazySignPropertys = lockLazyProps.get(lockWrapper.lockLoc());
 
                 if (lazySignPropertys == null) {
-                    lazySignPropertys = new LazySignPropertys(lockWrapper.lock());
+                    lazySignPropertys = new LazySignPropertys(PadlockAPI.getLock(lockWrapper.lockLoc().getBlock(), true));
 
-                    lockLazyProps.put(lockWrapper.lock(), lazySignPropertys);
+                    lockLazyProps.put(lockWrapper.lockLoc(), lazySignPropertys);
                 }
                 return lazySignPropertys;
             }
         } else {
-            @Nullable Sign lock = PadlockAPI.getLock(location.getBlock());
-            lockStateCache.put(location, new SignWrapper(lock));
+            @Nullable Sign lock = PadlockAPI.getLock(location.getBlock(), true);
 
             if (lock != null) {
+                lockStateCache.put(location, new LockWrapper(lock.getLocation()));
+
                 LazySignPropertys lazySignPropertys = lockLazyProps.get(lock);
 
-                if (lazySignPropertys != null) {
-                    return lazySignPropertys;
+                if (lazySignPropertys == null) {
+                    lazySignPropertys = new LazySignPropertys(lock);
+                    lockLazyProps.put(lock.getLocation(), lazySignPropertys);
                 }
+
+                return lazySignPropertys;
+            } else {
+                lockStateCache.put(location, new LockWrapper(null));
             }
         }
 
@@ -78,20 +84,20 @@ public class LockCacheManager { //todo use
      * reset the cache of a block and the ones next to it as well.
      */
     public void removeFromCache(@NotNull Location location) {
-        final SignWrapper signWrapper = lockStateCache.getIfPresent(location);
+        final LockWrapper signWrapper = lockStateCache.getIfPresent(location);
 
-        if (signWrapper != null && signWrapper.lock() != null) {
-            lockStateCache.asMap().entrySet().removeIf(entry -> signWrapper.lock() == entry.getValue().lock());
+        if (signWrapper != null && signWrapper.lockLoc() != null) {
+            lockStateCache.asMap().entrySet().removeIf(entry -> signWrapper.lockLoc().equals(entry.getValue().lockLoc()));
         }
     }
 
     public void removeFromCache(@NotNull Sign changedLock) {
-        lockStateCache.asMap().entrySet().removeIf(entry -> changedLock == entry.getValue().lock());
+        lockStateCache.asMap().entrySet().removeIf(entry -> entry.getValue().lockLoc() != null && changedLock.getLocation().equals(entry.getValue().lockLoc()));
     }
 
     /**
      * we need a value that represents "cached but still null" in contrast to "not cached yet aka null.
      */
-    private record SignWrapper(@Nullable Sign lock) {
+    private record LockWrapper(@Nullable Location lockLoc) {
     }
 }

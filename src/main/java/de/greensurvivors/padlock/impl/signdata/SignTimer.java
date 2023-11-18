@@ -51,7 +51,7 @@ public class SignTimer {
      * @return might be null if no timer was configured
      */
     protected static @Nullable Component getTimerComponent(@NotNull Sign sign) {
-        Long timerDuration = getTimer(sign);
+        Long timerDuration = getTimer(sign, false);
 
         if (timerDuration != null && timerDuration > 0) {
 
@@ -99,6 +99,10 @@ public class SignTimer {
      * @param shouldUpdateDisplay if the display should get updated. is important to set to false for updating a lock sign from legacy
      */
     public static void setTimer(@NotNull Sign sign, long timerDuration, boolean shouldUpdateDisplay) {
+        if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
+            Padlock.getPlugin().getLockCacheManager().removeFromCache(sign);
+        }
+
         sign.getPersistentDataContainer().set(timerKey, PersistentDataType.LONG, timerDuration);
         sign.update();
 
@@ -113,19 +117,23 @@ public class SignTimer {
      *
      * @return might be null if no timer was configured
      */
-    public static @Nullable Long getTimer(@NotNull Sign sign) {
-        Long timerDuration = sign.getPersistentDataContainer().get(timerKey, PersistentDataType.LONG);
-
-        if (timerDuration != null) {
-            return timerDuration;
+    public static @Nullable Long getTimer(@NotNull Sign sign, boolean ignoreCache) {
+        if (!ignoreCache && Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
+            return Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(sign.getLocation()).getTimer();
         } else {
-            timerDuration = getLegacyTimer(sign);
+            Long timerDuration = sign.getPersistentDataContainer().get(timerKey, PersistentDataType.LONG);
 
             if (timerDuration != null) {
-                PadlockAPI.updateLegacySign(sign);
                 return timerDuration;
             } else {
-                return null;
+                timerDuration = getLegacyTimer(sign);
+
+                if (timerDuration != null) {
+                    PadlockAPI.updateLegacySign(sign);
+                    return timerDuration;
+                } else {
+                    return null;
+                }
             }
         }
     }

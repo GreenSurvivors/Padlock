@@ -45,13 +45,13 @@ public class Padlock extends JavaPlugin {
             plugin.getLogger().info("no lockette found.");
         }
 
+        openableToggleManager = new OpenableToggleManager(this);
+        lockCacheManager = new LockCacheManager();
+
         // Read config
         messageManager = new MessageManager(this);
         configManager = new ConfigManager(this);
         configManager.reload();
-
-        openableToggleManager = new OpenableToggleManager(this);
-        lockCacheManager = new LockCacheManager();
 
         // Register Listeners
         // If debug mode is not on, debug listener won't register
