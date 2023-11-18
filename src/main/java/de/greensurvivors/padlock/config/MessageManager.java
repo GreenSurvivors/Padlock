@@ -22,6 +22,7 @@ import java.util.*;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.logging.Level;
+import java.util.stream.Collectors;
 
 /**
  * manages all translatable and placeholders used by this plugin.
@@ -31,7 +32,9 @@ public class MessageManager {
     /**
      * contains all sign lines without any decorations like color but still with every placeholder
      */
-    private final HashMap<LangPath, String> nakedSignLiness = new HashMap<>(); // path -> naked
+    private final HashMap<LangPath, String> nakedSignLines = new HashMap<>(); // path -> naked
+    @Deprecated(forRemoval = true)
+    private final HashMap<LangPath, Set<String>> nakedLegacySignLines = new HashMap<>();
     private ResourceBundle lang;
     /**
      * caches every component without placeholder for faster access in future and loads missing values automatically
@@ -50,12 +53,23 @@ public class MessageManager {
 
     private @NotNull String getStringFromLang(@NotNull LangPath path) {
         try {
-            lang.getString(path.getPath());
             return lang.getString(path.getPath());
         } catch (MissingResourceException | ClassCastException e) {
             plugin.getLogger().log(Level.WARNING, "couldn't find path: \"" + path.getPath() + "\" in lang files using fallback.", e);
             return path.getDefaultValue();
         }
+    }
+
+    private @NotNull Set<@NotNull String> getStringSetFromLang(@NotNull LangPath path) {
+        String value;
+        try {
+            value = lang.getString(path.getPath());
+        } catch (MissingResourceException | ClassCastException e) {
+            plugin.getLogger().log(Level.WARNING, "couldn't find path: \"" + path.getPath() + "\" in lang files using fallback.", e);
+            value = path.getDefaultValue();
+        }
+
+        return Set.of(value.split("\\s?+,\\s?+"));
     }
 
     /**
@@ -95,18 +109,17 @@ public class MessageManager {
         langCache.cleanUp();
         langCache.asMap().clear();
 
-        nakedSignLiness.put(LangPath.PRIVATE_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.PRIVATE_SIGN)).toLowerCase());
-        nakedSignLiness.put(LangPath.PUBLIC_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.PUBLIC_SIGN)).toLowerCase());
-        nakedSignLiness.put(LangPath.DONATION_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.DONATION_SIGN)).toLowerCase());
-        nakedSignLiness.put(LangPath.DISPLAY_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.DISPLAY_SIGN)).toLowerCase());
-        nakedSignLiness.put(LangPath.SUPPLY_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.SUPPLY_SIGN)).toLowerCase());
-        nakedSignLiness.put(LangPath.ADDITIONAL_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.ADDITIONAL_SIGN)).toLowerCase()); // todo deprecated
-        nakedSignLiness.put(LangPath.EVERYONE_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.EVERYONE_SIGN)).toLowerCase()); // todo deprecated
-        nakedSignLiness.put(LangPath.TIMER_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.TIMER_SIGN)).toLowerCase());
-        nakedSignLiness.put(LangPath.ERROR_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.ERROR_SIGN)).toLowerCase());
-        nakedSignLiness.put(LangPath.INVALID_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.INVALID_SIGN)).toLowerCase());
-        nakedSignLiness.put(LangPath.EXPIRE_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.EXPIRE_SIGN)).toLowerCase());
-        nakedSignLiness.put(LangPath.PLAYER_NAME_ON_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.PLAYER_NAME_ON_SIGN)).toLowerCase());
+        nakedSignLines.put(LangPath.PRIVATE_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.PRIVATE_SIGN)).toLowerCase());
+        nakedSignLines.put(LangPath.PUBLIC_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.PUBLIC_SIGN)).toLowerCase());
+        nakedSignLines.put(LangPath.DONATION_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.DONATION_SIGN)).toLowerCase());
+        nakedSignLines.put(LangPath.DISPLAY_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.DISPLAY_SIGN)).toLowerCase());
+        nakedSignLines.put(LangPath.SUPPLY_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.SUPPLY_SIGN)).toLowerCase());
+        nakedSignLines.put(LangPath.TIMER_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.TIMER_SIGN)).toLowerCase());
+
+        nakedLegacySignLines.put(LangPath.LEGACY_ADDITIONAL_SIGN, getStringSetFromLang(LangPath.LEGACY_ADDITIONAL_SIGN).stream().map(s -> MiniMessage.miniMessage().stripTags(s).toLowerCase()).collect(Collectors.toSet()));
+        nakedLegacySignLines.put(LangPath.LEGACY_EVERYONE_SIGN, getStringSetFromLang(LangPath.LEGACY_EVERYONE_SIGN).stream().map(s -> MiniMessage.miniMessage().stripTags(s).toLowerCase()).collect(Collectors.toSet()));
+        nakedLegacySignLines.put(LangPath.LEGACY_PRIVATE_SIGN, getStringSetFromLang(LangPath.LEGACY_PRIVATE_SIGN).stream().map(s -> MiniMessage.miniMessage().stripTags(s).toLowerCase()).collect(Collectors.toSet()));
+        nakedLegacySignLines.put(LangPath.LEGACY_TIMER_SIGN, getStringSetFromLang(LangPath.LEGACY_TIMER_SIGN).stream().map(s -> MiniMessage.miniMessage().stripTags(s).toLowerCase()).collect(Collectors.toSet()));
     }
 
     /**
@@ -200,7 +213,20 @@ public class MessageManager {
     public boolean isSignComp(@NotNull Component compToTest, @NotNull LangPath langPath) {
         String strToTest = PlainTextComponentSerializer.plainText().serialize(compToTest).trim();
 
-        return strToTest.toLowerCase().startsWith(nakedSignLiness.get(langPath));
+        return strToTest.equalsIgnoreCase(nakedSignLines.get(langPath));
+    }
+
+    @Deprecated(forRemoval = true)
+    public boolean isLegacySignComp(@NotNull Component compToTest, @NotNull LangPath langPath) {
+        String strToTest = PlainTextComponentSerializer.plainText().serialize(compToTest).toLowerCase().trim();
+
+        for (String legacyLine : nakedLegacySignLines.get(langPath)) {
+            if (strToTest.startsWith(legacyLine)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**
@@ -209,7 +235,12 @@ public class MessageManager {
      * @param langPath defines the type of line we need
      */
     public @Nullable String getNakedSignText(@NotNull LangPath langPath) {
-        return nakedSignLiness.get(langPath);
+        return nakedSignLines.get(langPath);
+    }
+
+    @Deprecated(forRemoval = true)
+    public @Nullable Set<@NotNull String> getNakedLegacyText(@NotNull LangPath langPath) {
+        return nakedLegacySignLines.get(langPath);
     }
 
     /**
@@ -247,15 +278,19 @@ public class MessageManager {
         DONATION_SIGN("sign.line.donation", "[Donation]"),
         DISPLAY_SIGN("sign.line.display", "[Display]"),
         SUPPLY_SIGN("sign.line.supply", "[Supply]"),
-        @Deprecated(forRemoval = true)
-        ADDITIONAL_SIGN("sign.line.additional", "[More Users]"),
-        @Deprecated(forRemoval = true)
-        EVERYONE_SIGN("sign.line.everyone", "[Everyone]"),
         TIMER_SIGN("sign.line.timer", "[Timer:<" + PlaceHolder.TIME.getPlaceholder() + ">]"),
-        EXPIRE_SIGN("sign.line.expired", "[<dark_aqua>Expired</dark_aqua>]"),
         ERROR_SIGN("sign.line.error", "[<dark_red>Error</dark_red>]"),
         INVALID_SIGN("sign.line.invalid", "[Invalid]"),
         PLAYER_NAME_ON_SIGN("sign.line.player-name", "<" + PlaceHolder.PLAYER.getPlaceholder() + ">"), // used for formatting displayed player names
+
+        @Deprecated(forRemoval = true)
+        LEGACY_ADDITIONAL_SIGN("sign.legacy.additional", "[More Users]"),
+        @Deprecated(forRemoval = true)
+        LEGACY_EVERYONE_SIGN("sign.legacy.everyone", "[Everyone]"),
+        @Deprecated(forRemoval = true)
+        LEGACY_PRIVATE_SIGN("sign.legacy.private", "[Private]"),
+        @Deprecated(forRemoval = true)
+        LEGACY_TIMER_SIGN("sign.legacy.timer", "[Timer:<timer>]"),
 
         HELP_HEADER("cmd.help.header"),
         HELP_ADD_MEMBER("cmd.help.add-member"),
@@ -263,7 +298,7 @@ public class MessageManager {
         HELP_ADD_OWNER("cmd.help.add-owner"),
         HELP_REMOVE_OWNER("cmd.help.remove-owner"),
         HELP_SET_ACCESS_TYPE("cmd.help.set-access-type"),
-        HELP_SET_PASSWORD("cmd.help.set-password"), //todo
+        HELP_SET_PASSWORD("cmd.help.set-password"),
         HELP_SET_TIMER("cmd.help.set-timer"),
         HELP_DEBUG("cmd.help.debug"),
         HELP_HELP("cmd.help.help"),
@@ -303,7 +338,7 @@ public class MessageManager {
         UNKNOWN_PLAYER("cmd.error.unknown-player"),
         NOT_A_PLAYER("cmd.error.not-a-player"),
         NOT_ENOUGH_ARGS("cmd.error.not-enough-args"),
-        NOT_A_BOOL("cmd.error.not-a-bool"),
+        NOT_ACCESS_TYPE("cmd.error.not-access-type"),
         CMD_USAGE("cmd.usage"),
         CMD_NOT_A_SUBCOMMAND("cmd.not-a-subcommand"),
 

@@ -35,10 +35,7 @@ public final class SignAccessType {
     }
 
     /**
-     * unless you work with player input or legacy signs use {@link #getAccessType(Sign)} instead!
-     *
-     * @param line
-     * @return
+     * unless you work with player input use {@link #getAccessType(Sign, boolean)} instead!
      */
     public static AccessType getAccessTypeFromComp(@NotNull Component line) {
         MessageManager manager = Padlock.getPlugin().getMessageManager();
@@ -53,6 +50,8 @@ public final class SignAccessType {
             return AccessType.DISPLAY;
         } else if (manager.isSignComp(line, MessageManager.LangPath.SUPPLY_SIGN)) {
             return AccessType.SUPPLY;
+        } else if (manager.isLegacySignComp(line, MessageManager.LangPath.PRIVATE_SIGN)) {
+            return AccessType.PRIVATE;
         } else {
             return null;
         }
@@ -114,7 +113,7 @@ public final class SignAccessType {
      */
     @Deprecated(forRemoval = true)
     public static boolean isLegacyEveryOneComp(@NotNull Component component) {
-        return Padlock.getPlugin().getMessageManager().isSignComp(component, MessageManager.LangPath.EVERYONE_SIGN);
+        return Padlock.getPlugin().getMessageManager().isLegacySignComp(component, MessageManager.LangPath.LEGACY_EVERYONE_SIGN);
     }
 
     /**
@@ -123,9 +122,9 @@ public final class SignAccessType {
     @Deprecated(forRemoval = true)
     private static @Nullable AccessType getLegacySetting(@NotNull Sign sign) {
         for (Component line : sign.getSide(Side.FRONT).lines()) {
-            if (Padlock.getPlugin().getMessageManager().isSignComp(line, MessageManager.LangPath.PRIVATE_SIGN)) {
+            if (Padlock.getPlugin().getMessageManager().isLegacySignComp(line, MessageManager.LangPath.PRIVATE_SIGN)) {
                 return AccessType.PRIVATE;
-            } else if (Padlock.getPlugin().getMessageManager().isSignComp(line, MessageManager.LangPath.EVERYONE_SIGN)) {
+            } else if (Padlock.getPlugin().getMessageManager().isLegacySignComp(line, MessageManager.LangPath.LEGACY_EVERYONE_SIGN)) {
                 return AccessType.PUBLIC;
             }
         }

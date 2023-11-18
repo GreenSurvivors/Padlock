@@ -69,7 +69,7 @@ public class SetAccessType extends SubCommand {
                                 plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_ACCESS_TYPE_SUCCESS,
                                         Placeholder.component(MessageManager.PlaceHolder.ARGUMENT.getPlaceholder(), Component.text(accessType.name().toLowerCase(Locale.ENGLISH))));
                             } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_BOOL, //todo
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_ACCESS_TYPE,
                                         Placeholder.unparsed(MessageManager.PlaceHolder.ARGUMENT.getPlaceholder(), args[1]));
                                 return false;
                             }

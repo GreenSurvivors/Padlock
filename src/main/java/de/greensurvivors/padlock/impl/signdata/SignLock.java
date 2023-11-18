@@ -65,7 +65,7 @@ public class SignLock {
      */
     @Deprecated(forRemoval = true)
     public static boolean isAdditionalSign(@NotNull Sign sign) {
-        return Padlock.getPlugin().getMessageManager().isSignComp(sign.getSide(Side.FRONT).line(0), MessageManager.LangPath.ADDITIONAL_SIGN);
+        return Padlock.getPlugin().getMessageManager().isLegacySignComp(sign.getSide(Side.FRONT).line(0), MessageManager.LangPath.LEGACY_ADDITIONAL_SIGN);
     }
 
     /**

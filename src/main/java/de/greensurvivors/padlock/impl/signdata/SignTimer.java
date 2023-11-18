@@ -15,8 +15,10 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 /**
  * A timer on a lock determines how many milliseconds it takes until the openable,
@@ -35,11 +37,18 @@ public class SignTimer {
      * group of any number to receive later
      */
     @Deprecated(forRemoval = true)
-    private final static Pattern legacyPattern = Pattern.compile(Padlock.getPlugin().getMessageManager().getNakedSignText(MessageManager.LangPath.TIMER_SIGN).replace("[", "\\[(?i)").replace("<time>", "(-?[0-9]+)"));
-    // pretty complex stuff [timer:<timer>] and timer can be any number of digits with their timeunit (t, s, h, d, w or M) optionally delimited by whitespace and commas, all ignoring case.
+    private final static Set<Pattern> legacyPatterns = Padlock.getPlugin().getMessageManager().
+            getNakedLegacyText(MessageManager.LangPath.TIMER_SIGN).stream().
+            map(s -> Pattern.compile(s.replace("[", "\\[(?i)").
+                    replace("<time>", "(-?[0-9]+)"))).collect(Collectors.toSet());
+    // pretty complex stuff [timer:<timer>] and timer can be any number of digits with their timeunit (t, s, h, d, w or M)
+    // optionally delimited by whitespace and commas, all ignoring case.
     // valid lines would be "[timer:2h]", "[TIMER:2D, 3w2t 555s]", "[tiMeR: 100W,,,  -8t]", "[timer:2h5h99h]"
     // invalid lines would be "timer:3d]", "[timer24w]", "[time:0x77Q]", "[banana]", "[timer:34ttt]"
-    private final static Pattern modernPattern = Pattern.compile(Padlock.getPlugin().getMessageManager().getNakedSignText(MessageManager.LangPath.TIMER_SIGN).replace("[", "\\[(?i)").replace("<time>", "\\s?((" + MiscUtils.getPeriodPattern().pattern() + "[\\s,]*?)+)"));
+    private final static Pattern modernPattern = Pattern.compile(Padlock.getPlugin().getMessageManager().
+            getNakedSignText(MessageManager.LangPath.TIMER_SIGN).replace("[", "\\[(?i)").
+            replace("<" + MessageManager.PlaceHolder.TIME.getPlaceholder() + ">",
+                    "\\s?((" + MiscUtils.getPeriodPattern().pattern() + "[\\s,]*?)+)"));
     private final static NamespacedKey timerKey = new NamespacedKey(Padlock.getPlugin(), "timer");
 
     /**
@@ -146,18 +155,22 @@ public class SignTimer {
      */
     public static @Nullable Long getTimerFromComp(@NotNull Component line) {
         String strToTest = PlainTextComponentSerializer.plainText().serialize(line).trim();
-        Matcher matcher = legacyPattern.matcher(strToTest);
+        Matcher matcher;
 
-        if (matcher.matches()) {
-            return Long.parseLong(matcher.group(1));
-        } else {
-            matcher = modernPattern.matcher(strToTest);
+        for (Pattern legacyPattern : legacyPatterns) {
+            matcher = legacyPattern.matcher(strToTest);
+
             if (matcher.matches()) {
-
-                return MiscUtils.parsePeriod(matcher.group(1));
-            } else {
-                return null;
+                return Long.parseLong(matcher.group(1));
             }
+        }
+
+        matcher = modernPattern.matcher(strToTest);
+        if (matcher.matches()) {
+
+            return MiscUtils.parsePeriod(matcher.group(1));
+        } else {
+            return null;
         }
     }
 
