@@ -56,8 +56,8 @@ public class SignLock {
      * Check if the sign is a lock sign by checking it's first line against the line configured in the lang file.
      */
     public static boolean isLockSign(@NotNull Sign sign) {
-        //todo second part is deprecated
-        return SignAccessType.getAccessType(sign, true) != null || (SignAccessType.getAccessTypeFromComp(sign.getSide(Side.FRONT).line(0)) != null);
+        //todo first part is deprecated
+        return (SignAccessType.getAccessTypeFromComp(sign.getSide(Side.FRONT).line(0)) != null) || SignAccessType.getAccessType(sign, true) != null;
     }
 
     /**
@@ -146,18 +146,15 @@ public class SignLock {
      */
     @Deprecated(forRemoval = true)
     public static void updateSignFromAdditional(@NotNull Sign main, @NotNull Sign additional) {
-        Padlock.getPlugin().getLogger().info("updating additional sign at " + additional.getLocation());
+        Padlock.getPlugin().getLogger().fine("updating additional sign at " + additional.getLocation());
         PlainTextComponentSerializer plainedText = PlainTextComponentSerializer.plainText();
         for (int i = 1; i <= 3; i++) {
             String line = plainedText.serialize(additional.getSide(Side.FRONT).line(i));
-
-            Padlock.getPlugin().getLogger().info("line: " + i + ", txt " + line);
 
             if (line.contains("#")) {
                 String[] splitted = line.split("#", 2);
 
                 if (splitted[1].length() == 36) { // uuid valid check
-                    Padlock.getPlugin().getLogger().info("member uuid");
                     try {
                         addPlayer(main, false, Bukkit.getOfflinePlayer(UUID.fromString(splitted[1])));
                     } catch (IllegalArgumentException ignored) {
@@ -167,7 +164,6 @@ public class SignLock {
                 OfflinePlayer maybePlayer = tryGetPlayerJustFromNameComp(additional.getSide(Side.FRONT).line(i));
 
                 if (maybePlayer != null) {
-                    Padlock.getPlugin().getLogger().info("member");
                     addPlayer(main, false, maybePlayer);
                 }
             }

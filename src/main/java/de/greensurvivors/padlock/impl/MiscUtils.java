@@ -143,7 +143,6 @@ public class MiscUtils {
      * @return the duration in milliseconds, or zero if not possible
      */
     public static long parsePeriod(@NotNull String period) {
-        Padlock.getPlugin().getLogger().info(period);
 
         try { //try Iso
             return Duration.parse(period).toMillis();
@@ -156,8 +155,6 @@ public class MiscUtils {
 
         while (matcher.find()) {
             try {
-                Padlock.getPlugin().getLogger().info("num: " + matcher.group(1) + ", type: " + matcher.group(2));
-                Padlock.getPlugin().getLogger().info(period);
                 long num = Long.parseLong(matcher.group(1));
                 String typ = matcher.group(2);
                 millis += switch (typ) { // from periodPattern

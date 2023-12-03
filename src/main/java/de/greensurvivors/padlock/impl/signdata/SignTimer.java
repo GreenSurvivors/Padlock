@@ -38,7 +38,7 @@ public class SignTimer {
      */
     @Deprecated(forRemoval = true)
     private final static Set<Pattern> legacyPatterns = Padlock.getPlugin().getMessageManager().
-            getNakedLegacyText(MessageManager.LangPath.TIMER_SIGN).stream().
+            getNakedLegacyText(MessageManager.LangPath.LEGACY_TIMER_SIGN).stream().
             map(s -> Pattern.compile(s.replace("[", "\\[(?i)").
                     replace("<time>", "(-?[0-9]+)"))).collect(Collectors.toSet());
     // pretty complex stuff [timer:<timer>] and timer can be any number of digits with their timeunit (t, s, h, d, w or M)

@@ -124,14 +124,12 @@ public class PadlockAPI {
      * get the lock sign of a simple single block
      */
     public static @Nullable Sign getLockSignSingleBlock(Block block, @Nullable BlockFace exempt) {
-        Padlock.getPlugin().getLogger().info("single block ");
         for (BlockFace blockface : cardinalFaces) {
             if (blockface != exempt) {
                 Sign sign = MiscUtils.getFacingSign(block, blockface);
 
                 // Find [Private] sign?
                 if (isValidLockSign(sign)) {
-                    Padlock.getPlugin().getLogger().info("valid?");
                     return sign;
                 }
             } // exempted blockface
@@ -557,8 +555,6 @@ public class PadlockAPI {
             }
         }
 
-
-        Padlock.getPlugin().getLogger().info("no.");
         return false;
     }
 
