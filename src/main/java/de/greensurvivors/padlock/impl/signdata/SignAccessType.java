@@ -61,7 +61,6 @@ public final class SignAccessType {
      * will start an update process, if the sign is a legacy sign
      */
     public static @Nullable AccessType getAccessType(@NotNull Sign sign, boolean ignoreCache) {
-        Padlock.getPlugin().getLogger().info("get access-type " + ignoreCache);
         if (!ignoreCache && Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
             return Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(sign.getLocation()).getAccessType();
         } else {
@@ -84,7 +83,6 @@ public final class SignAccessType {
 
             }
 
-            Padlock.getPlugin().getLogger().info("returned");
             return accessType;
         }
     }
@@ -122,7 +120,7 @@ public final class SignAccessType {
     @Deprecated(forRemoval = true)
     private static @Nullable AccessType getLegacySetting(@NotNull Sign sign) {
         for (Component line : sign.getSide(Side.FRONT).lines()) {
-            if (Padlock.getPlugin().getMessageManager().isLegacySignComp(line, MessageManager.LangPath.PRIVATE_SIGN)) {
+            if (Padlock.getPlugin().getMessageManager().isLegacySignComp(line, MessageManager.LangPath.LEGACY_PRIVATE_SIGN)) {
                 return AccessType.PRIVATE;
             } else if (Padlock.getPlugin().getMessageManager().isLegacySignComp(line, MessageManager.LangPath.LEGACY_EVERYONE_SIGN)) {
                 return AccessType.PUBLIC;
