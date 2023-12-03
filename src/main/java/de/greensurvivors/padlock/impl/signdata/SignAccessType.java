@@ -50,7 +50,7 @@ public final class SignAccessType {
             return AccessType.DISPLAY;
         } else if (manager.isSignComp(line, MessageManager.LangPath.SUPPLY_SIGN)) {
             return AccessType.SUPPLY;
-        } else if (manager.isLegacySignComp(line, MessageManager.LangPath.PRIVATE_SIGN)) {
+        } else if (manager.isLegacySignComp(line, MessageManager.LangPath.LEGACY_PRIVATE_SIGN)) {
             return AccessType.PRIVATE;
         } else {
             return null;
