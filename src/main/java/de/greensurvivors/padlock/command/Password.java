@@ -45,7 +45,7 @@ public class Password extends SubCommand implements TabCompleter, CommandExecuto
 
     public static void onExternalCommand(char @NotNull [] password, @NotNull Player player) {
         // check permission for passwords
-        if (player.hasPermission(PermissionManager.CMD_PASSWORD.getPerm())) {
+        if (player.hasPermission(PermissionManager.CMD_APPLY_PASSWORD.getPerm())) {
 
             //get and check selected sign
             Sign sign = SignSelection.getSelectedSign(player);
@@ -78,7 +78,7 @@ public class Password extends SubCommand implements TabCompleter, CommandExecuto
 
     @Override
     protected boolean checkPermission(@NotNull Permissible permissible) {
-        return permissible.hasPermission(PermissionManager.CMD_PASSWORD.getPerm());
+        return permissible.hasPermission(PermissionManager.CMD_APPLY_PASSWORD.getPerm());
     }
 
     @Override

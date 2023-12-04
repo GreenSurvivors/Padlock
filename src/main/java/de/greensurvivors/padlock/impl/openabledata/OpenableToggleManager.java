@@ -95,7 +95,9 @@ public class OpenableToggleManager {
                         toggleTasks.entrySet().removeIf(entry -> entry.getValue().equals(finalTaskToClearUp));
                     }
                 }
-            }, TimeUnit.MILLISECONDS.toSeconds(timeUntilToggle) * 20L);
+                // the reason why we multiply with 20 before converting to seconds, not after (millis -> seconds --> ticks),
+                // is that with time durations smaller than one second it would always result in 0 instead of an amount of ticks.
+            }, TimeUnit.MILLISECONDS.toSeconds(timeUntilToggle * 20L));
 
             for (Location location : locationsToToggle) {
                 toggleTasks.put(location, task);

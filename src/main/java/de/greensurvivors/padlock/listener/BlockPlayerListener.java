@@ -244,6 +244,11 @@ public class BlockPlayerListener implements Listener {
 
                 SignSelection.selectSign(player, clickedBlock);
                 plugin.getMessageManager().sendLang(player, MessageManager.LangPath.SELECT_SIGN);
+
+                // cancel block place when selecting a sign
+                if (event.hasItem()) {
+                    event.setCancelled(true);
+                }
             }
         }
     }

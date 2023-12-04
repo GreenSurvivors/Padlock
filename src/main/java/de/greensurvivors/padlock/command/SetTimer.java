@@ -69,24 +69,42 @@ public class SetTimer extends SubCommand {
                             // note: writing every time element in one argument,
                             // would have the same effect as spreading them across multiple arguments.
                             // using the same time unit more than once is permitted.
-                            long timerDuration = 0;
-                            for (int i = 1; i < args.length; i++) {
-                                timerDuration += MiscUtils.parsePeriod(args[i]);
+                            Long timerDuration = null;
+
+                            if (args.length == 2) {
+                                try {
+                                    if (Integer.parseInt(args[1]) <= 0) {
+                                        timerDuration = -1L;
+                                    }
+                                } catch (NumberFormatException ignored) {
+                                }
                             }
 
-                            if (timerDuration != 0) {
-                                // success
-                                SignTimer.setTimer(sign, timerDuration, true);
+                            if (timerDuration == null) {
+                                for (int i = 1; i < args.length; i++) {
+                                    Long period = MiscUtils.parsePeriod(args[i]);
 
-                                if (timerDuration > 0) {
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_SUCCESS_ON,
-                                            Placeholder.component(MessageManager.PlaceHolder.TIME.getPlaceholder(), Component.text(timerDuration)));
-                                } else {
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_SUCCESS_OFF);
+                                    if (period != null) {
+                                        if (timerDuration == null) {
+                                            timerDuration = 0L;
+                                        }
+
+                                        timerDuration += period;
+                                    } else {
+                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_ERROR);
+                                        return false;
+                                    }
                                 }
+                            }
+
+                            // success
+                            SignTimer.setTimer(sign, timerDuration, true);
+
+                            if (timerDuration > 0) {
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_SUCCESS_ON,
+                                        Placeholder.component(MessageManager.PlaceHolder.TIME.getPlaceholder(), Component.text(timerDuration)));
                             } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_ERROR);
-                                return false;
+                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_SUCCESS_OFF);
                             }
                         } else {
                             plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_OWNER);
