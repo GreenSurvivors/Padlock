@@ -298,6 +298,7 @@ public class MessageManager {
         HELP_ADD_OWNER("cmd.help.add-owner"),
         HELP_REMOVE_OWNER("cmd.help.remove-owner"),
         HELP_SET_ACCESS_TYPE("cmd.help.set-access-type"),
+        HELP_SET_CONNECTED("cmd.help.set-connected"),
         HELP_SET_PASSWORD("cmd.help.set-password"),
         HELP_SET_TIMER("cmd.help.set-timer"),
         HELP_DEBUG("cmd.help.debug"),
@@ -327,6 +328,7 @@ public class MessageManager {
         PASSWORD_SAFETY_WARNING("cmd.password.safety-warning", "<dark_red>Warning: never use a password, you are using anywhere else! While I did everything I could for your safety, there <bold>ARE</bold> ways your password could get leaked!</dark_red>"),
         PASSWORD_START_PROCESSING("cmd.password.start-processing"),
         RELOAD_SUCCESS("cmd.reload.success"),
+        SET_CONNECTED_SUCCESS("cmd.set-connected.success"),
 
         INFO_OWNERS("cmd.info.owners"),
         INFO_MEMBERS("cmd.info.members"),
@@ -340,6 +342,7 @@ public class MessageManager {
         NOT_A_PLAYER("cmd.error.not-a-player"),
         NOT_ENOUGH_ARGS("cmd.error.not-enough-args"),
         NOT_ACCESS_TYPE("cmd.error.not-access-type"),
+        NOT_A_BOOL("cmd.error.not-a-bool"),
         CMD_USAGE("cmd.usage"),
         CMD_NOT_A_SUBCOMMAND("cmd.not-a-subcommand"),
 

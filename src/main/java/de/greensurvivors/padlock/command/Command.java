@@ -50,6 +50,7 @@ public class Command implements CommandExecutor, TabCompleter {
         SUBCOMMANDS.add(new RemoveMember(plugin));
         SUBCOMMANDS.add(new SetTimer(plugin));
         SUBCOMMANDS.add(new SetAccessType(plugin));
+        SUBCOMMANDS.add(new SetConnected(plugin));
         // admin sub commands
         SUBCOMMANDS.add(new AddOwner(plugin));
         SUBCOMMANDS.add(new RemoveOwner(plugin));

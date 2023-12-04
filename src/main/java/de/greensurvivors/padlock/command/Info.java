@@ -66,7 +66,7 @@ public class Info extends SubCommand {
     }
 
     @Override
-    protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) { //todo this needs formatting and general glow up
+    protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) { //todo this needs formatting and general glow up; connected info; payers seem to be broken
         if (this.checkPermission(sender)) {
             if (sender instanceof Player player) {
                 Sign sign = SignSelection.getSelectedSign(player);
