@@ -282,6 +282,7 @@ public class MessageManager {
         ERROR_SIGN("sign.line.error", "[<dark_red>Error</dark_red>]"),
         INVALID_SIGN("sign.line.invalid", "[Invalid]"),
         PLAYER_NAME_ON_SIGN("sign.line.player-name", "<" + PlaceHolder.PLAYER.getPlaceholder() + ">"), // used for formatting displayed player names
+        MORE_USERS_ON_SIGN("sign.line.more-users", "[More Users]"), // not the same as the LEGACY_ADDITIONAL_SIGN line. This indicates that there are users that can't get displayed.
 
         @Deprecated(forRemoval = true)
         LEGACY_ADDITIONAL_SIGN("sign.legacy.additional", "[More Users]"),

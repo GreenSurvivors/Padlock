@@ -84,7 +84,7 @@ public class Info extends SubCommand {
                             SignLock.isMember(sign, player.getUniqueId())) {
 
                         // owners
-                        Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_OWNERS);
+                        Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_OWNERS).appendSpace();
                         for (String name : getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, true, false))) {
                             component = component.append(Component.text(name));
                             component = component.append(Component.text(", "));
@@ -92,8 +92,8 @@ public class Info extends SubCommand {
 
                         // members
                         component = component.append(Component.newline());
-                        component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_MEMBERS));
-                        if (SignAccessType.getAccessType(sign, false) == SignAccessType.AccessType.PUBLIC) {
+                        component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_MEMBERS)).appendSpace();
+                        if (SignAccessType.getAccessType(sign, false) != SignAccessType.AccessType.PUBLIC) {
                             for (String name : getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, false, false))) {
                                 component = component.append(Component.text(name));
                                 component = component.append(Component.text(", "));
@@ -102,7 +102,7 @@ public class Info extends SubCommand {
 
                         // access type
                         component = component.append(Component.newline());
-                        component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_ACCESS_TYPE));
+                        component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_ACCESS_TYPE)).appendSpace();
 
                         switch (SignAccessType.getAccessType(sign, false)) {
                             case PRIVATE ->
@@ -124,13 +124,13 @@ public class Info extends SubCommand {
                         Long timer = SignTimer.getTimer(sign, false);
                         if (timer != null) {
                             component = component.append(Component.newline());
-                            component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_TIMER));
+                            component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_TIMER)).appendSpace();
                             component = component.append(Component.text(timer));
                         }
 
                         // expiration
                         component = component.append(Component.newline());
-                        component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_EXPIRED));
+                        component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_EXPIRED)).appendSpace();
                         component = component.append(Component.text(SignExpiration.isSignExpired(sign)));
 
                         plugin.getMessageManager().sendMessageWithPrefix(sender, component);
