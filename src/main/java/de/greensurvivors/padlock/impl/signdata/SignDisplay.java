@@ -30,12 +30,22 @@ public class SignDisplay {
      * @param toFill the component lines to fill
      * @param sign   sign to get its users from
      * @param owners if owners (true) or members (false) should get filled in
+     * @return if the [more Users] tag should get added
      */
-    private static void fillWithPlayers(@Nullable Component @NotNull [] toFill, @NotNull Sign sign, boolean owners) {
+    private static boolean fillWithPlayers(@Nullable Component @NotNull [] toFill, @NotNull Sign sign, boolean owners, int lastIndex) {
         Set<String> uuidStrs = SignLock.getUUIDs(sign, owners, false);
+        boolean useMoreUsersTag = false;
+
+        for (String uuidstr : uuidStrs) {
+            Padlock.getPlugin().getLogger().info("uuid: " + uuidstr);
+        }
 
         if (!uuidStrs.isEmpty()) {
             Iterator<String> it = uuidStrs.iterator();
+
+
+            useMoreUsersTag = uuidStrs.size() > lastIndex;
+            Padlock.getPlugin().getLogger().info("size: " + uuidStrs.size() + " last index: " + lastIndex);
 
             for (int i = 0; i < toFill.length; i++) {
                 if (toFill[i] == null) {
@@ -53,6 +63,7 @@ public class SignDisplay {
                                 break;
                             } else {
                                 Padlock.getPlugin().getLogger().log(Level.WARNING, "broken UUID \"" + uuidStr + "\" (no " + (owners ? "Owner" : "member") + ") in Lock-Sign at " + sign.getLocation());
+                                useMoreUsersTag = true; // probably is a valid member, but the server doesn't know their name since they never joined on the server
                             }
                         } catch (IllegalArgumentException e) {
                             Padlock.getPlugin().getLogger().log(Level.WARNING, "broken UUID \"" + uuidStr + "\" (invalid) in Lock-Sign at " + sign.getLocation(), e);
@@ -67,6 +78,7 @@ public class SignDisplay {
             Padlock.getPlugin().getLogger().log(Level.WARNING, "Lock sign without Owners at " + sign.getLocation());
         }
 
+        return useMoreUsersTag;
     }
 
     /**
@@ -83,7 +95,8 @@ public class SignDisplay {
         final Component[] linesToUpdate = new Component[amountOfLines];
 
         // first line is always just the lock line
-        linesToUpdate[0] = switch (SignAccessType.getAccessType(sign, false)) {
+        SignAccessType.AccessType accessType = SignAccessType.getAccessType(sign, false);
+        linesToUpdate[0] = switch (accessType) {
             case PRIVATE -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PRIVATE_SIGN);
             case PUBLIC -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PUBLIC_SIGN);
             case DONATION -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.DONATION_SIGN);
@@ -100,9 +113,15 @@ public class SignDisplay {
             lastIndex--;
         }
 
-        // fill with owners, then if there is still space, and this is not an everyone sign, the members
-        fillWithPlayers(linesToUpdate, sign, true);
-        fillWithPlayers(linesToUpdate, sign, false);
+        // fill with owners, then if there is still space, and this is not a public sign, the members
+        boolean shouldAddMoreUsers = fillWithPlayers(linesToUpdate, sign, true, lastIndex);
+        if (accessType != SignAccessType.AccessType.PUBLIC) {
+            shouldAddMoreUsers = shouldAddMoreUsers && fillWithPlayers(linesToUpdate, sign, false, lastIndex);
+        }
+
+        if (shouldAddMoreUsers) {
+            linesToUpdate[lastIndex] = Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.MORE_USERS_ON_SIGN);
+        }
 
         //got everything. Update.
         for (int i = 0; i < amountOfLines; i++) {

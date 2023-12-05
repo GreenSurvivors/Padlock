@@ -11,6 +11,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.apache.commons.collections4.set.ListOrderedSet;
+import org.apache.commons.lang3.StringUtils;
 import org.bukkit.Bukkit;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.Sound;
@@ -49,6 +50,7 @@ public class Command implements CommandExecutor, TabCompleter {
         SUBCOMMANDS.add(new RemoveMember(plugin));
         SUBCOMMANDS.add(new SetTimer(plugin));
         SUBCOMMANDS.add(new SetAccessType(plugin));
+        SUBCOMMANDS.add(new SetConnected(plugin));
         // admin sub commands
         SUBCOMMANDS.add(new AddOwner(plugin));
         SUBCOMMANDS.add(new RemoveOwner(plugin));
@@ -403,7 +405,7 @@ public class Command implements CommandExecutor, TabCompleter {
         if (suggestionList != null) {
             List<String> filteredList = new ArrayList<>();
             for (String s : suggestionList) {
-                if (s.startsWith(args[args.length - 1])) {
+                if (StringUtils.startsWithIgnoreCase(s, args[args.length - 1])) {
                     filteredList.add(s);
                 }
             }

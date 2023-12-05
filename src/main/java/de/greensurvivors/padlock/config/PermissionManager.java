@@ -14,16 +14,17 @@ public enum PermissionManager {
     CMD_INFO(new Permission("padlock.cmd.info", "", PermissionDefault.TRUE)),
     CMD_RELOAD(new Permission("padlock.cmd.reload", "", PermissionDefault.OP)),
     CMD_UPDATE_SIGN(new Permission("padlock.cmd.updatesign", "", PermissionDefault.OP)),
-    CMD_PASSWORD(new Permission("padlock.cmd.password", "", PermissionDefault.TRUE)),
+    CMD_SET_PASSWORD(new Permission("padlock.cmd.setpassword", "", PermissionDefault.TRUE)),
+    CMD_APPLY_PASSWORD(new Permission("padlock.cmd.applypassword", "", PermissionDefault.TRUE)),
     CMD_SET_TIMER(new Permission("padlock.cmd.setTimer", PermissionDefault.TRUE)),
-    CMD_SET_CREATED(new Permission("padlock.cmd.setcreated", "", PermissionDefault.OP)),
     CMD_SET_ACCESS_TYPE(new Permission("padlock.cmd.setaccesstype", "", PermissionDefault.TRUE)),
+    CMD_SET_CONNECTED(new Permission("padlock.cmd.setconnected", "", PermissionDefault.TRUE)),
     CMD_VERSION(new Permission("padlock.cmd.version", "", PermissionDefault.OP)),
 
     ACTION_LOCK(new Permission("padlock.action.lock", "", PermissionDefault.TRUE)),
     ACTION_LOCK_OTHERS(new Permission("padlock.action.lockothers", "", PermissionDefault.OP)),
 
-    NO_EXPIRE(new Permission("padlock.noexpire", "", PermissionDefault.OP)),
+    NO_EXPIRE(new Permission("padlock.noexpire", "", PermissionDefault.OP)), //todo
 
     EDIT(new Permission("padlock.edit", "Edit your own lock", PermissionDefault.TRUE)),
     ADMIN_EDIT(new Permission("padlock.admin.edit", "Edit locks of other players", PermissionDefault.OP, Map.of(EDIT.getPerm().getName(), true))),
@@ -36,21 +37,23 @@ public enum PermissionManager {
                     CMD_INFO.perm.getName(), true,
                     CMD_RELOAD.perm.getName(), true,
                     CMD_UPDATE_SIGN.perm.getName(), true,
-                    CMD_PASSWORD.perm.getName(), true,
+                    CMD_SET_CONNECTED.perm.getName(), true,
+                    CMD_SET_PASSWORD.perm.getName(), true,
+                    CMD_APPLY_PASSWORD.perm.getName(), true,
                     CMD_SET_TIMER.perm.getName(), true,
-                    CMD_SET_CREATED.perm.getName(), true,
                     CMD_SET_ACCESS_TYPE.perm.getName(), true,
                     CMD_VERSION.perm.getName(), true
             ))),
     DEBUG(new Permission("padlock.debug", "Debug permission. Only for development/serious problems.", PermissionDefault.OP)),
 
     // last so it can call all the others
-    WILDCARD_ALL(new Permission("padlock.admin.*", "All permission", PermissionDefault.OP,
+    WILDCARD_ALL(new Permission("padlock.admin", "All permissions", PermissionDefault.OP,
             Map.of(
                     ADMIN_EDIT.perm.getName(), true,
                     ADMIN_BREAK.perm.getName(), true,
                     ADMIN_USE.perm.getName(), true,
-                    ADMIN_COMMANDS.perm.getName(), true
+                    ADMIN_COMMANDS.perm.getName(), true,
+                    NO_EXPIRE.perm.getName(), true
             )));
 
     private final Permission perm;

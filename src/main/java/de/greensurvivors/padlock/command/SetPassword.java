@@ -88,7 +88,7 @@ public final class SetPassword extends SubCommand {
 
     @Override
     protected boolean checkPermission(@NotNull Permissible permissible) {
-        return permissible.hasPermission(PermissionManager.CMD_PASSWORD.getPerm());
+        return permissible.hasPermission(PermissionManager.CMD_SET_PASSWORD.getPerm());
     }
 
     @Override

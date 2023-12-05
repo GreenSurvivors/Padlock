@@ -244,6 +244,11 @@ public class BlockPlayerListener implements Listener {
 
                 SignSelection.selectSign(player, clickedBlock);
                 plugin.getMessageManager().sendLang(player, MessageManager.LangPath.SELECT_SIGN);
+
+                // cancel block place when selecting a sign
+                if (event.hasItem()) {
+                    event.setCancelled(true);
+                }
             }
         }
     }
@@ -376,27 +381,28 @@ public class BlockPlayerListener implements Listener {
                                     !(player.isSneaking() && event.hasItem()) &&
                                     // event gets fired for both hands, ignore offhand
                                     event.getHand() == EquipmentSlot.HAND) {
-                                Long closetime = SignTimer.getTimer(lockSign, false);
 
-                                if (closetime != null) {
-                                    Set<Block> openables = new HashSet<>();
-                                    openables.add(openableBlock);
+                                Set<Block> openables = new HashSet<>();
+                                openables.add(openableBlock);
 
-                                    if (openableBlock.getType() == Material.IRON_DOOR || openableBlock.getType() == Material.IRON_TRAPDOOR) {
-                                        Openables.toggleOpenable(openableBlock);
-                                    }
+                                if (openableBlock.getType() == Material.IRON_DOOR || openableBlock.getType() == Material.IRON_TRAPDOOR) {
+                                    Openables.toggleOpenable(openableBlock);
+                                }
+
+                                if (SignConnectedOpenable.isConnected(lockSign)) {
                                     for (BlockFace blockface : PadlockAPI.cardinalFaces) {
                                         Block relative = openableBlock.getRelative(blockface);
                                         if (relative.getType() == openableBlock.getType()) {
                                             openables.add(relative);
                                             Openables.toggleOpenable(relative);
-                                        }
-                                    }
+                                        } //not the same type of block
+                                    } // for loop
+                                } // not connected
 
-                                    if (closetime > 0) {
-                                        plugin.getOpenableToggleManager().toggleCancelRunning(openables, closetime);
-                                    } // timer disabled
-                                } // no timer
+                                Long closetime = SignTimer.getTimer(lockSign, false);
+                                if (closetime != null && closetime > 0) {
+                                    plugin.getOpenableToggleManager().toggleCancelRunning(openables, closetime);
+                                } // timer disabled
                             } // not openable
                         } // not right-click
                     } else {// no permission

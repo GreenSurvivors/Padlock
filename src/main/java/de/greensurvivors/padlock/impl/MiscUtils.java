@@ -140,9 +140,9 @@ public class MiscUtils {
      * First try ISO-8601 duration, and afterward our own implementation
      * using the same time unit more than once is permitted.
      *
-     * @return the duration in milliseconds, or zero if not possible
+     * @return the duration in milliseconds, or null if not possible
      */
-    public static long parsePeriod(@NotNull String period) {
+    public static @Nullable Long parsePeriod(@NotNull String period) {
 
         try { //try Iso
             return Duration.parse(period).toMillis();
@@ -151,9 +151,14 @@ public class MiscUtils {
         }
 
         Matcher matcher = periodPattern.matcher(period);
-        long millis = 0;
+        Long millis = null;
 
         while (matcher.find()) {
+            // we got a match.
+            if (millis == null) {
+                millis = 0L;
+            }
+
             try {
                 long num = Long.parseLong(matcher.group(1));
                 String typ = matcher.group(2);
