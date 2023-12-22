@@ -17,6 +17,7 @@ import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -73,18 +74,26 @@ public final class ChatPlayerListener implements Listener {
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     private void onChat(@NotNull PlayerCommandPreprocessEvent event) {
         String text = event.getMessage();
-        //Argon2PasswordEncoder encoder = Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
 
         for (String cmdToCheck : mainCmdStrings) {
             if (text.regionMatches(true, 1, cmdToCheck, 0, cmdToCheck.length())) {
                 // make room so chat event can roll through, we can wait until next circle
                 Bukkit.getScheduler().runTask(plugin, () -> {
-                    final char[] newPassword = text.substring(cmdToCheck.length() + 1).toCharArray();
+                    final char @Nullable [] newPassword;
+
+                    if (text.length() > cmdToCheck.length() + 1) {
+                        newPassword = text.substring(cmdToCheck.length() + 1).toCharArray();
+                    } else {
+                        newPassword = null;
+                    }
+
                     SetPassword.onExternalCommand(newPassword, event.getPlayer());
 
                     //invalidate char array
                     // yes I know I invalidate the arrays at multiple places, but in terms of password safety it's better to be double and tripple safe then sorry.
-                    Arrays.fill(newPassword, '*');
+                    if (newPassword != null) {
+                        Arrays.fill(newPassword, '*');
+                    }
                 });
 
                 event.setMessage(text.substring(0, cmdToCheck.length() + 1) + "**********");

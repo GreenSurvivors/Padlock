@@ -77,6 +77,9 @@ public enum PermissionManager {
     ADMIN_BREAK(new Permission("padlock.admin.break",
             "Break locks of other players",
             PermissionDefault.OP)),
+    ADMIN_PASSWORD(new Permission("padlock.admin.password",
+            "Allows to manage passwords of Signs one does not own. Dangerous!",
+            PermissionDefault.FALSE)),
     ADMIN_USE(new Permission("padlock.admin.use",
             "Use locked blocks of other players",
             PermissionDefault.OP)),
@@ -96,6 +99,7 @@ public enum PermissionManager {
                     ADMIN_INTERFERE.perm.getName(), true,
                     ADMIN_COMMANDS.perm.getName(), true,
                     NO_EXPIRE.perm.getName(), true,
+                    ADMIN_PASSWORD.perm.getName(), true,
                     DEBUG.perm.getName(), true
             )));
 

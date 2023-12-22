@@ -47,7 +47,7 @@ public class DependencyManager {
         }
 
         // Vault
-        if (Bukkit.getPluginManager().getPlugin("Vault") == null) {
+        if (Bukkit.getPluginManager().getPlugin("Vault") != null) {
             RegisteredServiceProvider<Permission> rsp = getServer().getServicesManager().getRegistration(Permission.class);
 
             if (rsp != null) {
