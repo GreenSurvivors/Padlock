@@ -24,15 +24,15 @@ public class SetAccessType extends SubCommand {
         super(plugin);
 
         MessageManager manager = Padlock.getPlugin().getMessageManager();
-        accessTypeStrs.put(manager.getNakedSignText(MessageManager.LangPath.PRIVATE_SIGN).toLowerCase().
+        accessTypeStrs.put(manager.getNakedSignText(MessageManager.LangPath.SIGN_LINE_PRIVATE).toLowerCase().
                 replace("[", "").replace("]", "").trim(), SignAccessType.AccessType.PRIVATE);
-        accessTypeStrs.put(manager.getNakedSignText(MessageManager.LangPath.PUBLIC_SIGN).toLowerCase().
+        accessTypeStrs.put(manager.getNakedSignText(MessageManager.LangPath.SIGN_LINE_PUBLIC).toLowerCase().
                 replace("[", "").replace("]", "").trim(), SignAccessType.AccessType.PUBLIC);
-        accessTypeStrs.put(manager.getNakedSignText(MessageManager.LangPath.DONATION_SIGN).toLowerCase().
+        accessTypeStrs.put(manager.getNakedSignText(MessageManager.LangPath.SIGN_LINE_DONATION).toLowerCase().
                 replace("[", "").replace("]", "").trim(), SignAccessType.AccessType.DONATION);
-        accessTypeStrs.put(manager.getNakedSignText(MessageManager.LangPath.DISPLAY_SIGN).toLowerCase().
+        accessTypeStrs.put(manager.getNakedSignText(MessageManager.LangPath.SIGN_LINE_DISPLAY).toLowerCase().
                 replace("[", "").replace("]", "").trim(), SignAccessType.AccessType.DISPLAY);
-        accessTypeStrs.put(manager.getNakedSignText(MessageManager.LangPath.SUPPLY_SIGN).toLowerCase().
+        accessTypeStrs.put(manager.getNakedSignText(MessageManager.LangPath.SIGN_LINE_SUPPLY_SIGN).toLowerCase().
                 replace("[", "").replace("]", "").trim(), SignAccessType.AccessType.SUPPLY);
     }
 
@@ -43,7 +43,7 @@ public class SetAccessType extends SubCommand {
 
     @Override
     protected @NotNull Set<String> getAliases() {
-        return Set.of("setaccesstype", "settype", "setaccess", "seta", "sa", "sat");
+        return Set.of("setaccesstype", "settype", "setaccess", "seta", "sat");
     }
 
     @Override

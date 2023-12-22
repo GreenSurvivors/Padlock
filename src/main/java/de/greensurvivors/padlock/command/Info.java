@@ -36,7 +36,7 @@ public class Info extends SubCommand {
      * Try to get a list of names from the set of string versions of uuids given back by the lock.
      * Will ignore any entry without a valid uuid.
      */
-    public static @NotNull Set<String> getNamesFromUUIDStrSet(final @NotNull Set<String> stringUUIDs) {
+    private static @NotNull Set<String> getNamesFromUUIDStrSet(final @NotNull Set<String> stringUUIDs) {
         Set<String> players = new HashSet<>(stringUUIDs.size());
 
         for (String uuidStr : stringUUIDs) {
@@ -106,18 +106,18 @@ public class Info extends SubCommand {
 
                         switch (SignAccessType.getAccessType(sign, false)) {
                             case PRIVATE ->
-                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PRIVATE_SIGN));
+                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_PRIVATE));
                             case PUBLIC ->
-                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PUBLIC_SIGN));
+                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_PUBLIC));
                             case DONATION ->
-                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.DONATION_SIGN));
+                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_DONATION));
                             case DISPLAY ->
-                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.DISPLAY_SIGN));
+                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_DISPLAY));
                             case SUPPLY ->
-                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SUPPLY_SIGN));
+                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_SUPPLY_SIGN));
                             /*case null, // todo next java version*/
                             default ->
-                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN));
+                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_ERROR));
                         }
 
                         // timer

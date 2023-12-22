@@ -48,7 +48,7 @@ public class SignLock {
      * @param sign sign to set invalid
      */
     public static void setInvalid(@NotNull Sign sign) {
-        sign.getSide(Side.FRONT).line(0, Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.INVALID_SIGN));
+        sign.getSide(Side.FRONT).line(0, Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_INVALID));
         sign.update();
     }
 

@@ -56,7 +56,7 @@ public class SignDisplay {
                             OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(uuidStr));
 
                             if (player.getName() != null) {
-                                toFill[i] = Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PLAYER_NAME_ON_SIGN,
+                                toFill[i] = Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_PLAYER_NAME_ON,
                                         Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), player.getName()));
 
                                 //we have written a line; back to main loop to get the next one!
@@ -97,13 +97,15 @@ public class SignDisplay {
         // first line is always just the lock line
         SignAccessType.AccessType accessType = SignAccessType.getAccessType(sign, false);
         linesToUpdate[0] = switch (accessType) {
-            case PRIVATE -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PRIVATE_SIGN);
-            case PUBLIC -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PUBLIC_SIGN);
-            case DONATION -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.DONATION_SIGN);
-            case DISPLAY -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.DISPLAY_SIGN);
-            case SUPPLY -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SUPPLY_SIGN);
+            case PRIVATE -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_PRIVATE);
+            case PUBLIC -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_PUBLIC);
+            case DONATION ->
+                    Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_DONATION);
+            case DISPLAY -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_DISPLAY);
+            case SUPPLY ->
+                    Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_SUPPLY_SIGN);
             /*case null, // todo next java version*/
-            default -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN);
+            default -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_ERROR);
         };
 
         //special settings
@@ -120,7 +122,7 @@ public class SignDisplay {
         }
 
         if (shouldAddMoreUsers) {
-            linesToUpdate[lastIndex] = Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.MORE_USERS_ON_SIGN);
+            linesToUpdate[lastIndex] = Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_MORE_USERS);
         }
 
         //got everything. Update.

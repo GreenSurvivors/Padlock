@@ -46,7 +46,7 @@ public class SignTimer {
     // valid lines would be "[timer:2h]", "[TIMER:2D, 3w2t 555s]", "[tiMeR: 100W,,,  -8t]", "[timer:2h5h99h]"
     // invalid lines would be "timer:3d]", "[timer24w]", "[time:0x77Q]", "[banana]", "[timer:34ttt]"
     private final static Pattern modernPattern = Pattern.compile(Padlock.getPlugin().getMessageManager().
-            getNakedSignText(MessageManager.LangPath.TIMER_SIGN).replace("[", "\\[(?i)").
+            getNakedSignText(MessageManager.LangPath.SIGN_LINE_TIMER_SIGN).replace("[", "\\[(?i)").
             replace("<" + MessageManager.PlaceHolder.TIME.getPlaceholder() + ">",
                     "\\s?((" + MiscUtils.getPeriodPattern().pattern() + "[\\s,]*?)+)"));
     private final static NamespacedKey timerKey = new NamespacedKey(Padlock.getPlugin(), "timer");
@@ -94,7 +94,7 @@ public class SignTimer {
                 timeStr += ticks + "t";
             }
 
-            return Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.TIMER_SIGN,
+            return Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_TIMER_SIGN,
                     Placeholder.unparsed(MessageManager.PlaceHolder.TIME.getPlaceholder(), timeStr));
         } else {
             return null;

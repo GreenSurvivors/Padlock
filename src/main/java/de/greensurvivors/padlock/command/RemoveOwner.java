@@ -22,7 +22,7 @@ public class RemoveOwner extends SubCommand {
 
     @Override
     protected boolean checkPermission(@NotNull Permissible permissible) {
-        return permissible.hasPermission(PermissionManager.EDIT.getPerm()) && permissible.hasPermission(PermissionManager.ADMIN_EDIT.getPerm());
+        return permissible.hasPermission(PermissionManager.ADMIN_EDIT.getPerm());
     }
 
     @Override

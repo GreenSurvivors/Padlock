@@ -64,6 +64,12 @@ public class Debug extends SubCommand {
                 linked = true;
                 sender.sendMessage(" - CoreProtectAPI: " + CoreProtectAPIVersion);
             }
+
+            if (plugin.getDependencyManager().isHookedIntoVault()) {
+                linked = true;
+                sender.sendMessage(" - VaultAPI");
+            }
+
             if (!linked) {
                 sender.sendMessage(" - none");
             }
