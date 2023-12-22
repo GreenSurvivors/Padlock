@@ -39,51 +39,41 @@ public final class SetPassword extends SubCommand {
         return Set.of("setpassword", "setpw");
     }
 
-    public static void onExternalCommand(char @NotNull [] newPassword, @NotNull Player player) {
+    public static void onExternalCommand(char @Nullable [] newPassword, @NotNull Player player) {
         // check permission to edit
-        if (player.hasPermission(PermissionManager.EDIT.getPerm())) {
+        if (player.hasPermission(PermissionManager.CMD_SET_PASSWORD.getPerm())) {
             //get and check selected sign
             Sign sign = SignSelection.getSelectedSign(player);
-            if (newPassword.length != 0) { // todo check if strong enough
-                if (sign != null) {
-                    //check for old Lockett(Pro) signs and try to update them
-                    sign = Command.checkAndUpdateLegacySign(sign, player);
-                    if (sign == null) {
-                        Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.SIGN_NEED_RESELECT);
-                        return;
-                    }
+            if (sign != null) {
+                //check for old Lockett(Pro) signs and try to update them
+                sign = Command.checkAndUpdateLegacySign(sign, player);
+                if (sign == null) {
+                    Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                    return;
+                }
 
-                    if (PadlockAPI.isLockSign(sign)) {
-                        // check sign owner, even admins can't change a password of something they don't own.
-                        if (SignLock.isOwner(sign, player.getUniqueId())) {
-                            if (!SignPasswords.isOnCooldown(player.getUniqueId(), sign.getLocation())) {
-                                if (!SignPasswords.needsPasswordAccess(sign) || SignPasswords.hasStillAccess(player.getUniqueId(), sign.getLocation())) {
-                                    // this will communicate if password was set or removed
-                                    SignPasswords.setPassword(sign, player, newPassword);
-                                } else {
-                                    Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.NEEDS_PASSWORD);
-                                }
-                            } else {
-                                Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.PASSWORD_ON_COOLDOWN);
-                            }
-                        } else {
-                            Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.NO_PERMISSION);
-                        }
+                if (PadlockAPI.isLockSign(sign)) {
+                    // check sign owner, even admins can't change a password of something they don't own.
+                    if (SignLock.isOwner(sign, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_PASSWORD.getPerm())) {
+                        // this will communicate if password was set or removed
+                        SignPasswords.setPassword(sign, player, newPassword);
                     } else {
-                        Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                        Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.NO_PERMISSION);
                     }
                 } else {
-                    Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.SIGN_NOT_SELECTED);
+                    Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.SIGN_NEED_RESELECT);
                 }
             } else {
-                Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.NOT_ENOUGH_ARGS);
+                Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.SIGN_NOT_SELECTED);
             }
         } else {
             Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.NO_PERMISSION);
         }
 
         // yes I know I invalidate the arrays at multiple places, but in terms of password safety it's better to be double and tripple safe then sorry.
-        Arrays.fill(newPassword, '*');
+        if (newPassword != null) {
+            Arrays.fill(newPassword, '*');
+        }
     }
 
     @Override

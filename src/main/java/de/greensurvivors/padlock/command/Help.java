@@ -4,6 +4,7 @@ import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permissible;
@@ -13,6 +14,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
  * gives back a list of all for the cmd-sender available commands or information about a specific command.
@@ -55,18 +57,12 @@ public class Help extends SubCommand {
                     return false;
                 }
             } else { //todo maybe pages
-                Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_HEADER);
-                component = component.append(Component.newline());
-
-                for (SubCommand subCommand : Command.getSubCommands(sender)) {
-                    component = component.append(Component.text(" - "));
-
-                    for (String alias : subCommand.getAliases()) { //todo maybe get separator from config and don't add this on the last alias
-                        component = component.append(Component.text(alias).append(Component.text(", ")));
-                    }
-
-                    component = component.append(Component.newline());
-                }
+                Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_HEADER).append(Component.newline());
+                // list all subcommands alias per line
+                component = component.append(MiniMessage.miniMessage().deserialize(
+                        Command.getSubCommands(sender).stream().map(subCommand ->
+                                " - " + String.join(", ", subCommand.getAliases())). //todo get delimiter from config
+                                collect(Collectors.joining("<newline>")))); //todo better line break than newline + minimessage
 
                 sender.sendMessage(component);
             }

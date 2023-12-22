@@ -2,6 +2,7 @@ package de.greensurvivors.padlock.impl.signdata;
 
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.PadlockAPI;
+import de.greensurvivors.padlock.config.PermissionManager;
 import de.greensurvivors.padlock.impl.MiscUtils;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Sign;
@@ -21,8 +22,14 @@ public class SignExpiration {
         if (PadlockAPI.isLockSign(sign)) {
             long lastUsed = -1;
 
-            for (OfflinePlayer player : MiscUtils.getPlayersFromUUIDStrings(SignLock.getUUIDs(sign, true, true))) {
-                lastUsed = Math.max(player.getLastSeen(), lastUsed);
+            for (OfflinePlayer offlinePlayer : MiscUtils.getPlayersFromUUIDStrings(SignLock.getUUIDs(sign, true, true))) {
+                // if a player has the no expire permission return current time.
+                // does depend on Vault, since online players get checked later anyway and Bukkit does not have an api to check permissions of offline players.
+                if (Padlock.getPlugin().getDependencyManager().getOfflinePermission(sign.getWorld(), offlinePlayer, PermissionManager.NO_EXPIRE.getPerm())) {
+                    return System.currentTimeMillis();
+                }
+
+                lastUsed = Math.max(offlinePlayer.getLastSeen(), lastUsed);
             }
 
             if (lastUsed <= 0) {

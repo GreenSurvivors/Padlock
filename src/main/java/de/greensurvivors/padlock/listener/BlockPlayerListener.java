@@ -152,12 +152,12 @@ public class BlockPlayerListener implements Listener {
                 if (PadlockAPI.isProtected(attachedBlock)) {
                     if (PadlockAPI.isOwner(attachedBlock, player)) {
                         plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_ERROR_ALREADY_LOCKED);
-                        event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN));
+                        event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_ERROR));
                     } else {
                         plugin.getMessageManager().sendLang(player, MessageManager.LangPath.NOT_OWNER);
                         event.setCancelled(true);
                     }
-                } else { // all good
+                } else if (player.hasPermission(PermissionManager.ACTION_LOCK.getPerm())) { // all good
                     Sign sign = (Sign) event.getBlock().getState();
                     SignAccessType.setAccessType(sign, accessType, false);
                     sign.setWaxed(true);
@@ -166,7 +166,7 @@ public class BlockPlayerListener implements Listener {
                     // Player with this permission can lock with another name
                     if (!player.hasPermission(PermissionManager.ACTION_LOCK_OTHERS.getPerm())) {
                         // set the player self as owner
-                        event.line(1, Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.PLAYER_NAME_ON_SIGN,
+                        event.line(1, Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_PLAYER_NAME_ON,
                                 Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), player.getName())));
 
                         SignLock.addPlayer(sign, true, player);
@@ -184,7 +184,7 @@ public class BlockPlayerListener implements Listener {
                             } else {
                                 plugin.getMessageManager().sendLang(player, MessageManager.LangPath.UNKNOWN_PLAYER,
                                         Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), strLine));
-                                event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN));
+                                event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_ERROR));
                                 return;
                             }
                         } else if (player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm())) { // failsafe: only allow setting a sign without owner if you could break it! (this event should never return null here anyway)
@@ -218,10 +218,13 @@ public class BlockPlayerListener implements Listener {
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
 
                     plugin.getLockCacheManager().removeFromCache(attachedBlock.getLocation());
+                } else {
+                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.NO_PERMISSION);
+                    event.setCancelled(true);
                 }
             } else {
                 plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_ERROR_NOT_LOCKABLE);
-                event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.ERROR_SIGN));
+                event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_ERROR));
             }
         } // not a lock sign
     }

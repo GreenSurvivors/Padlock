@@ -1,24 +1,46 @@
 # Configuration file
-# https://github.com/connection-lost/LockettePro/wiki/*-config.yml
+# https://github.com/GreenSurvivors/Padlock/wiki/config.yml
 # If there are missing entries, you can add them manually.
 
 # will turn itself off after imported the old config once. Will not import language files
 import-fromLockettePro: false
+#The language file that Padlock will read from.
 language-file-name: 'en'
 dependency:
+  # If set to true and worldguard is installed, this will check if the player is allowed to build when quick protecting / breaking locks.
   worldguard:
     enabled: true
+  # If set to true and coreprotect is installed, quick protect gets logged in coreprotect as block place.
   coreprotect:
     enabled: true
 lock:
+  #| Option                | Description                                                                                                                                             |
+  #|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
+  #| NOT_SNEAKING_REQUIRED | Quick protect if the player right-clicks with a sign in hand and **not** sneaking                                                                       |
+  #| SNEAK_NONRELEVANT     | Quick protect if the player right-clicks with a sign, whenever or not they are sneaking or not (this makes it hard to place signs on protected blocks!) |
+  #| SNEAK_REQUIRED        | Quick protect if the player right-clicks with a sign in hand and **not** sneaking                                                                       |
+  #| OFF                   | Players can't quick protect and always have to manual lock                                                                                              |
   quick-lock:
     type: NOT_SNEAKING_REQUIRED
   blocked:
+    # This will block players from placing blocks that may potentially interfere with a locked block.
     interfere: true
+    # This will block items from transferring in/out a locked container
     item-transfer:
       in: false
       out: true
     hopper-minecart: REMOVE
+  # List of
+  #* EXPLOSION // tnt, creeper, endcrystal, every explosion.
+  #* GROWTH
+  #* PISTON
+  #* REDSTONE
+  #* VILLAGER
+  #* ENDERMAN
+  #* ENDER_DRAGON
+  #* WITHER
+  #* ZOMBIE
+  #* SILVERFISH
   exemptions:
     -
 cache:
@@ -26,9 +48,11 @@ cache:
 bedrock-prefix: "."
 
 
-# material name see: https://hub.spigotmc.org/javadocs/bukkit/org/bukkit/Material.html
+# for material names see: https://jd.papermc.io/paper/1.20/org/bukkit/Material.html
+# for tags see: https://jd.papermc.io/paper/1.20/org/bukkit/Tag.html
 # legacy block name and block id are not supported!
 # changing this list will not invalidate any already placed signs, it will just not allow any new locks.
+#
 lockables:
   - MINECRAFT:DOORS
   - MINECRAFT:TRAPDOORS
@@ -50,6 +74,7 @@ lockables:
   - JUKEBOX
   - BEACON
   - CAMPFIRES
+  - DECORATED_POT
   - MINECRAFT:ANVIL
   - DIAMOND_BLOCK
   - NETHERITE_BLOCK

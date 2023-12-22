@@ -40,15 +40,15 @@ public final class SignAccessType {
     public static AccessType getAccessTypeFromComp(@NotNull Component line) {
         MessageManager manager = Padlock.getPlugin().getMessageManager();
 
-        if (manager.isSignComp(line, MessageManager.LangPath.PRIVATE_SIGN)) {
+        if (manager.isSignComp(line, MessageManager.LangPath.SIGN_LINE_PRIVATE)) {
             return AccessType.PRIVATE;
-        } else if (manager.isSignComp(line, MessageManager.LangPath.PUBLIC_SIGN)) {
+        } else if (manager.isSignComp(line, MessageManager.LangPath.SIGN_LINE_PUBLIC)) {
             return AccessType.PUBLIC;
-        } else if (manager.isSignComp(line, MessageManager.LangPath.DONATION_SIGN)) {
+        } else if (manager.isSignComp(line, MessageManager.LangPath.SIGN_LINE_DONATION)) {
             return AccessType.DONATION;
-        } else if (manager.isSignComp(line, MessageManager.LangPath.DISPLAY_SIGN)) {
+        } else if (manager.isSignComp(line, MessageManager.LangPath.SIGN_LINE_DISPLAY)) {
             return AccessType.DISPLAY;
-        } else if (manager.isSignComp(line, MessageManager.LangPath.SUPPLY_SIGN)) {
+        } else if (manager.isSignComp(line, MessageManager.LangPath.SIGN_LINE_SUPPLY_SIGN)) {
             return AccessType.SUPPLY;
         } else if (manager.isLegacySignComp(line, MessageManager.LangPath.LEGACY_PRIVATE_SIGN)) {
             return AccessType.PRIVATE;

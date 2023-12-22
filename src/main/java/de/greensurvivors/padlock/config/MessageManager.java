@@ -109,12 +109,12 @@ public class MessageManager {
         langCache.cleanUp();
         langCache.asMap().clear();
 
-        nakedSignLines.put(LangPath.PRIVATE_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.PRIVATE_SIGN)).toLowerCase());
-        nakedSignLines.put(LangPath.PUBLIC_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.PUBLIC_SIGN)).toLowerCase());
-        nakedSignLines.put(LangPath.DONATION_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.DONATION_SIGN)).toLowerCase());
-        nakedSignLines.put(LangPath.DISPLAY_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.DISPLAY_SIGN)).toLowerCase());
-        nakedSignLines.put(LangPath.SUPPLY_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.SUPPLY_SIGN)).toLowerCase());
-        nakedSignLines.put(LangPath.TIMER_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.TIMER_SIGN)).toLowerCase());
+        nakedSignLines.put(LangPath.SIGN_LINE_PRIVATE, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.SIGN_LINE_PRIVATE)).toLowerCase());
+        nakedSignLines.put(LangPath.SIGN_LINE_PUBLIC, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.SIGN_LINE_PUBLIC)).toLowerCase());
+        nakedSignLines.put(LangPath.SIGN_LINE_DONATION, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.SIGN_LINE_DONATION)).toLowerCase());
+        nakedSignLines.put(LangPath.SIGN_LINE_DISPLAY, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.SIGN_LINE_DISPLAY)).toLowerCase());
+        nakedSignLines.put(LangPath.SIGN_LINE_SUPPLY_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.SIGN_LINE_SUPPLY_SIGN)).toLowerCase());
+        nakedSignLines.put(LangPath.SIGN_LINE_TIMER_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.SIGN_LINE_TIMER_SIGN)).toLowerCase());
 
         nakedLegacySignLines.put(LangPath.LEGACY_ADDITIONAL_SIGN, getStringSetFromLang(LangPath.LEGACY_ADDITIONAL_SIGN).stream().map(s -> MiniMessage.miniMessage().stripTags(s).toLowerCase()).collect(Collectors.toSet()));
         nakedLegacySignLines.put(LangPath.LEGACY_EVERYONE_SIGN, getStringSetFromLang(LangPath.LEGACY_EVERYONE_SIGN).stream().map(s -> MiniMessage.miniMessage().stripTags(s).toLowerCase()).collect(Collectors.toSet()));
@@ -247,9 +247,9 @@ public class MessageManager {
      * placeholder strings used. will be surrounded in Minimassage typical format of <>
      */
     public enum PlaceHolder {
-        TIME("time"),
+        ARGUMENT("argument"),
         PLAYER("player"),
-        ARGUMENT("argument");
+        TIME("time");
 
         private final String placeholder;
 
@@ -271,19 +271,40 @@ public class MessageManager {
      * Paths of all translatable
      */
     public enum LangPath {
-        PLUGIN_PREFIX("prefix", "<gold>[Padlock]</gold> "),
-
-        PRIVATE_SIGN("sign.line.private", "[Private]"),
-        PUBLIC_SIGN("sign.line.public", "[Public]"),
-        DONATION_SIGN("sign.line.donation", "[Donation]"),
-        DISPLAY_SIGN("sign.line.display", "[Display]"),
-        SUPPLY_SIGN("sign.line.supply", "[Supply]"),
-        TIMER_SIGN("sign.line.timer", "[Timer:<" + PlaceHolder.TIME.getPlaceholder() + ">]"),
-        ERROR_SIGN("sign.line.error", "[<dark_red>Error</dark_red>]"),
-        INVALID_SIGN("sign.line.invalid", "[Invalid]"),
-        PLAYER_NAME_ON_SIGN("sign.line.player-name", "<" + PlaceHolder.PLAYER.getPlaceholder() + ">"), // used for formatting displayed player names
-        MORE_USERS_ON_SIGN("sign.line.more-users", "[More Users]"), // not the same as the LEGACY_ADDITIONAL_SIGN line. This indicates that there are users that can't get displayed.
-
+        //actions
+        ACTION_PREVENTED_INTERFERE("action.prevented.interfere-with-others"),
+        ACTION_PREVENTED_LOCKED("action.prevented.locked"),
+        ACTION_PREVENTED_USE_CMDS("action.prevented.use-commands"),
+        //
+        ADD_MEMBER_SUCCESS("cmd.add-member.success"),
+        ADD_OWNER_SUCCESS("cmd.add-owner.success"),
+        BREAK_LOCK_SUCCESS("action.break-lock.success"),
+        CMD_NOT_A_SUBCOMMAND("cmd.not-a-subcommand"),
+        CMD_USAGE("cmd.usage"),
+        //help
+        HELP_ADD_MEMBER("cmd.help.add-member"),
+        HELP_ADD_OWNER("cmd.help.add-owner"),
+        HELP_DEBUG("cmd.help.debug"),
+        HELP_HEADER("cmd.help.header"),
+        HELP_HELP("cmd.help.help"),
+        HELP_INFO("cmd.help.info"),
+        HELP_PASSWORD("cmd.help.password"),
+        HELP_RELOAD("cmd.help.reload"),
+        HELP_REMOVE_MEMBER("cmd.help.remove-member"),
+        HELP_REMOVE_OWNER("cmd.help.remove-owner"),
+        HELP_SET_ACCESS_TYPE("cmd.help.set-access-type"),
+        HELP_SET_CONNECTED("cmd.help.set-connected"),
+        HELP_SET_PASSWORD("cmd.help.set-password"),
+        HELP_SET_TIMER("cmd.help.set-timer"),
+        HELP_UPDATE_SIGN("cmd.help.update-sign"),
+        HELP_VERSION("cmd.help.version"),
+        //info cmd
+        INFO_ACCESS_TYPE("cmd.info.access-type"),
+        INFO_EXPIRED("cmd.info.expired"),
+        INFO_MEMBERS("cmd.info.members"),
+        INFO_OWNERS("cmd.info.owners"),
+        INFO_TIMER("cmd.info.timer"),
+        //legacy
         @Deprecated(forRemoval = true)
         LEGACY_ADDITIONAL_SIGN("sign.legacy.additional", "[More Users]"),
         @Deprecated(forRemoval = true)
@@ -292,78 +313,60 @@ public class MessageManager {
         LEGACY_PRIVATE_SIGN("sign.legacy.private", "[Private]"),
         @Deprecated(forRemoval = true)
         LEGACY_TIMER_SIGN("sign.legacy.timer", "[Timer:<timer>]"),
-
-        HELP_HEADER("cmd.help.header"),
-        HELP_ADD_MEMBER("cmd.help.add-member"),
-        HELP_REMOVE_MEMBER("cmd.help.remove-member"),
-        HELP_ADD_OWNER("cmd.help.add-owner"),
-        HELP_REMOVE_OWNER("cmd.help.remove-owner"),
-        HELP_SET_ACCESS_TYPE("cmd.help.set-access-type"),
-        HELP_SET_CONNECTED("cmd.help.set-connected"),
-        HELP_SET_PASSWORD("cmd.help.set-password"),
-        HELP_SET_TIMER("cmd.help.set-timer"),
-        HELP_DEBUG("cmd.help.debug"),
-        HELP_HELP("cmd.help.help"),
-        HELP_PASSWORD("cmd.help.password"),
-        HELP_INFO("cmd.help.info"),
-        HELP_RELOAD("cmd.help.reload"),
-        HELP_UPDATE_SIGN("cmd.help.update-sign"),
-        HELP_VERSION("cmd.help.version"),
-
-        ADD_OWNER_SUCCESS("cmd.add-owner.success"),
-        REMOVE_OWNER_SUCCESS("cmd.remove-owner.success"),
-        REMOVE_OWNER_ERROR("cmd.remove-owner.error"),
-        ADD_MEMBER_SUCCESS("cmd.add-member.success"),
-        REMOVE_MEMBER_SUCCESS("cmd.remove-member.success"),
-        REMOVE_MEMBER_ERROR("cmd.remove-member.error"),
-        SET_ACCESS_TYPE_SUCCESS("cmd.set-access-type.success"),
-        SET_PASSWORD_SUCCESS("cmd.set-password.set.success"),
-        SET_PASSWORD_REMOVE_SUCCESS("cmd.set-password.remove.success"),
-        SET_TIMER_SUCCESS_ON("cmd.set-timer.success.turned-on"),
-        SET_TIMER_SUCCESS_OFF("cmd.set-timer.success.turned-off"),
-        SET_TIMER_ERROR("cmd.set-timer.error"),
-        UPDATE_SIGN_SUCCESS("cmd.sign-update.success"),
-        PASSWORD_ACCESS_GRANTED("cmd.password.access-granted"),
-        PASSWORD_WRONG_PASSWORD("cmd.password.wrong-password"),
-        PASSWORD_ON_COOLDOWN("cmd.password.on-cooldown"),
-        PASSWORD_SAFETY_WARNING("cmd.password.safety-warning", "<dark_red>Warning: never use a password, you are using anywhere else! While I did everything I could for your safety, there <bold>ARE</bold> ways your password could get leaked!</dark_red>"),
-        PASSWORD_START_PROCESSING("cmd.password.start-processing"),
-        RELOAD_SUCCESS("cmd.reload.success"),
-        SET_CONNECTED_SUCCESS("cmd.set-connected.success"),
-
-        INFO_OWNERS("cmd.info.owners"),
-        INFO_MEMBERS("cmd.info.members"),
-        INFO_TIMER("cmd.info.timer"),
-        INFO_ACCESS_TYPE("cmd.info.access-type"),
-        INFO_EXPIRED("cmd.info.expired"),
-
-        SIGN_NEED_RESELECT("cmd.error.sign-need-reselect"),
-        SIGN_NOT_SELECTED("cmd.error.no-sign-selected"),
-        UNKNOWN_PLAYER("cmd.error.unknown-player"),
-        NOT_A_PLAYER("cmd.error.not-a-player"),
-        NOT_ENOUGH_ARGS("cmd.error.not-enough-args"),
-        NOT_ACCESS_TYPE("cmd.error.not-access-type"),
-        NOT_A_BOOL("cmd.error.not-a-bool"),
-        CMD_USAGE("cmd.usage"),
-        CMD_NOT_A_SUBCOMMAND("cmd.not-a-subcommand"),
-
-        NO_PERMISSION("no-permission"),
-        NOT_OWNER("lock.not-owner"),
-        NEEDS_PASSWORD("lock.needs-password"),
-
-        LOCK_SUCCESS("action.lock.success"),
+        //
         LOCK_ERROR_ALREADY_LOCKED("action.lock.error.already-locked"),
         LOCK_ERROR_NOT_LOCKABLE("action.lock.error.not-lockable"),
         LOCK_ERROR_NO_OWNER("action.lock.error.no-owner"),
-        QUICK_LOCK_ERROR("action.quick-lock.error"),
-        SELECT_SIGN("action.select-sign.success"),
-        BREAK_LOCK_SUCCESS("action.break-lock.success"),
-        ACTION_PREVENTED_LOCKED("action.prevented.locked"),
-        ACTION_PREVENTED_INTERFERE("action.prevented.interfere-with-others"),
-        ACTION_PREVENTED_USE_CMDS("action.prevented.use-commands"),
-
+        LOCK_SUCCESS("action.lock.success"),
+        //notices
+        NOTICE_MANUEL_LOCK("notice.manual-lock"),
         NOTICE_QUICK_LOCK("notice.quick-lock"),
-        NOTICE_MANUEL_LOCK("notice.manual-lock");
+        // user cmd args errors
+        NOT_ACCESS_TYPE("cmd.error.not-access-type"),
+        NOT_A_BOOL("cmd.error.not-a-bool"),
+        NOT_A_PLAYER("cmd.error.not-a-player"),
+        NOT_ENOUGH_ARGS("cmd.error.not-enough-args"),
+        NOT_OWNER("lock.not-owner"),
+        NO_PERMISSION("no-permission"),
+        //passwords
+        PASSWORD_ACCESS_GRANTED("cmd.password.access-granted"),
+        PASSWORD_ON_COOLDOWN("cmd.password.on-cooldown"),
+        PASSWORD_SAFETY_WARNING("cmd.password.safety-warning", "<dark_red>Warning: never use a password, you are using anywhere else! While I did everything I could for your safety, there <bold>ARE</bold> ways your password could get leaked!</dark_red>"),
+        PASSWORD_START_PROCESSING("cmd.password.start-processing"),
+        PASSWORD_WRONG_PASSWORD("cmd.password.wrong-password"),
+        //plugin prefix
+        PLUGIN_PREFIX("prefix", "<gold>[Padlock]</gold> "),
+        //
+        QUICK_LOCK_ERROR("action.quick-lock.error"),
+        RELOAD_SUCCESS("cmd.reload.success"),
+        REMOVE_MEMBER_ERROR("cmd.remove-member.error"),
+        REMOVE_MEMBER_SUCCESS("cmd.remove-member.success"),
+        REMOVE_OWNER_ERROR("cmd.remove-owner.error"),
+        REMOVE_OWNER_SUCCESS("cmd.remove-owner.success"),
+        SELECT_SIGN("action.select-sign.success"),
+        SET_ACCESS_TYPE_SUCCESS("cmd.set-access-type.success"),
+        SET_CONNECTED_SUCCESS("cmd.set-connected.success"),
+        SET_PASSWORD_REMOVE_SUCCESS("cmd.set-password.remove.success"),
+        SET_PASSWORD_SUCCESS("cmd.set-password.set.success"),
+        SET_TIMER_ERROR("cmd.set-timer.error"),
+        SET_TIMER_SUCCESS_OFF("cmd.set-timer.success.turned-off"),
+        SET_TIMER_SUCCESS_ON("cmd.set-timer.success.turned-on"),
+        // display on signs
+        SIGN_LINE_DISPLAY("sign.line.display", "[Display]"),
+        SIGN_LINE_DONATION("sign.line.donation", "[Donation]"),
+        SIGN_LINE_ERROR("sign.line.error", "[<dark_red>Error</dark_red>]"),
+        SIGN_LINE_INVALID("sign.line.invalid", "[Invalid]"),
+        SIGN_LINE_PRIVATE("sign.line.private", "[Private]"),
+        SIGN_LINE_PUBLIC("sign.line.public", "[Public]"),
+        SIGN_LINE_SUPPLY_SIGN("sign.line.supply", "[Supply]"),
+        SIGN_LINE_TIMER_SIGN("sign.line.timer", "[Timer:<" + PlaceHolder.TIME.getPlaceholder() + ">]"),
+        SIGN_MORE_USERS("sign.line.more-users", "[More Users]"), // not the same as the LEGACY_ADDITIONAL_SIGN line. This indicates that there are users that can't get displayed.
+        //
+        SIGN_NEED_RESELECT("cmd.error.sign-need-reselect"),
+        SIGN_NOT_SELECTED("cmd.error.no-sign-selected"),
+        SIGN_PLAYER_NAME_ON("sign.line.player-name", "<" + PlaceHolder.PLAYER.getPlaceholder() + ">"), // used for formatting displayed player names
+        UNKNOWN_PLAYER("cmd.error.unknown-player"),
+        UPDATE_SIGN_SUCCESS("cmd.sign-update.success");
 
         private final String path;
         private final String defaultValue;
