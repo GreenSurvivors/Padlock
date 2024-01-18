@@ -111,6 +111,17 @@ public class Openables {
     }
 
     /**
+     * Returns true if the submitted block OR the one below / above it is a door
+     */
+    public static boolean isUpDownDoor(Block block) {
+        return  // is door
+                Tag.DOORS.isTagged(block.getType()) ||
+                        // Indirectly protecting a door
+                        Tag.DOORS.isTagged(block.getRelative(BlockFace.UP).getType()) ||
+                        Tag.DOORS.isTagged(block.getRelative(BlockFace.DOWN).getType());
+    }
+
+    /**
      * enum containing all the sounds to play, when an openable open/closes
      * This is here because just setting the data of a block to open/close doesn't make a sound.
      */

@@ -92,7 +92,7 @@ public final class SignAccessType {
      * Will not update the Display of the sign afterwarts to not overwrite other unimported data like timers
      */
     @Deprecated(forRemoval = true)
-    public static void updateLegacy(@NotNull Sign sign) {
+    public static void updateLegacyType(@NotNull Sign sign) {
         AccessType type = getLegacySetting(sign);
 
         if (type != null) {
@@ -107,7 +107,7 @@ public final class SignAccessType {
      * checks if a line would be a line of an everyone sign.
      * This is only available to make sure the line can safely interpreted as a username.
      * Please don't use this to get data of a legacy sign.
-     * Use {@link #updateLegacy(Sign)} and then {@link #getAccessType(Sign)}
+     * Use {@link #updateLegacyType(Sign)} and then {@link #getAccessType(Sign, boolean)}
      */
     @Deprecated(forRemoval = true)
     public static boolean isLegacyEveryOneComp(@NotNull Component component) {
@@ -133,7 +133,7 @@ public final class SignAccessType {
     /**
      * update a legacy lockette additional sign with potential an everyone line on it.
      */
-    public static void updateLegacyFromAdditional(Sign lockSign, Sign additional) {
+    public static void updateLegacyTypeFromAdditional(Sign lockSign, Sign additional) {
         AccessType type = getLegacySetting(additional);
 
         // not every additional sign has an "everyone" on it, and this is the only access type they can have

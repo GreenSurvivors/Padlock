@@ -29,8 +29,8 @@ import java.util.Set;
  * for the right command in a {@link PlayerCommandPreprocessEvent} in {@link de.greensurvivors.padlock.listener.ChatPlayerListener}.
  * <p>Also, {@link de.greensurvivors.padlock.command.Command} as well as {@link Padlock} itself has a separate instance of this,</p>
  */
-public class Password extends SubCommand implements TabCompleter, CommandExecutor {
-    public Password(@NotNull Padlock plugin) {
+public class ApplyPassword extends SubCommand implements TabCompleter, CommandExecutor {
+    public ApplyPassword(@NotNull Padlock plugin) {
         super(plugin);
     }
 
@@ -40,9 +40,16 @@ public class Password extends SubCommand implements TabCompleter, CommandExecuto
      * nor is there a way to have a static Set in the mother class without all subclasses share the same... -.-
      */
     public static @NotNull Set<String> getAliasesStatic() {
-        return Set.of("password", "pw", "applypassword");
+        return Set.of("password", "pw", "applypassword, usepassword");
     }
 
+    /**
+     * Passwords need extra protection. Therefore, we catch them before the command gets
+     * processed via {@link PlayerCommandPreprocessEvent} in {@link de.greensurvivors.padlock.listener.ChatPlayerListener}
+     *
+     * @param password
+     * @param player
+     */
     public static void onExternalCommand(char @NotNull [] password, @NotNull Player player) {
         // check permission for passwords
         if (player.hasPermission(PermissionManager.CMD_APPLY_PASSWORD.getPerm())) {

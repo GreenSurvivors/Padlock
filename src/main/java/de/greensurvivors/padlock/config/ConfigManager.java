@@ -54,8 +54,7 @@ public class ConfigManager {
         IMPORT_FROM_LOCKETTEPRO.setValue(false);
 
         //reload Language files
-        plugin.getMessageManager().setLangFileName(config.getString(LANG_FILENAME.getPath(), LANG_FILENAME.getFallbackValue()));
-        plugin.getMessageManager().reload();
+        plugin.getMessageManager().reload(config.getString(LANG_FILENAME.getPath(), LANG_FILENAME.getFallbackValue()));
 
         //dependency
         DEPENDENCY_WORLDGUARD_ENABLED.setValue(config.getBoolean(DEPENDENCY_WORLDGUARD_ENABLED.getPath(), DEPENDENCY_WORLDGUARD_ENABLED.getFallbackValue()));
