@@ -15,22 +15,24 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
-import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
+import java.security.CodeSource;
 import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * manages all translatable and placeholders used by this plugin.
  */
 public class MessageManager {
     private final String BUNDLE_NAME = "lang";
+    final Pattern BUNDLE_FILE_NAME_PATTERN = Pattern.compile(BUNDLE_NAME + "(?:_.*)?.properties");
     private final Plugin plugin;
     /**
      * contains all sign lines without any decorations like color but still with every placeholder
@@ -79,7 +81,7 @@ public class MessageManager {
         // save all missing keys
         initLangFiles();
 
-        Locale locale = Locale.forLanguageTag(langfilename);
+        Locale locale = Locale.forLanguageTag(langfilename.replace("_", "-"));
         plugin.getLogger().info("Locale set to language: " + locale.toLanguageTag());
         File langDictionary = new File(plugin.getDataFolder(), BUNDLE_NAME);
 
@@ -183,79 +185,69 @@ public class MessageManager {
      * saves all missing lang files from resources to the plugins datafolder
      */
     private void initLangFiles() {
-        Enumeration<URL> en;
-        try {
-            en = plugin.getClass().getClassLoader().getResources(BUNDLE_NAME + ".properties");
-
-            while (en.hasMoreElements()) {
-                URL url = en.nextElement();
-                JarURLConnection urlcon;
-                urlcon = (JarURLConnection) (url.openConnection());
-
-                JarFile jar = urlcon.getJarFile();
-                Enumeration<JarEntry> entries = jar.entries();
-                boolean found = false;
-
-                while (entries.hasMoreElements()) {
-                    JarEntry jarEntry = entries.nextElement();
-
-                    String entry = jarEntry.getName();
-
-                    if (entry.startsWith(BUNDLE_NAME)) {
-                        try (InputStream inputStream = plugin.getResource(entry)) {
-                            File langFile = new File(new File(plugin.getDataFolder(), BUNDLE_NAME), entry);
-                            if (!langFile.exists()) { // don't overwrite existing files
-
-                                FileUtils.copyInputStreamToFile(inputStream, langFile); // It should never be null, we already found the resource!
-                            } else { // add defaults to file to expand in case there are key-value pairs missing
-                                Properties defaults = new Properties();
-                                defaults.load(new InputStreamReader(inputStream, StandardCharsets.UTF_8));
-
-                                Properties current = new Properties();
-                                try (InputStreamReader reader = new InputStreamReader(new FileInputStream(langFile), StandardCharsets.UTF_8)) {
-                                    current.load(reader);
-                                }
-
-                                try (FileWriter fw = new FileWriter(langFile, StandardCharsets.UTF_8, true);
-                                     BufferedWriter bw = new BufferedWriter(fw)) {
-                                    // can't use the defaults from constructor since that DOESN'T get stored!
-                                    boolean updated = false;
-                                    for (Map.Entry<Object, Object> translationPair : defaults.entrySet()) {
-                                        if (current.get(translationPair.getKey()) == null) {
-                                            if (!updated) {
-                                                bw.write("# New Values where added. Is everything else up to date? Time of update: " + new Date());
-                                                bw.newLine();
-
-                                                plugin.getLogger().fine("Updated langfile \"" + entry + "\". Might want to check the new translation strings out!");
-
-                                                updated = true;
-                                            }
-
-                                            String key = saveConvert((String) translationPair.getKey(), true);
-                                            /* No need to escape embedded and trailing spaces for value, hence
-                                             * pass false to flag.
-                                             */
-                                            String val = saveConvert((String) translationPair.getValue(), false);
-                                            bw.write((key + "=" + val));
-                                            bw.newLine();
-                                        } // current already knows the key
-                                    } // end of for
-                                } // end of try
-                            } // end of else (file exists)
-                        } catch (IllegalArgumentException e) {
-                            plugin.getLogger().log(Level.WARNING, "Couldn't save lang file \"" + entry + "\".", e);
-                        }
-
-                        found = true;
-                    } else if (found && entry.contains(File.pathSeparator)) {
-                        break; // already over it
+        CodeSource src = this.getClass().getProtectionDomain().getCodeSource();
+        if (src != null) {
+            URL jarUrl = src.getLocation();
+            try (ZipInputStream zipStream = new ZipInputStream(jarUrl.openStream())) {
+                ZipEntry zipEntry;
+                while ((zipEntry = zipStream.getNextEntry()) != null) {
+                    if (zipEntry.isDirectory()) {
+                        // already done with topmost layer
+                        break;
                     }
-                }
 
-                jar.close();
+                    String entryName = zipEntry.getName();
+
+                    if (BUNDLE_FILE_NAME_PATTERN.matcher(entryName).matches()) {
+                        File langFile = new File(new File(plugin.getDataFolder(), BUNDLE_NAME), entryName);
+                        if (!langFile.exists()) { // don't overwrite existing files
+                            FileUtils.copyToFile(zipStream, langFile);
+                        } else { // add defaults to file to expand in case there are key-value pairs missing
+                            Properties defaults = new Properties();
+                            // don't close reader, since we need the stream to be still open for the next entry!
+                            defaults.load(new InputStreamReader(zipStream, StandardCharsets.UTF_8));
+
+                            Properties current = new Properties();
+                            try (InputStreamReader reader = new InputStreamReader(new FileInputStream(langFile), StandardCharsets.UTF_8)) {
+                                current.load(reader);
+                            } catch (Exception e) {
+                                plugin.getLogger().log(Level.WARNING, "couldn't get current properties file for " + entryName + "!", e);
+                                continue;
+                            }
+
+                            try (FileWriter fw = new FileWriter(langFile, StandardCharsets.UTF_8, true);
+                                 // we are NOT using Properties#store since it gets rid of comments and doesn't guarantee ordering
+                                 BufferedWriter bw = new BufferedWriter(fw)) {
+                                boolean updated = false; // only write comment once
+                                for (Map.Entry<Object, Object> translationPair : defaults.entrySet()) {
+                                    if (current.get(translationPair.getKey()) == null) {
+                                        if (!updated) {
+                                            bw.write("# New Values where added. Is everything else up to date? Time of update: " + new Date());
+                                            bw.newLine();
+
+                                            plugin.getLogger().fine("Updated langfile \"" + entryName + "\". Might want to check the new translation strings out!");
+
+                                            updated = true;
+                                        }
+
+                                        String key = saveConvert((String) translationPair.getKey(), true);
+                                        /* No need to escape embedded and trailing spaces for value, hence
+                                         * pass false to flag.
+                                         */
+                                        String val = saveConvert((String) translationPair.getValue(), false);
+                                        bw.write((key + "=" + val));
+                                        bw.newLine();
+                                    } // current already knows the key
+                                } // end of for
+                            } // end of try
+                        } // end of else (file exists)
+                    } // doesn't match
+                } // end of elements
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.WARNING, "Couldn't save lang files", e);
             }
-        } catch (IOException e) {
-            plugin.getLogger().log(Level.WARNING, "Couldn't save lang files", e);
+        } else {
+            plugin.getLogger().warning("Couldn't save lang files: no CodeSource!");
         }
     }
 
