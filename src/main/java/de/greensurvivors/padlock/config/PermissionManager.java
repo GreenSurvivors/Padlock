@@ -67,10 +67,6 @@ public enum PermissionManager {
             "Edit your own lock",
             PermissionDefault.TRUE)),
 
-    NO_EXPIRE(new Permission("padlock.noexpire",
-            "Locks of Player with this permission, who own this lock, will never expire.",
-            PermissionDefault.OP)),
-
     ADMIN_EDIT(new Permission("padlock.admin.edit",
             "Edit locks of other players",
             PermissionDefault.OP, Map.of(EDIT.getPerm().getName(), true))),
@@ -98,7 +94,6 @@ public enum PermissionManager {
                     ADMIN_USE.perm.getName(), true,
                     ADMIN_INTERFERE.perm.getName(), true,
                     ADMIN_COMMANDS.perm.getName(), true,
-                    NO_EXPIRE.perm.getName(), true,
                     ADMIN_PASSWORD.perm.getName(), true,
                     DEBUG.perm.getName(), true
             )));

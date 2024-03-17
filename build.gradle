@@ -6,15 +6,12 @@ plugins {
 }
 // Suppiled by Jenkins
 ext.majorVersion = 2
-ext.minorVersion = 4
-ext.minecraftVersion = "1.20.2"
+ext.minorVersion = 5
+ext.minecraftVersion = "1.20.4"
 
 ext.buildNumber = System.env.BUILD_NUMBER == null ? "x"                : "build" + "$System.env.BUILD_NUMBER"
 ext.mavenDirectory = System.env.MAVEN_DIR == null ? "$projectDir/repo" : "$System.env.MAVEN_DIR"
 ext.jdDirectory = System.env.JAVADOCS_DIR == null ? null               : "$System.env.JAVADOCS_DIR"
-
-sourceCompatibility = 17
-targetCompatibility = 17
 
 // differet version convension from Nyaa plugins
 group = "de.greensurvivors"
