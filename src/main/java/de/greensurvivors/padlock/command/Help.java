@@ -4,6 +4,7 @@ import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.command.CommandSender;
@@ -46,11 +47,12 @@ public class Help extends SubCommand {
                 SubCommand command = Command.getSubCommandFromString(sender, args[1]);
 
                 if (command != null) {
-                    Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_HEADER);
-                    component = component.append(Component.newline());
-                    component = component.append(command.getHelpText());
+                    TextComponent.Builder builder = Component.text();
+                    builder.append(plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_HEADER));
+                    builder.append(Component.newline());
+                    builder.append(command.getHelpText());
 
-                    sender.sendMessage(component);
+                    sender.sendMessage(builder);
                 } else { // didn't type a valid subcommand.
                     plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.CMD_NOT_A_SUBCOMMAND,
                             Placeholder.unparsed(MessageManager.PlaceHolder.ARGUMENT.getPlaceholder(), args[1]));
