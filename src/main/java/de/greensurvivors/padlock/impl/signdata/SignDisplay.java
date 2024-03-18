@@ -36,17 +36,13 @@ public class SignDisplay {
         Set<String> uuidStrs = SignLock.getUUIDs(sign, owners, false);
         boolean useMoreUsersTag = false;
 
-        for (String uuidstr : uuidStrs) {
-            Padlock.getPlugin().getLogger().info("uuid: " + uuidstr);
-        }
-
         if (!uuidStrs.isEmpty()) {
             Iterator<String> it = uuidStrs.iterator();
 
-
+            // initial simple check
             useMoreUsersTag = uuidStrs.size() > lastIndex;
-            Padlock.getPlugin().getLogger().info("size: " + uuidStrs.size() + " last index: " + lastIndex);
 
+            mainLoop:
             for (int i = 0; i < toFill.length; i++) {
                 if (toFill[i] == null) {
                     while (it.hasNext()) {
@@ -60,13 +56,15 @@ public class SignDisplay {
                                         Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), player.getName()));
 
                                 //we have written a line; back to main loop to get the next one!
-                                break;
+                                continue mainLoop;
                             } else {
-                                Padlock.getPlugin().getLogger().log(Level.WARNING, "broken UUID \"" + uuidStr + "\" (no " + (owners ? "Owner" : "member") + ") in Lock-Sign at " + sign.getLocation());
+                                Padlock.getPlugin().getLogger().log(Level.WARNING, "broken UUID \"" + uuidStr + "\" (no " + (owners ? "Owner" : "member") + " name) in Lock-Sign at " + sign.getLocation());
                                 useMoreUsersTag = true; // probably is a valid member, but the server doesn't know their name since they never joined on the server
+                                //however for now try to write the next player into this line
                             }
                         } catch (IllegalArgumentException e) {
                             Padlock.getPlugin().getLogger().log(Level.WARNING, "broken UUID \"" + uuidStr + "\" (invalid) in Lock-Sign at " + sign.getLocation(), e);
+                            //for now just ignore it and try to write the next player into this line
                         }
                     } //inner loop
 
@@ -74,6 +72,11 @@ public class SignDisplay {
                     break;
                 } //line already filled
             } //outer loop
+
+            if (it.hasNext()) {
+                // not all players got filled in, because the sign lines did already contain text
+                useMoreUsersTag = true;
+            }
         } else if (owners) {
             Padlock.getPlugin().getLogger().log(Level.WARNING, "Lock sign without Owners at " + sign.getLocation());
         }
@@ -118,10 +121,10 @@ public class SignDisplay {
         // fill with owners, then if there is still space, and this is not a public sign, the members
         boolean shouldAddMoreUsers = fillWithPlayers(linesToUpdate, sign, true, lastIndex);
         if (accessType != SignAccessType.AccessType.PUBLIC) {
-            shouldAddMoreUsers = shouldAddMoreUsers && fillWithPlayers(linesToUpdate, sign, false, lastIndex);
+            shouldAddMoreUsers = shouldAddMoreUsers || fillWithPlayers(linesToUpdate, sign, false, lastIndex);
         }
 
-        if (shouldAddMoreUsers) {
+        if (shouldAddMoreUsers) { // this might overwrite the last name
             linesToUpdate[lastIndex] = Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_MORE_USERS);
         }
 

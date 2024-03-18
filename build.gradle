@@ -20,7 +20,7 @@ version = "$majorVersion.$minorVersion.$buildNumber".toString()
 /*
 // comment this in, if you want to test with a specific Mc version instead of the one defined in minecraftVersion
 runServer {
-    minecraftVersion("1.20.2")
+    minecraftVersion("1.20.4")
 }
  */
 

@@ -17,10 +17,7 @@ import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 
 /**
@@ -35,13 +32,16 @@ public class Info extends SubCommand {
     /**
      * Try to get a list of names from the set of string versions of uuids given back by the lock.
      * Will ignore any entry without a valid uuid.
+     * May return a UUID string instead of a name if the name was null
      */
-    private static @NotNull Set<String> getNamesFromUUIDStrSet(final @NotNull Set<String> stringUUIDs) {
+    private static @NotNull Set<@Nullable String> getNamesFromUUIDStrSet(final @NotNull Set<String> stringUUIDs) {
         Set<String> players = new HashSet<>(stringUUIDs.size());
 
         for (String uuidStr : stringUUIDs) {
             try {
-                players.add(Bukkit.getOfflinePlayer(UUID.fromString(uuidStr)).getName());
+                String name = Bukkit.getOfflinePlayer(UUID.fromString(uuidStr)).getName();
+
+                players.add(Objects.requireNonNullElse(name, uuidStr));
             } catch (IllegalArgumentException e) {
                 Padlock.getPlugin().getLogger().log(Level.WARNING, "couldn't get UUID from String \"" + uuidStr + "\"", e);
             }
