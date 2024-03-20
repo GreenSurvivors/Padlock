@@ -26,8 +26,8 @@ import java.util.concurrent.TimeUnit;
  * heavy redstone wire use might be.
  */
 public class LockCacheManager {
-    // default cache should never get used, but if it does, it has at least a maximum size to not grow unlimited
-    Map<Location, LazySignProperties> lockLazyProps = new HashMap<>();
+    // cache has a maximum size to not grow unlimited
+    private final Map<Location, LazySignProperties> lockLazyProps = new HashMap<>();
     private final @NotNull Cache<@NotNull Location, @NotNull LockWrapper> lockStateCache = Caffeine.newBuilder().
             evictionListener((RemovalListener<Location, LockWrapper>) (loc, lockWrapper, cause) -> {
                 if (lockWrapper != null) {

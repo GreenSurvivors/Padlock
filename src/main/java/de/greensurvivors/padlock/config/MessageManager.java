@@ -15,19 +15,24 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
-import java.net.JarURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.nio.charset.StandardCharsets;
+import java.security.CodeSource;
 import java.util.*;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
 import java.util.logging.Level;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipInputStream;
 
 /**
  * manages all translatable and placeholders used by this plugin.
  */
 public class MessageManager {
+    private final String BUNDLE_NAME = "lang";
+    final Pattern BUNDLE_FILE_NAME_PATTERN = Pattern.compile(BUNDLE_NAME + "(?:_.*)?.properties");
     private final Plugin plugin;
     /**
      * contains all sign lines without any decorations like color but still with every placeholder
@@ -41,14 +46,9 @@ public class MessageManager {
      */
     private final LoadingCache<LangPath, Component> langCache = Caffeine.newBuilder().build(
             path -> MiniMessage.miniMessage().deserialize(getStringFromLang(path)));
-    private String langfilename = "lang/lang_en.yml";
 
     public MessageManager(Plugin plugin) {
         this.plugin = plugin;
-    }
-
-    protected void setLangFileName(String langfilename) {
-        this.langfilename = langfilename;
     }
 
     private @NotNull String getStringFromLang(@NotNull LangPath path) {
@@ -73,30 +73,30 @@ public class MessageManager {
     }
 
     /**
-     * reload language file. Please call {@link #setLangFileName(String)} before calling this for the first time
+     * reload language file.
      */
-    protected void reload() {
-        Locale locale = Locale.forLanguageTag(langfilename);
+    protected void reload(String langfilename) {
+        lang = null; // reset last bundle
+
+        // save all missing keys
+        initLangFiles();
+
+        Locale locale = Locale.forLanguageTag(langfilename.replace("_", "-"));
         plugin.getLogger().info("Locale set to language: " + locale.toLanguageTag());
-        File langFile = new File(new File(plugin.getDataFolder(), "lang"), UTF8ResourceBundleControl.get().toBundleName("lang", locale) + ".properties");
+        File langDictionary = new File(plugin.getDataFolder(), BUNDLE_NAME);
 
-        if (!langFile.exists()) {
-            // save all of them
-            initLangFiles();
+        URL[] urls;
+        try {
+            urls = new URL[]{langDictionary.toURI().toURL()};
+            lang = ResourceBundle.getBundle(BUNDLE_NAME, locale, new URLClassLoader(urls), UTF8ResourceBundleControl.get());
+
+        } catch (SecurityException | MalformedURLException e) {
+            plugin.getLogger().log(Level.WARNING, "Exception while reading lang bundle. Using internal", e);
+        } catch (MissingResourceException ignored) { // how? missing write access?
+            plugin.getLogger().log(Level.WARNING, "No translation file for " + UTF8ResourceBundleControl.get().toBundleName(BUNDLE_NAME, locale) + " found on disc. Using internal");
         }
 
-        lang = null;
-        if (langFile.exists()) {
-            try (InputStreamReader inputStreamReader = new InputStreamReader(new FileInputStream(langFile), StandardCharsets.UTF_8)) {
-                lang = new PropertyResourceBundle(inputStreamReader);
-            } catch (FileNotFoundException ignored) {
-                plugin.getLogger().info("No translation file found. Using internal");
-            } catch (IOException e) {
-                plugin.getLogger().log(Level.WARNING, "IO exception while reading lang bundle", e);
-            }
-        }
-
-        if (lang == null) {
+        if (lang == null) { // fallback, since we are always trying to save defaults this never should happen
             try {
                 lang = PropertyResourceBundle.getBundle("lang", locale, plugin.getClass().getClassLoader(), new UTF8ResourceBundleControl());
             } catch (MissingResourceException e) {
@@ -122,47 +122,132 @@ public class MessageManager {
         nakedLegacySignLines.put(LangPath.LEGACY_TIMER_SIGN, getStringSetFromLang(LangPath.LEGACY_TIMER_SIGN).stream().map(s -> MiniMessage.miniMessage().stripTags(s).toLowerCase()).collect(Collectors.toSet()));
     }
 
-    /**
-     * saves lang files from resources to the plugins datafolder
-     */
-    private void initLangFiles() {
-        Enumeration<URL> en;
-        try {
-            en = plugin.getClass().getClassLoader().getResources("lang.properties");
+    private String saveConvert(String theString, boolean escapeSpace) {
+        int len = theString.length();
+        int bufLen = len * 2;
+        if (bufLen < 0) {
+            bufLen = Integer.MAX_VALUE;
+        }
+        StringBuilder convertedStrBuilder = new StringBuilder(bufLen);
 
-            while (en.hasMoreElements()) {
-                URL url = en.nextElement();
-                JarURLConnection urlcon;
-                urlcon = (JarURLConnection) (url.openConnection());
-
-                JarFile jar = urlcon.getJarFile();
-                Enumeration<JarEntry> entries = jar.entries();
-                boolean found = false;
-
-                while (entries.hasMoreElements()) {
-                    JarEntry jarEntry = entries.nextElement();
-
-                    String entry = jarEntry.getName();
-
-                    if (entry.startsWith("lang_")) { // never save the fallback
-                        try {
-                            InputStream inputStream = plugin.getResource(entry);
-                            File langFile = new File(new File(plugin.getDataFolder(), "lang"), entry);
-                            FileUtils.copyInputStreamToFile(inputStream, langFile); // It should never be null, we already found the resource!
-                        } catch (IllegalArgumentException e) {
-                            plugin.getLogger().log(Level.WARNING, "Couldn't save lang file \"" + entry + "\".", e);
+        for (int i = 0; i < theString.length(); i++) {
+            char aChar = theString.charAt(i);
+            // Handle common case first
+            if ((aChar > 61) && (aChar < 127)) {
+                if (aChar == '\\') {
+                    if (i + 1 < theString.length()) {
+                        final char bChar = theString.charAt(i + 1);
+                        if (bChar == ' ' || bChar == 't' || bChar == 'n' || bChar == 'r' ||
+                                bChar == 'f' || bChar == '\\' || bChar == 'u' || bChar == '=' ||
+                                bChar == ':' || bChar == '#' || bChar == '!') {
+                            // don't double escape already escaped chars
+                            convertedStrBuilder.append(aChar);
+                            convertedStrBuilder.append(bChar);
+                            i++;
+                            continue;
+                        } else {
+                            // any other char following
+                            convertedStrBuilder.append('\\');
                         }
-
-                        found = true;
-                    } else if (found && entry.contains("/")) {
-                        break; // already over it
+                    } else {
+                        // last char was a backslash. escape!
+                        convertedStrBuilder.append('\\');
                     }
                 }
-
-                jar.close();
+                convertedStrBuilder.append(aChar);
+                continue;
             }
-        } catch (IOException e) {
-            plugin.getLogger().log(Level.WARNING, "Couldn't save lang files", e);
+
+            // escape non escaped chars that have to get escaped
+            switch (aChar) {
+                case ' ' -> {
+                    if (escapeSpace) {
+                        convertedStrBuilder.append('\\');
+                    }
+                    convertedStrBuilder.append(' ');
+                }
+                case '\t' -> convertedStrBuilder.append("\\t");
+                case '\n' -> convertedStrBuilder.append("\\n");
+                case '\r' -> convertedStrBuilder.append("\\r");
+                case '\f' -> convertedStrBuilder.append("\\f");
+                case '=', ':', '#', '!' -> {
+                    convertedStrBuilder.append('\\');
+                    convertedStrBuilder.append(aChar);
+                }
+                default -> convertedStrBuilder.append(aChar);
+            }
+        }
+
+        return convertedStrBuilder.toString();
+    }
+
+    /**
+     * saves all missing lang files from resources to the plugins datafolder
+     */
+    private void initLangFiles() {
+        CodeSource src = this.getClass().getProtectionDomain().getCodeSource();
+        if (src != null) {
+            URL jarUrl = src.getLocation();
+            try (ZipInputStream zipStream = new ZipInputStream(jarUrl.openStream())) {
+                ZipEntry zipEntry;
+                while ((zipEntry = zipStream.getNextEntry()) != null) {
+                    if (zipEntry.isDirectory()) {
+                        // already done with topmost layer
+                        break;
+                    }
+
+                    String entryName = zipEntry.getName();
+
+                    if (BUNDLE_FILE_NAME_PATTERN.matcher(entryName).matches()) {
+                        File langFile = new File(new File(plugin.getDataFolder(), BUNDLE_NAME), entryName);
+                        if (!langFile.exists()) { // don't overwrite existing files
+                            FileUtils.copyToFile(zipStream, langFile);
+                        } else { // add defaults to file to expand in case there are key-value pairs missing
+                            Properties defaults = new Properties();
+                            // don't close reader, since we need the stream to be still open for the next entry!
+                            defaults.load(new InputStreamReader(zipStream, StandardCharsets.UTF_8));
+
+                            Properties current = new Properties();
+                            try (InputStreamReader reader = new InputStreamReader(new FileInputStream(langFile), StandardCharsets.UTF_8)) {
+                                current.load(reader);
+                            } catch (Exception e) {
+                                plugin.getLogger().log(Level.WARNING, "couldn't get current properties file for " + entryName + "!", e);
+                                continue;
+                            }
+
+                            try (FileWriter fw = new FileWriter(langFile, StandardCharsets.UTF_8, true);
+                                 // we are NOT using Properties#store since it gets rid of comments and doesn't guarantee ordering
+                                 BufferedWriter bw = new BufferedWriter(fw)) {
+                                boolean updated = false; // only write comment once
+                                for (Map.Entry<Object, Object> translationPair : defaults.entrySet()) {
+                                    if (current.get(translationPair.getKey()) == null) {
+                                        if (!updated) {
+                                            bw.write("# New Values where added. Is everything else up to date? Time of update: " + new Date());
+                                            bw.newLine();
+
+                                            plugin.getLogger().fine("Updated langfile \"" + entryName + "\". Might want to check the new translation strings out!");
+
+                                            updated = true;
+                                        }
+
+                                        String key = saveConvert((String) translationPair.getKey(), true);
+                                        /* No need to escape embedded and trailing spaces for value, hence
+                                         * pass false to flag.
+                                         */
+                                        String val = saveConvert((String) translationPair.getValue(), false);
+                                        bw.write((key + "=" + val));
+                                        bw.newLine();
+                                    } // current already knows the key
+                                } // end of for
+                            } // end of try
+                        } // end of else (file exists)
+                    } // doesn't match
+                } // end of elements
+            } catch (IOException e) {
+                plugin.getLogger().log(Level.WARNING, "Couldn't save lang files", e);
+            }
+        } else {
+            plugin.getLogger().warning("Couldn't save lang files: no CodeSource!");
         }
     }
 

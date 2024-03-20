@@ -58,19 +58,20 @@ public class PadlockAPI {
 
                     if (lockSign != null) {
                         SignLock.updateLegacyLock(lockSign);
+                        SignConnectedOpenable.updateLegacy(lockSign, attachedTo);
                         SignTimer.updateLegacyTimer(lockSign);
-                        SignAccessType.updateLegacy(lockSign);
+                        SignAccessType.updateLegacyType(lockSign);
                         SignDisplay.updateDisplay(lockSign);
 
                         for (Sign additional : getAdditionalSignsDoor(attachedDoor)) {
                             SignLock.updateSignFromAdditional(lockSign, additional);
                             SignTimer.updateLegacyTimerFromAdditional(lockSign, additional);
-                            SignAccessType.updateLegacyFromAdditional(lockSign, additional);
+                            SignAccessType.updateLegacyTypeFromAdditional(lockSign, additional);
                         }
 
                         return lockSign;
                     } else {
-                        Padlock.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the double block at " + attachedTo.getLocation() + " is locked.");
+                        Padlock.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the door block at " + attachedTo.getLocation() + " is locked.");
                     }
                 } else {
                     Padlock.getPlugin().getLogger().warning("Couldn't get double block parts, but data says there should be one. Is it half? " + attachedTo.getLocation());
@@ -79,33 +80,35 @@ public class PadlockAPI {
                 Sign lockSign = getLockChest(attachedTo);
                 if (lockSign != null) {
                     SignLock.updateLegacyLock(lockSign);
+                    SignConnectedOpenable.updateLegacy(lockSign, attachedTo); // even though we now we are protecting a chest, a valid double door could still be below it
                     SignTimer.updateLegacyTimer(lockSign);
-                    SignAccessType.updateLegacy(lockSign);
+                    SignAccessType.updateLegacyType(lockSign);
                     SignDisplay.updateDisplay(lockSign);
 
                     for (Sign additional : getAdditionalSignsChest(attachedTo)) {
                         SignLock.updateSignFromAdditional(lockSign, additional);
                         SignTimer.updateLegacyTimerFromAdditional(lockSign, additional);
-                        SignAccessType.updateLegacyFromAdditional(lockSign, additional);
+                        SignAccessType.updateLegacyTypeFromAdditional(lockSign, additional);
                     }
 
                     return lockSign;
                 } else {
-                    Padlock.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the door at " + attachedTo.getLocation() + "is locked.");
+                    Padlock.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the chest at " + attachedTo.getLocation() + "is locked.");
                 }
             } else {
                 Sign lockSign = getLockSignSingleBlock(attachedTo, null);
 
                 if (lockSign != null) {
                     SignLock.updateLegacyLock(lockSign);
+                    SignConnectedOpenable.updateLegacy(lockSign, attachedTo);
                     SignTimer.updateLegacyTimer(lockSign);
-                    SignAccessType.updateLegacy(lockSign);
+                    SignAccessType.updateLegacyType(lockSign);
                     SignDisplay.updateDisplay(lockSign);
 
                     for (Sign additional : getAdditionalSignsSingleBlock(attachedTo, null)) {
                         SignLock.updateSignFromAdditional(lockSign, additional);
                         SignTimer.updateLegacyTimerFromAdditional(lockSign, additional);
-                        SignAccessType.updateLegacyFromAdditional(lockSign, additional);
+                        SignAccessType.updateLegacyTypeFromAdditional(lockSign, additional);
                     }
 
                     return lockSign;
@@ -518,7 +521,9 @@ public class PadlockAPI {
             return true;
         } else { // Indirectly lockable
             Block blockup = block.getRelative(BlockFace.UP);
-            if (isUpDownAlsoLockableBlock(blockup)) return true;
+            if (isUpDownAlsoLockableBlock(blockup)) {
+                return true;
+            }
             Block blockdown = block.getRelative(BlockFace.DOWN);
             return isUpDownAlsoLockableBlock(blockdown);
         }

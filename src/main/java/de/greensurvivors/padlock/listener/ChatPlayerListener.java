@@ -1,7 +1,7 @@
 package de.greensurvivors.padlock.listener;
 
 import de.greensurvivors.padlock.Padlock;
-import de.greensurvivors.padlock.command.Password;
+import de.greensurvivors.padlock.command.ApplyPassword;
 import de.greensurvivors.padlock.command.SetPassword;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.logging.log4j.Level;
@@ -55,11 +55,11 @@ public final class ChatPlayerListener implements Listener {
             }
         }
         for (String cmdStr : cmdAliases) {
-            for (String subCmdStr : Password.getAliasesStatic()) {
+            for (String subCmdStr : ApplyPassword.getAliasesStatic()) {
                 pwCmdStrings.add(cmdStr + " " + subCmdStr + " ");
             }
         }
-        for (String cmdStr : Password.getAliasesStatic()) {
+        for (String cmdStr : ApplyPassword.getAliasesStatic()) {
             pwCmdStrings.add(cmdStr + " ");
         }
 
@@ -107,7 +107,7 @@ public final class ChatPlayerListener implements Listener {
                 // make room so chat event can roll through, we can wait until next circle
                 Bukkit.getScheduler().runTask(plugin, () -> {
                     final char[] password = text.substring(cmdToCheck.length() + 1).toCharArray();
-                    Password.onExternalCommand(password, event.getPlayer());
+                    ApplyPassword.onExternalCommand(password, event.getPlayer());
 
                     //invalidate char array
                     // yes I know I invalidate the arrays at multiple places, but in terms of password safety it's better to be double and tripple safe then sorry.

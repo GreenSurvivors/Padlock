@@ -3,9 +3,11 @@ package de.greensurvivors.padlock.impl.signdata;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import de.greensurvivors.padlock.Padlock;
+import de.greensurvivors.padlock.PadlockAPI;
 import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.dataTypes.LazySignProperties;
+import de.greensurvivors.padlock.impl.openabledata.Openables;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.apache.commons.collections4.set.ListOrderedSet;
@@ -327,6 +329,12 @@ public class SignLock {
         // set lock and it's owner
         SignAccessType.setAccessType(sign, SignAccessType.AccessType.PRIVATE, false);
         addPlayer(sign, true, player);
+
+        // auto connect doors to stay in line with lockette
+        Block attachedBlock = PadlockAPI.getAttachedBlock(newsign);
+        if (attachedBlock != null && Openables.isUpDownDoor(attachedBlock)) {
+            SignConnectedOpenable.setConnected(sign, true);
+        }
 
         //set waxed and finally make all the changes happen by updating the state
         sign.setWaxed(true);

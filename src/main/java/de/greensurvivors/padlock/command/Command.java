@@ -59,7 +59,7 @@ public class Command implements CommandExecutor, TabCompleter {
         SUBCOMMANDS.add(new Debug(plugin));
         SUBCOMMANDS.add(new Reload(plugin));
         SUBCOMMANDS.add(new SetPassword(plugin));
-        SUBCOMMANDS.add(new Password(plugin));
+        SUBCOMMANDS.add(new ApplyPassword(plugin));
     }
 
     /**

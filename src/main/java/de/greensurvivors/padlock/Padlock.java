@@ -1,7 +1,7 @@
 package de.greensurvivors.padlock;
 
+import de.greensurvivors.padlock.command.ApplyPassword;
 import de.greensurvivors.padlock.command.Command;
-import de.greensurvivors.padlock.command.Password;
 import de.greensurvivors.padlock.config.ConfigManager;
 import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.impl.DependencyManager;
@@ -74,7 +74,7 @@ public class Padlock extends JavaPlugin {
             getLogger().log(Level.SEVERE, "Couldn't register command 'padlock'!");
         }
 
-        Password pwCmd = new Password(plugin);
+        ApplyPassword pwCmd = new ApplyPassword(plugin);
         PluginCommand pwCommand = getCommand("password");
         if (pwCommand != null) {
 

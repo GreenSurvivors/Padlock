@@ -213,6 +213,11 @@ public class BlockPlayerListener implements Listener {
                         } // else invalid line
                     } // for loop
 
+                    // auto connect doors to stay in line with lockette
+                    if (Openables.isUpDownDoor(attachedBlock)) {
+                        SignConnectedOpenable.setConnected(sign, true);
+                    }
+
                     //update Sign after event was done
                     Bukkit.getScheduler().runTaskLater(plugin, () -> SignDisplay.updateDisplay(sign), 2);
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
@@ -295,8 +300,14 @@ public class BlockPlayerListener implements Listener {
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
                     event.setCancelled(true);
                 } else if (!plugin.getDependencyManager().isProtectedFrom(block, player)) { // if the player is allowed to break the block
-                    // break lock sign in case it wasn't attached to the block
-                    lock.getBlock().breakNaturally();
+                    // only break sign, if the broken block was the last protected block
+                    Block attachedBlock = PadlockAPI.getAttachedBlock(event.getBlock());
+                    if (attachedBlock != null && !PadlockAPI.isLockable(attachedBlock)) {
+                        // break lock sign in case it wasn't attached to the block and isn't left over.
+                        // wouldn't be a big deal, but just in case there was block type specific settings,
+                        // we save us to deal with mixed up settings in the future
+                        lock.getBlock().breakNaturally();
+                    }
                 }
             }
         }
@@ -340,7 +351,7 @@ public class BlockPlayerListener implements Listener {
      * Protect block from being used
      * & handle connected openables
      */
-    @EventHandler(priority = EventPriority.HIGH)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
     private void onAttemptInteractLockedBlocks(@NotNull PlayerInteractEvent event) {
         Action action = event.getAction();
         Block block = event.getClickedBlock();
@@ -365,7 +376,8 @@ public class BlockPlayerListener implements Listener {
             if (lockSign != null) {
                 if (SignSelection.getSelectedSign(player) != lockSign) {
                     if (SignLock.isMember(lockSign, player.getUniqueId()) || SignLock.isOwner(lockSign, player.getUniqueId()) ||
-                            player.hasPermission(PermissionManager.ADMIN_USE.getPerm()) || SignAccessType.getAccessType(lockSign, false) != SignAccessType.AccessType.PRIVATE) {
+                            player.hasPermission(PermissionManager.ADMIN_USE.getPerm()) ||
+                            SignAccessType.getAccessType(lockSign, false) != SignAccessType.AccessType.PRIVATE) {
 
                         // Handle multi openables
                         if (action == Action.RIGHT_CLICK_BLOCK) {

@@ -9,6 +9,7 @@ import de.greensurvivors.padlock.impl.signdata.SignExpiration;
 import de.greensurvivors.padlock.impl.signdata.SignLock;
 import de.greensurvivors.padlock.impl.signdata.SignTimer;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.TextComponent;
 import org.bukkit.Bukkit;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
@@ -17,10 +18,7 @@ import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.logging.Level;
 
 /**
@@ -35,13 +33,16 @@ public class Info extends SubCommand {
     /**
      * Try to get a list of names from the set of string versions of uuids given back by the lock.
      * Will ignore any entry without a valid uuid.
+     * May return a UUID string instead of a name if the name was null
      */
-    private static @NotNull Set<String> getNamesFromUUIDStrSet(final @NotNull Set<String> stringUUIDs) {
+    private static @NotNull Set<@Nullable String> getNamesFromUUIDStrSet(final @NotNull Set<String> stringUUIDs) {
         Set<String> players = new HashSet<>(stringUUIDs.size());
 
         for (String uuidStr : stringUUIDs) {
             try {
-                players.add(Bukkit.getOfflinePlayer(UUID.fromString(uuidStr)).getName());
+                String name = Bukkit.getOfflinePlayer(UUID.fromString(uuidStr)).getName();
+
+                players.add(Objects.requireNonNullElse(name, uuidStr));
             } catch (IllegalArgumentException e) {
                 Padlock.getPlugin().getLogger().log(Level.WARNING, "couldn't get UUID from String \"" + uuidStr + "\"", e);
             }
@@ -84,56 +85,57 @@ public class Info extends SubCommand {
                             SignLock.isMember(sign, player.getUniqueId())) {
 
                         // owners
-                        Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_OWNERS).appendSpace();
+                        TextComponent.Builder builder = Component.text();
+                        builder.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_OWNERS).appendSpace());
                         for (String name : getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, true, false))) {
-                            component = component.append(Component.text(name));
-                            component = component.append(Component.text(", "));
+                            builder.append(Component.text(name));
+                            builder.append(Component.text(", "));
                         }
 
                         // members
-                        component = component.append(Component.newline());
-                        component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_MEMBERS)).appendSpace();
+                        builder.append(Component.newline());
+                        builder.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_MEMBERS)).appendSpace();
                         if (SignAccessType.getAccessType(sign, false) != SignAccessType.AccessType.PUBLIC) {
                             for (String name : getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, false, false))) {
-                                component = component.append(Component.text(name));
-                                component = component.append(Component.text(", "));
+                                builder.append(Component.text(name));
+                                builder.append(Component.text(", "));
                             }
                         }
 
                         // access type
-                        component = component.append(Component.newline());
-                        component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_ACCESS_TYPE)).appendSpace();
+                        builder.append(Component.newline());
+                        builder.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_ACCESS_TYPE)).appendSpace();
 
                         switch (SignAccessType.getAccessType(sign, false)) {
                             case PRIVATE ->
-                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_PRIVATE));
+                                    builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_PRIVATE));
                             case PUBLIC ->
-                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_PUBLIC));
+                                    builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_PUBLIC));
                             case DONATION ->
-                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_DONATION));
+                                    builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_DONATION));
                             case DISPLAY ->
-                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_DISPLAY));
+                                    builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_DISPLAY));
                             case SUPPLY ->
-                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_SUPPLY_SIGN));
+                                    builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_SUPPLY_SIGN));
                             /*case null, // todo next java version*/
                             default ->
-                                    component = component.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_ERROR));
+                                    builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_ERROR));
                         }
 
                         // timer
                         Long timer = SignTimer.getTimer(sign, false);
                         if (timer != null) {
-                            component = component.append(Component.newline());
-                            component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_TIMER)).appendSpace();
-                            component = component.append(Component.text(timer));
+                            builder.append(Component.newline());
+                            builder.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_TIMER)).appendSpace();
+                            builder.append(Component.text(timer));
                         }
 
                         // expiration
-                        component = component.append(Component.newline());
-                        component = component.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_EXPIRED)).appendSpace();
-                        component = component.append(Component.text(SignExpiration.isSignExpired(sign)));
+                        builder.append(Component.newline());
+                        builder.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_EXPIRED)).appendSpace();
+                        builder.append(Component.text(SignExpiration.isSignExpired(sign)));
 
-                        plugin.getMessageManager().sendMessageWithPrefix(sender, component);
+                        plugin.getMessageManager().sendMessageWithPrefix(sender, builder.asComponent());
                     } else {
                         plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
                     }

@@ -16,7 +16,6 @@ public class LazySignProperties {
     private Long timer;
     private SignAccessType.AccessType accessType;
 
-
     public LazySignProperties(@Nullable Sign lockSign) {
         this.lock = lockSign;
 

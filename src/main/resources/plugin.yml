@@ -1,7 +1,7 @@
 name: Padlock
 main: de.greensurvivors.padlock.Padlock
 authors: [ connection_lost, GreensurvivorsTeam ]
-softdepend: [ WorldGuard, CoreProtect, LockettePro, Vault ]
+softdepend: [ WorldGuard, CoreProtect, LockettePro ]
 loadbefore: [ SignShop ]
 version: ${version}
 api-version: "1.20"
@@ -21,5 +21,5 @@ commands:
   password:
     usage: |
       /password
-    aliases: [ pw, applypassword ]
+    aliases: [ pw, applypassword, usepassword ]
 #Permissions are handled in Permission Manager
