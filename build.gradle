@@ -34,7 +34,6 @@ repositories {
     mavenCentral()
     maven { name 'Paper'; url 'https://repo.papermc.io/repository/maven-public/' }
     maven { name 'sk89q-repo'; url "https://maven.enginehub.org/repo/" } //worldguard
-    maven { name 'playpro'; url 'https://maven.playpro.com/' } //coreProtect
     maven { url 'https://jitpack.io' } // vault
 }
 
@@ -46,7 +45,6 @@ dependencies {
 
     paperweight.paperDevBundle("$minecraftVersion-R0.1-SNAPSHOT")
     compileOnly ('com.sk89q.worldguard:worldguard-bukkit:7.1.0-SNAPSHOT') { transitive = false }
-    compileOnly('net.coreprotect:coreprotect:22.2') { transitive = false }
     compileOnly('com.github.MilkBowl:VaultAPI:1.7') { transitive = false }
 }
 
