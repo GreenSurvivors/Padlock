@@ -1,7 +1,7 @@
 name: Padlock
 main: de.greensurvivors.padlock.Padlock
 authors: [ connection_lost, GreensurvivorsTeam ]
-softdepend: [ WorldGuard, CoreProtect, LockettePro ]
+softdepend: [ WorldGuard, LockettePro ]
 loadbefore: [ SignShop ]
 version: ${version}
 api-version: "1.20"

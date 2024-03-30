@@ -296,16 +296,16 @@ public class SignLock {
 
     /**
      * sets a new lock sign with the player as the owner
+     * Does NOT apply physics!
      *
-     * @param newsign   the block where the new sign should get created in (Note: does not check for any existing blocks at this place!)
+     * @param newsign the block where the new sign should get created in (Note: does not check for any existing blocks at this place!)
      * @param blockface the direction the new sign should face
      * @param material  Material of the sign
      * @param player    new Owner
-     * @return the updated block
      */
-    public static @NotNull Block putPrivateSignOn(@NotNull Block newsign, @NotNull BlockFace blockface, @NotNull Material material, @NotNull Player player) {
+    public static void putPrivateSignOn(@NotNull Block newsign, @NotNull BlockFace blockface, @NotNull Material material, @NotNull Player player) {
         // set type
-        Material blockType = Material.getMaterial(material.name().replace("_SIGN", "_WALL_SIGN"));
+        Material blockType = Material.matchMaterial(material.name().replace("_SIGN", "_WALL_SIGN"));
         if (blockType != null && Tag.WALL_SIGNS.isTagged(blockType)) {
             newsign.setType(blockType);
         } else {
@@ -316,13 +316,14 @@ public class SignLock {
         BlockData data = newsign.getBlockData();
         if (data instanceof Directional directional) {
             directional.setFacing(blockface);
-            newsign.setBlockData(directional, true);
+            newsign.setBlockData(directional, false); // physics are NOT handled by this methode to make resets possible
         }
 
-        Sign sign = (Sign) newsign.getState();
+        // DANGER AHEAD! We don't use a snapshot here!
+        Sign sign = (Sign) newsign.getState(false);
 
         // default color is hardly visible on dark signs
-        if (newsign.getType() == Material.DARK_OAK_WALL_SIGN) {
+        if (sign.getType() == Material.DARK_OAK_WALL_SIGN) {
             sign.getSide(Side.FRONT).setColor(DyeColor.WHITE);
         }
 
@@ -341,8 +342,6 @@ public class SignLock {
         sign.update();
 
         SignDisplay.updateDisplay(sign);
-
-        return newsign;
     }
 
     /**

@@ -58,13 +58,6 @@ public class Debug extends SubCommand {
                 sender.sendMessage(" - Worldguard: " + worldguardVersion);
             }
 
-            String CoreProtectAPIVersion = plugin.getDependencyManager().getCoreProtectAPIVersion();
-
-            if (CoreProtectAPIVersion != null) {
-                linked = true;
-                sender.sendMessage(" - CoreProtectAPI: " + CoreProtectAPIVersion);
-            }
-
             if (!linked) {
                 sender.sendMessage(" - none");
             }

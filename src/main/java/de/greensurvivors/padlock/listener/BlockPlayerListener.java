@@ -12,14 +12,8 @@ import de.greensurvivors.padlock.impl.signdata.*;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import org.bukkit.Bukkit;
-import org.bukkit.GameMode;
-import org.bukkit.Material;
-import org.bukkit.Tag;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.DoubleChest;
-import org.bukkit.block.Sign;
+import org.bukkit.*;
+import org.bukkit.block.*;
 import org.bukkit.block.data.type.Chest;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
@@ -52,16 +46,37 @@ import java.util.Set;
  */
 public class BlockPlayerListener implements Listener {
     private final Padlock plugin;
+    private final static Set<Material> replaceableMaterials = Set.of(Material.AIR, Material.CAVE_AIR, Material.LIGHT,
+            Material.WATER, Material.LAVA, Material.VINE, Material.GLOW_LICHEN);
 
     public BlockPlayerListener(Padlock plugin) {
         this.plugin = plugin;
     }
 
     /**
+     * checks for vanilla spawn protection
+     *
+     * @param player
+     * @param location
+     * @return
+     */
+    private static boolean isSpawnProtected(@NotNull Player player, @NotNull Location location) {
+        int spawnSize = Bukkit.getServer().getSpawnRadius();
+
+        if (Bukkit.getServer().getWorlds().get(0).getEnvironment() == World.Environment.NORMAL &&
+                spawnSize > 0 && !player.isOp()) {
+            Location spawnLocation = player.getWorld().getSpawnLocation();
+            return Math.abs(location.x() - spawnLocation.z()) > spawnSize ||
+                    Math.abs(location.z() - spawnLocation.z()) > spawnSize;
+        }
+        return true;
+    }
+
+    /**
      * Quick aka automatic protect
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.NORMAL)
-    public void onQuickLock(PlayerInteractEvent event) {
+    public void onQuickLock(@NotNull PlayerInteractEvent event) {
         Player player = event.getPlayer();
 
         // Check quick lock status
@@ -96,37 +111,53 @@ public class BlockPlayerListener implements Listener {
                     BlockFace blockface = event.getBlockFace();
                     if (PadlockAPI.cardinalFaces.contains(blockface)) {
                         Block block = event.getClickedBlock();
-                        if (block == null) return;
-                        Block signLocBlock = block.getRelative(blockface);
+                        if (block != null) {
+                            Block signLocBlock = block.getRelative(blockface);
 
-                        // Check permission with external plugin
-                        if (plugin.getDependencyManager().isProtectedFrom(block, player)) return; // blockwise
-                        if (plugin.getDependencyManager().isProtectedFrom(signLocBlock, player)) return; // signwise
-
-                        // Check whether locking location is obstructed
-                        if (signLocBlock.isEmpty()) {
-                            // Check whether this block is lockable
-                            if (PadlockAPI.isLockable(block)) {
-                                // Is this block already locked?
-                                boolean locked = PadlockAPI.isProtected(block);
+                            // Check permission with external plugin and
+                            // whether locking location is obstructed and
+                            // whether this block is lockable
+                            if (!plugin.getDependencyManager().isProtectedFromBreak(block, player) &&
+                                    replaceableMaterials.contains(signLocBlock.getType()) &&
+                                    PadlockAPI.isLockable(block)) {
                                 // Cancel event here
                                 event.setCancelled(true);
-                                // Check lock info
-                                if (!locked) {
+                                // Is this block already locked?
+                                if (!PadlockAPI.isProtected(block)) {
                                     // Not locked, not a locked door nearby
-                                    MiscUtils.removeAItemMainHand(player);
+
+                                    //copy original state
+                                    BlockState replacedState = signLocBlock.getState(true);
                                     // Put sign on
-                                    Block newsign = SignLock.putPrivateSignOn(signLocBlock, blockface, signType, player);
-                                    plugin.getLockCacheManager().removeFromCache(block.getLocation());
-                                    // Send message
-                                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
-                                    plugin.getDependencyManager().logPlacement(player, newsign);
+                                    SignLock.putPrivateSignOn(signLocBlock, blockface, signType, player); // no copy!
+
+                                    // because of this BlockPlaceEvent we have to first change the block and if it was canceled reset later, instead
+                                    // of setting the state after all checks
+                                    boolean canBuild = isSpawnProtected(player, signLocBlock.getLocation());
+                                    BlockPlaceEvent blockPlaceEvent = new BlockPlaceEvent(signLocBlock, replacedState,
+                                            block, player.getInventory().getItemInMainHand(), player, canBuild, event.getHand());
+
+                                    Bukkit.getPluginManager().callEvent(blockPlaceEvent);
+                                    if (!blockPlaceEvent.isCancelled() && blockPlaceEvent.canBuild()) {
+                                        // all good. update inventory, apply physics, invalidate cache and send message
+                                        MiscUtils.removeAItemMainHand(player);
+
+                                        // I know this does set the data a second time. But I don't now any way to just apply physics without reflection
+                                        signLocBlock.getState().update(true, true);
+
+                                        plugin.getLockCacheManager().removeFromCache(block.getLocation());
+                                        // Send message
+                                        plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
+                                    } else {
+                                        // reset
+                                        replacedState.update(true, false);
+                                    }
                                 } else {
                                     // Cannot lock this block
                                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.QUICK_LOCK_ERROR);
                                 }
-                            }
-                        }
+                            } // not lockable
+                        } // clicked block is null
                     } // not cardinal face of block
                 } // no permission
             } // not right-click or not holding signs
@@ -299,7 +330,7 @@ public class BlockPlayerListener implements Listener {
                 if (!(SignLock.isOwner(lock, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm()))) {
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
                     event.setCancelled(true);
-                } else if (!plugin.getDependencyManager().isProtectedFrom(block, player)) { // if the player is allowed to break the block
+                } else if (!plugin.getDependencyManager().isProtectedFromBreak(block, player)) { // if the player is allowed to break the block
                     // only break sign, if the broken block was the last protected block
                     Block attachedBlock = PadlockAPI.getAttachedBlock(event.getBlock());
                     if (attachedBlock != null && !PadlockAPI.isLockable(attachedBlock)) {
@@ -523,7 +554,7 @@ public class BlockPlayerListener implements Listener {
         }
     }
 
-    private void onPlaceItem(InventoryInteractEvent event, Inventory topInventory) {
+    private void onPlaceItem(@NotNull InventoryInteractEvent event, @NotNull Inventory topInventory) {
         Block block = null;
         if (topInventory.getHolder() instanceof BlockInventoryHolder blockInventoryHolder) {
             block = blockInventoryHolder.getBlock();
@@ -563,7 +594,7 @@ public class BlockPlayerListener implements Listener {
 
     }
 
-    private void onTakeItem(InventoryInteractEvent event, Inventory topInventory) {
+    private void onTakeItem(@NotNull InventoryInteractEvent event, @NotNull Inventory topInventory) {
         Block block = null;
         if (topInventory.getHolder() instanceof BlockInventoryHolder blockInventoryHolder) {
             block = blockInventoryHolder.getBlock();
@@ -601,7 +632,7 @@ public class BlockPlayerListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    private void onInventoryClick(InventoryClickEvent event) { // todo warn people when opening what they are opening best with cache to not annoy
+    private void onInventoryClick(@NotNull InventoryClickEvent event) { // todo warn people when opening what they are opening best with cache to not annoy
         Inventory topInv = event.getView().getTopInventory();
 
         switch (event.getAction()) {
@@ -639,7 +670,7 @@ public class BlockPlayerListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    private void onInventoryDrag(InventoryDragEvent event) {
+    private void onInventoryDrag(@NotNull InventoryDragEvent event) {
         for (int rawSlotId : event.getRawSlots()) {
             if (rawSlotId < event.getView().getTopInventory().getSize()) {
                 onPlaceItem(event, event.getView().getTopInventory());
