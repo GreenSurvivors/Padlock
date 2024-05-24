@@ -6,10 +6,10 @@ plugins {
 }
 // Suppiled by Jenkins
 ext.majorVersion = 2
-ext.minorVersion = 5
+ext.minorVersion = 6
 ext.minecraftVersion = "1.20.6"
 
-ext.buildNumber = System.env.BUILD_NUMBER == null ? "x"                : "build" + "$System.env.BUILD_NUMBER"
+ext.buildNumber = System.env.BUILD_NUMBER == null ? "dev" : "build" + "$System.env.BUILD_NUMBER"
 ext.mavenDirectory = System.env.MAVEN_DIR == null ? "$projectDir/repo" : "$System.env.MAVEN_DIR"
 ext.jdDirectory = System.env.JAVADOCS_DIR == null ? null               : "$System.env.JAVADOCS_DIR"
 
