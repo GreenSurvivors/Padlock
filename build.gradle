@@ -6,8 +6,8 @@ plugins {
 }
 // Suppiled by Jenkins
 ext.majorVersion = 2
-ext.minorVersion = 6
-ext.minecraftVersion = "1.20.4"
+ext.minorVersion = 7
+ext.minecraftVersion = "1.20.6"
 
 ext.buildNumber = System.env.BUILD_NUMBER == null ? "dev" : "build" + "$System.env.BUILD_NUMBER"
 ext.mavenDirectory = System.env.MAVEN_DIR == null ? "$projectDir/repo" : "$System.env.MAVEN_DIR"
@@ -17,12 +17,6 @@ ext.jdDirectory = System.env.JAVADOCS_DIR == null ? null               : "$Syste
 group = "de.greensurvivors"
 archivesBaseName = "Padlock"
 version = "$majorVersion.$minorVersion.$buildNumber".toString()
-/*
-// comment this in, if you want to test with a specific Mc version instead of the one defined in minecraftVersion
-runServer {
-    minecraftVersion("1.20.4")
-}
- */
 
 // extra compile warnings
 compileJava {
@@ -38,7 +32,7 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.apache.commons:commons-collections4:4.4'
+    implementation 'org.apache.commons:commons-collections4:4.5.0-M1'
     implementation 'org.jetbrains:annotations:24.1.0'
     implementation("com.github.ben-manes.caffeine:caffeine:3.1.8") // caches
     implementation("de.mkammerer:argon2-jvm:2.11") // native password hashing with argon2
@@ -56,13 +50,6 @@ processResources {
 tasks.register('sourcesJar', Jar) {
     archiveClassifier.set("sources")
     from sourceSets.main.java.srcDirs
-}
-
-tasks {
-    // Configure reobfJar to run when invoking the build task
-    assemble {
-        dependsOn(reobfJar)
-    }
 }
 
 publishing {
