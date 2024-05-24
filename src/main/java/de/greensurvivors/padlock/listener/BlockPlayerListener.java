@@ -76,7 +76,7 @@ public class BlockPlayerListener implements Listener {
      * Quick aka automatic protect
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.NORMAL)
-    public void onQuickLock(@NotNull PlayerInteractEvent event) {
+    private void onQuickLock(@NotNull PlayerInteractEvent event) {
         Player player = event.getPlayer();
 
         // Check quick lock status
@@ -585,8 +585,7 @@ public class BlockPlayerListener implements Listener {
                     case DISPLAY, SUPPLY -> {
                         event.setResult(Event.Result.DENY);
                     }
-                    /*case null, // todo next java update */
-                    default -> {
+                    case null -> {
                     }
                 }
             }
@@ -623,8 +622,7 @@ public class BlockPlayerListener implements Listener {
                     case DISPLAY, DONATION -> {
                         event.setResult(Event.Result.DENY);
                     }
-                    /*case null, // todo next java update */
-                    default -> {
+                    case null -> {
                     }
                 }
             }
