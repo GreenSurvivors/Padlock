@@ -117,8 +117,7 @@ public class Info extends SubCommand {
                                     builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_DISPLAY));
                             case SUPPLY ->
                                     builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_SUPPLY_SIGN));
-                            /*case null, // todo next java version*/
-                            default ->
+                            case null, default ->
                                     builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_ERROR));
                         }
 
