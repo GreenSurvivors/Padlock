@@ -3,6 +3,7 @@ package de.greensurvivors.padlock.config;
 import org.bukkit.Bukkit;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -104,7 +105,7 @@ public enum PermissionManager {
 
     private final Permission perm;
 
-    PermissionManager(Permission perm) {
+    PermissionManager(@NotNull Permission perm) {
         this.perm = perm;
 
         Bukkit.getPluginManager().addPermission(perm);
