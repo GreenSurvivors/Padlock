@@ -1,15 +1,15 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id("io.papermc.paperweight.userdev") version "1.5.9"
-    id("xyz.jpenilla.run-paper") version "1.0.6"
+    id("io.papermc.paperweight.userdev") version "1.7.1"
+    id("xyz.jpenilla.run-paper") version "2.3.0"
 }
 // Suppiled by Jenkins
 ext.majorVersion = 2
-ext.minorVersion = 5
+ext.minorVersion = 6
 ext.minecraftVersion = "1.20.4"
 
-ext.buildNumber = System.env.BUILD_NUMBER == null ? "x"                : "build" + "$System.env.BUILD_NUMBER"
+ext.buildNumber = System.env.BUILD_NUMBER == null ? "dev" : "build" + "$System.env.BUILD_NUMBER"
 ext.mavenDirectory = System.env.MAVEN_DIR == null ? "$projectDir/repo" : "$System.env.MAVEN_DIR"
 ext.jdDirectory = System.env.JAVADOCS_DIR == null ? null               : "$System.env.JAVADOCS_DIR"
 
