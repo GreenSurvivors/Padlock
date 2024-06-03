@@ -421,6 +421,11 @@ public class MessageManager {
         PASSWORD_SAFETY_WARNING("cmd.password.safety-warning", "<dark_red>Warning: never use a password, you are using anywhere else! While I did everything I could for your safety, there <bold>ARE</bold> ways your password could get leaked!</dark_red>"),
         PASSWORD_START_PROCESSING("cmd.password.start-processing"),
         PASSWORD_WRONG_PASSWORD("cmd.password.wrong-password"),
+        PASSWORD_DEFAULT_PASSWORD("cmd.password.default"),
+        PASSWORD_INPUT_SET_TITLE("cmd.password.gui-title.set"),
+        PASSWORD_INPUT_REMOVE("cmd.password.gui.remove"),
+        PASSWORD_INPUT_APPLY_TITLE("cmd.password.gui-title.apply"),
+        PASSWORD_ERROR_EMPTY("cmd.password.error.empty"),
         //plugin prefix
         PLUGIN_PREFIX("prefix", "<gold>[Padlock]</gold> "),
         //

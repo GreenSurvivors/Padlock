@@ -12,7 +12,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Sign;
-import org.bukkit.entity.Player;
+import org.bukkit.entity.HumanEntity;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
 import org.jetbrains.annotations.NotNull;
@@ -208,7 +208,7 @@ public final class SignPasswords {
         return (hash != null && !hash.isEmpty());
     }
 
-    public static void checkPasswordAndGrandAccess(@NotNull Sign sign, @NotNull Player player, char @NotNull [] password) {
+    public static void checkPasswordAndGrandAccess(@NotNull Sign sign, @NotNull HumanEntity player, char @NotNull [] password) {
         final String hash = sign.getPersistentDataContainer().get(passwordHashKey, PersistentDataType.STRING);
 
         if (hash != null) {
@@ -244,7 +244,7 @@ public final class SignPasswords {
         }
     }
 
-    public static void setPassword(final @NotNull Sign sign, final @NotNull Player player, final char @Nullable [] newPassword) {
+    public static void setPassword(final @NotNull Sign sign, final @NotNull HumanEntity player, final char @Nullable [] newPassword) {
         PersistentDataContainer dataContainer = sign.getPersistentDataContainer();
 
         if (newPassword == null) {
