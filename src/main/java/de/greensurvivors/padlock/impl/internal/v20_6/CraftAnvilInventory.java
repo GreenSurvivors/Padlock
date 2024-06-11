@@ -4,7 +4,6 @@ import de.greensurvivors.padlock.impl.internal.InputAnvilMenu;
 import net.minecraft.world.Container;
 import org.bukkit.Location;
 import org.bukkit.craftbukkit.inventory.CraftInventoryAnvil;
-import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.Nullable;
 
 public final class CraftAnvilInventory extends CraftInventoryAnvil implements InputAnvilMenu {
@@ -23,9 +22,8 @@ public final class CraftAnvilInventory extends CraftInventoryAnvil implements In
      */
     @Override
     @Deprecated
-    @Contract(value = " -> null", pure = true)
-    public @Nullable String getRenameText() {
-        return null;
+    public String getRenameText() {
+        return super.getRenameText();
     }
 
     public char @Nullable [] getRenameChars() {
