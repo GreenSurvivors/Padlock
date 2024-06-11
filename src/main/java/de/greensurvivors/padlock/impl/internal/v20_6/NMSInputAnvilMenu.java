@@ -15,6 +15,7 @@ import org.bukkit.craftbukkit.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.inventory.CraftInventory;
 import org.bukkit.craftbukkit.inventory.CraftInventoryView;
 import org.bukkit.inventory.InventoryView;
+import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -60,8 +61,11 @@ public final class NMSInputAnvilMenu extends AnvilMenu {
         } else {
             this.emptyText = PaperAdventure.asVanilla(emptyText);
         }
+
+        itemName = BLURRED;
     }
 
+    @Contract(pure = true)
     public char @Nullable [] getLastInput() {
         return lastInput;
     }
