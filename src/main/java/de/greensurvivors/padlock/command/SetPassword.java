@@ -22,7 +22,6 @@ import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryCloseEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryType;
-import org.bukkit.event.player.PlayerCommandPreprocessEvent;
 import org.bukkit.inventory.AnvilInventory;
 import org.bukkit.inventory.InventoryView;
 import org.bukkit.inventory.ItemStack;
@@ -36,10 +35,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
 
-/**
- * But since we are handling passwords, we want to leak them as less as possible,
- * and catch them even before the server checks for the right command in a {@link PlayerCommandPreprocessEvent} in {@link de.greensurvivors.padlock.listener.ChatPlayerListener}
- */
 public final class SetPassword extends SubCommand implements Listener {
     private final WeakHashMap<InventoryView, Sign> openInventories = new WeakHashMap<>();
 
@@ -53,6 +48,8 @@ public final class SetPassword extends SubCommand implements Listener {
     private void onInventoryClose(@NotNull InventoryCloseEvent event) {
         if (openInventories.containsKey(event.getView())) {
             event.getInventory().clear();
+
+            openInventories.remove(event.getView());
         }
     }
 
