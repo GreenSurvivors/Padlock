@@ -10,9 +10,6 @@ dependency:
   # If set to true and worldguard is installed, this will check if the player is allowed to build when quick protecting / breaking locks.
   worldguard:
     enabled: true
-  # If set to true and coreprotect is installed, quick protect gets logged in coreprotect as block place.
-  coreprotect:
-    enabled: true
 lock:
   #| Option                | Description                                                                                                                                             |
   #|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
