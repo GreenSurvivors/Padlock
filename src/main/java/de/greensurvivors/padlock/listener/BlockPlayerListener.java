@@ -63,7 +63,7 @@ public class BlockPlayerListener implements Listener {
     private static boolean isSpawnProtected(@NotNull Player player, @NotNull Location location) {
         int spawnSize = Bukkit.getServer().getSpawnRadius();
 
-        if (Bukkit.getServer().getWorlds().get(0).getEnvironment() == World.Environment.NORMAL &&
+        if (Bukkit.getServer().getWorlds().getFirst().getEnvironment() == World.Environment.NORMAL &&
                 spawnSize > 0 && !player.isOp()) {
             Location spawnLocation = player.getWorld().getSpawnLocation();
             return Math.abs(location.x() - spawnLocation.z()) > spawnSize ||
@@ -76,7 +76,7 @@ public class BlockPlayerListener implements Listener {
      * Quick aka automatic protect
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.NORMAL)
-    public void onQuickLock(@NotNull PlayerInteractEvent event) {
+    private void onQuickLock(@NotNull PlayerInteractEvent event) {
         Player player = event.getPlayer();
 
         // Check quick lock status
@@ -585,8 +585,7 @@ public class BlockPlayerListener implements Listener {
                     case DISPLAY, SUPPLY -> {
                         event.setResult(Event.Result.DENY);
                     }
-                    /*case null, // todo next java update */
-                    default -> {
+                    case null -> {
                     }
                 }
             }
@@ -623,8 +622,7 @@ public class BlockPlayerListener implements Listener {
                     case DISPLAY, DONATION -> {
                         event.setResult(Event.Result.DENY);
                     }
-                    /*case null, // todo next java update */
-                    default -> {
+                    case null -> {
                     }
                 }
             }

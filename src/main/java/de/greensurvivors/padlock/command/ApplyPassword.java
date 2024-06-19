@@ -40,7 +40,7 @@ public class ApplyPassword extends SubCommand implements TabCompleter, CommandEx
      * nor is there a way to have a static Set in the mother class without all subclasses share the same... -.-
      */
     public static @NotNull Set<String> getAliasesStatic() {
-        return Set.of("password", "pw", "applypassword, usepassword");
+        return Set.of("password", "pw", "applypassword", "usepassword");
     }
 
     /**
