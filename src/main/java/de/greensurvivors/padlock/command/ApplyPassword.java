@@ -13,9 +13,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
-import org.bukkit.command.CommandExecutor;
-import org.bukkit.command.CommandSender;
-import org.bukkit.command.TabCompleter;
+import org.bukkit.command.*;
 import org.bukkit.entity.Player;
 import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
@@ -36,6 +34,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 import java.util.WeakHashMap;
+import java.util.logging.Level;
 
 /**
  * Please note: This is a main command as well as a subcommand.
@@ -48,12 +47,25 @@ public class ApplyPassword extends SubCommand implements TabCompleter, CommandEx
 
     public ApplyPassword(@NotNull Padlock plugin) {
         super(plugin);
+
+        Bukkit.getPluginManager().registerEvents(this, plugin);
+
+        // register this also as a normal command
+        PluginCommand pwCommand = plugin.getCommand("password");
+        if (pwCommand != null) {
+
+            pwCommand.setExecutor(this);
+            pwCommand.setTabCompleter(this);
+        } else {
+            plugin.getLogger().log(Level.SEVERE, "Couldn't register command 'password'!");
+        }
     }
 
     @EventHandler(ignoreCancelled = false)
     private void onInventoryClose(@NotNull InventoryCloseEvent event) {
         if (openInventories.containsKey(event.getView())) {
             event.getInventory().clear();
+            openInventories.remove(event.getView());
         }
     }
 

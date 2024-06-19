@@ -1,6 +1,5 @@
 package de.greensurvivors.padlock;
 
-import de.greensurvivors.padlock.command.ApplyPassword;
 import de.greensurvivors.padlock.command.MainCommand;
 import de.greensurvivors.padlock.config.ConfigManager;
 import de.greensurvivors.padlock.config.MessageManager;
@@ -70,11 +69,9 @@ public class Padlock extends JavaPlugin {
         pluginManager.registerEvents(new BlockPlayerListener(this), this);
         pluginManager.registerEvents(new BlockEnvironmentListener(this), this);
         pluginManager.registerEvents(new BlockInventoryMoveListener(this), this);
-        ApplyPassword applyPasswordCmd = new ApplyPassword(this);
-        pluginManager.registerEvents(applyPasswordCmd, this);
-        //set password command is also a listener, but that will register itself.
+        //setPassword and applyPassword commands are also listener, but they will register themself.
 
-        //register commands
+        //register main command; applyPassword will - again - register itself
         MainCommand lockCmd = new MainCommand(this);
 
         PluginCommand mainCommand = getCommand("padlock");
@@ -85,16 +82,6 @@ public class Padlock extends JavaPlugin {
         } else {
             getLogger().log(Level.SEVERE, "Couldn't register command 'padlock'!");
         }
-
-        PluginCommand pwCommand = getCommand("password");
-        if (pwCommand != null) {
-
-            pwCommand.setExecutor(applyPasswordCmd);
-            pwCommand.setTabCompleter(applyPasswordCmd);
-        } else {
-            getLogger().log(Level.SEVERE, "Couldn't register command 'password'!");
-        }
-
 
         // Dependencys
         dependencyManager = new DependencyManager(this);
