@@ -98,7 +98,7 @@ public class MessageManager {
 
         if (lang == null) { // fallback, since we are always trying to save defaults this never should happen
             try {
-                lang = PropertyResourceBundle.getBundle("lang", locale, plugin.getClass().getClassLoader(), new UTF8ResourceBundleControl());
+                lang = PropertyResourceBundle.getBundle(BUNDLE_NAME, locale, plugin.getClass().getClassLoader(), new UTF8ResourceBundleControl());
             } catch (MissingResourceException e) {
                 plugin.getLogger().log(Level.SEVERE, "Couldn't get Ressource bundle \"lang\" for locale \"" + locale.toLanguageTag() + "\". Messages WILL be broken!", e);
             }
@@ -255,7 +255,7 @@ public class MessageManager {
      * prepend the message with the plugins prefix before sending it to the audience.
      */
     public void sendMessageWithPrefix(@NotNull Audience audience, @NotNull Component messages) {
-        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(Component.text(" ")).append(messages));
+        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).appendSpace().append(messages));
     }
 
     /**
@@ -277,7 +277,7 @@ public class MessageManager {
      * send a component from the lang file to the audience, prefixed with this plugins prefix.
      */
     public void sendLang(@NotNull Audience audience, @NotNull LangPath path) {
-        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(Component.text(" ")).append(langCache.get(path)));
+        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).appendSpace().append(langCache.get(path)));
     }
 
     /**
@@ -285,7 +285,7 @@ public class MessageManager {
      * Note: might be slightly slower than {@link #sendLang(Audience, LangPath)} since this can not use cache.
      */
     public void sendLang(@NotNull Audience audience, @NotNull LangPath path, @NotNull TagResolver resolver) {
-        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).append(Component.text(" ")).append(
+        audience.sendMessage(langCache.get(LangPath.PLUGIN_PREFIX).appendSpace().append(
                 MiniMessage.miniMessage().deserialize(getStringFromLang(path), resolver)));
     }
 
