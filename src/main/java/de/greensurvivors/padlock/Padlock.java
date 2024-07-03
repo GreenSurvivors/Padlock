@@ -22,7 +22,7 @@ public class Padlock extends JavaPlugin {
     /**
      * only for big problems or plugin development
      */
-    private final boolean debug = false;
+    private final boolean debug = false; // todo make this a setting in the config.
     private ConfigManager configManager;
     private MessageManager messageManager;
     private OpenableToggleManager openableToggleManager;
@@ -56,7 +56,9 @@ public class Padlock extends JavaPlugin {
         // Register Listeners
         // If debug mode is not on, debug listener won't register
         PluginManager pluginManager = getServer().getPluginManager();
-        if (debug) pluginManager.registerEvents(new BlockDebugListener(), this);
+        if (debug) {
+            pluginManager.registerEvents(new BlockDebugListener(), this);
+        }
         pluginManager.registerEvents(new BlockPlayerListener(this), this);
         pluginManager.registerEvents(new BlockEnvironmentListener(this), this);
         pluginManager.registerEvents(new BlockInventoryMoveListener(this), this);
