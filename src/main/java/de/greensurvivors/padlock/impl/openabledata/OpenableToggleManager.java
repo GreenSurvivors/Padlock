@@ -6,6 +6,7 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
@@ -53,7 +54,7 @@ public class OpenableToggleManager {
      *
      * @param timeUntilToggle time to wait until all the given blocks will get toggled in milliseconds
      */
-    public void toggleCancelRunning(final @NotNull Set<@NotNull Block> blocksToToggle, final long timeUntilToggle) {
+    public void toggleCancelRunning(final @NotNull Player player, final @NotNull Set<@NotNull Block> blocksToToggle, final long timeUntilToggle) {
         Set<Location> locationsToToggle = blocksToToggle.stream().map(Block::getLocation).collect(Collectors.toSet());
 
         // remove running tasks
@@ -88,7 +89,7 @@ public class OpenableToggleManager {
                         }
                     }
 
-                    Openables.toggleOpenable(openableBlock);
+                    Openables.toggleOpenable(player, openableBlock);
 
                     if (taskToClearUp != null) {
                         final BukkitTask finalTaskToClearUp = taskToClearUp; // just Java being Java and needing a final variable, even if this can't change at this point.
