@@ -1,16 +1,34 @@
 package de.greensurvivors.padlock.impl.openabledata;
 
+import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.PadlockAPI;
 import de.greensurvivors.padlock.impl.dataTypes.DoubleBlockParts;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.DoorBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.TrapDoorBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.BlockHitResult;
+import org.bukkit.Location;
 import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
 import org.bukkit.block.data.Openable;
+import org.bukkit.craftbukkit.CraftWorld;
+import org.bukkit.craftbukkit.block.CraftBlockType;
+import org.bukkit.craftbukkit.block.data.CraftBlockData;
+import org.bukkit.craftbukkit.entity.CraftPlayer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -18,17 +36,80 @@ import java.util.Map;
  * Helper class for openables
  */
 public class Openables {
+    // cache found methods, since reflection is expensive
+    private static final Map<@NotNull Class<?>, @NotNull Method> cachedMethods = new HashMap<>();
+
     /**
      * open/closes the openable block (door, fence gate, trapdoor,...)
      * will do nothing if the block can't be opened.
      */
-    public static void toggleOpenable(@NotNull Block block) {
+    public static void toggleOpenable(@NotNull org.bukkit.entity.Player player, @NotNull Block block) {
         if (block.getBlockData() instanceof Openable openable) {
             boolean open = !openable.isOpen();
 
+            if (block.getBlockData() instanceof CraftBlockData craftBlockData) {
+                net.minecraft.world.level.block.Block nmsBlock = CraftBlockType.bukkitToMinecraft(block.getType());
+                Location location = block.getLocation();
+
+                final BlockPos blockPos = new BlockPos(location.getBlockX(), location.getBlockY(), location.getBlockZ());
+                final ServerLevel level = ((CraftWorld) block.getWorld()).getHandle();
+                final ServerPlayer serverPlayer = ((CraftPlayer) player).getHandle();
+
+                switch (nmsBlock) {
+                    case DoorBlock doorBlock -> {
+                        // don't use useWithoutItem because of iron door check
+                        doorBlock.setOpen(serverPlayer, level, craftBlockData.getState(), blockPos, open);
+
+                        return;
+                    }
+                    case TrapDoorBlock trapDoorBlock -> {
+                        try {
+                            Class<?> clazz = trapDoorBlock.getClass();
+                            Method method = cachedMethods.get(clazz);
+
+                            if (method == null) {
+                                // don't use useWithoutItem because of iron trapdoor check
+                                method = clazz.getDeclaredMethod("toggle", BlockState.class, Level.class, BlockPos.class, Player.class);
+                                method.setAccessible(true);
+
+                                cachedMethods.put(clazz, method);
+                            }
+
+                            method.invoke(trapDoorBlock, craftBlockData.getState(), level, blockPos, serverPlayer);
+
+                            return;
+                        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                            Padlock.getPlugin().getComponentLogger().warn("Could use \"useWithoutItem\" of trapdoor, block: " + block, e);
+                        }
+                    }
+                    case FenceGateBlock fenceGateBlock -> {
+                        try {
+                            Class<?> clazz = fenceGateBlock.getClass();
+                            Method method = cachedMethods.get(clazz);
+
+                            if (method == null) {
+                                method = clazz.getDeclaredMethod("useWithoutItem", BlockState.class, Level.class, BlockPos.class, Player.class, BlockHitResult.class);
+                                method.setAccessible(true);
+
+                                cachedMethods.put(clazz, method);
+                            }
+
+                            method.invoke(fenceGateBlock, craftBlockData.getState(), level, blockPos, serverPlayer, null);
+
+                            return;
+                        } catch (NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
+                            Padlock.getPlugin().getComponentLogger().warn("Could use \"useWithoutItem\" of fence gate, block: " + block, e);
+                        }
+                    }
+                    case null, default -> {
+                    }
+                }
+            }
+
+            // unknown, get fallback
             openable.setOpen(open);
             block.setBlockData(openable);
-            block.getWorld().playSound(block.getLocation(), open ? OpenableSound.getOpenSound(block.getType()) : OpenableSound.getCloseSound(block.getType()), 1, 1);
+            block.getWorld().playSound(block.getLocation(), open ? getOpenSound(block.getType()) : getCloseSound(block.getType()), 1, 1);
         }
     }
 
@@ -75,7 +156,7 @@ public class Openables {
      * @return mapping from all directions to adjacent to the block of the same type.
      * A direction might be missing if there was no fitting block
      */
-    public static @NotNull Map<@NotNull BlockFace, @NotNull Block> getConnectedSingle(Block block) {
+    public static @NotNull Map<@NotNull BlockFace, @NotNull Block> getConnectedSingle(@NotNull Block block) {
         Map<BlockFace, Block> adjacent = new HashMap<>();
 
         for (BlockFace blockFace : PadlockAPI.allFaces) {
@@ -107,13 +188,14 @@ public class Openables {
             }
         }
 
+
         return adjacent;
     }
 
     /**
      * Returns true if the submitted block OR the one below / above it is a door
      */
-    public static boolean isUpDownDoor(Block block) {
+    public static boolean isUpDownDoor(@NotNull Block block) {
         return  // is door
                 Tag.DOORS.isTagged(block.getType()) ||
                         // Indirectly protecting a door
@@ -121,110 +203,29 @@ public class Openables {
                         Tag.DOORS.isTagged(block.getRelative(BlockFace.DOWN).getType());
     }
 
-    /**
-     * enum containing all the sounds to play, when an openable open/closes
-     * This is here because just setting the data of a block to open/close doesn't make a sound.
-     */
-    private enum OpenableSound { // todo find a way to use net.minecraft.world.level.block.state.properties.BlockSetType
-        OAK_DOOR(Material.OAK_DOOR),
-        SPRUCE_DOOR(Material.SPRUCE_DOOR),
-        BIRCH_DOOR(Material.BIRCH_DOOR),
-        ACACIA_DOOR(Material.ACACIA_DOOR),
-        JUNGLE_DOOR(Material.JUNGLE_DOOR),
-        DARK_OAK_DOOR(Material.DARK_OAK_DOOR),
-        MANGROVE_DOOR(Material.MANGROVE_DOOR),
-        IRON_DOOR(Material.IRON_DOOR, Sound.BLOCK_IRON_DOOR_CLOSE, Sound.BLOCK_IRON_DOOR_OPEN),
-        CRIMSON_DOOR(Material.CRIMSON_DOOR, Sound.BLOCK_NETHER_WOOD_DOOR_CLOSE, Sound.BLOCK_NETHER_WOOD_DOOR_OPEN),
-        WARPED_DOOR(Material.WARPED_DOOR, Sound.BLOCK_NETHER_WOOD_DOOR_CLOSE, Sound.BLOCK_NETHER_WOOD_DOOR_OPEN),
-        CHERRY_DOOR(Material.CHERRY_DOOR, Sound.BLOCK_CHERRY_WOOD_DOOR_CLOSE, Sound.BLOCK_CHERRY_WOOD_DOOR_OPEN),
-        BAMBOO_DOOR(Material.BAMBOO_DOOR, Sound.BLOCK_BAMBOO_WOOD_DOOR_CLOSE, Sound.BLOCK_BAMBOO_WOOD_DOOR_OPEN),
-        OAK_TRAPDOOR(Material.OAK_TRAPDOOR),
-        SPRUCE_TRAPDOOR(Material.SPRUCE_TRAPDOOR),
-        BIRCH_TRAPDOOR(Material.BIRCH_TRAPDOOR),
-        ACACIA_TRAPDOOR(Material.ACACIA_TRAPDOOR),
-        JUNGLE_TRAPDOOR(Material.JUNGLE_TRAPDOOR),
-        DARK_OAK_TRAPDOOR(Material.DARK_OAK_TRAPDOOR),
-        MANGROVE_TRAPDOOR(Material.MANGROVE_TRAPDOOR),
-        IRON_TRAPDOOR(Material.IRON_TRAPDOOR, Sound.BLOCK_IRON_TRAPDOOR_CLOSE, Sound.BLOCK_IRON_TRAPDOOR_OPEN),
-        CRIMSON_TRAPDOOR(Material.CRIMSON_TRAPDOOR, Sound.BLOCK_NETHER_WOOD_TRAPDOOR_CLOSE, Sound.BLOCK_NETHER_WOOD_TRAPDOOR_OPEN),
-        WARPED_TRAPDOOR(Material.WARPED_TRAPDOOR, Sound.BLOCK_NETHER_WOOD_TRAPDOOR_CLOSE, Sound.BLOCK_NETHER_WOOD_TRAPDOOR_OPEN),
-        CHERRY_TRAPDOOR(Material.CHERRY_TRAPDOOR, Sound.BLOCK_CHERRY_WOOD_TRAPDOOR_CLOSE, Sound.BLOCK_CHERRY_WOOD_TRAPDOOR_OPEN),
-        BAMBOO_TRAPDOOR(Material.BAMBOO_TRAPDOOR, Sound.BLOCK_BAMBOO_WOOD_TRAPDOOR_CLOSE, Sound.BLOCK_BAMBOO_WOOD_TRAPDOOR_OPEN),
-        OAK_FENCE_GATE(Material.OAK_FENCE_GATE),
-        SPRUCE_FENCE_GATE(Material.SPRUCE_FENCE_GATE),
-        BIRCH_FENCE_GATE(Material.BIRCH_FENCE_GATE),
-        ACACIA_FENCE_GATE(Material.ACACIA_FENCE_GATE),
-        JUNGLE_FENCE_GATE(Material.JUNGLE_FENCE_GATE),
-        DARK_OAK_FENCE_GATE(Material.DARK_OAK_FENCE_GATE),
-        MANGROVE_FENCE_GATE(Material.MANGROVE_FENCE_GATE),
-        CRIMSON_FENCE_GATE(Material.CRIMSON_FENCE_GATE, Sound.BLOCK_NETHER_WOOD_FENCE_GATE_CLOSE, Sound.BLOCK_NETHER_WOOD_FENCE_GATE_OPEN),
-        WARPED_FENCE_GATE(Material.WARPED_FENCE_GATE, Sound.BLOCK_NETHER_WOOD_FENCE_GATE_CLOSE, Sound.BLOCK_NETHER_WOOD_FENCE_GATE_OPEN),
-        CHERRY_FENCE_GATE(Material.CHERRY_FENCE_GATE, Sound.BLOCK_CHERRY_WOOD_FENCE_GATE_CLOSE, Sound.BLOCK_CHERRY_WOOD_FENCE_GATE_OPEN),
-        BAMBOO_FENCE_GATE(Material.BAMBOO_FENCE_GATE, Sound.BLOCK_BAMBOO_WOOD_FENCE_GATE_CLOSE, Sound.BLOCK_BAMBOO_WOOD_FENCE_GATE_OPEN);
-
-        private final Material material;
-        private final Sound closeSound;
-        private final Sound openSound;
-
-        OpenableSound(@NotNull Material material) {
-            this.material = material;
-            if (Tag.DOORS.isTagged(material)) {
-                this.closeSound = Sound.BLOCK_WOODEN_DOOR_CLOSE;
-                this.openSound = Sound.BLOCK_WOODEN_DOOR_OPEN;
-            } else if (Tag.TRAPDOORS.isTagged(material)) {
-                this.closeSound = Sound.BLOCK_WOODEN_TRAPDOOR_CLOSE;
-                this.openSound = Sound.BLOCK_WOODEN_TRAPDOOR_OPEN;
-            } else if (Tag.FENCE_GATES.isTagged(material)) {
-                this.closeSound = Sound.BLOCK_FENCE_GATE_CLOSE;
-                this.openSound = Sound.BLOCK_FENCE_GATE_OPEN;
-            } else { // I have no idea. Should never happen...
-                this.closeSound = Sound.ENTITY_VILLAGER_NO;
-                this.openSound = Sound.ENTITY_VILLAGER_YES;
-            }
+    private static @NotNull Sound getCloseSound(@NotNull Material material) {
+        // fallback in case a material wasn't implemented yet
+        if (Tag.DOORS.isTagged(material)) {
+            return Sound.BLOCK_WOODEN_DOOR_CLOSE;
+        } else if (Tag.TRAPDOORS.isTagged(material)) {
+            return Sound.BLOCK_WOODEN_TRAPDOOR_CLOSE;
+        } else if (Tag.FENCE_GATES.isTagged(material)) {
+            return Sound.BLOCK_FENCE_GATE_CLOSE;
+        } else { // I have no idea. Should never happen...
+            return Sound.ENTITY_VILLAGER_NO;
         }
+    }
 
-        OpenableSound(@NotNull Material material, @NotNull Sound closeSound, @NotNull Sound openSound) {
-            this.material = material;
-            this.closeSound = closeSound;
-            this.openSound = openSound;
-        }
-
-        public static @NotNull Sound getCloseSound(@NotNull Material material) {
-            for (OpenableSound doorSound : OpenableSound.values()) {
-                if (doorSound.material.equals(material)) {
-                    return doorSound.closeSound;
-                }
-            }
-
-            // fallback in case a new door wasn't implemented yet
-            if (Tag.DOORS.isTagged(material)) {
-                return Sound.BLOCK_WOODEN_DOOR_CLOSE;
-            } else if (Tag.TRAPDOORS.isTagged(material)) {
-                return Sound.BLOCK_WOODEN_TRAPDOOR_CLOSE;
-            } else if (Tag.FENCE_GATES.isTagged(material)) {
-                return Sound.BLOCK_FENCE_GATE_CLOSE;
-            } else { // I have no idea. Should never happen...
-                return Sound.ENTITY_VILLAGER_NO;
-            }
-        }
-
-        public static @NotNull Sound getOpenSound(@NotNull Material material) {
-            for (OpenableSound doorSound : OpenableSound.values()) {
-                if (doorSound.material.equals(material)) {
-                    return doorSound.openSound;
-                }
-            }
-
-            // fallback in case a new door wasn't implemented yet
-            if (Tag.DOORS.isTagged(material)) {
-                return Sound.BLOCK_WOODEN_DOOR_OPEN;
-            } else if (Tag.TRAPDOORS.isTagged(material)) {
-                return Sound.BLOCK_WOODEN_TRAPDOOR_OPEN;
-            } else if (Tag.FENCE_GATES.isTagged(material)) {
-                return Sound.BLOCK_FENCE_GATE_OPEN;
-            } else { // I have no idea. Should never happen...
-                return Sound.ENTITY_VILLAGER_YES;
-            }
+    private static @NotNull Sound getOpenSound(@NotNull Material material) {
+        // fallback in case a new material wasn't implemented yet
+        if (Tag.DOORS.isTagged(material)) {
+            return Sound.BLOCK_WOODEN_DOOR_OPEN;
+        } else if (Tag.TRAPDOORS.isTagged(material)) {
+            return Sound.BLOCK_WOODEN_TRAPDOOR_OPEN;
+        } else if (Tag.FENCE_GATES.isTagged(material)) {
+            return Sound.BLOCK_FENCE_GATE_OPEN;
+        } else { // I have no idea. Should never happen...
+            return Sound.ENTITY_VILLAGER_YES;
         }
     }
 }
