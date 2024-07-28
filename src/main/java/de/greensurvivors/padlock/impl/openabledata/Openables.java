@@ -100,10 +100,10 @@ public class Openables {
         Map<BlockFace, DoubleBlockParts> adjacent = new HashMap<>();
 
         for (BlockFace blockFace : PadlockAPI.cardinalFaces) {
-            Block relative0 = parts.downPart().getRelative(blockFace), relative1 = parts.upPart().getRelative(blockFace);
+            Block relativeUP = parts.upPart().getRelative(blockFace), relativeDown = parts.downPart().getRelative(blockFace);
 
-            if (relative0.getType() == parts.downPart().getType() && relative1.getType() == parts.upPart().getType()) {
-                adjacent.put(blockFace, new DoubleBlockParts(relative0, relative1));
+            if (relativeDown.getType() == parts.downPart().getType() && relativeUP.getType() == parts.upPart().getType()) {
+                adjacent.put(blockFace, new DoubleBlockParts(relativeUP, relativeDown));
             }
         }
 

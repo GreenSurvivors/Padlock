@@ -426,7 +426,7 @@ public class PadlockAPI {
     /**
      * get the not expired lock sign of a block, might be null if no where found.
      */
-    public static @Nullable Sign getLock(Block block, boolean ignoreCache) {
+    public static @Nullable Sign getLock(@NotNull Block block, boolean ignoreCache) {
         if (!ignoreCache && Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
             return Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(block.getLocation()).getLock();
         } else {

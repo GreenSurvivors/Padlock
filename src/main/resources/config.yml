@@ -38,8 +38,7 @@ lock:
   #* WITHER
   #* ZOMBIE
   #* SILVERFISH
-  exemptions:
-    -
+  exemptions: []
 cache:
   seconds: 0
 bedrock-prefix: "."

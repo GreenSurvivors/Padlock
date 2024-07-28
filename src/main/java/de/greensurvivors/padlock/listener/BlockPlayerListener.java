@@ -401,10 +401,11 @@ public class BlockPlayerListener implements Listener {
             }
         }
         if (action == Action.LEFT_CLICK_BLOCK || action == Action.RIGHT_CLICK_BLOCK) {
-            Player player = event.getPlayer();
             Sign lockSign = PadlockAPI.getLock(block, false);
 
             if (lockSign != null) {
+                Player player = event.getPlayer();
+
                 if (SignSelection.getSelectedSign(player) != lockSign) {
                     if (SignLock.isMember(lockSign, player.getUniqueId()) || SignLock.isOwner(lockSign, player.getUniqueId()) ||
                             player.hasPermission(PermissionManager.ADMIN_USE.getPerm()) ||
