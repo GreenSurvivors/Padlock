@@ -372,9 +372,9 @@ public class SignLock {
          *
          * @return the ListOrderedSet class
          */
-        @NotNull
+        @SuppressWarnings("unchecked")
         @Override
-        public Class<ListOrderedSet<String>> getComplexType() { //todo this cast
+        public @NotNull Class<ListOrderedSet<String>> getComplexType() { //todo this cast
             return ((Class<ListOrderedSet<String>>) ((Class<?>) ListOrderedSet.class));
         }
 
