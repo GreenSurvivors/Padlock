@@ -192,8 +192,7 @@ public class MessageManager {
                 ZipEntry zipEntry;
                 while ((zipEntry = zipStream.getNextEntry()) != null) {
                     if (zipEntry.isDirectory()) {
-                        // already done with topmost layer
-                        break;
+                        continue;
                     }
 
                     String entryName = zipEntry.getName();
