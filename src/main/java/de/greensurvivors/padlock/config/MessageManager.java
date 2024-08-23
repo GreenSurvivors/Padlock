@@ -444,6 +444,7 @@ public class MessageManager {
         SIGN_LINE_PUBLIC("sign.line.public", "[Public]"),
         SIGN_LINE_SUPPLY_SIGN("sign.line.supply", "[Supply]"),
         SIGN_LINE_TIMER_SIGN("sign.line.timer", "[Timer:<" + PlaceHolder.TIME.getPlaceholder() + ">]"),
+        SING_LINE_HAS_PASSWORD("sign.line.has-password", "[Password]"),
         SIGN_MORE_USERS("sign.line.more-users", "[More Users]"), // not the same as the LEGACY_ADDITIONAL_SIGN line. This indicates that there are users that can't get displayed.
         //
         SIGN_NEED_RESELECT("cmd.error.sign-need-reselect"),
