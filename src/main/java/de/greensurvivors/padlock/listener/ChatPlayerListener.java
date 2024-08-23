@@ -22,11 +22,12 @@ import org.jetbrains.annotations.Nullable;
 import java.util.*;
 
 public final class ChatPlayerListener implements Listener {
-    private static final Set<String> mainCmdStrings = new HashSet<>();
-    private static final Set<String> pwCmdStrings = new HashSet<>();
+    private static final Set<String> setPwCmdStrings = new HashSet<>();
+    private static final Set<String> removePwCmdStrings = new HashSet<>(); // the client doesn't set tailing whitespace
+    private static final Set<String> applyPwCmdStrings = new HashSet<>();
     private final Padlock plugin;
 
-    public ChatPlayerListener(Padlock plugin) {
+    public ChatPlayerListener(@NotNull Padlock plugin) {
         this.plugin = plugin;
 
         // get all possible combinations of all command aliases with all subcommand aliases
@@ -51,16 +52,21 @@ public final class ChatPlayerListener implements Listener {
         }
         for (String cmdStr : cmdAliases) {
             for (String subCmdStr : SetPassword.getAliasesStatic()) {
-                mainCmdStrings.add(cmdStr + " " + subCmdStr + " ");
+                setPwCmdStrings.add(cmdStr + " " + subCmdStr + " ");
+            }
+        }
+        for (String cmdStr : cmdAliases) {
+            for (String subCmdStr : SetPassword.getAliasesStatic()) {
+                removePwCmdStrings.add(cmdStr + " " + subCmdStr);
             }
         }
         for (String cmdStr : cmdAliases) {
             for (String subCmdStr : ApplyPassword.getAliasesStatic()) {
-                pwCmdStrings.add(cmdStr + " " + subCmdStr + " ");
+                applyPwCmdStrings.add(cmdStr + " " + subCmdStr + " ");
             }
         }
         for (String cmdStr : ApplyPassword.getAliasesStatic()) {
-            pwCmdStrings.add(cmdStr + " ");
+            applyPwCmdStrings.add(cmdStr + " ");
         }
 
         // set our custom filter
@@ -73,9 +79,9 @@ public final class ChatPlayerListener implements Listener {
      */
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = false)
     private void onChat(@NotNull PlayerCommandPreprocessEvent event) {
-        String text = event.getMessage();
+        final String text = event.getMessage();
 
-        for (String cmdToCheck : mainCmdStrings) {
+        for (String cmdToCheck : setPwCmdStrings) {
             if (text.regionMatches(true, 1, cmdToCheck, 0, cmdToCheck.length())) {
                 // make room so chat event can roll through, we can wait until next circle
                 Bukkit.getScheduler().runTask(plugin, () -> {
@@ -83,7 +89,7 @@ public final class ChatPlayerListener implements Listener {
 
                     if (text.length() > cmdToCheck.length() + 1) {
                         newPassword = text.substring(cmdToCheck.length() + 1).toCharArray();
-                    } else {
+                    } else { // should never happen, since the client doesn't send tailing whitespace
                         newPassword = null;
                     }
 
@@ -98,11 +104,23 @@ public final class ChatPlayerListener implements Listener {
 
                 event.setMessage(text.substring(0, cmdToCheck.length() + 1) + "**********");
                 plugin.getLogger().info(event.getPlayer().getName() + " issued sub command: setpassword.");
-                break;
+                return;
             }
         }
 
-        for (String cmdToCheck : pwCmdStrings) {
+        for (String cmdToCheck : removePwCmdStrings) {
+            if (text.regionMatches(true, 1, cmdToCheck, 0, cmdToCheck.length())) {
+                // make room so chat event can roll through, we can wait until next circle
+                Bukkit.getScheduler().runTask(plugin, () -> {
+                    SetPassword.onExternalCommand(null, event.getPlayer());
+                });
+
+                plugin.getLogger().info(event.getPlayer().getName() + " issued sub command: setpassword to remove a password.");
+                return;
+            }
+        }
+
+        for (String cmdToCheck : applyPwCmdStrings) {
             if (text.regionMatches(true, 1, cmdToCheck, 0, cmdToCheck.length())) {
                 // make room so chat event can roll through, we can wait until next circle
                 Bukkit.getScheduler().runTask(plugin, () -> {
@@ -116,7 +134,7 @@ public final class ChatPlayerListener implements Listener {
 
                 event.setMessage(text.substring(0, cmdToCheck.length() + 1) + "**********");
                 plugin.getLogger().info(event.getPlayer().getName() + " issued sub command: password.");
-                break;
+                return;
             }
         }
     }
@@ -161,7 +179,7 @@ public final class ChatPlayerListener implements Listener {
 
 
         public Result logResult(String text) {
-            for (String cmdToCheck : mainCmdStrings) {
+            for (String cmdToCheck : setPwCmdStrings) {
                 int index = StringUtils.indexOfIgnoreCase(text, cmdToCheck);
 
                 if (index > 0) {
@@ -169,7 +187,7 @@ public final class ChatPlayerListener implements Listener {
                 }
             }
 
-            for (String cmdToCheck : pwCmdStrings) {
+            for (String cmdToCheck : applyPwCmdStrings) {
                 int index = StringUtils.indexOfIgnoreCase(text, cmdToCheck);
 
                 if (index > 0) {
