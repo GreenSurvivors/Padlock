@@ -58,12 +58,7 @@ public class MiscUtils {
      * checks if a player has not been notified before and adds them to the notified list if not
      */
     public static boolean shouldNotify(@NotNull Player player) {
-        if (notified.contains(player.getUniqueId())) {
-            return false;
-        } else {
-            notified.add(player.getUniqueId());
-            return true;
-        }
+        return notified.add(player.getUniqueId());
     }
 
     /**

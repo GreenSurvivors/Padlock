@@ -104,7 +104,7 @@ public class BlockPlayerListener implements Listener {
             Material signType = player.getInventory().getItemInMainHand().getType();
 
             // Check action correctness
-            if (action == Action.RIGHT_CLICK_BLOCK && Tag.SIGNS.isTagged(signType)) {
+            if (action == Action.RIGHT_CLICK_BLOCK && Tag.SIGNS.isTagged(signType)) { // note: this does NOT include hanging signs by intention
                 // Check permission
                 if (player.hasPermission(PermissionManager.ACTION_LOCK.getPerm())) {
                     // Get target block to lock
@@ -434,6 +434,9 @@ public class BlockPlayerListener implements Listener {
 
                                 if (openableBlock.getType() == Material.IRON_DOOR || openableBlock.getType() == Material.IRON_TRAPDOOR) {
                                     Openables.toggleOpenable(openableBlock);
+
+                                    // stop blocks from getting placed when opening a door.
+                                    event.setCancelled(true);
                                 }
 
                                 if (SignConnectedOpenable.isConnected(lockSign)) {
