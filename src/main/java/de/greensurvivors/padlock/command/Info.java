@@ -86,6 +86,8 @@ public class Info extends SubCommand {
 
                         // owners
                         TextComponent.Builder builder = Component.text();
+                        builder.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_HEAD));
+                        builder.append(Component.newline());
                         builder.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_OWNERS).appendSpace());
                         for (String name : getNamesFromUUIDStrSet(SignLock.getUUIDs(sign, true, false))) {
                             builder.append(Component.text(name));
@@ -135,7 +137,7 @@ public class Info extends SubCommand {
                         builder.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_EXPIRED)).appendSpace();
                         builder.append(Component.text(SignExpiration.isSignExpired(sign)));
 
-                        plugin.getMessageManager().sendMessageWithPrefix(sender, builder.asComponent());
+                        sender.sendMessage(builder.asComponent());
                     } else {
                         plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
                     }

@@ -370,6 +370,7 @@ public class MessageManager {
         HELP_ADD_OWNER("cmd.help.add-owner"),
         HELP_DEBUG("cmd.help.debug"),
         HELP_HEADER("cmd.help.header"),
+        HELP_DESCRIPTION("cmd.help.description"),
         HELP_HELP("cmd.help.help"),
         HELP_INFO("cmd.help.info"),
         HELP_PASSWORD("cmd.help.password"),
@@ -383,6 +384,7 @@ public class MessageManager {
         HELP_UPDATE_SIGN("cmd.help.update-sign"),
         HELP_VERSION("cmd.help.version"),
         //info cmd
+        INFO_HEAD("cmd.info.head"),
         INFO_ACCESS_TYPE("cmd.info.access-type"),
         INFO_EXPIRED("cmd.info.expired"),
         INFO_MEMBERS("cmd.info.members"),
