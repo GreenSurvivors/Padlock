@@ -44,7 +44,7 @@ public class RemoveMember extends SubCommand {
      */
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
-        return Command.onRemovePlayer(sender, args, false);
+        return MainCommand.onRemovePlayer(sender, args, false);
     }
 
     /**
@@ -56,6 +56,6 @@ public class RemoveMember extends SubCommand {
      */
     @Override
     protected @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
-        return Command.onTapCompleteRemovePlayer(sender, false);
+        return MainCommand.onTapCompleteRemovePlayer(sender, false);
     }
 }

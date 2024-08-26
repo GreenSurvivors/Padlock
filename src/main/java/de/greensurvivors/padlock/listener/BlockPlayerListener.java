@@ -184,7 +184,7 @@ public class BlockPlayerListener implements Listener {
             Block attachedBlock = PadlockAPI.getAttachedBlock(event.getBlock());
             if (attachedBlock != null && PadlockAPI.isLockable(attachedBlock)) {
                 if (PadlockAPI.isProtected(attachedBlock)) {
-                    if (PadlockAPI.isOwner(attachedBlock, player)) {
+                    if (PadlockAPI.isOwner(attachedBlock, player.getUniqueId())) {
                         plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_ERROR_ALREADY_LOCKED);
                         event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_ERROR));
                     } else {
@@ -315,7 +315,7 @@ public class BlockPlayerListener implements Listener {
                     event.setCancelled(true);
                 }
             } else if (PadlockAPI.isAdditionalSign(sign)) {
-                if (PadlockAPI.isOwner(block, player) || player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm())) {
+                if (PadlockAPI.isOwner(block, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm())) {
                     final Sign lockSign = PadlockAPI.getLock(PadlockAPI.getAttachedBlock(block), false);
 
                     //let the additional sign break but update the others
@@ -506,7 +506,7 @@ public class BlockPlayerListener implements Listener {
         Block block = event.getBlock();
         Player player = event.getPlayer();
 
-        if (!player.hasPermission(PermissionManager.ADMIN_INTERFERE.getPerm()) && PadlockAPI.isInterfering(block, player)) {
+        if (!player.hasPermission(PermissionManager.ADMIN_INTERFERE.getPerm()) && PadlockAPI.isInterfering(block, player.getUniqueId())) {
             // no permission
             plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_INTERFERE);
             event.setCancelled(true);
@@ -540,7 +540,7 @@ public class BlockPlayerListener implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlockClicked().getRelative(event.getBlockFace());
 
-        if (!(PadlockAPI.isOwner(block, player) ||
+        if (!(PadlockAPI.isOwner(block, player.getUniqueId()) ||
                 player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
 
             plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
@@ -563,7 +563,7 @@ public class BlockPlayerListener implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlockClicked().getRelative(event.getBlockFace());
 
-        if (!(PadlockAPI.isOwner(block, player) || player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
+        if (!(PadlockAPI.isOwner(block, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
             plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
             event.setCancelled(true);
         } // has permission

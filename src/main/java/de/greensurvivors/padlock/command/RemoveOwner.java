@@ -44,7 +44,7 @@ public class RemoveOwner extends SubCommand {
      */
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
-        return Command.onRemovePlayer(sender, args, true);
+        return MainCommand.onRemovePlayer(sender, args, true);
     }
 
     /**
@@ -56,6 +56,6 @@ public class RemoveOwner extends SubCommand {
      */
     @Override
     protected @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull String[] args) {
-        return Command.onTapCompleteRemovePlayer(sender, true);
+        return MainCommand.onTapCompleteRemovePlayer(sender, true);
     }
 }

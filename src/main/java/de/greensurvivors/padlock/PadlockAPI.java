@@ -6,7 +6,6 @@ import de.greensurvivors.padlock.impl.dataTypes.LazySignProperties;
 import de.greensurvivors.padlock.impl.openabledata.Openables;
 import de.greensurvivors.padlock.impl.signdata.*;
 import org.bukkit.Material;
-import org.bukkit.OfflinePlayer;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -17,14 +16,10 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.type.Chest;
 import org.bukkit.block.data.type.Door;
-import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  *
@@ -485,10 +480,10 @@ public class PadlockAPI {
      *
      * @return will also true if the block is not protected
      */
-    public static boolean isOwner(@NotNull Block block, @NotNull OfflinePlayer player) {
+    public static boolean isOwner(@NotNull Block block, @NotNull UUID playerUUid) {
         if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
             Set<String> ownerUUIDStrs = Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(block.getLocation()).getOwnerUUIDStrs();
-            String playerUUIDStr = player.getUniqueId().toString();
+            String playerUUIDStr = playerUUid.toString();
 
             if (ownerUUIDStrs != null) {
                 for (String ownerUUIDStr : ownerUUIDStrs) {
@@ -501,26 +496,26 @@ public class PadlockAPI {
             return false;
         } else {
             Sign lock = getLock(block, true);
-            return lock != null && SignLock.isOwner(lock, player.getUniqueId());
+            return lock != null && SignLock.isOwner(lock, playerUUid);
         }
     }
 
     /**
      * checks if the player is a member of the locked block.
      */
-    public static boolean isMember(@NotNull Block block, @NotNull Player player) {
+    public static boolean isMember(@NotNull Block block, @NotNull UUID playerUUid) {
         if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
             LazySignProperties lazySignPropertys = Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(block.getLocation());
 
             if (lazySignPropertys.isLock()) {
-                return SignLock.isMember(lazySignPropertys.getLock(), player.getUniqueId());
+                return SignLock.isMember(lazySignPropertys.getLock(), playerUUid);
             } else {
                 return false;
             }
         }
 
         Sign lock = getLock(block, true);
-        return lock != null && SignLock.isMember(lock, player.getUniqueId());
+        return lock != null && SignLock.isMember(lock, playerUUid);
     }
 
     /**
@@ -564,19 +559,19 @@ public class PadlockAPI {
     /**
      * return true, if interference is forbidden, true otherwise
      */
-    public static boolean isInterfering(@NotNull Block block, @NotNull Player player) {
+    public static boolean isInterfering(@NotNull Block block, @NotNull UUID playerUUid) {
         if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
             return Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(block.getLocation()).isLock();
         }
 
         Sign lock = getLock(block, true);
 
-        if (lock != null && !SignLock.isOwner(lock, player.getUniqueId())) {
+        if (lock != null && !SignLock.isOwner(lock, playerUUid)) {
             return true;
         } else if (block.getState() instanceof Container && Padlock.getPlugin().getConfigManager().isInterferePlacementBlocked()) { // container need additional space because of hopper / minecarts
             for (BlockFace blockface : allFaces) {
                 lock = getLock(block.getRelative(blockface), false);
-                if (lock != null && !SignLock.isOwner(lock, player.getUniqueId())) {
+                if (lock != null && !SignLock.isOwner(lock, playerUUid)) {
                     return true;
                 }
             }

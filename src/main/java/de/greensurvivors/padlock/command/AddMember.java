@@ -45,7 +45,7 @@ public class AddMember extends SubCommand {
      */
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
-        return Command.onAddPlayer(sender, args, false);
+        return MainCommand.onAddPlayer(sender, args, false);
     }
 
     @Override

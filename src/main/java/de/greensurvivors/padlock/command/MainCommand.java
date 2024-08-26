@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  * main command of this plugin, does by itself
  * nothing but call it's subcommands and supply command functions for them
  */
-public class Command implements CommandExecutor, TabCompleter {
+public class MainCommand implements CommandExecutor, TabCompleter {
     /**
      * contains all the registered subcommands
      * (they get registered when a new instance get created)
@@ -40,8 +40,8 @@ public class Command implements CommandExecutor, TabCompleter {
     private final static Set<SubCommand> SUBCOMMANDS = new HashSet<>();
     private static Padlock plugin;
 
-    public Command(@NotNull Padlock plugin) {
-        Command.plugin = plugin;
+    public MainCommand(@NotNull Padlock plugin) {
+        MainCommand.plugin = plugin;
 
         //register all subcommands
         SUBCOMMANDS.add(new Help(plugin));
@@ -236,7 +236,7 @@ public class Command implements CommandExecutor, TabCompleter {
                                     (!addOwner && SignLock.isOwner(sign, player.getUniqueId()))) { // /lock addmember
 
                                 // try to get player from argument
-                                OfflinePlayer offlinePlayer = Command.getPlayerFromArgument(args[1]);
+                                OfflinePlayer offlinePlayer = MainCommand.getPlayerFromArgument(args[1]);
                                 if (offlinePlayer != null) {
                                     //success!
                                     SignLock.addPlayer(sign, addOwner, offlinePlayer);
@@ -372,7 +372,7 @@ public class Command implements CommandExecutor, TabCompleter {
      * @param sender  Source of the command.  For players tab-completing a
      *                command inside of a command block, this will be the player, not
      *                the command block.
-     * @param command Command which was executed
+     * @param command MainCommand which was executed
      * @param label   Alias of the command which was used
      * @param args    The arguments passed to the command, including final
      *                partial argument to be completed
@@ -425,7 +425,7 @@ public class Command implements CommandExecutor, TabCompleter {
      * calls the subcommands onCommand method
      *
      * @param sender       Source of the command
-     * @param command      Command which was executed
+     * @param command      MainCommand which was executed
      * @param commandLabel Alias of the command which was used
      * @param args         Passed command arguments
      * @return true if a valid command, otherwise false

@@ -33,7 +33,8 @@ public class BlockDebugListener implements Listener {
                 player.sendMessage(Component.text("===========================", NamedTextColor.GREEN));
                 player.sendMessage(Component.text("isLockable: ").append(formatBoolean(PadlockAPI.isLockable(clickedBlock))));
                 player.sendMessage(Component.text("isProtected: ").append(formatBoolean(PadlockAPI.isProtected(clickedBlock))));
-                player.sendMessage(Component.text(" - isOwner/User: ").append(formatBoolean(PadlockAPI.isOwner(clickedBlock, player))).append(Component.text("/")).append(formatBoolean(PadlockAPI.isMember(clickedBlock, player))));
+                player.sendMessage(Component.text(" - isOwner/User: ").append(formatBoolean(PadlockAPI.isOwner(clickedBlock, player.getUniqueId()))).
+                    append(Component.text("/")).append(formatBoolean(PadlockAPI.isMember(clickedBlock, player.getUniqueId()))));
                 if (clickedBlock.getState() instanceof Sign sign && PadlockAPI.isLockSign(sign)) {
                     player.sendMessage(Component.text("isSignExpired: ").append(formatBoolean(PadlockAPI.isSignExpired(sign))));
                     player.sendMessage(Component.text(" - last used: " + SignExpiration.getLastUsed(sign)));

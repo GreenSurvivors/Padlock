@@ -1,7 +1,7 @@
 package de.greensurvivors.padlock;
 
 import de.greensurvivors.padlock.command.ApplyPassword;
-import de.greensurvivors.padlock.command.Command;
+import de.greensurvivors.padlock.command.MainCommand;
 import de.greensurvivors.padlock.config.ConfigManager;
 import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.impl.DependencyManager;
@@ -40,9 +40,8 @@ public class Padlock extends JavaPlugin {
         // don't allow
         Plugin lockettePro = Bukkit.getPluginManager().getPlugin("LockettePro");
         if (lockettePro != null) {
+            plugin.getLogger().warning("LockettePro found and disabling it. Please remove LockettePro from your Plugin list!");
             Bukkit.getPluginManager().disablePlugin(lockettePro);
-        } else {
-            plugin.getLogger().info("no lockette found.");
         }
 
         openableToggleManager = new OpenableToggleManager(this);
@@ -65,7 +64,7 @@ public class Padlock extends JavaPlugin {
         pluginManager.registerEvents(new ChatPlayerListener(this), this);
 
         //register commands
-        Command lockCmd = new Command(this);
+        MainCommand lockCmd = new MainCommand(this);
 
         PluginCommand mainCommand = getCommand("padlock");
         if (mainCommand != null) {
