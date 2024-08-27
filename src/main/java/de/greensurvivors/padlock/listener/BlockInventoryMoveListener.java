@@ -6,6 +6,7 @@ import de.greensurvivors.padlock.config.ConfigManager;
 import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.DoubleChest;
+import org.bukkit.block.Hopper;
 import org.bukkit.entity.minecart.HopperMinecart;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
@@ -14,6 +15,7 @@ import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.inventory.ItemStack;
+import org.jetbrains.annotations.NotNull;
 
 /**
  * protects against blocks / non player entities taking items out / putting in a locked block
@@ -36,7 +38,7 @@ public class BlockInventoryMoveListener implements Listener {
                 // Additional Hopper Minecart Check
                 if (event.getDestination().getHolder() instanceof HopperMinecart hopperMinecart) {
                     ConfigManager.HopperMinecartBlockedOption hopperminecartaction = plugin.getConfigManager().getHopperMinecartAction();
-                    switch (hopperminecartaction) {
+                    switch (hopperminecartaction) { // note: hopper minecarts don't have cooldowns, if you experience lag you should turn the remove option on
                         // case 0 - Impossible
                         case TRUE -> // Cancel only, it is not called if !Config.isItemTransferOutBlocked()
                                 event.setCancelled(true);
@@ -47,6 +49,9 @@ public class BlockInventoryMoveListener implements Listener {
                             hopperMinecart.remove();
                         }
                     }
+                } else if (event.getDestination().getHolder() instanceof Hopper hopper) {
+                    // don't check this hopper again for some time, don't waste compute time
+                    hopper.setTransferCooldown(plugin.getConfigManager().getItemTransferCooldown());
                 }
 
                 return;
@@ -56,6 +61,11 @@ public class BlockInventoryMoveListener implements Listener {
         if (plugin.getConfigManager().isItemTransferInBlocked()) {
             if (isInventoryLocked(event.getDestination())) {
                 event.setCancelled(true);
+
+                // don't check this hopper again for some time, don't waste compute time
+                if (event.getSource().getHolder() instanceof Hopper hopper) {
+                    hopper.setTransferCooldown(plugin.getConfigManager().getItemTransferCooldown());
+                }
             }
         }
     }
@@ -64,7 +74,7 @@ public class BlockInventoryMoveListener implements Listener {
      * @param inventory
      * @return
      */
-    public boolean isInventoryLocked(Inventory inventory) {
+    public boolean isInventoryLocked(@NotNull Inventory inventory) {
         // get holder
         InventoryHolder inventoryholder = inventory.getHolder();
         if (inventoryholder instanceof DoubleChest) {

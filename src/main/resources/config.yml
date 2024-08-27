@@ -26,6 +26,10 @@ lock:
     item-transfer:
       in: false
       out: true
+      # How long a hopper should wait until trying to move items again. Range 0 - Integer.MAX_VALUE
+      # Note: this cooldown will stay even if the lock was removed from the container!
+      cooldown-ticks: 1200
+      # Note: hopper minecarts don't have cooldowns, so if you experience lag you should turn the remove option on
     hopper-minecart: REMOVE
   # List of
   #* EXPLOSION // tnt, creeper, endcrystal, every explosion.
@@ -39,6 +43,8 @@ lock:
   #* ZOMBIE
   #* SILVERFISH
   exemptions: []
+  # Experimental feature. This feature will cache a block's lock state.
+  # It can dramatically increase your server's performance. Recommended interval is 5~10, 0 is off
 cache:
   seconds: 0
 bedrock-prefix: "."
