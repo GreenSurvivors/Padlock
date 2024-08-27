@@ -453,6 +453,28 @@ public class PadlockAPI {
                 }
             } else if (block.getBlockData() instanceof Chest) {
                 return getLockChest(block);
+            } else { // it may be a block over / under door
+                Block blockup = block.getRelative(BlockFace.UP);
+                if (blockup.getBlockData() instanceof Bisected && !Tag.STAIRS.isTagged(blockup.getType())) { // door, also stupid stairs
+                    DoubleBlockParts doubleBlockParts = Openables.getDoubleBlockParts(blockup);
+
+                    if (doubleBlockParts != null) {
+                        return getNearLockDoubleBlock(doubleBlockParts);
+                    } else {
+                        return null;
+                    }
+                }
+
+                Block blockdown = block.getRelative(BlockFace.DOWN);
+                if (blockdown.getBlockData() instanceof Bisected && !Tag.STAIRS.isTagged(blockdown.getType())) { // door, also stupid stairs
+                    DoubleBlockParts doubleBlockParts = Openables.getDoubleBlockParts(blockdown);
+
+                    if (doubleBlockParts != null) {
+                        return getNearLockDoubleBlock(doubleBlockParts);
+                    } else {
+                        return null;
+                    }
+                }
             }
             return getLockSignSingleBlock(block, null);
         }
@@ -532,7 +554,7 @@ public class PadlockAPI {
     /**
      * return true if the block above / below the lockable block is also a lockable spot
      */
-    public static boolean isUpDownAlsoLockableBlock(Block block) {
+    public static boolean isUpDownAlsoLockableBlock(@NotNull Block block) {
         Material material = block.getType();
 
         return Padlock.getPlugin().getConfigManager().isLockable(material) && (Openables.isSingleOpenable(material) ||

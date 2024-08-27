@@ -59,7 +59,10 @@ public class Help extends SubCommand {
                     return false;
                 }
             } else { //todo maybe pages
-                Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_HEADER).append(Component.newline());
+                Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_HEADER)
+                        .append(Component.newline())
+                        .append(plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_DESCRIPTION)
+                        .append(Component.newline()));
                 // list all subcommands alias per line
                 component = component.append(MiniMessage.miniMessage().deserialize(
                         Command.getSubCommands(sender).stream().map(subCommand ->

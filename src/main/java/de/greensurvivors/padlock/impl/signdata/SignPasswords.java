@@ -202,7 +202,7 @@ public final class SignPasswords {
         return false;
     }
 
-    public static boolean needsPasswordAccess(Sign sign) {
+    public static boolean needsPasswordAccess(@NotNull Sign sign) {
         final String hash = sign.getPersistentDataContainer().get(passwordHashKey, PersistentDataType.STRING);
 
         return (hash != null && !hash.isEmpty());
@@ -244,7 +244,7 @@ public final class SignPasswords {
         }
     }
 
-    public static void setPassword(@NotNull Sign sign, @NotNull Player player, char @Nullable [] newPassword) {
+    public static void setPassword(final @NotNull Sign sign, final @NotNull Player player, final char @Nullable [] newPassword) {
         PersistentDataContainer dataContainer = sign.getPersistentDataContainer();
 
         if (newPassword == null) {
@@ -253,6 +253,8 @@ public final class SignPasswords {
             removeAccessOfLoc(sign.getLocation());
             Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.SET_PASSWORD_REMOVE_SUCCESS);
             SignPasswords.stopWaiting(player.getUniqueId(), sign.getLocation());
+
+            SignDisplay.updateDisplay(sign);
         } else {
             Bukkit.getScheduler().runTaskAsynchronously(Padlock.getPlugin(), () -> {
                 // encoding may take a while and slow down the cpu, it's better if we do it async
@@ -268,6 +270,8 @@ public final class SignPasswords {
                     SignPasswords.stopWaiting(player.getUniqueId(), sign.getLocation());
 
                     clearArray(newPassword);
+
+                    SignDisplay.updateDisplay(sign);
                 });
             });
         }

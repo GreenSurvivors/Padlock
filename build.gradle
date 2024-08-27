@@ -6,7 +6,7 @@ plugins {
 }
 // Suppiled by Jenkins
 ext.majorVersion = 2
-ext.minorVersion = 8
+ext.minorVersion = 10
 ext.minecraftVersion = "1.20.4"
 
 ext.buildNumber = System.env.BUILD_NUMBER == null ? "dev" : "build" + "$System.env.BUILD_NUMBER"

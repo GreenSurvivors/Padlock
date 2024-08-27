@@ -118,6 +118,11 @@ public class SignDisplay {
             lastIndex--;
         }
 
+        if (SignPasswords.needsPasswordAccess(sign)) {
+            linesToUpdate[lastIndex] = Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SING_LINE_HAS_PASSWORD);
+            lastIndex--;
+        }
+
         // fill with owners, then if there is still space, and this is not a public sign, the members
         boolean shouldAddMoreUsers = fillWithPlayers(linesToUpdate, sign, true, lastIndex);
         if (accessType != SignAccessType.AccessType.PUBLIC) {
