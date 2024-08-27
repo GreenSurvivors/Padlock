@@ -83,7 +83,7 @@ public class BlockPlayerListener implements Listener {
 
         // Check quick lock status
         switch (plugin.getConfigManager().getQuickProtectAction()) {
-            case OFF -> {
+            case NO_QUICKLOCK -> {
                 return;
             }
             case SNEAK_REQUIRED -> {
@@ -470,7 +470,9 @@ public class BlockPlayerListener implements Listener {
                                     Openables.toggleOpenable(openableBlock);
 
                                     // stop blocks from getting placed when opening a door.
-                                    event.setCancelled(true);
+                                    if (event.hasItem()) {
+                                        event.setCancelled(true);
+                                    }
                                 }
 
                                 if (SignConnectedOpenable.isConnected(lockSign)) {
@@ -523,7 +525,7 @@ public class BlockPlayerListener implements Listener {
         if (player.hasPermission(PermissionManager.ACTION_LOCK.getPerm())) {
             if (MiscUtils.shouldNotify(player) && plugin.getConfigManager().isLockable(block.getType())) {
                 //notice me Senpai (o//_//o)
-                if (Objects.requireNonNull(plugin.getConfigManager().getQuickProtectAction()) == ConfigManager.QuickProtectOption.OFF) {
+                if (Objects.requireNonNull(plugin.getConfigManager().getQuickProtectAction()) == ConfigManager.QuickProtectOption.NO_QUICKLOCK) {
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.NOTICE_MANUEL_LOCK);
                 } else {
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.NOTICE_QUICK_LOCK);
@@ -540,8 +542,8 @@ public class BlockPlayerListener implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlockClicked().getRelative(event.getBlockFace());
 
-        if (!(PadlockAPI.isOwner(block, player.getUniqueId()) ||
-                player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
+        if (PadlockAPI.isProtected(block) &&
+            !(PadlockAPI.isOwner(block, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
 
             plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
             event.setCancelled(true);

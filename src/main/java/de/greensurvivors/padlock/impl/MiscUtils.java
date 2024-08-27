@@ -36,6 +36,9 @@ public class MiscUtils {
      */
     private static final Set<UUID> notified = new HashSet<>();
     // the point at the beginning is for bedrock player if the proxy supports them.
+    // please note, even though very few but there are valid accounts that doesn't match, from very early days and exploits.
+    // If it comes down to it, we have to try UUID from string / or check Bukkit.getOfflinePlayer(<str>).hasPlayedBefore()
+    // Since this is just a brute force methode I will it only change it, if a problem ever gets reported.
     private static Pattern usernamePattern = Pattern.compile("^.?[a-zA-Z0-9_]{3,16}$");
 
     public static @NotNull Pattern getPeriodPattern() {

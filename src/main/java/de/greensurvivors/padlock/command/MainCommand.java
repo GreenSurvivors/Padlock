@@ -68,7 +68,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
      * <br>
      * I don't plan to support offline mode servers.
      * If you don't have a valid UUID working for you,
-     * I'm not going through the hassle to service you.
+     * I'm not going through the hassle to service you. I'm happy for PRs though.
      * <br>
      * Please note: this will return some kind of offline player,
      * But as it goes in Bukkit's API this player might have never played

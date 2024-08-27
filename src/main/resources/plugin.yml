@@ -17,7 +17,7 @@ commands:
   padlock:
     usage: |
       /lock
-    aliases: [ lock, padlock, lockit ]
+    aliases: [ lock, padlock, lockit, lockette ] # lockette alias because we are a successor
   password:
     usage: |
       /password

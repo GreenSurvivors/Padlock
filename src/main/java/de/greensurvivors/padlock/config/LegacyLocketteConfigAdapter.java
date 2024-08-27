@@ -31,7 +31,7 @@ class LegacyLocketteConfigAdapter {
     private boolean blockitemtransferout = false;
     private int cachetime = 0;
     private boolean cacheenabled = false;
-    private ConfigManager.HopperMinecartBlockedOption blockhopperminecart = null;
+    private ConfigManager.HopperMinecartMoveItemOption blockhopperminecart = null;
     private double lockexpiredays = 60D;
     private long lockdefaultcreatetime = -1L;
     private Set<ConfigManager.ProtectionExemption> protectionexempt = new HashSet<>();
@@ -47,7 +47,7 @@ class LegacyLocketteConfigAdapter {
         String enablequickprotectstring = config.getString("enable-quick-protect", "true");
 
         switch (enablequickprotectstring.toLowerCase()) {
-            case "false" -> enablequickprotect = ConfigManager.QuickProtectOption.OFF;
+            case "false" -> enablequickprotect = ConfigManager.QuickProtectOption.NO_QUICKLOCK;
             case "sneak" -> enablequickprotect = ConfigManager.QuickProtectOption.SNEAK_REQUIRED;
             default -> enablequickprotect = ConfigManager.QuickProtectOption.NOT_SNEAKING_REQUIRED;
         }
@@ -76,9 +76,9 @@ class LegacyLocketteConfigAdapter {
 
         String blockhopperminecartstring = config.getString("block-hopper-minecart", "remove");
         switch (blockhopperminecartstring.toLowerCase()) {
-            case "true" -> blockhopperminecart = ConfigManager.HopperMinecartBlockedOption.TRUE;
-            case "false" -> blockhopperminecart = ConfigManager.HopperMinecartBlockedOption.FALSE;
-            default -> blockhopperminecart = ConfigManager.HopperMinecartBlockedOption.REMOVE;
+            case "true" -> blockhopperminecart = ConfigManager.HopperMinecartMoveItemOption.BLOCKED;
+            case "false" -> blockhopperminecart = ConfigManager.HopperMinecartMoveItemOption.ALLOWED;
+            default -> blockhopperminecart = ConfigManager.HopperMinecartMoveItemOption.REMOVE;
         }
 
         lockexpiredays = config.getDouble("lock-expire-days", 999.9D);
@@ -129,7 +129,7 @@ class LegacyLocketteConfigAdapter {
         return blockitemtransferout;
     }
 
-    protected ConfigManager.HopperMinecartBlockedOption getHopperMinecartAction() {
+    protected ConfigManager.HopperMinecartMoveItemOption getHopperMinecartAction() {
         return blockhopperminecart;
     }
 

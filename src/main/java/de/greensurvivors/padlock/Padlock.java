@@ -14,6 +14,7 @@ import org.bukkit.plugin.Plugin;
 import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.logging.Level;
 
@@ -38,9 +39,14 @@ public class Padlock extends JavaPlugin {
         plugin = this;
 
         // don't allow
-        Plugin lockettePro = Bukkit.getPluginManager().getPlugin("LockettePro");
+        final @Nullable Plugin lockettePro = Bukkit.getPluginManager().getPlugin("LockettePro");
         if (lockettePro != null) {
             plugin.getLogger().warning("LockettePro found and disabling it. Please remove LockettePro from your Plugin list!");
+
+            // unregister lockette cmds
+            Bukkit.getCommandMap().getKnownCommands().entrySet().removeIf(
+                entry -> entry.getValue() instanceof PluginCommand cmd && cmd.getPlugin() == lockettePro);
+
             Bukkit.getPluginManager().disablePlugin(lockettePro);
         }
 
