@@ -44,4 +44,14 @@ public class DependencyManager {
         }
         return false;
     }
+
+    /**
+     * get if worldguard would stop from interacting with the block
+     */
+    public boolean isProtectedFromInteract(@NotNull Block block, @NotNull Player player) {
+        if (worldguard != null) {
+            return !worldguard.createProtectionQuery().testBlockInteract(player, block);
+        }
+        return false;
+    }
 }

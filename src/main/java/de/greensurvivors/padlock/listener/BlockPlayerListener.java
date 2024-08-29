@@ -63,7 +63,7 @@ public class BlockPlayerListener implements Listener {
     private static boolean isSpawnProtected(@NotNull Player player, @NotNull Location location) {
         int spawnSize = Bukkit.getServer().getSpawnRadius();
 
-        if (Bukkit.getServer().getWorlds().get(0).getEnvironment() == World.Environment.NORMAL &&
+        if (Bukkit.getServer().getWorlds().getFirst().getEnvironment() == World.Environment.NORMAL &&
                 spawnSize > 0 && !player.isOp()) {
             Location spawnLocation = player.getWorld().getSpawnLocation();
             return Math.abs(location.x() - spawnLocation.z()) > spawnSize ||
@@ -117,6 +117,7 @@ public class BlockPlayerListener implements Listener {
                             // Check permission with external plugin and
                             // whether locking location is obstructed and
                             // whether this block is lockable
+                            // Note: we check for break, not interact here, since we want to ensure the player can break the lock!
                             if (!plugin.getDependencyManager().isProtectedFromBreak(block, player) &&
                                     replaceableMaterials.contains(signLocBlock.getType()) &&
                                     PadlockAPI.isLockable(block)) {
@@ -330,7 +331,7 @@ public class BlockPlayerListener implements Listener {
                 if (!(SignLock.isOwner(lock, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm()))) {
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
                     event.setCancelled(true);
-                } else if (!plugin.getDependencyManager().isProtectedFromBreak(block, player)) { // if the player is allowed to break the block
+                } else if (!plugin.getDependencyManager().isProtectedFromBreak(block, player)) { // if the player is allowed to break the block. Note: we check for break, not interact here, since we want to ensure the player can break the lock!
                     // only break sign, if the broken block was the last protected block
                     Block attachedBlock = PadlockAPI.getAttachedBlock(event.getBlock());
                     if (attachedBlock != null && !PadlockAPI.isLockable(attachedBlock)) {
@@ -382,7 +383,8 @@ public class BlockPlayerListener implements Listener {
      * Protect block from being used
      * & handle connected openables
      */
-    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
+    // go as last as possible to ensure wolrdguard is done
     private void onAttemptInteractLockedBlocks(@NotNull PlayerInteractEvent event) {
         Action action = event.getAction();
         Block block = event.getClickedBlock();
@@ -401,6 +403,16 @@ public class BlockPlayerListener implements Listener {
             }
         }
         if (action == Action.LEFT_CLICK_BLOCK || action == Action.RIGHT_CLICK_BLOCK) {
+            if (event.useInteractedBlock() == Event.Result.DENY) {
+                // uncancel the event, if worldguard canceled it.
+                if (plugin.getConfigManager().shouldOverwriteWorldguard() &&
+                    plugin.getDependencyManager().isProtectedFromInteract(event.getClickedBlock(), event.getPlayer())) {
+                    event.setUseInteractedBlock(Event.Result.DEFAULT);
+                } else { // something else canceled the event
+                    return;
+                }
+            }
+
             Sign lockSign = PadlockAPI.getLock(block, false);
 
             if (lockSign != null) {

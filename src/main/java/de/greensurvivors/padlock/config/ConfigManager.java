@@ -23,6 +23,7 @@ public class ConfigManager {
     private final ConfigOption<Boolean> IMPORT_FROM_LOCKETTEPRO = new ConfigOption<>("import-fromLockettePro", false);
     private final ConfigOption<String> LANG_FILENAME = new ConfigOption<>("language-file-name", "lang/lang_en.yml");
     private final ConfigOption<Boolean> DEPENDENCY_WORLDGUARD_ENABLED = new ConfigOption<>("dependency.worldguard.enabled", true);
+    private final ConfigOption<Boolean> DEPENDENCY_WORLDGUARD_OVERWRITE = new ConfigOption<>("dependency.worldguard.overwrite", false);
     private final ConfigOption<Set<Material>> LOCKABLES = new ConfigOption<>("lockables", new HashSet<>()); //todo auto add inventory-blocks
     private final ConfigOption<QuickProtectOption> QUICKPROTECT_TYPE = new ConfigOption<>("lock.quick-lock.type", QuickProtectOption.NOT_SNEAKING_REQUIRED);
     private final ConfigOption<Boolean> LOCK_BLOCKS_INTERFERE = new ConfigOption<>("lock.blocked.interfere", true);
@@ -58,6 +59,7 @@ public class ConfigManager {
 
         //dependency
         DEPENDENCY_WORLDGUARD_ENABLED.setValue(config.getBoolean(DEPENDENCY_WORLDGUARD_ENABLED.getPath(), DEPENDENCY_WORLDGUARD_ENABLED.getFallbackValue()));
+        DEPENDENCY_WORLDGUARD_OVERWRITE.setValue(config.getBoolean(DEPENDENCY_WORLDGUARD_OVERWRITE.getPath(), DEPENDENCY_WORLDGUARD_OVERWRITE.getFallbackValue()));
 
         // load Material set of lockable blocks
         List<?> objects = config.getList(LOCKABLES.getPath(), new ArrayList<>(LOCKABLES.getFallbackValue()));
@@ -382,6 +384,10 @@ public class ConfigManager {
 
     public boolean shouldUseWorldguard() {
         return DEPENDENCY_WORLDGUARD_ENABLED.getValueOrFallback();
+    }
+
+    public boolean shouldOverwriteWorldguard() {
+        return DEPENDENCY_WORLDGUARD_OVERWRITE.getValueOrFallback();
     }
 
     public enum QuickProtectOption {

@@ -7,9 +7,12 @@ import-fromLockettePro: false
 #The language file that Padlock will read from.
 language-file-name: 'en'
 dependency:
-  # If set to true and worldguard is installed, this will check if the player is allowed to build when quick protecting / breaking locks.
   worldguard:
+    # If set to true and worldguard is enabled, this will check if the player is allowed to build when quick protecting / breaking locks.
     enabled: true
+    # If set to true and worldguard is enabled, this will give the player access to locked blocks even if they don't have access to the region else wise.
+    # Note: This can interfere with other plugins, only set to true if you know what you are doing!
+    overwrite: false
 lock:
   #| Option                | Description                                                                                                                                             |
   #|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
@@ -48,7 +51,6 @@ lock:
 cache:
   seconds: 0
 bedrock-prefix: "."
-
 
 # for material names see: https://jd.papermc.io/paper/1.20/org/bukkit/Material.html
 # for tags see: https://jd.papermc.io/paper/1.20/org/bukkit/Tag.html
