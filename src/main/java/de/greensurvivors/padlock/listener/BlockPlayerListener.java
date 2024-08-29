@@ -1,5 +1,6 @@
 package de.greensurvivors.padlock.listener;
 
+import com.sk89q.worldguard.bukkit.event.block.UseBlockEvent;
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.PadlockAPI;
 import de.greensurvivors.padlock.config.ConfigManager;
@@ -27,6 +28,7 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -379,11 +381,41 @@ public class BlockPlayerListener implements Listener {
         }
     }
 
+    // worldguard internal event, NOT part of API.
+    // worldguard fires this event, so it goes
+    // original event start --> worldguard handling the event and then fires the UseBlockEvent -->
+    // we listen as early as possible to the UseBlockEvent and allowing the original event to pass -->
+    // no worldguard listener should cancel the original event -->
+    // original event gets handled by every plugin between -->
+    // if not canceled we finally handle the original event ourselves below
+    // of course this does not just include the PlayerInteractEvent,
+    // but also InventoryOpenEvent, BlockDamageEvent (for cakes), EntityInteractEvent, PlayerBedEnterEvent,
+    // PlayerTakeLecternBookEvent, CauldronLevelChangeEvent, BlockDispenseEvent (for some reason) and PlayerOpenSignEvent
+    // (worldguard version 7.0.9, 2024)
+    // we only allow the use of blocks when we do handle the original event,
+    // but it might be a good inspiration to support more block types
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    private void onWorldguardUseBlockEvent(final @NotNull UseBlockEvent event) {
+        if (event.getOriginalEvent() instanceof PlayerInteractEvent ||
+            event.getOriginalEvent() instanceof InventoryOpenEvent ||
+            event.getOriginalEvent() instanceof PlayerTakeLecternBookEvent) { // only care for events we handle
+            for (final @NotNull Block block : event.getBlocks()) { // this means WE have to check every interacted block at least twice! I recommend to turn on caching if using in combination with world guard
+                Sign lockSign = PadlockAPI.getLock(block, false);
+
+                if (lockSign != null) {
+                    // allow the interaction of this block
+                    event.setAllowed(true);
+                }
+            }
+        }
+    }
+
     /**
      * Protect block from being used
      * & handle connected openables
      */
-    @EventHandler(priority = EventPriority.HIGHEST, ignoreCancelled = false)
+    @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    // ensure with priority to fire after worldguard
     // go as last as possible to ensure wolrdguard is done
     private void onAttemptInteractLockedBlocks(@NotNull PlayerInteractEvent event) {
         Action action = event.getAction();
@@ -403,16 +435,6 @@ public class BlockPlayerListener implements Listener {
             }
         }
         if (action == Action.LEFT_CLICK_BLOCK || action == Action.RIGHT_CLICK_BLOCK) {
-            if (event.useInteractedBlock() == Event.Result.DENY) {
-                // uncancel the event, if worldguard canceled it.
-                if (plugin.getConfigManager().shouldOverwriteWorldguard() &&
-                    plugin.getDependencyManager().isProtectedFromInteract(event.getClickedBlock(), event.getPlayer())) {
-                    event.setUseInteractedBlock(Event.Result.DEFAULT);
-                } else { // something else canceled the event
-                    return;
-                }
-            }
-
             Sign lockSign = PadlockAPI.getLock(block, false);
 
             if (lockSign != null) {

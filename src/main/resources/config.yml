@@ -11,7 +11,8 @@ dependency:
     # If set to true and worldguard is enabled, this will check if the player is allowed to build when quick protecting / breaking locks.
     enabled: true
     # If set to true and worldguard is enabled, this will give the player access to locked blocks even if they don't have access to the region else wise.
-    # Note: This can interfere with other plugins, only set to true if you know what you are doing!
+    # Note: This does NOT allow the player to break locks, even if they are owner of it, when they don't have block break access on the region!
+    # Note: We have to check every block at least twice to make this happen. If you experience lag, I would recommend to turn caching on.
     overwrite: false
 lock:
   #| Option                | Description                                                                                                                                             |
@@ -19,7 +20,7 @@ lock:
   #| NOT_SNEAKING_REQUIRED | Quick protect if the player right-clicks with a sign in hand and **not** sneaking                                                                       |
   #| SNEAK_NONRELEVANT     | Quick protect if the player right-clicks with a sign, whenever or not they are sneaking or not (this makes it hard to place signs on protected blocks!) |
   #| SNEAK_REQUIRED        | Quick protect if the player right-clicks with a sign in hand and **not** sneaking                                                                       |
-  #| OFF                   | Players can't quick protect and always have to manual lock                                                                                              |
+  #| OFF                   | Players can't quick-protect and always have to manual lock                                                                                              |
   quick-lock:
     type: NOT_SNEAKING_REQUIRED
   blocked:
