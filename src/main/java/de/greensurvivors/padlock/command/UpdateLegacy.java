@@ -20,24 +20,24 @@ import java.util.Set;
  * updates a selected legacy or additional sign.
  */
 @Deprecated(forRemoval = true)
-public class UpdateSign extends SubCommand {
-    protected UpdateSign(@NotNull Padlock plugin) {
+public class UpdateLegacy extends SubCommand {
+    protected UpdateLegacy(@NotNull Padlock plugin) {
         super(plugin);
     }
 
     @Override
     protected boolean checkPermission(@NotNull Permissible permissible) {
-        return permissible.hasPermission(PermissionManager.CMD_UPDATE_SIGN.getPerm());
+        return permissible.hasPermission(PermissionManager.CMD_UPDATE_LEGACY.getPerm());
     }
 
     @Override
     protected @NotNull Set<String> getAliases() {
-        return Set.of("updatesign");
+        return Set.of("updatelegacy");
     }
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_UPDATE_SIGN);
+        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_UPDATE_LEGACY);
     }
 
     @Override
@@ -47,7 +47,7 @@ public class UpdateSign extends SubCommand {
                 Sign sign = SignSelection.getSelectedSign(player);
                 if (sign != null) {
                     if (PadlockAPI.updateLegacySign(sign) != null) {
-                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UPDATE_SIGN_SUCCESS);
+                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UPDATE_LEGACY_SUCCESS);
                     } else {
                         plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
                     }

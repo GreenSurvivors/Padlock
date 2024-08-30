@@ -36,7 +36,6 @@ public class SetTimer extends SubCommand {
         return permissible.hasPermission(PermissionManager.CMD_SET_TIMER.getPerm());
     }
 
-
     @Override
     protected @NotNull Set<String> getAliases() {
         return Set.of("settimer", "timer");
@@ -50,7 +49,7 @@ public class SetTimer extends SubCommand {
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         if (sender instanceof Player player) {
-            if (sender.hasPermission(PermissionManager.CMD_SET_TIMER.getPerm())) {
+            if (checkPermission(sender)) {
                 if (args.length >= 2) {
                     Sign sign = SignSelection.getSelectedSign(player);
 

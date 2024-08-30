@@ -54,7 +54,8 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         // admin sub commands
         SUBCOMMANDS.add(new AddOwner(plugin));
         SUBCOMMANDS.add(new RemoveOwner(plugin));
-        SUBCOMMANDS.add(new UpdateSign(plugin));
+        SUBCOMMANDS.add(new UpdateDisplay(plugin));
+        SUBCOMMANDS.add(new UpdateLegacy(plugin));
         SUBCOMMANDS.add(new Version(plugin));
         SUBCOMMANDS.add(new Debug(plugin));
         SUBCOMMANDS.add(new Reload(plugin));
@@ -134,7 +135,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 PadlockAPI.setInvalid(sign);
                 return null;
             } else {
-                plugin.getMessageManager().sendLang(audience, MessageManager.LangPath.UPDATE_SIGN_SUCCESS);
+                plugin.getMessageManager().sendLang(audience, MessageManager.LangPath.UPDATE_LEGACY_SUCCESS);
                 return otherSign;
             }
         }

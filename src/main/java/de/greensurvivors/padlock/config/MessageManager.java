@@ -381,7 +381,8 @@ public class MessageManager {
         HELP_SET_CONNECTED("cmd.help.set-connected"),
         HELP_SET_PASSWORD("cmd.help.set-password"),
         HELP_SET_TIMER("cmd.help.set-timer"),
-        HELP_UPDATE_SIGN("cmd.help.update-sign"),
+        HELP_UPDATE_DISPLAY("cmd.help.update-display"),
+        HELP_UPDATE_LEGACY("cmd.help.update-legacy"),
         HELP_VERSION("cmd.help.version"),
         //info cmd
         INFO_HEAD("cmd.info.head"),
@@ -453,7 +454,8 @@ public class MessageManager {
         SIGN_NOT_SELECTED("cmd.error.no-sign-selected"),
         SIGN_PLAYER_NAME_ON("sign.line.player-name", "<" + PlaceHolder.PLAYER.getPlaceholder() + ">"), // used for formatting displayed player names
         UNKNOWN_PLAYER("cmd.error.unknown-player"),
-        UPDATE_SIGN_SUCCESS("cmd.sign-update.success");
+        UPDATE_DISPLAY_SUCCESS("cmd.update-display.success"),
+        UPDATE_LEGACY_SUCCESS("cmd.update-legacy.success");
 
         private final String path;
         private final String defaultValue;
