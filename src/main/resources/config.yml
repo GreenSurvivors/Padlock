@@ -7,16 +7,20 @@ import-fromLockettePro: false
 #The language file that Padlock will read from.
 language-file-name: 'en'
 dependency:
-  # If set to true and worldguard is installed, this will check if the player is allowed to build when quick protecting / breaking locks.
   worldguard:
+    # If set to true and worldguard is enabled, this will check if the player is allowed to build when quick protecting / breaking locks.
     enabled: true
+    # If set to true and worldguard is enabled, this will give the player access to locked blocks even if they don't have access to the region else wise.
+    # Note: This does NOT allow the player to break locks, even if they are owner of it, when they don't have block break access on the region!
+    # Note: We have to check every block at least twice to make this happen. If you experience lag, I would recommend to turn caching on.
+    overwrite: false
 lock:
   #| Option                | Description                                                                                                                                             |
   #|-----------------------|---------------------------------------------------------------------------------------------------------------------------------------------------------|
   #| NOT_SNEAKING_REQUIRED | Quick protect if the player right-clicks with a sign in hand and **not** sneaking                                                                       |
   #| SNEAK_NONRELEVANT     | Quick protect if the player right-clicks with a sign, whenever or not they are sneaking or not (this makes it hard to place signs on protected blocks!) |
   #| SNEAK_REQUIRED        | Quick protect if the player right-clicks with a sign in hand and **not** sneaking                                                                       |
-  #| OFF                   | Players can't quick protect and always have to manual lock                                                                                              |
+  #| OFF                   | Players can't quick-protect and always have to manual lock                                                                                              |
   quick-lock:
     type: NOT_SNEAKING_REQUIRED
   blocked:
@@ -26,6 +30,10 @@ lock:
     item-transfer:
       in: false
       out: true
+      # How long a hopper should wait until trying to move items again. Range 0 - Integer.MAX_VALUE
+      # Note: this cooldown will stay even if the lock was removed from the container!
+      cooldown-ticks: 1200
+      # Note: hopper minecarts don't have cooldowns, so if you experience lag you should turn the remove option on
     hopper-minecart: REMOVE
   # List of
   #* EXPLOSION // tnt, creeper, endcrystal, every explosion.
@@ -39,10 +47,11 @@ lock:
   #* ZOMBIE
   #* SILVERFISH
   exemptions: []
+  # Experimental feature. This feature will cache a block's lock state.
+  # It can dramatically increase your server's performance. Recommended interval is 5~10, 0 is off
 cache:
   seconds: 0
 bedrock-prefix: "."
-
 
 # for material names see: https://jd.papermc.io/paper/1.20/org/bukkit/Material.html
 # for tags see: https://jd.papermc.io/paper/1.20/org/bukkit/Tag.html

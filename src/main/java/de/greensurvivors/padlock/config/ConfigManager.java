@@ -7,6 +7,7 @@ import org.bukkit.NamespacedKey;
 import org.bukkit.Tag;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Range;
 
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -22,15 +23,16 @@ public class ConfigManager {
     private final ConfigOption<Boolean> IMPORT_FROM_LOCKETTEPRO = new ConfigOption<>("import-fromLockettePro", false);
     private final ConfigOption<String> LANG_FILENAME = new ConfigOption<>("language-file-name", "lang/lang_en.yml");
     private final ConfigOption<Boolean> DEPENDENCY_WORLDGUARD_ENABLED = new ConfigOption<>("dependency.worldguard.enabled", true);
+    private final ConfigOption<Boolean> DEPENDENCY_WORLDGUARD_OVERWRITE = new ConfigOption<>("dependency.worldguard.overwrite", false);
     private final ConfigOption<Set<Material>> LOCKABLES = new ConfigOption<>("lockables", new HashSet<>()); //todo auto add inventory-blocks
     private final ConfigOption<QuickProtectOption> QUICKPROTECT_TYPE = new ConfigOption<>("lock.quick-lock.type", QuickProtectOption.NOT_SNEAKING_REQUIRED);
     private final ConfigOption<Boolean> LOCK_BLOCKS_INTERFERE = new ConfigOption<>("lock.blocked.interfere", true);
     private final ConfigOption<Boolean> LOCK_BLOCKS_ITEM_TRANSFER_IN = new ConfigOption<>("lock.blocked.item-transfer.in", false);
     private final ConfigOption<Boolean> LOCK_BLOCKS_ITEM_TRANSFER_OUT = new ConfigOption<>("lock.blocked.item-transfer.out", true);
+    private final ConfigOption<@Range(from = 0, to = Integer.MAX_VALUE) Integer> ITEM_TRANSFER_COOLDOWN = new ConfigOption<>("lock.blocked.item-transfer.cooldown-ticks", 1200);
     private final ConfigOption<HopperMinecartBlockedOption> LOCK_BLOCKS_HOPPER_MINECART = new ConfigOption<>("lock.blocked.hopper-minecart", HopperMinecartBlockedOption.REMOVE);
     private final ConfigOption<Set<ProtectionExemption>> LOCK_EXEMPTIONS = new ConfigOption<>("lock.exemptions", Set.of());
     private final ConfigOption<Long> LOCK_EXPIRE_DAYS = new ConfigOption<>("lock.expire.days", 999L);
-    //while this works intern with milliseconds, configurable are only seconds for easier handling of the config
     private final ConfigOption<Integer> CACHE_SECONDS = new ConfigOption<>("cache.seconds", 0);
     private final ConfigOption<String> BEDROCK_PREFIX = new ConfigOption<>("bedrock-prefix", ".");
 
@@ -57,6 +59,7 @@ public class ConfigManager {
 
         //dependency
         DEPENDENCY_WORLDGUARD_ENABLED.setValue(config.getBoolean(DEPENDENCY_WORLDGUARD_ENABLED.getPath(), DEPENDENCY_WORLDGUARD_ENABLED.getFallbackValue()));
+        DEPENDENCY_WORLDGUARD_OVERWRITE.setValue(config.getBoolean(DEPENDENCY_WORLDGUARD_OVERWRITE.getPath(), DEPENDENCY_WORLDGUARD_OVERWRITE.getFallbackValue()));
 
         // load Material set of lockable blocks
         List<?> objects = config.getList(LOCKABLES.getPath(), new ArrayList<>(LOCKABLES.getFallbackValue()));
@@ -225,6 +228,7 @@ public class ConfigManager {
         LOCK_BLOCKS_INTERFERE.setValue(config.getBoolean(LOCK_BLOCKS_INTERFERE.getPath(), LOCK_BLOCKS_INTERFERE.getFallbackValue()));
         LOCK_BLOCKS_ITEM_TRANSFER_IN.setValue(config.getBoolean(LOCK_BLOCKS_ITEM_TRANSFER_IN.getPath(), LOCK_BLOCKS_ITEM_TRANSFER_IN.getFallbackValue()));
         LOCK_BLOCKS_ITEM_TRANSFER_OUT.setValue(config.getBoolean(LOCK_BLOCKS_ITEM_TRANSFER_OUT.getPath(), LOCK_BLOCKS_ITEM_TRANSFER_OUT.getFallbackValue()));
+        ITEM_TRANSFER_COOLDOWN.setValue(Math.max(0, config.getInt(ITEM_TRANSFER_COOLDOWN.getPath(), ITEM_TRANSFER_COOLDOWN.getFallbackValue())));
 
         object = config.get(LOCK_BLOCKS_HOPPER_MINECART.getPath(), LOCK_BLOCKS_HOPPER_MINECART.getFallbackValue());
         if (Objects.requireNonNull(object) instanceof HopperMinecartBlockedOption quickProtectOption) {
@@ -295,7 +299,7 @@ public class ConfigManager {
 
         LOCK_EXPIRE_DAYS.setValue(config.getLong(LOCK_EXPIRE_DAYS.getPath(), LOCK_EXPIRE_DAYS.getFallbackValue()));
 
-        CACHE_SECONDS.setValue(config.getInt(CACHE_SECONDS.getPath(), CACHE_SECONDS.getFallbackValue()));
+        CACHE_SECONDS.setValue(Math.max(0, config.getInt(CACHE_SECONDS.getPath(), CACHE_SECONDS.getFallbackValue())));
         if (CACHE_SECONDS.getValueOrFallback() > 0) {
             plugin.getLockCacheManager().setExpirationTime(CACHE_SECONDS.getValueOrFallback(), TimeUnit.SECONDS);
             plugin.getLogger().info("Cache is enabled! In case of inconsistency, turn off immediately.");
@@ -346,6 +350,10 @@ public class ConfigManager {
         return LOCK_BLOCKS_ITEM_TRANSFER_OUT.getValueOrFallback();
     }
 
+    public int getItemTransferCooldown() {
+        return ITEM_TRANSFER_COOLDOWN.getValueOrFallback();
+    }
+
     public @NotNull HopperMinecartBlockedOption getHopperMinecartAction() {
         return LOCK_BLOCKS_HOPPER_MINECART.getValueOrFallback();
     }
@@ -376,6 +384,10 @@ public class ConfigManager {
 
     public boolean shouldUseWorldguard() {
         return DEPENDENCY_WORLDGUARD_ENABLED.getValueOrFallback();
+    }
+
+    public boolean shouldOverwriteWorldguard() {
+        return DEPENDENCY_WORLDGUARD_OVERWRITE.getValueOrFallback();
     }
 
     public enum QuickProtectOption {

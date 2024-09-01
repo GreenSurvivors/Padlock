@@ -1,5 +1,6 @@
 package de.greensurvivors.padlock.listener;
 
+import com.sk89q.worldguard.bukkit.event.block.UseBlockEvent;
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.PadlockAPI;
 import de.greensurvivors.padlock.config.ConfigManager;
@@ -27,6 +28,7 @@ import org.bukkit.event.block.SignChangeEvent;
 import org.bukkit.event.inventory.InventoryClickEvent;
 import org.bukkit.event.inventory.InventoryDragEvent;
 import org.bukkit.event.inventory.InventoryInteractEvent;
+import org.bukkit.event.inventory.InventoryOpenEvent;
 import org.bukkit.event.player.PlayerBucketEmptyEvent;
 import org.bukkit.event.player.PlayerBucketFillEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
@@ -63,7 +65,7 @@ public class BlockPlayerListener implements Listener {
     private static boolean isSpawnProtected(@NotNull Player player, @NotNull Location location) {
         int spawnSize = Bukkit.getServer().getSpawnRadius();
 
-        if (Bukkit.getServer().getWorlds().get(0).getEnvironment() == World.Environment.NORMAL &&
+        if (Bukkit.getServer().getWorlds().getFirst().getEnvironment() == World.Environment.NORMAL &&
                 spawnSize > 0 && !player.isOp()) {
             Location spawnLocation = player.getWorld().getSpawnLocation();
             return Math.abs(location.x() - spawnLocation.z()) > spawnSize ||
@@ -117,6 +119,7 @@ public class BlockPlayerListener implements Listener {
                             // Check permission with external plugin and
                             // whether locking location is obstructed and
                             // whether this block is lockable
+                            // Note: we check for break, not interact here, since we want to ensure the player can break the lock!
                             if (!plugin.getDependencyManager().isProtectedFromBreak(block, player) &&
                                     replaceableMaterials.contains(signLocBlock.getType()) &&
                                     PadlockAPI.isLockable(block)) {
@@ -330,7 +333,7 @@ public class BlockPlayerListener implements Listener {
                 if (!(SignLock.isOwner(lock, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm()))) {
                     plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
                     event.setCancelled(true);
-                } else if (!plugin.getDependencyManager().isProtectedFromBreak(block, player)) { // if the player is allowed to break the block
+                } else if (!plugin.getDependencyManager().isProtectedFromBreak(block, player)) { // if the player is allowed to break the block. Note: we check for break, not interact here, since we want to ensure the player can break the lock!
                     // only break sign, if the broken block was the last protected block
                     Block attachedBlock = PadlockAPI.getAttachedBlock(event.getBlock());
                     if (attachedBlock != null && !PadlockAPI.isLockable(attachedBlock)) {
@@ -378,11 +381,42 @@ public class BlockPlayerListener implements Listener {
         }
     }
 
+    // worldguard internal event, NOT part of API.
+    // worldguard fires this event, so it goes
+    // original event start --> worldguard handling the event and then fires the UseBlockEvent -->
+    // we listen as early as possible to the UseBlockEvent and allowing the original event to pass -->
+    // no worldguard listener should cancel the original event -->
+    // original event gets handled by every plugin between -->
+    // if not canceled we finally handle the original event ourselves below
+    // of course this does not just include the PlayerInteractEvent,
+    // but also InventoryOpenEvent, BlockDamageEvent (for cakes), EntityInteractEvent, PlayerBedEnterEvent,
+    // PlayerTakeLecternBookEvent, CauldronLevelChangeEvent, BlockDispenseEvent (for some reason) and PlayerOpenSignEvent
+    // (worldguard version 7.0.9, 2024)
+    // we only allow the use of blocks when we do handle the original event,
+    // but it might be a good inspiration to support more block types
+    @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
+    private void onWorldguardUseBlockEvent(final @NotNull UseBlockEvent event) {
+        if (event.getOriginalEvent() instanceof PlayerInteractEvent ||
+            event.getOriginalEvent() instanceof InventoryOpenEvent ||
+            event.getOriginalEvent() instanceof PlayerTakeLecternBookEvent) { // only care for events we handle
+            for (final @NotNull Block block : event.getBlocks()) { // this means WE have to check every interacted block at least twice! I recommend to turn on caching if using in combination with world guard
+                Sign lockSign = PadlockAPI.getLock(block, false);
+
+                if (lockSign != null) {
+                    // allow the interaction of this block
+                    event.setAllowed(true);
+                }
+            }
+        }
+    }
+
     /**
      * Protect block from being used
      * & handle connected openables
      */
     @EventHandler(priority = EventPriority.HIGH, ignoreCancelled = true)
+    // ensure with priority to fire after worldguard
+    // go as last as possible to ensure wolrdguard is done
     private void onAttemptInteractLockedBlocks(@NotNull PlayerInteractEvent event) {
         Action action = event.getAction();
         Block block = event.getClickedBlock();
