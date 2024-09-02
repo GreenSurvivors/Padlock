@@ -83,6 +83,7 @@ lockables:
   - HOPPER
   - DISPENSER
   - DROPPER
+  - CRAFTER
   - BREWING_STAND
   - JUKEBOX
   - BEACON
