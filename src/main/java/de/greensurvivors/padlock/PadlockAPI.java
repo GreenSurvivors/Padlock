@@ -485,15 +485,7 @@ public class PadlockAPI {
             Set<String> ownerUUIDStrs = Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(block.getLocation()).getOwnerUUIDStrs();
             String playerUUIDStr = playerUUid.toString();
 
-            if (ownerUUIDStrs != null) {
-                for (String ownerUUIDStr : ownerUUIDStrs) {
-                    if (playerUUIDStr.equals(ownerUUIDStr)) {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
+            return ownerUUIDStrs != null && ownerUUIDStrs.contains(playerUUIDStr);
         } else {
             Sign lock = getLock(block, true);
             return lock != null && SignLock.isOwner(lock, playerUUid);

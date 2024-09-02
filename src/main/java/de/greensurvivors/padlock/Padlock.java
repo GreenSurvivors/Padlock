@@ -38,10 +38,10 @@ public class Padlock extends JavaPlugin {
     public void onEnable() {
         plugin = this;
 
-        // don't allow
+        // don't allow LockettePro to run parallel. We provide everything it does.
         final @Nullable Plugin lockettePro = Bukkit.getPluginManager().getPlugin("LockettePro");
         if (lockettePro != null) {
-            plugin.getLogger().warning("LockettePro found and disabling it. Please remove LockettePro from your Plugin list!");
+            plugin.getLogger().warning("I found LockettePro and disabled it. Please remove LockettePro from your Plugin list!");
 
             // unregister lockette cmds
             Bukkit.getCommandMap().getKnownCommands().entrySet().removeIf(
