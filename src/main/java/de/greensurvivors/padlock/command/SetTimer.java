@@ -36,7 +36,6 @@ public class SetTimer extends SubCommand {
         return permissible.hasPermission(PermissionManager.CMD_SET_TIMER.getPerm());
     }
 
-
     @Override
     protected @NotNull Set<String> getAliases() {
         return Set.of("settimer", "timer");
@@ -50,13 +49,13 @@ public class SetTimer extends SubCommand {
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         if (sender instanceof Player player) {
-            if (sender.hasPermission(PermissionManager.CMD_SET_TIMER.getPerm())) {
+            if (checkPermission(sender)) {
                 if (args.length >= 2) {
                     Sign sign = SignSelection.getSelectedSign(player);
 
                     if (sign != null) {
                         //check for old Lockett(Pro) signs and try to update them
-                        sign = Command.checkAndUpdateLegacySign(sign, player);
+                        sign = MainCommand.checkAndUpdateLegacySign(sign, player);
                         if (sign == null) {
                             plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
                             return true;

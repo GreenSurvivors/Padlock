@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
  * main command of this plugin, does by itself
  * nothing but call it's subcommands and supply command functions for them
  */
-public class Command implements CommandExecutor, TabCompleter {
+public class MainCommand implements CommandExecutor, TabCompleter {
     /**
      * contains all the registered subcommands
      * (they get registered when a new instance get created)
@@ -40,8 +40,8 @@ public class Command implements CommandExecutor, TabCompleter {
     private final static Set<SubCommand> SUBCOMMANDS = new HashSet<>();
     private static Padlock plugin;
 
-    public Command(@NotNull Padlock plugin) {
-        Command.plugin = plugin;
+    public MainCommand(@NotNull Padlock plugin) {
+        MainCommand.plugin = plugin;
 
         //register all subcommands
         SUBCOMMANDS.add(new Help(plugin));
@@ -54,7 +54,8 @@ public class Command implements CommandExecutor, TabCompleter {
         // admin sub commands
         SUBCOMMANDS.add(new AddOwner(plugin));
         SUBCOMMANDS.add(new RemoveOwner(plugin));
-        SUBCOMMANDS.add(new UpdateSign(plugin));
+        SUBCOMMANDS.add(new UpdateDisplay(plugin));
+        SUBCOMMANDS.add(new UpdateLegacy(plugin));
         SUBCOMMANDS.add(new Version(plugin));
         SUBCOMMANDS.add(new Debug(plugin));
         SUBCOMMANDS.add(new Reload(plugin));
@@ -68,7 +69,7 @@ public class Command implements CommandExecutor, TabCompleter {
      * <br>
      * I don't plan to support offline mode servers.
      * If you don't have a valid UUID working for you,
-     * I'm not going through the hassle to service you.
+     * I'm not going through the hassle to service you. I'm happy for PRs though.
      * <br>
      * Please note: this will return some kind of offline player,
      * But as it goes in Bukkit's API this player might have never played
@@ -134,7 +135,7 @@ public class Command implements CommandExecutor, TabCompleter {
                 PadlockAPI.setInvalid(sign);
                 return null;
             } else {
-                plugin.getMessageManager().sendLang(audience, MessageManager.LangPath.UPDATE_SIGN_SUCCESS);
+                plugin.getMessageManager().sendLang(audience, MessageManager.LangPath.UPDATE_LEGACY_SUCCESS);
                 return otherSign;
             }
         }
@@ -236,7 +237,7 @@ public class Command implements CommandExecutor, TabCompleter {
                                     (!addOwner && SignLock.isOwner(sign, player.getUniqueId()))) { // /lock addmember
 
                                 // try to get player from argument
-                                OfflinePlayer offlinePlayer = Command.getPlayerFromArgument(args[1]);
+                                OfflinePlayer offlinePlayer = MainCommand.getPlayerFromArgument(args[1]);
                                 if (offlinePlayer != null) {
                                     //success!
                                     SignLock.addPlayer(sign, addOwner, offlinePlayer);
@@ -372,7 +373,7 @@ public class Command implements CommandExecutor, TabCompleter {
      * @param sender  Source of the command.  For players tab-completing a
      *                command inside of a command block, this will be the player, not
      *                the command block.
-     * @param command Command which was executed
+     * @param command MainCommand which was executed
      * @param label   Alias of the command which was used
      * @param args    The arguments passed to the command, including final
      *                partial argument to be completed
@@ -425,7 +426,7 @@ public class Command implements CommandExecutor, TabCompleter {
      * calls the subcommands onCommand method
      *
      * @param sender       Source of the command
-     * @param command      Command which was executed
+     * @param command      MainCommand which was executed
      * @param commandLabel Alias of the command which was used
      * @param args         Passed command arguments
      * @return true if a valid command, otherwise false

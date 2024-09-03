@@ -46,7 +46,7 @@ public final class SetPassword extends SubCommand {
             Sign sign = SignSelection.getSelectedSign(player);
             if (sign != null) {
                 //check for old Lockett(Pro) signs and try to update them
-                sign = Command.checkAndUpdateLegacySign(sign, player);
+                sign = MainCommand.checkAndUpdateLegacySign(sign, player);
                 if (sign == null) {
                     Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.SIGN_NEED_RESELECT);
                     return;

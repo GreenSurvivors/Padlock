@@ -30,17 +30,16 @@ public class BlockInventoryMoveListener implements Listener {
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
     public void onInventoryMove(InventoryMoveItemEvent event) {
         if (plugin.getConfigManager().isItemTransferOutBlocked() ||
-                plugin.getConfigManager().getHopperMinecartAction() != ConfigManager.HopperMinecartBlockedOption.FALSE) {
+            plugin.getConfigManager().getHopperMinecartAction() != ConfigManager.HopperMinecartMoveItemOption.ALLOWED) {
             if (isInventoryLocked(event.getSource())) {
                 if (plugin.getConfigManager().isItemTransferOutBlocked()) {
                     event.setCancelled(true);
                 }
                 // Additional Hopper Minecart Check
                 if (event.getDestination().getHolder() instanceof HopperMinecart hopperMinecart) {
-                    ConfigManager.HopperMinecartBlockedOption hopperminecartaction = plugin.getConfigManager().getHopperMinecartAction();
+                    ConfigManager.HopperMinecartMoveItemOption hopperminecartaction = plugin.getConfigManager().getHopperMinecartAction();
                     switch (hopperminecartaction) { // note: hopper minecarts don't have cooldowns, if you experience lag you should turn the remove option on
-                        // case 0 - Impossible
-                        case TRUE -> // Cancel only, it is not called if !Config.isItemTransferOutBlocked()
+                        case BLOCKED -> // Cancel only, it is not called if !Config.isItemTransferOutBlocked()
                                 event.setCancelled(true);
                         case REMOVE -> { // Extra action - HopperMinecart removal
                             event.setCancelled(true);

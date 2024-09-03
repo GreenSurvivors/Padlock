@@ -45,7 +45,7 @@ public class AddOwner extends SubCommand {
      */
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
-        return Command.onAddPlayer(sender, args, true);
+        return MainCommand.onAddPlayer(sender, args, true);
     }
 
     @Override

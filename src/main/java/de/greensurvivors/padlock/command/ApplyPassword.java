@@ -27,7 +27,7 @@ import java.util.Set;
  * the {@link #onCommand(CommandSender, String[])} doesn't do anything and this class doesn't even
  * implement {@link CommandExecutor}. Instead, we catch them even before the server checks
  * for the right command in a {@link PlayerCommandPreprocessEvent} in {@link de.greensurvivors.padlock.listener.ChatPlayerListener}.
- * <p>Also, {@link de.greensurvivors.padlock.command.Command} as well as {@link Padlock} itself has a separate instance of this,</p>
+ * <p>Also, {@link MainCommand} as well as {@link Padlock} itself has a separate instance of this,</p>
  */
 public class ApplyPassword extends SubCommand implements TabCompleter, CommandExecutor {
     public ApplyPassword(@NotNull Padlock plugin) {
@@ -59,7 +59,7 @@ public class ApplyPassword extends SubCommand implements TabCompleter, CommandEx
 
             if (sign != null) {
                 //check for old Lockett(Pro) signs and try to update them
-                sign = de.greensurvivors.padlock.command.Command.checkAndUpdateLegacySign(sign, player);
+                sign = MainCommand.checkAndUpdateLegacySign(sign, player);
                 if (sign == null) {
                     Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.SIGN_NEED_RESELECT);
                     return;

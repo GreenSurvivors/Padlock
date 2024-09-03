@@ -44,7 +44,7 @@ public class Help extends SubCommand {
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         if (this.checkPermission(sender)) {
             if (args.length >= 2) {
-                SubCommand command = Command.getSubCommandFromString(sender, args[1]);
+                SubCommand command = MainCommand.getSubCommandFromString(sender, args[1]);
 
                 if (command != null) {
                     TextComponent.Builder builder = Component.text();
@@ -65,7 +65,7 @@ public class Help extends SubCommand {
                         .append(Component.newline()));
                 // list all subcommands alias per line
                 component = component.append(MiniMessage.miniMessage().deserialize(
-                        Command.getSubCommands(sender).stream().map(subCommand ->
+                    MainCommand.getSubCommands(sender).stream().map(subCommand ->
                                 " - " + String.join(", ", subCommand.getAliases())). //todo get delimiter from config
                                 collect(Collectors.joining("<newline>")))); //todo better line break than newline + minimessage
 
@@ -81,7 +81,7 @@ public class Help extends SubCommand {
         if (args.length == 2) {
             List<String> result = new ArrayList<>();
 
-            for (SubCommand subCommand : Command.getSubCommands(sender)) {
+            for (SubCommand subCommand : MainCommand.getSubCommands(sender)) {
                 result.addAll(subCommand.getAliases());
             }
 

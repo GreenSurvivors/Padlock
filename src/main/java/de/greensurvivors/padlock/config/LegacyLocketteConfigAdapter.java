@@ -6,6 +6,7 @@ import org.bukkit.Tag;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
+import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.util.Collections;
@@ -30,7 +31,7 @@ class LegacyLocketteConfigAdapter {
     private boolean blockitemtransferout = false;
     private int cachetime = 0;
     private boolean cacheenabled = false;
-    private ConfigManager.HopperMinecartBlockedOption blockhopperminecart = null;
+    private ConfigManager.HopperMinecartMoveItemOption blockhopperminecart = null;
     private double lockexpiredays = 60D;
     private long lockdefaultcreatetime = -1L;
     private Set<ConfigManager.ProtectionExemption> protectionexempt = new HashSet<>();
@@ -38,7 +39,7 @@ class LegacyLocketteConfigAdapter {
     protected LegacyLocketteConfigAdapter() {
     }
 
-    protected void reload(Plugin plugin) {
+    protected void reload(@NotNull Plugin plugin) {
         FileConfiguration config = YamlConfiguration.loadConfiguration(new File("plugins/LockettePro/config.yml"));
 
         worldguard = config.getBoolean("worldguard", true);
@@ -46,7 +47,7 @@ class LegacyLocketteConfigAdapter {
         String enablequickprotectstring = config.getString("enable-quick-protect", "true");
 
         switch (enablequickprotectstring.toLowerCase()) {
-            case "false" -> enablequickprotect = ConfigManager.QuickProtectOption.OFF;
+            case "false" -> enablequickprotect = ConfigManager.QuickProtectOption.NO_QUICKLOCK;
             case "sneak" -> enablequickprotect = ConfigManager.QuickProtectOption.SNEAK_REQUIRED;
             default -> enablequickprotect = ConfigManager.QuickProtectOption.NOT_SNEAKING_REQUIRED;
         }
@@ -75,16 +76,16 @@ class LegacyLocketteConfigAdapter {
 
         String blockhopperminecartstring = config.getString("block-hopper-minecart", "remove");
         switch (blockhopperminecartstring.toLowerCase()) {
-            case "true" -> blockhopperminecart = ConfigManager.HopperMinecartBlockedOption.TRUE;
-            case "false" -> blockhopperminecart = ConfigManager.HopperMinecartBlockedOption.FALSE;
-            default -> blockhopperminecart = ConfigManager.HopperMinecartBlockedOption.REMOVE;
+            case "true" -> blockhopperminecart = ConfigManager.HopperMinecartMoveItemOption.BLOCKED;
+            case "false" -> blockhopperminecart = ConfigManager.HopperMinecartMoveItemOption.ALLOWED;
+            default -> blockhopperminecart = ConfigManager.HopperMinecartMoveItemOption.REMOVE;
         }
 
         lockexpiredays = config.getDouble("lock-expire-days", 999.9D);
         lockdefaultcreatetime = config.getLong("lock-default-create-time-unix", -1L);
         if (lockdefaultcreatetime < -1L) lockdefaultcreatetime = -1L;
         List<String> unprocesseditems = config.getStringList("lockables");
-        lockables = new HashSet<Material>();
+        lockables = new HashSet<>();
         for (String unprocesseditem : unprocesseditems) {
             if (unprocesseditem.equals("*")) {
                 Collections.addAll(lockables, Material.values());
@@ -128,7 +129,7 @@ class LegacyLocketteConfigAdapter {
         return blockitemtransferout;
     }
 
-    protected ConfigManager.HopperMinecartBlockedOption getHopperMinecartAction() {
+    protected ConfigManager.HopperMinecartMoveItemOption getHopperMinecartAction() {
         return blockhopperminecart;
     }
 
@@ -147,7 +148,6 @@ class LegacyLocketteConfigAdapter {
     protected boolean isCacheEnabled() {
         return cacheenabled;
     }
-
 
     protected boolean workWithWorldguard() {
         return worldguard;

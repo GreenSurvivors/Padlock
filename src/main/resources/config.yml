@@ -20,7 +20,7 @@ lock:
   #| NOT_SNEAKING_REQUIRED | Quick protect if the player right-clicks with a sign in hand and **not** sneaking                                                                       |
   #| SNEAK_NONRELEVANT     | Quick protect if the player right-clicks with a sign, whenever or not they are sneaking or not (this makes it hard to place signs on protected blocks!) |
   #| SNEAK_REQUIRED        | Quick protect if the player right-clicks with a sign in hand and **not** sneaking                                                                       |
-  #| OFF                   | Players can't quick-protect and always have to manual lock                                                                                              |
+  #| NO_QUICKLOCK          | Players can't quick-protect and always have to manual lock                                                                                              |
   quick-lock:
     type: NOT_SNEAKING_REQUIRED
   blocked:
@@ -33,7 +33,12 @@ lock:
       # How long a hopper should wait until trying to move items again. Range 0 - Integer.MAX_VALUE
       # Note: this cooldown will stay even if the lock was removed from the container!
       cooldown-ticks: 1200
-      # Note: hopper minecarts don't have cooldowns, so if you experience lag you should turn the remove option on
+    #| Option  | Description                                                                                |
+    #|---------|--------------------------------------------------------------------------------------------|
+    #| BLOCKED | Minecarts cant move items in / out of a locked container                                   |
+    #| ALLOWED | Minecarts can move items according to the item-transfer option                             |
+    #| REMOVE  | Minecarts will get removed from the world when trying to interfere with locked containers  |
+    # Note: hopper minecarts don't have cooldowns, so if you experience lag you should turn the remove option on
     hopper-minecart: REMOVE
   # List of
   #* EXPLOSION // tnt, creeper, endcrystal, every explosion.

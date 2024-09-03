@@ -30,7 +30,7 @@ public class ConfigManager {
     private final ConfigOption<Boolean> LOCK_BLOCKS_ITEM_TRANSFER_IN = new ConfigOption<>("lock.blocked.item-transfer.in", false);
     private final ConfigOption<Boolean> LOCK_BLOCKS_ITEM_TRANSFER_OUT = new ConfigOption<>("lock.blocked.item-transfer.out", true);
     private final ConfigOption<@Range(from = 0, to = Integer.MAX_VALUE) Integer> ITEM_TRANSFER_COOLDOWN = new ConfigOption<>("lock.blocked.item-transfer.cooldown-ticks", 1200);
-    private final ConfigOption<HopperMinecartBlockedOption> LOCK_BLOCKS_HOPPER_MINECART = new ConfigOption<>("lock.blocked.hopper-minecart", HopperMinecartBlockedOption.REMOVE);
+    private final ConfigOption<HopperMinecartMoveItemOption> LOCK_BLOCKS_HOPPER_MINECART = new ConfigOption<>("lock.blocked.hopper-minecart", HopperMinecartMoveItemOption.REMOVE);
     private final ConfigOption<Set<ProtectionExemption>> LOCK_EXEMPTIONS = new ConfigOption<>("lock.exemptions", Set.of());
     private final ConfigOption<Long> LOCK_EXPIRE_DAYS = new ConfigOption<>("lock.expire.days", 999L);
     private final ConfigOption<Integer> CACHE_SECONDS = new ConfigOption<>("cache.seconds", 0);
@@ -231,10 +231,10 @@ public class ConfigManager {
         ITEM_TRANSFER_COOLDOWN.setValue(Math.max(0, config.getInt(ITEM_TRANSFER_COOLDOWN.getPath(), ITEM_TRANSFER_COOLDOWN.getFallbackValue())));
 
         object = config.get(LOCK_BLOCKS_HOPPER_MINECART.getPath(), LOCK_BLOCKS_HOPPER_MINECART.getFallbackValue());
-        if (Objects.requireNonNull(object) instanceof HopperMinecartBlockedOption quickProtectOption) {
+        if (Objects.requireNonNull(object) instanceof HopperMinecartMoveItemOption quickProtectOption) {
             LOCK_BLOCKS_HOPPER_MINECART.setValue(quickProtectOption);
         } else if (object instanceof String string) {
-            HopperMinecartBlockedOption setting = MiscUtils.getEnum(HopperMinecartBlockedOption.class, string);
+            HopperMinecartMoveItemOption setting = MiscUtils.getEnum(HopperMinecartMoveItemOption.class, string);
 
             if (setting != null) {
                 LOCK_BLOCKS_HOPPER_MINECART.setValue(setting);
@@ -246,10 +246,10 @@ public class ConfigManager {
         }
         /* todo use this next java version
         switch (object) {
-            case HopperMinecartBlockedOption quickProtectOption ->
+            case HopperMinecartMoveItemOption quickProtectOption ->
                     LOCK_BLOCKS_HOPPER_MINECART.setValue(quickProtectOption);
             case String string -> {
-                HopperMinecartBlockedOption setting = (HopperMinecartBlockedOption) getEnumVal(string, HopperMinecartBlockedOption.values());
+                HopperMinecartMoveItemOption setting = (HopperMinecartMoveItemOption) getEnumVal(string, HopperMinecartMoveItemOption.values());
 
                 if (setting != null) {
                     LOCK_BLOCKS_HOPPER_MINECART.setValue(setting);
@@ -354,7 +354,7 @@ public class ConfigManager {
         return ITEM_TRANSFER_COOLDOWN.getValueOrFallback();
     }
 
-    public @NotNull HopperMinecartBlockedOption getHopperMinecartAction() {
+    public @NotNull HopperMinecartMoveItemOption getHopperMinecartAction() {
         return LOCK_BLOCKS_HOPPER_MINECART.getValueOrFallback();
     }
 
@@ -406,7 +406,7 @@ public class ConfigManager {
         /**
          * don't quick protect
          */
-        OFF,
+        NO_QUICKLOCK,
     }
 
     /**
@@ -430,9 +430,15 @@ public class ConfigManager {
         SILVERFISH // break blocks if they slither out of them
     }
 
-    public enum HopperMinecartBlockedOption {
-        TRUE,
-        FALSE,
+    public enum HopperMinecartMoveItemOption {
+        /**
+         * doesn't allow Items to flow from the minecart into a container
+         */
+        BLOCKED,
+        /**
+         * allows minecarts to insert items into locked containers
+         */
+        ALLOWED,
         /**
          * breaks the mine-cart
          */
