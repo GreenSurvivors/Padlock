@@ -63,7 +63,7 @@ class LegacyLocketteConfigAdapter {
 
             if (protectionExemtion != null) {
                 protectionexempt.add(protectionExemtion);
-            } else {
+            } else if (!string.equals("nothing")) { // special case, we will just leave it empty.
                 plugin.getLogger().warning("Couldn't get exemtion from legacy \"" + string + "\" for lock exemtion list. Ignoring.");
             }
         }

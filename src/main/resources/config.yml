@@ -52,6 +52,8 @@ lock:
   #* ZOMBIE
   #* SILVERFISH
   exemptions: []
+  expire:
+    days: 999.9
   # Experimental feature. This feature will cache a block's lock state.
   # It can dramatically increase your server's performance. Recommended interval is 5~10, 0 is off
 cache:

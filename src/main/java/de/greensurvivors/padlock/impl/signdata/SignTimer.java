@@ -16,6 +16,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -180,7 +181,7 @@ public class SignTimer {
      */
     @Deprecated(forRemoval = true)
     public static void updateLegacyTimer(@NotNull Sign sign) {
-        Long legacyTimer = getLegacyTimer(sign);
+        @Nullable Long legacyTimer = getLegacyTimer(sign);
 
         if (legacyTimer != null) {
             setTimer(sign, legacyTimer, false);
@@ -198,7 +199,7 @@ public class SignTimer {
             Long timer = getTimerFromComp(line);
 
             if (timer != null) {
-                return timer;
+                return TimeUnit.SECONDS.toMillis(timer);
             }
         }
 

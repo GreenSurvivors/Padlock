@@ -319,14 +319,15 @@ public class ConfigManager {
 
         FileConfiguration config = plugin.getConfig();
 
+        config.set(IMPORT_FROM_LOCKETTEPRO.getPath(), false);
         config.set(DEPENDENCY_WORLDGUARD_ENABLED.getPath(), adapter.workWithWorldguard());
-        config.set(LOCKABLES.getPath(), adapter.getLockables());
-        config.set(QUICKPROTECT_TYPE.getPath(), adapter.getQuickProtectAction());
+        config.set(LOCKABLES.getPath(), adapter.getLockables().stream().map(mat -> mat.getKey().asString()).toArray(String[]::new));
+        config.set(QUICKPROTECT_TYPE.getPath(), adapter.getQuickProtectAction().toString());
         config.set(LOCK_BLOCKS_INTERFERE.getPath(), adapter.isInterferePlacementBlocked());
         config.set(LOCK_BLOCKS_ITEM_TRANSFER_IN.getPath(), adapter.isItemTransferInBlocked());
         config.set(LOCK_BLOCKS_ITEM_TRANSFER_OUT.getPath(), adapter.isItemTransferOutBlocked());
-        config.set(LOCK_BLOCKS_HOPPER_MINECART.getPath(), adapter.isItemTransferOutBlocked());
-        config.set(LOCK_EXEMPTIONS.getPath(), adapter.getProtectionExemptions());
+        config.set(LOCK_BLOCKS_HOPPER_MINECART.getPath(), adapter.getHopperMinecartAction().toString());
+        config.set(LOCK_EXEMPTIONS.getPath(), adapter.getProtectionExemptions().toArray(new ProtectionExemption[0]));
         config.set(LOCK_EXPIRE_DAYS.getPath(), adapter.getLockExpireDays());
         config.set(CACHE_SECONDS.getPath(), adapter.getCacheTimeSeconds());
 
