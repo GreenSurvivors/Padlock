@@ -119,15 +119,20 @@ public final class SignAccessType {
      */
     @Deprecated(forRemoval = true)
     private static @Nullable AccessType getLegacySetting(@NotNull Sign sign) {
+        boolean isPrivate = false;
         for (Component line : sign.getSide(Side.FRONT).lines()) {
             if (Padlock.getPlugin().getMessageManager().isLegacySignComp(line, MessageManager.LangPath.LEGACY_PRIVATE_SIGN)) {
-                return AccessType.PRIVATE;
+                isPrivate = true; // a lockette sign can have [Everyone] and [Private] on the same sign, and the Everyone-one overwrites
             } else if (Padlock.getPlugin().getMessageManager().isLegacySignComp(line, MessageManager.LangPath.LEGACY_EVERYONE_SIGN)) {
                 return AccessType.PUBLIC;
             }
         }
 
-        return null;
+        if (isPrivate) {
+            return AccessType.PRIVATE;
+        } else {
+            return null;
+        }
     }
 
     /**

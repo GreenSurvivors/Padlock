@@ -39,17 +39,17 @@ public class SignTimer {
      */
     @Deprecated(forRemoval = true)
     private final static Set<Pattern> legacyPatterns = Padlock.getPlugin().getMessageManager().
-            getNakedLegacyText(MessageManager.LangPath.LEGACY_TIMER_SIGN).stream().
-            map(s -> Pattern.compile(s.replace("[", "\\[(?i)").
-                    replace("<time>", "(-?[0-9]+)"))).collect(Collectors.toSet());
+        getNakedLegacyText(MessageManager.LangPath.LEGACY_TIMER_SIGN).stream().
+        map(s -> Pattern.compile(s.replace("[", "\\[(?i)").
+            replace("<time>", "(-?[0-9]+)"))).collect(Collectors.toSet());
     // pretty complex stuff [timer:<timer>] and timer can be any number of digits with their timeunit (t, s, h, d, w or M)
     // optionally delimited by whitespace and commas, all ignoring case.
     // valid lines would be "[timer:2h]", "[TIMER:2D, 3w2t 555s]", "[tiMeR: 100W,,,  -8t]", "[timer:2h5h99h]"
     // invalid lines would be "timer:3d]", "[timer24w]", "[time:0x77Q]", "[banana]", "[timer:34ttt]"
     private final static Pattern modernPattern = Pattern.compile(Padlock.getPlugin().getMessageManager().
-            getNakedSignText(MessageManager.LangPath.SIGN_LINE_TIMER_SIGN).replace("[", "\\[(?i)").
-            replace("<" + MessageManager.PlaceHolder.TIME.getPlaceholder() + ">",
-                    "\\s?((" + MiscUtils.getPeriodPattern().pattern() + "[\\s,]*?)+)"));
+        getNakedSignText(MessageManager.LangPath.SIGN_LINE_TIMER_SIGN).replace("[", "\\[(?i)").
+        replace("<" + MessageManager.PlaceHolder.TIME.getPlaceholder() + ">",
+            "\\s?((" + MiscUtils.getPeriodPattern().pattern() + "[\\s,]*?)+)"));
     private final static NamespacedKey timerKey = new NamespacedKey(Padlock.getPlugin(), "timer");
 
     /**
@@ -60,43 +60,16 @@ public class SignTimer {
      *
      * @return might be null if no timer was configured
      */
-    protected static @Nullable Component getTimerComponent(@NotNull Sign sign) {
+    public static @Nullable Component getTimerComponent(@NotNull Sign sign) {
         Long timerDuration = getTimer(sign, false);
 
         if (timerDuration != null && timerDuration > 0) {
-
-
             Duration duration = Duration.ofMillis(timerDuration);
 
-            String timeStr = "";
-
-            final long days = duration.toDaysPart();
-            if (days != 0) {
-                timeStr += days + "d";
-            }
-
-            final int hours = duration.toHoursPart();
-            if (hours != 0) {
-                timeStr += hours + "h";
-            }
-
-            final int minutes = duration.toMinutesPart();
-            if (minutes != 0) {
-                timeStr += minutes + "m";
-            }
-
-            final int seconds = duration.toSecondsPart();
-            if (seconds != 0) {
-                timeStr += seconds + "s";
-            }
-
-            final int ticks = duration.toMillisPart() / 50;
-            if (ticks != 0) {
-                timeStr += ticks + "t";
-            }
+            final String timeStr = MiscUtils.formatTimeString(duration);
 
             return Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_TIMER_SIGN,
-                    Placeholder.unparsed(MessageManager.PlaceHolder.TIME.getPlaceholder(), timeStr));
+                Placeholder.unparsed(MessageManager.PlaceHolder.TIME.getPlaceholder(), timeStr));
         } else {
             return null;
         }
