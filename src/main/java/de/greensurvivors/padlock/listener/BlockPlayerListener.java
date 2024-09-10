@@ -319,7 +319,9 @@ public class BlockPlayerListener implements Listener {
                     final Sign lockSign = PadlockAPI.getLock(PadlockAPI.getAttachedBlock(block), false);
 
                     //let the additional sign break but update the others
-                    Bukkit.getScheduler().runTaskLater(plugin, () -> PadlockAPI.updateLegacySign(lockSign), 2);
+                    if (lockSign != null) {
+                        Bukkit.getScheduler().runTaskLater(plugin, () -> PadlockAPI.updateLegacySign(lockSign), 2);
+                    }
                 } else { // not allowed to break
                     PadlockAPI.updateLegacySign(sign);
 

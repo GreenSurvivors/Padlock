@@ -32,7 +32,7 @@ public class ConfigManager {
     private final ConfigOption<@Range(from = 0, to = Integer.MAX_VALUE) Integer> ITEM_TRANSFER_COOLDOWN = new ConfigOption<>("lock.blocked.item-transfer.cooldown-ticks", 1200);
     private final ConfigOption<HopperMinecartMoveItemOption> LOCK_BLOCKS_HOPPER_MINECART = new ConfigOption<>("lock.blocked.hopper-minecart", HopperMinecartMoveItemOption.REMOVE);
     private final ConfigOption<Set<ProtectionExemption>> LOCK_EXEMPTIONS = new ConfigOption<>("lock.exemptions", Set.of());
-    private final ConfigOption<Long> LOCK_EXPIRE_DAYS = new ConfigOption<>("lock.expire.days", 999L);
+    private final ConfigOption<Long> LOCK_EXPIRE_DAYS = new ConfigOption<>("lock.expire.days", 0L);
     private final ConfigOption<Integer> CACHE_SECONDS = new ConfigOption<>("cache.seconds", 0);
     private final ConfigOption<String> BEDROCK_PREFIX = new ConfigOption<>("bedrock-prefix", ".");
 

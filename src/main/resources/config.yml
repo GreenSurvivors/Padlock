@@ -51,9 +51,10 @@ lock:
   #* WITHER
   #* ZOMBIE
   #* SILVERFISH
-  exemptions: []
+  exemptions: [ ]
+  # How long the lock will be valid in days. 0 = never
   expire:
-    days: 999.9
+    days: 0
   # Experimental feature. This feature will cache a block's lock state.
   # It can dramatically increase your server's performance. Recommended interval is 5~10, 0 is off
 cache:
