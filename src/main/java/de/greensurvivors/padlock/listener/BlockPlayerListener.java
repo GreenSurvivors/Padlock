@@ -556,7 +556,7 @@ public class BlockPlayerListener implements Listener {
                     player.updateInventory();
                 }
             }, 1L);
-        } // has permission
+        } // has permission or is not protected
     }
 
     /**
@@ -567,10 +567,11 @@ public class BlockPlayerListener implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlockClicked().getRelative(event.getBlockFace());
 
-        if (!(PadlockAPI.isOwner(block, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
+        if (PadlockAPI.isProtected(block) &&
+            !(PadlockAPI.isOwner(block, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
             plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
             event.setCancelled(true);
-        } // has permission
+        } // has permission or is not protected
     }
 
     /**
