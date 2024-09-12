@@ -1,13 +1,15 @@
 package de.greensurvivors.padlock;
 
-import de.greensurvivors.padlock.command.ApplyPassword;
 import de.greensurvivors.padlock.command.MainCommand;
 import de.greensurvivors.padlock.config.ConfigManager;
 import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.impl.DependencyManager;
 import de.greensurvivors.padlock.impl.LockCacheManager;
 import de.greensurvivors.padlock.impl.openabledata.OpenableToggleManager;
-import de.greensurvivors.padlock.listener.*;
+import de.greensurvivors.padlock.listener.BlockDebugListener;
+import de.greensurvivors.padlock.listener.BlockEnvironmentListener;
+import de.greensurvivors.padlock.listener.BlockInventoryMoveListener;
+import de.greensurvivors.padlock.listener.BlockPlayerListener;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
 import org.bukkit.plugin.Plugin;
@@ -67,9 +69,9 @@ public class Padlock extends JavaPlugin {
         pluginManager.registerEvents(new BlockPlayerListener(this), this);
         pluginManager.registerEvents(new BlockEnvironmentListener(this), this);
         pluginManager.registerEvents(new BlockInventoryMoveListener(this), this);
-        pluginManager.registerEvents(new ChatPlayerListener(this), this);
+        //setPassword and applyPassword commands are also listener, but they will register themself.
 
-        //register commands
+        //register main command; applyPassword will - again - register itself
         MainCommand lockCmd = new MainCommand(this);
 
         PluginCommand mainCommand = getCommand("padlock");
@@ -80,17 +82,6 @@ public class Padlock extends JavaPlugin {
         } else {
             getLogger().log(Level.SEVERE, "Couldn't register command 'padlock'!");
         }
-
-        ApplyPassword pwCmd = new ApplyPassword(plugin);
-        PluginCommand pwCommand = getCommand("password");
-        if (pwCommand != null) {
-
-            pwCommand.setExecutor(pwCmd);
-            pwCommand.setTabCompleter(pwCmd);
-        } else {
-            getLogger().log(Level.SEVERE, "Couldn't register command 'password'!");
-        }
-
 
         // Dependencys
         dependencyManager = new DependencyManager(this);

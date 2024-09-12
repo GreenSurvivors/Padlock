@@ -367,7 +367,7 @@ public class ConfigManager {
         return LOCK_EXPIRE_DAYS.getValueOrFallback();
     }
 
-    public boolean isLockable(Material material) {
+    public boolean isLockable(@NotNull Material material) {
         return LOCKABLES.getValueOrFallback().contains(material);
     }
 

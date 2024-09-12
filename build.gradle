@@ -9,7 +9,7 @@ ext.majorVersion = 2
 ext.minorVersion = 14
 ext.minecraftVersion = "1.20.4"
 
-ext.buildNumber = System.env.BUILD_NUMBER == null ? "dev" : "build" + "$System.env.BUILD_NUMBER"
+ext.buildNumber = System.env.BUILD_NUMBER == null ? "dev"              : "build" + "$System.env.BUILD_NUMBER"
 ext.mavenDirectory = System.env.MAVEN_DIR == null ? "$projectDir/repo" : "$System.env.MAVEN_DIR"
 ext.jdDirectory = System.env.JAVADOCS_DIR == null ? null               : "$System.env.JAVADOCS_DIR"
 
@@ -66,13 +66,6 @@ processResources {
 tasks.register('sourcesJar', Jar) {
     archiveClassifier.set("sources")
     from sourceSets.main.java.srcDirs
-}
-
-tasks {
-    // Configure reobfJar to run when invoking the build task
-    assemble {
-        dependsOn(reobfJar)
-    }
 }
 
 publishing {
