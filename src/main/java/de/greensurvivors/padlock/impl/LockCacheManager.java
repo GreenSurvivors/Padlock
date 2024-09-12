@@ -64,7 +64,7 @@ public class LockCacheManager { // todo check Persistent data container use
             if (lock != null) {
                 lockStateCache.put(location, new LockWrapper(lock.getLocation()));
 
-                LazySignProperties lazySignPropertys = lockLazyProps.get(lock);
+                LazySignProperties lazySignPropertys = lockLazyProps.get(lock.getLocation());
 
                 if (lazySignPropertys == null) {
                     lazySignPropertys = new LazySignProperties(lock);

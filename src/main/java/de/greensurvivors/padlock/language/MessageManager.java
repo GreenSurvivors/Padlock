@@ -23,7 +23,6 @@ import java.security.CodeSource;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
@@ -39,8 +38,6 @@ public class MessageManager /*extends MiniMessageTranslator*/ {
      * contains all sign lines without any decorations like color but still with every placeholder
      */
     private final HashMap<LangPath, String> nakedSignLines = new HashMap<>(); // path -> naked
-    @Deprecated(forRemoval = true)
-    private final HashMap<LangPath, Set<String>> nakedLegacySignLines = new HashMap<>();
     private ResourceBundle lang;
     /**
      * caches every component without placeholder for faster access in future and loads missing values automatically
@@ -116,11 +113,6 @@ public class MessageManager /*extends MiniMessageTranslator*/ {
         nakedSignLines.put(LangPath.SIGN_LINE_DISPLAY, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.SIGN_LINE_DISPLAY)).toLowerCase());
         nakedSignLines.put(LangPath.SIGN_LINE_SUPPLY_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.SIGN_LINE_SUPPLY_SIGN)).toLowerCase());
         nakedSignLines.put(LangPath.SIGN_LINE_TIMER_SIGN, MiniMessage.miniMessage().stripTags(getStringFromLang(LangPath.SIGN_LINE_TIMER_SIGN)).toLowerCase());
-
-        nakedLegacySignLines.put(LangPath.LEGACY_ADDITIONAL_SIGN, getStringSetFromLang(LangPath.LEGACY_ADDITIONAL_SIGN).stream().map(s -> MiniMessage.miniMessage().stripTags(s).toLowerCase()).collect(Collectors.toSet()));
-        nakedLegacySignLines.put(LangPath.LEGACY_EVERYONE_SIGN, getStringSetFromLang(LangPath.LEGACY_EVERYONE_SIGN).stream().map(s -> MiniMessage.miniMessage().stripTags(s).toLowerCase()).collect(Collectors.toSet()));
-        nakedLegacySignLines.put(LangPath.LEGACY_PRIVATE_SIGN, getStringSetFromLang(LangPath.LEGACY_PRIVATE_SIGN).stream().map(s -> MiniMessage.miniMessage().stripTags(s).toLowerCase()).collect(Collectors.toSet()));
-        nakedLegacySignLines.put(LangPath.LEGACY_TIMER_SIGN, getStringSetFromLang(LangPath.LEGACY_TIMER_SIGN).stream().map(s -> MiniMessage.miniMessage().stripTags(s).toLowerCase()).collect(Collectors.toSet()));
     }
 
     private String saveConvert(String theString, boolean escapeSpace) {
@@ -301,19 +293,6 @@ public class MessageManager /*extends MiniMessageTranslator*/ {
         return strToTest.equalsIgnoreCase(nakedSignLines.get(langPath));
     }
 
-    @Deprecated(forRemoval = true)
-    public boolean isLegacySignComp(@NotNull Component compToTest, @NotNull LangPath langPath) {
-        String strToTest = PlainTextComponentSerializer.plainText().serialize(compToTest).toLowerCase().trim();
-
-        for (String legacyLine : nakedLegacySignLines.get(langPath)) {
-            if (strToTest.startsWith(legacyLine)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     /**
      * get the line of a sign without any decorations, but still with its placeholders.
      *
@@ -321,11 +300,6 @@ public class MessageManager /*extends MiniMessageTranslator*/ {
      */
     public @Nullable String getNakedSignText(@NotNull LangPath langPath) {
         return nakedSignLines.get(langPath);
-    }
-
-    @Deprecated(forRemoval = true)
-    public @Nullable Set<@NotNull String> getNakedLegacyText(@NotNull LangPath langPath) {
-        return nakedLegacySignLines.get(langPath);
     }
 
     /*

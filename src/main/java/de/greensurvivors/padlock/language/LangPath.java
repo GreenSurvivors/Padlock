@@ -34,7 +34,6 @@ public enum LangPath {
     HELP_SET_PASSWORD("cmd.help.set-password"),
     HELP_SET_TIMER("cmd.help.set-timer"),
     HELP_UPDATE_DISPLAY("cmd.help.update-display"),
-    HELP_UPDATE_LEGACY("cmd.help.update-legacy"),
     HELP_VERSION("cmd.help.version"),
     //info cmd
     INFO_HEAD("cmd.info.head"),
@@ -43,15 +42,6 @@ public enum LangPath {
     INFO_MEMBERS("cmd.info.members"),
     INFO_OWNERS("cmd.info.owners"),
     INFO_TIMER("cmd.info.timer"),
-    //legacy
-    @Deprecated(forRemoval = true)
-    LEGACY_ADDITIONAL_SIGN("sign.legacy.additional", "[More Users]"),
-    @Deprecated(forRemoval = true)
-    LEGACY_EVERYONE_SIGN("sign.legacy.everyone", "[Everyone]"),
-    @Deprecated(forRemoval = true)
-    LEGACY_PRIVATE_SIGN("sign.legacy.private", "[Private]"),
-    @Deprecated(forRemoval = true)
-    LEGACY_TIMER_SIGN("sign.legacy.timer", "[Timer:<timer>]"),
     //
     LOCK_ERROR_ALREADY_LOCKED("action.lock.error.already-locked"),
     LOCK_ERROR_NOT_LOCKABLE("action.lock.error.not-lockable"),
@@ -106,8 +96,7 @@ public enum LangPath {
     SIGN_NOT_SELECTED("cmd.error.no-sign-selected"),
     SIGN_PLAYER_NAME_ON("sign.line.player-name", "<" + PlaceHolder.PLAYER.getPlaceholder() + ">"), // used for formatting displayed player names
     UNKNOWN_PLAYER("cmd.error.unknown-player"),
-    UPDATE_DISPLAY_SUCCESS("cmd.update-display.success"),
-    UPDATE_LEGACY_SUCCESS("cmd.update-legacy.success");
+    UPDATE_DISPLAY_SUCCESS("cmd.update-display.success");
 
     private final @NotNull String path;
     private final @NotNull String defaultValue;

@@ -279,8 +279,7 @@ public class BlockPlayerListener implements Listener {
             if (!player.hasPermission(PermissionManager.EDIT.getPerm())) return;
 
             // check permission: owner or admin
-            if (clickedBlock.getState() instanceof Sign sign &&
-                    (PadlockAPI.isLockSign(sign) || PadlockAPI.isAdditionalSign(sign))) {
+            if (clickedBlock.getState() instanceof Sign sign && PadlockAPI.isLockSign(sign)) {
 
                 SignSelection.selectSign(player, clickedBlock);
                 plugin.getMessageManager().sendLang(player, LangPath.SELECT_SIGN);
@@ -312,20 +311,6 @@ public class BlockPlayerListener implements Listener {
                     plugin.getMessageManager().sendLang(player, LangPath.NOT_OWNER);
                     event.setCancelled(true);
                 }
-            } else if (PadlockAPI.isAdditionalSign(sign)) {
-                if (PadlockAPI.isOwner(block, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm())) {
-                    final Sign lockSign = PadlockAPI.getLock(PadlockAPI.getAttachedBlock(block), false);
-
-                    //let the additional sign break but update the others
-                    if (lockSign != null) {
-                        Bukkit.getScheduler().runTaskLater(plugin, () -> PadlockAPI.updateLegacySign(lockSign), 2);
-                    }
-                } else { // not allowed to break
-                    PadlockAPI.updateLegacySign(sign);
-
-                    plugin.getMessageManager().sendLang(player, LangPath.NOT_OWNER);
-                    event.setCancelled(true);
-                }
             }
         } else { // not a sign
             Sign lock = PadlockAPI.getLock(block, false);
@@ -348,23 +333,6 @@ public class BlockPlayerListener implements Listener {
     }
 
     /**
-     * protect sign from being changed
-     */
-    @Deprecated(forRemoval = true) // only needed for legacy signs.
-    @EventHandler(ignoreCancelled = true, priority = EventPriority.LOW)
-    private void onAttemptChangeLockSign(@NotNull SignChangeEvent event) {
-        Block block = event.getBlock();
-        if (block.getState() instanceof Sign sign &&
-                (PadlockAPI.isLockSign(sign) || PadlockAPI.isAdditionalSign(sign))) {
-            PadlockAPI.updateLegacySign(sign);
-            plugin.getMessageManager().sendLang(event.getPlayer(), LangPath.ACTION_PREVENTED_USE_CMDS);
-            sign.setWaxed(true);
-            sign.update();
-            event.setCancelled(true);
-        }
-    }
-
-    /**
      * protect against wax removing
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
@@ -373,8 +341,7 @@ public class BlockPlayerListener implements Listener {
         Block block = event.getClickedBlock();
 
         if (action == Action.RIGHT_CLICK_BLOCK &&
-                (block.getState() instanceof Sign sign &&
-                        (PadlockAPI.isLockSign(sign) || PadlockAPI.isAdditionalSign(sign))) &&
+            (block.getState() instanceof Sign sign && PadlockAPI.isLockSign(sign)) &&
                 event.getItem() != null && Tag.ITEMS_AXES.isTagged(event.getItem().getType())) {
             plugin.getMessageManager().sendLang(event.getPlayer(), LangPath.ACTION_PREVENTED_USE_CMDS);
             event.setCancelled(true);
