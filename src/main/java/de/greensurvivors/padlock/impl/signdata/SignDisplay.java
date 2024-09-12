@@ -107,8 +107,7 @@ public class SignDisplay {
             case DISPLAY -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_DISPLAY);
             case SUPPLY ->
                     Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_SUPPLY_SIGN);
-            /*case null, // todo next java version*/
-            default -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_ERROR);
+            case null -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_ERROR);
         };
 
         //special settings

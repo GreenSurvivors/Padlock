@@ -1,4 +1,4 @@
-***WARNING: Versions for Minecraft 1.20.x are not fully tested yet.***
+***WARNING: Versions for Minecraft 1.21.x are not fully tested yet.***
 Please create an issus if you find anything wrong. Thank you.
 
 All versions can be found at [Github Release Page](https://github.com/GreenSurvivors/Padlock/releases).

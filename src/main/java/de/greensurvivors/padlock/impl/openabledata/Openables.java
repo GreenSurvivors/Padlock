@@ -11,6 +11,7 @@ import org.bukkit.block.data.Openable;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -138,6 +139,14 @@ public class Openables {
         WARPED_DOOR(Material.WARPED_DOOR, Sound.BLOCK_NETHER_WOOD_DOOR_CLOSE, Sound.BLOCK_NETHER_WOOD_DOOR_OPEN),
         CHERRY_DOOR(Material.CHERRY_DOOR, Sound.BLOCK_CHERRY_WOOD_DOOR_CLOSE, Sound.BLOCK_CHERRY_WOOD_DOOR_OPEN),
         BAMBOO_DOOR(Material.BAMBOO_DOOR, Sound.BLOCK_BAMBOO_WOOD_DOOR_CLOSE, Sound.BLOCK_BAMBOO_WOOD_DOOR_OPEN),
+        COPPER_DOOR(Material.COPPER_DOOR, Sound.BLOCK_COPPER_DOOR_OPEN, Sound.BLOCK_COPPER_DOOR_CLOSE),
+        EXPOSED_COPPER_DOOR(Material.EXPOSED_COPPER_DOOR, Sound.BLOCK_COPPER_DOOR_OPEN, Sound.BLOCK_COPPER_DOOR_CLOSE),
+        WEATHERED_COPPER_DOOR(Material.WEATHERED_COPPER_DOOR, Sound.BLOCK_COPPER_DOOR_OPEN, Sound.BLOCK_COPPER_DOOR_CLOSE),
+        OXIDIZED_COPPER_DOOR(Material.OXIDIZED_COPPER_DOOR, Sound.BLOCK_COPPER_DOOR_OPEN, Sound.BLOCK_COPPER_DOOR_CLOSE),
+        WAXED_COPPER_DOOR(Material.WAXED_COPPER_DOOR, Sound.BLOCK_COPPER_DOOR_OPEN, Sound.BLOCK_COPPER_DOOR_CLOSE),
+        WAXED_EXPOSED_COPPER_DOOR(Material.WAXED_EXPOSED_COPPER_DOOR, Sound.BLOCK_COPPER_DOOR_OPEN, Sound.BLOCK_COPPER_DOOR_CLOSE),
+        WAXED_WEATHERED_COPPER_DOOR(Material.WAXED_WEATHERED_COPPER_DOOR, Sound.BLOCK_COPPER_DOOR_OPEN, Sound.BLOCK_COPPER_DOOR_CLOSE),
+        WAXED_OXIDIZED_COPPER_DOOR(Material.WAXED_OXIDIZED_COPPER_DOOR, Sound.BLOCK_COPPER_DOOR_OPEN, Sound.BLOCK_COPPER_DOOR_CLOSE),
         OAK_TRAPDOOR(Material.OAK_TRAPDOOR),
         SPRUCE_TRAPDOOR(Material.SPRUCE_TRAPDOOR),
         BIRCH_TRAPDOOR(Material.BIRCH_TRAPDOOR),
@@ -150,6 +159,14 @@ public class Openables {
         WARPED_TRAPDOOR(Material.WARPED_TRAPDOOR, Sound.BLOCK_NETHER_WOOD_TRAPDOOR_CLOSE, Sound.BLOCK_NETHER_WOOD_TRAPDOOR_OPEN),
         CHERRY_TRAPDOOR(Material.CHERRY_TRAPDOOR, Sound.BLOCK_CHERRY_WOOD_TRAPDOOR_CLOSE, Sound.BLOCK_CHERRY_WOOD_TRAPDOOR_OPEN),
         BAMBOO_TRAPDOOR(Material.BAMBOO_TRAPDOOR, Sound.BLOCK_BAMBOO_WOOD_TRAPDOOR_CLOSE, Sound.BLOCK_BAMBOO_WOOD_TRAPDOOR_OPEN),
+        COPPER_TRAPDOOR(Material.COPPER_TRAPDOOR, Sound.BLOCK_COPPER_TRAPDOOR_OPEN, Sound.BLOCK_COPPER_TRAPDOOR_CLOSE),
+        EXPOSED_COPPER_TRAPDOOR(Material.EXPOSED_COPPER_TRAPDOOR, Sound.BLOCK_COPPER_TRAPDOOR_OPEN, Sound.BLOCK_COPPER_TRAPDOOR_CLOSE),
+        WEATHERED_COPPER_TRAPDOOR(Material.WEATHERED_COPPER_TRAPDOOR, Sound.BLOCK_COPPER_TRAPDOOR_OPEN, Sound.BLOCK_COPPER_TRAPDOOR_CLOSE),
+        OXIDIZED_COPPER_TRAPDOOR(Material.OXIDIZED_COPPER_TRAPDOOR, Sound.BLOCK_COPPER_TRAPDOOR_OPEN, Sound.BLOCK_COPPER_TRAPDOOR_CLOSE),
+        WAXED_COPPER_TRAPDOOR(Material.WAXED_COPPER_TRAPDOOR, Sound.BLOCK_COPPER_TRAPDOOR_OPEN, Sound.BLOCK_COPPER_TRAPDOOR_CLOSE),
+        WAXED_EXPOSED_COPPER_TRAPDOOR(Material.WAXED_EXPOSED_COPPER_TRAPDOOR, Sound.BLOCK_COPPER_TRAPDOOR_OPEN, Sound.BLOCK_COPPER_TRAPDOOR_CLOSE),
+        WAXED_WEATHERED_COPPER_TRAPDOOR(Material.WAXED_WEATHERED_COPPER_TRAPDOOR, Sound.BLOCK_COPPER_TRAPDOOR_OPEN, Sound.BLOCK_COPPER_TRAPDOOR_CLOSE),
+        WAXED_OXIDIZED_COPPER_TRAPDOOR(Material.WAXED_OXIDIZED_COPPER_TRAPDOOR, Sound.BLOCK_COPPER_TRAPDOOR_OPEN, Sound.BLOCK_COPPER_TRAPDOOR_CLOSE),
         OAK_FENCE_GATE(Material.OAK_FENCE_GATE),
         SPRUCE_FENCE_GATE(Material.SPRUCE_FENCE_GATE),
         BIRCH_FENCE_GATE(Material.BIRCH_FENCE_GATE),
@@ -165,6 +182,9 @@ public class Openables {
         private final Material material;
         private final Sound closeSound;
         private final Sound openSound;
+
+        private static final EnumSet<OpenableSound> values; // cache the values ourselves, since OpenableSound.values is way slower.
+        static {values = EnumSet.allOf(OpenableSound.class);} // note: because the order of initialisation, we can't add the enum values in the constructor
 
         OpenableSound(@NotNull Material material) {
             this.material = material;
@@ -190,13 +210,13 @@ public class Openables {
         }
 
         public static @NotNull Sound getCloseSound(@NotNull Material material) {
-            for (OpenableSound doorSound : OpenableSound.values()) {
-                if (doorSound.material.equals(material)) {
-                    return doorSound.closeSound;
+            for (OpenableSound openableSound : values) {
+                if (openableSound.material.equals(material)) {
+                    return openableSound.closeSound;
                 }
             }
 
-            // fallback in case a new door wasn't implemented yet
+            // fallback in case a material wasn't implemented yet
             if (Tag.DOORS.isTagged(material)) {
                 return Sound.BLOCK_WOODEN_DOOR_CLOSE;
             } else if (Tag.TRAPDOORS.isTagged(material)) {
@@ -209,13 +229,13 @@ public class Openables {
         }
 
         public static @NotNull Sound getOpenSound(@NotNull Material material) {
-            for (OpenableSound doorSound : OpenableSound.values()) {
-                if (doorSound.material.equals(material)) {
-                    return doorSound.openSound;
+            for (OpenableSound openableSound : values) {
+                if (openableSound.material.equals(material)) {
+                    return openableSound.openSound;
                 }
             }
 
-            // fallback in case a new door wasn't implemented yet
+            // fallback in case a new material wasn't implemented yet
             if (Tag.DOORS.isTagged(material)) {
                 return Sound.BLOCK_WOODEN_DOOR_OPEN;
             } else if (Tag.TRAPDOORS.isTagged(material)) {
