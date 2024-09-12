@@ -3,6 +3,7 @@ package de.greensurvivors.padlock.command;
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
+import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.SignSelection;
 import de.greensurvivors.padlock.impl.signdata.SignAccessType;
 import de.greensurvivors.padlock.impl.signdata.SignExpiration;
@@ -18,6 +19,7 @@ import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.logging.Level;
 
@@ -81,8 +83,8 @@ public class Info extends SubCommand {
 
                     // only admins, owners and members
                     if (player.hasPermission(PermissionManager.ADMIN_USE.getPerm()) ||
-                            SignLock.isOwner(sign, player.getUniqueId()) ||
-                            SignLock.isMember(sign, player.getUniqueId())) {
+                        SignLock.isOwner(sign, player.getUniqueId()) ||
+                        SignLock.isMember(sign, player.getUniqueId())) {
 
                         // owners
                         TextComponent.Builder builder = Component.text();
@@ -110,18 +112,18 @@ public class Info extends SubCommand {
 
                         switch (SignAccessType.getAccessType(sign, false)) {
                             case PRIVATE ->
-                                    builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_PRIVATE));
+                                builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_PRIVATE));
                             case PUBLIC ->
-                                    builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_PUBLIC));
+                                builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_PUBLIC));
                             case DONATION ->
-                                    builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_DONATION));
+                                builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_DONATION));
                             case DISPLAY ->
-                                    builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_DISPLAY));
+                                builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_DISPLAY));
                             case SUPPLY ->
-                                    builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_SUPPLY_SIGN));
+                                builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_SUPPLY_SIGN));
                             /*case null, // todo next java version*/
                             default ->
-                                    builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_ERROR));
+                                builder.append(Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_ERROR));
                         }
 
                         // timer
@@ -129,7 +131,7 @@ public class Info extends SubCommand {
                         if (timer != null) {
                             builder.append(Component.newline());
                             builder.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_TIMER)).appendSpace();
-                            builder.append(Component.text(timer));
+                            builder.append(Component.text(MiscUtils.formatTimeString(Duration.ofMillis(timer))));
                         }
 
                         // expiration

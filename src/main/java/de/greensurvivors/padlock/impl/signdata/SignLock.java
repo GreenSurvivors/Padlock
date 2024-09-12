@@ -84,18 +84,18 @@ public class SignLock {
     /**
      * Check if the sign grants everyone member access or if the uuid is a registered member of the lock sign.
      */
-    public static boolean isMember(@NotNull final Sign sign, UUID uuid) {
+    public static boolean isMember(final @NotNull Sign sign, final @NotNull UUID uuid) {
         if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
             LazySignProperties lazySignPropertys = Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(sign.getLocation());
             Set<String> memberUUIDStrs = lazySignPropertys.getMemberUUIDStrs();
 
             return (lazySignPropertys.getAccessType() == SignAccessType.AccessType.PUBLIC) ||
-                    SignPasswords.hasStillAccess(uuid, sign.getLocation()) ||
-                    (memberUUIDStrs != null && memberUUIDStrs.contains(uuid.toString()));
+                SignPasswords.hasStillAccess(uuid, sign.getLocation()) ||
+                (memberUUIDStrs != null && memberUUIDStrs.contains(uuid.toString()));
         } else {
             return (SignAccessType.getAccessType(sign, true) == SignAccessType.AccessType.PUBLIC) ||
-                    SignPasswords.hasStillAccess(uuid, sign.getLocation()) ||
-                    getUUIDs(sign, false, true).contains(uuid.toString());
+                SignPasswords.hasStillAccess(uuid, sign.getLocation()) ||
+                getUUIDs(sign, false, true).contains(uuid.toString());
         }
     }
 
@@ -298,7 +298,7 @@ public class SignLock {
      * sets a new lock sign with the player as the owner
      * Does NOT apply physics!
      *
-     * @param newsign the block where the new sign should get created in (Note: does not check for any existing blocks at this place!)
+     * @param newsign   the block where the new sign should get created in (Note: does not check for any existing blocks at this place!)
      * @param blockface the direction the new sign should face
      * @param material  Material of the sign
      * @param player    new Owner

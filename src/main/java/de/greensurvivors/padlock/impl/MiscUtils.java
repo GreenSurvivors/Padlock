@@ -176,4 +176,34 @@ public class MiscUtils {
         }
         return millis;
     }
+
+    public static @NotNull String formatTimeString(final @NotNull Duration duration) {
+        String timeStr = "";
+
+        final long days = duration.toDaysPart();
+        if (days != 0) {
+            timeStr += days + "d";
+        }
+
+        final int hours = duration.toHoursPart();
+        if (hours != 0) {
+            timeStr += hours + "h";
+        }
+
+        final int minutes = duration.toMinutesPart();
+        if (minutes != 0) {
+            timeStr += minutes + "m";
+        }
+
+        final int seconds = duration.toSecondsPart();
+        if (seconds != 0) {
+            timeStr += seconds + "s";
+        }
+
+        final int ticks = duration.toMillisPart() / 50;
+        if (ticks != 0) {
+            timeStr += ticks + "t";
+        }
+        return timeStr;
+    }
 }

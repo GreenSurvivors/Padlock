@@ -183,12 +183,12 @@ public final class SignPasswords {
         }
     }
 
-    private static void cacheAccess(UUID uuid, Location location) {
+    private static void cacheAccess(@NotNull UUID uuid, @NotNull Location location) {
         accessMap.computeIfAbsent(uuid, ignored -> new CacheSet<>(Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(20).build()));
         accessMap.get(uuid).add(location);
     }
 
-    public static boolean hasStillAccess(UUID uuid, Location location) {
+    public static boolean hasStillAccess(@NotNull UUID uuid, @NotNull Location location) {
         CacheSet<Location> cache = accessMap.get(uuid);
 
         if (cache != null) {
@@ -305,15 +305,15 @@ public final class SignPasswords {
         clearArray(password);
 
         return "$argon2id" +
-                "$v=" +
-                Argon2Version.DEFAULT_VERSION.getVersion() +
-                "$m=" +
-                MEMORY +
-                ",t=" +
-                ITERATIONS +
-                ",p=" +
-                PARALLELISM +
-                "$" + b64encoder.encodeToString(salt) +
-                "$" + b64encoder.encodeToString(hash); //version
+            "$v=" +
+            Argon2Version.DEFAULT_VERSION.getVersion() +
+            "$m=" +
+            MEMORY +
+            ",t=" +
+            ITERATIONS +
+            ",p=" +
+            PARALLELISM +
+            "$" + b64encoder.encodeToString(salt) +
+            "$" + b64encoder.encodeToString(hash); //version
     }
 }

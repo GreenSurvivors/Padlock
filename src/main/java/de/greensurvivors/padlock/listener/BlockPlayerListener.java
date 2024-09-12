@@ -319,7 +319,9 @@ public class BlockPlayerListener implements Listener {
                     final Sign lockSign = PadlockAPI.getLock(PadlockAPI.getAttachedBlock(block), false);
 
                     //let the additional sign break but update the others
-                    Bukkit.getScheduler().runTaskLater(plugin, () -> PadlockAPI.updateLegacySign(lockSign), 2);
+                    if (lockSign != null) {
+                        Bukkit.getScheduler().runTaskLater(plugin, () -> PadlockAPI.updateLegacySign(lockSign), 2);
+                    }
                 } else { // not allowed to break
                     PadlockAPI.updateLegacySign(sign);
 
@@ -554,7 +556,7 @@ public class BlockPlayerListener implements Listener {
                     player.updateInventory();
                 }
             }, 1L);
-        } // has permission
+        } // has permission or is not protected
     }
 
     /**
@@ -565,10 +567,11 @@ public class BlockPlayerListener implements Listener {
         Player player = event.getPlayer();
         Block block = event.getBlockClicked().getRelative(event.getBlockFace());
 
-        if (!(PadlockAPI.isOwner(block, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
+        if (PadlockAPI.isProtected(block) &&
+            !(PadlockAPI.isOwner(block, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
             plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
             event.setCancelled(true);
-        } // has permission
+        } // has permission or is not protected
     }
 
     /**

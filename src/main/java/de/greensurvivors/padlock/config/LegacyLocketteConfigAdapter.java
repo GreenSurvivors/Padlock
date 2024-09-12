@@ -32,7 +32,7 @@ class LegacyLocketteConfigAdapter {
     private int cachetime = 0;
     private boolean cacheenabled = false;
     private ConfigManager.HopperMinecartMoveItemOption blockhopperminecart = null;
-    private double lockexpiredays = 60D;
+    private double lockexpiredays = 999.9D;
     private long lockdefaultcreatetime = -1L;
     private Set<ConfigManager.ProtectionExemption> protectionexempt = new HashSet<>();
 
@@ -63,7 +63,7 @@ class LegacyLocketteConfigAdapter {
 
             if (protectionExemtion != null) {
                 protectionexempt.add(protectionExemtion);
-            } else {
+            } else if (!string.equals("nothing")) { // special case, we will just leave it empty.
                 plugin.getLogger().warning("Couldn't get exemtion from legacy \"" + string + "\" for lock exemtion list. Ignoring.");
             }
         }
@@ -81,7 +81,11 @@ class LegacyLocketteConfigAdapter {
             default -> blockhopperminecart = ConfigManager.HopperMinecartMoveItemOption.REMOVE;
         }
 
-        lockexpiredays = config.getDouble("lock-expire-days", 999.9D);
+        if (config.getBoolean("lock-expire", false)) {
+            lockexpiredays = config.getDouble("lock-expire-days", 999.9D);
+        } else {
+            lockexpiredays = 0.0D;
+        }
         lockdefaultcreatetime = config.getLong("lock-default-create-time-unix", -1L);
         if (lockdefaultcreatetime < -1L) lockdefaultcreatetime = -1L;
         List<String> unprocesseditems = config.getStringList("lockables");

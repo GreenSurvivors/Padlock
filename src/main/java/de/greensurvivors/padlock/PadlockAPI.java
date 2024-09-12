@@ -39,41 +39,26 @@ public class PadlockAPI {
      * returns lock sign of a block, sets all additional signs invalid
      */
     @Deprecated(forRemoval = true)
-    public static @Nullable Sign updateLegacySign(Sign signToUpdate) {
+    public static @Nullable Sign updateLegacySign(final @NotNull Sign signToUpdate) {
         Block attachedTo = getAttachedBlock(signToUpdate.getBlock());
 
         if (attachedTo != null) {
             BlockData data = attachedTo.getBlockData();
 
             if (data instanceof Door) { // in ancient Lockette times, only doors did have special treatment like this
-                DoubleBlockParts attachedDoor = Openables.getDoubleBlockParts(attachedTo);
-
-                if (attachedDoor != null) {
-                    Sign lockSign = getNearLockDoubleBlock(attachedDoor);
-
-                    if (lockSign != null) {
-                        SignLock.updateLegacyLock(lockSign);
-                        SignConnectedOpenable.updateLegacy(lockSign, attachedTo);
-                        SignTimer.updateLegacyTimer(lockSign);
-                        SignAccessType.updateLegacyType(lockSign);
-                        SignDisplay.updateDisplay(lockSign);
-
-                        for (Sign additional : getAdditionalSignsDoor(attachedDoor)) {
-                            SignLock.updateSignFromAdditional(lockSign, additional);
-                            SignTimer.updateLegacyTimerFromAdditional(lockSign, additional);
-                            SignAccessType.updateLegacyTypeFromAdditional(lockSign, additional);
-                        }
-
-                        return lockSign;
-                    } else {
-                        Padlock.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the door block at " + attachedTo.getLocation() + " is locked.");
-                    }
-                } else {
-                    Padlock.getPlugin().getLogger().warning("Couldn't get double block parts, but data says there should be one. Is it half? " + attachedTo.getLocation());
-                }
+                return updateLagacyDoorSign(signToUpdate, attachedTo);
             } else if (data instanceof Chest) {
-                Sign lockSign = getLockChest(attachedTo);
-                if (lockSign != null) {
+                Sign temp = getLockChest(attachedTo);
+
+                if (temp != null) {
+                    // reuse old instance to not screw with expectations about this sign. Changing the PersistentDataConatiner
+                    // on one instance doesn't change it on the other.
+                    final @NotNull Sign lockSign;
+                    if (temp.getLocation().distanceSquared(signToUpdate.getLocation()) < 1E3) {
+                        lockSign = signToUpdate;
+                    } else {
+                        lockSign = temp;
+                    }
                     SignLock.updateLegacyLock(lockSign);
                     SignConnectedOpenable.updateLegacy(lockSign, attachedTo); // even though we now we are protecting a chest, a valid double door could still be below it
                     SignTimer.updateLegacyTimer(lockSign);
@@ -90,10 +75,29 @@ public class PadlockAPI {
                 } else {
                     Padlock.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the chest at " + attachedTo.getLocation() + "is locked.");
                 }
-            } else {
-                Sign lockSign = getLockSignSingleBlock(attachedTo, null);
+            } else { // we still could be part of a door.
+                Block blockDown = attachedTo.getRelative(BlockFace.DOWN);
+                if (blockDown.getBlockData() instanceof Door) {
+                    return updateLagacyDoorSign(signToUpdate, blockDown);
+                }
 
-                if (lockSign != null) {
+                Block blockUp = attachedTo.getRelative(BlockFace.DOWN);
+                if (attachedTo.getRelative(BlockFace.UP).getBlockData() instanceof Door) {
+                    return updateLagacyDoorSign(signToUpdate, blockUp);
+                }
+
+                Sign temp = getLockSignSingleBlock(attachedTo, null);
+
+                if (temp != null) {
+                    // reuse old instance to not screw with expectations about this sign. Changing the PersistentDataConatiner
+                    // on one instance doesn't change it on the other.
+                    final @NotNull Sign lockSign;
+                    if (temp.getLocation().distanceSquared(signToUpdate.getLocation()) < 1E3) {
+                        lockSign = signToUpdate;
+                    } else {
+                        lockSign = temp;
+                    }
+
                     SignLock.updateLegacyLock(lockSign);
                     SignConnectedOpenable.updateLegacy(lockSign, attachedTo);
                     SignTimer.updateLegacyTimer(lockSign);
@@ -115,6 +119,51 @@ public class PadlockAPI {
             setInvalid(signToUpdate);
         }
 
+        return null;
+    }
+
+    /**
+     * common code, for the case, if a lock / additional sign protects a door.
+     *
+     * @param doorBlock block data of this block has to be an instance of Door
+     * @return lock sign of a block, sets all additional signs invalid
+     */
+    @Deprecated(forRemoval = true)
+    private static @Nullable Sign updateLagacyDoorSign(final @NotNull Sign signToUpdate, final @NotNull Block doorBlock) {
+        DoubleBlockParts attachedDoor = Openables.getDoubleBlockParts(doorBlock);
+
+        if (attachedDoor != null) {
+            Sign temp = getNearLockDoubleBlock(attachedDoor);
+
+            if (temp != null) {
+                // reuse old instance to not screw with expectations about this sign. Changing the PersistentDataConatiner
+                // on one instance doesn't change it on the other.
+                final @NotNull Sign lockSign;
+                if (temp.getLocation().distanceSquared(signToUpdate.getLocation()) < 1E3) {
+                    lockSign = signToUpdate;
+                } else {
+                    lockSign = temp;
+                }
+
+                SignLock.updateLegacyLock(lockSign);
+                SignConnectedOpenable.updateLegacy(lockSign, doorBlock);
+                SignTimer.updateLegacyTimer(lockSign);
+                SignAccessType.updateLegacyType(lockSign);
+                SignDisplay.updateDisplay(lockSign);
+
+                for (Sign additional : getAdditionalSignsDoor(attachedDoor)) {
+                    SignLock.updateSignFromAdditional(lockSign, additional);
+                    SignTimer.updateLegacyTimerFromAdditional(lockSign, additional);
+                    SignAccessType.updateLegacyTypeFromAdditional(lockSign, additional);
+                }
+
+                return lockSign;
+            } else {
+                Padlock.getPlugin().getLogger().warning("Couldn't find a lock sign to update, but the door block at " + doorBlock.getLocation() + " is locked.");
+            }
+        } else {
+            Padlock.getPlugin().getLogger().warning("Couldn't get double block parts, but data says there should be one. Is it half? " + doorBlock.getLocation());
+        }
         return null;
     }
 
@@ -256,7 +305,7 @@ public class PadlockAPI {
      * Get lock sign of a chest.
      * Chests need special handeling since they could be double chests
      */
-    private static @Nullable Sign getLockChest(Block chestBlock) {
+    private static @Nullable Sign getLockChest(@NotNull Block chestBlock) {
         if (chestBlock.getBlockData() instanceof Chest chest && chest.getType() != Chest.Type.SINGLE) {
 
             // Check second chest sign
@@ -301,7 +350,7 @@ public class PadlockAPI {
      * @param exempt marks the direction to NOT check (we now for sure there could nothing be)
      */
     @Deprecated(forRemoval = true)
-    public static @NotNull List<Sign> getAdditionalSignsSingleBlock(Block block, @Nullable BlockFace exempt) {
+    public static @NotNull List<Sign> getAdditionalSignsSingleBlock(@NotNull Block block, @Nullable BlockFace exempt) {
         List<Sign> additionalSigns = new ArrayList<>();
 
         for (BlockFace blockface : cardinalFaces) {
@@ -400,7 +449,7 @@ public class PadlockAPI {
      * get legacy additional signs of doors.
      */
     @Deprecated(forRemoval = true)
-    private static @NotNull List<Sign> getAdditionalSignsChest(Block chestBlock) {
+    private static @NotNull List<Sign> getAdditionalSignsChest(@NotNull Block chestBlock) {
         if (chestBlock.getBlockData() instanceof Chest chest && chest.getType() != Chest.Type.SINGLE) {
             List<Sign> addiditionalSigns = new ArrayList<>();
 
@@ -545,7 +594,7 @@ public class PadlockAPI {
         Material material = block.getType();
 
         return Padlock.getPlugin().getConfigManager().isLockable(material) && (Openables.isSingleOpenable(material) ||
-                (!Tag.STAIRS.isTagged(material) && block.getBlockData() instanceof Bisected));
+            (!Tag.STAIRS.isTagged(material) && block.getBlockData() instanceof Bisected));
     }
 
     /**
