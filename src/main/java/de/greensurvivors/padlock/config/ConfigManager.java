@@ -20,7 +20,6 @@ public class ConfigManager {
     private final @NotNull Padlock plugin;
     // please note: While fallback values are defined here, these are in fact NOT the default options. They are just used in the unfortunate case loading them goes wrong.
     // if you want to change default options, have also a look into resources/config.yaml
-    private final ConfigOption<Boolean> IMPORT_FROM_LOCKETTEPRO = new ConfigOption<>("import-fromLockettePro", false);
     private final ConfigOption<String> LANG_FILENAME = new ConfigOption<>("language-file-name", "lang/lang_en.yml");
     private final ConfigOption<Boolean> DEPENDENCY_WORLDGUARD_ENABLED = new ConfigOption<>("dependency.worldguard.enabled", true);
     private final ConfigOption<Boolean> DEPENDENCY_WORLDGUARD_OVERWRITE = new ConfigOption<>("dependency.worldguard.overwrite", false);
@@ -48,11 +47,6 @@ public class ConfigManager {
     public void reload() {
         plugin.saveDefaultConfig();
         FileConfiguration config = plugin.getConfig();
-
-        if (config.getBoolean(IMPORT_FROM_LOCKETTEPRO.getPath(), IMPORT_FROM_LOCKETTEPRO.getFallbackValue())) {
-            getFromLegacy();
-        }
-        IMPORT_FROM_LOCKETTEPRO.setValue(false);
 
         //reload Language files
         plugin.getMessageManager().reload(config.getString(LANG_FILENAME.getPath(), LANG_FILENAME.getFallbackValue()));
@@ -215,32 +209,6 @@ public class ConfigManager {
 
         BEDROCK_PREFIX.setValue(config.getString(BEDROCK_PREFIX.getPath(), BEDROCK_PREFIX.getFallbackValue()));
         MiscUtils.setBedrockPrefix(BEDROCK_PREFIX.getValueOrFallback());
-    }
-
-    /**
-     * Bridge to load LockettePro configs for easy switch
-     */
-    @Deprecated(forRemoval = true)
-    private void getFromLegacy() {
-        LegacyLocketteConfigAdapter adapter = new LegacyLocketteConfigAdapter();
-        adapter.reload(plugin);
-
-        FileConfiguration config = plugin.getConfig();
-
-        config.set(IMPORT_FROM_LOCKETTEPRO.getPath(), false);
-        config.set(DEPENDENCY_WORLDGUARD_ENABLED.getPath(), adapter.workWithWorldguard());
-        config.set(LOCKABLES.getPath(), adapter.getLockables().stream().map(mat -> mat.getKey().asString()).toArray(String[]::new));
-        config.set(QUICKPROTECT_TYPE.getPath(), adapter.getQuickProtectAction().toString());
-        config.set(LOCK_BLOCKS_INTERFERE.getPath(), adapter.isInterferePlacementBlocked());
-        config.set(LOCK_BLOCKS_ITEM_TRANSFER_IN.getPath(), adapter.isItemTransferInBlocked());
-        config.set(LOCK_BLOCKS_ITEM_TRANSFER_OUT.getPath(), adapter.isItemTransferOutBlocked());
-        config.set(LOCK_BLOCKS_HOPPER_MINECART.getPath(), adapter.getHopperMinecartAction().toString());
-        config.set(LOCK_EXEMPTIONS.getPath(), adapter.getProtectionExemptions().toArray(new ProtectionExemption[0]));
-        config.set(LOCK_EXPIRE_DAYS.getPath(), adapter.getLockExpireDays());
-        config.set(CACHE_SECONDS.getPath(), adapter.getCacheTimeSeconds());
-
-        plugin.saveConfig();
-        plugin.reloadConfig();
     }
 
     public @NotNull QuickProtectOption getQuickProtectAction() {

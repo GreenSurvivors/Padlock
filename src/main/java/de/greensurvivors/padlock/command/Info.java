@@ -74,13 +74,6 @@ public class Info extends SubCommand {
             if (sender instanceof Player player) {
                 Sign sign = SignSelection.getSelectedSign(player);
                 if (sign != null) {
-                    //check for old Lockett(Pro) signs and try to update them
-                    sign = MainCommand.checkAndUpdateLegacySign(sign, player);
-                    if (sign == null) {
-                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
-                        return true;
-                    }
-
                     // only admins, owners and members
                     if (player.hasPermission(PermissionManager.ADMIN_USE.getPerm()) ||
                         SignLock.isOwner(sign, player.getUniqueId()) ||

@@ -7,7 +7,6 @@ import de.greensurvivors.padlock.config.PermissionManager;
 import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.SignSelection;
 import de.greensurvivors.padlock.impl.signdata.SignLock;
-import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.apache.commons.collections4.set.ListOrderedSet;
@@ -55,7 +54,6 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         SUBCOMMANDS.add(new AddOwner(plugin));
         SUBCOMMANDS.add(new RemoveOwner(plugin));
         SUBCOMMANDS.add(new UpdateDisplay(plugin));
-        SUBCOMMANDS.add(new UpdateLegacy(plugin));
         SUBCOMMANDS.add(new Version(plugin));
         SUBCOMMANDS.add(new Debug(plugin));
         SUBCOMMANDS.add(new Reload(plugin));
@@ -120,30 +118,6 @@ public class MainCommand implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Checks if a sign is a legacy or an additional sign and starts the update process.
-     *
-     * @return the main lock sign if found or null else
-     */
-    @Deprecated(forRemoval = true)
-    protected static @Nullable Sign checkAndUpdateLegacySign(@NotNull Sign sign, @NotNull Audience audience) {
-        //check for old Lockett(Pro) signs and try to update them
-        if (PadlockAPI.isAdditionalSign(sign) || SignLock.isLegacySign(sign)) {
-            Sign otherSign = PadlockAPI.updateLegacySign(sign); //get main sign
-
-            if (otherSign == null) { // couldn't find the main sign of the block.
-                //the calling function will return feedback to the player, since this may also get called on tabCompletable
-                PadlockAPI.setInvalid(sign);
-                return null;
-            } else {
-                plugin.getMessageManager().sendLang(audience, MessageManager.LangPath.UPDATE_LEGACY_SUCCESS);
-                return otherSign;
-            }
-        }
-
-        return sign;
-    }
-
-    /**
      * Since removing a member or an owner share most of their code,
      * Both of it gets dealt here in a common place instead of in the subcommands
      * calling thins method
@@ -165,12 +139,6 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 Sign sign = SignSelection.getSelectedSign(player);
 
                 if (sign != null) {
-                    //check for old Lockett(Pro) signs and try to update them
-                    sign = checkAndUpdateLegacySign(sign, player);
-                    if (sign == null) {
-                        return null;
-                    }
-
                     if (PadlockAPI.isLockSign(sign)) {
                         // check sign or admin permission, since only admins can mess with owners
                         if (sender.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()) || // /lock removeowner
@@ -224,13 +192,6 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     Sign sign = SignSelection.getSelectedSign(player);
 
                     if (sign != null) {
-                        //check for old Lockett(Pro) signs and try to update them
-                        sign = checkAndUpdateLegacySign(sign, player);
-                        if (sign == null) {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
-                            return true;
-                        }
-
                         if (PadlockAPI.isLockSign(sign)) {
                             // check sign or admin permission, since only admins can mess with owners
                             if (player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()) || // /lock addowner
@@ -302,13 +263,6 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     Sign sign = SignSelection.getSelectedSign(player);
 
                     if (sign != null) {
-                        //check for old Lockett(Pro) signs and try to update them
-                        sign = checkAndUpdateLegacySign(sign, player);
-                        if (sign == null) {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
-                            return true;
-                        }
-
                         if (PadlockAPI.isLockSign(sign)) {
                             // check sign or admin permission, since only admins can mess with owners
                             if (player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()) || // /lock removeowner

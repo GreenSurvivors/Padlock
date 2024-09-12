@@ -5,11 +5,8 @@ import com.google.gson.reflect.TypeToken;
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.PadlockAPI;
 import de.greensurvivors.padlock.config.MessageManager;
-import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.dataTypes.LazySignProperties;
 import de.greensurvivors.padlock.impl.openabledata.Openables;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.apache.commons.collections4.set.ListOrderedSet;
 import org.bukkit.*;
 import org.bukkit.block.Block;
@@ -63,14 +60,6 @@ public class SignLock {
     }
 
     /**
-     * Checks if a sign is a legacy additional sign of the Lockette(pro) plugin by comparing against the configured line in the lang file.
-     */
-    @Deprecated(forRemoval = true)
-    public static boolean isAdditionalSign(@NotNull Sign sign) {
-        return Padlock.getPlugin().getMessageManager().isLegacySignComp(sign.getSide(Side.FRONT).line(0), MessageManager.LangPath.LEGACY_ADDITIONAL_SIGN);
-    }
-
-    /**
      * Check if a given uuid is a registered owner uuid of a lock sign.
      */
     public static boolean isOwner(final @NotNull Sign sign, final @NotNull UUID uuid) {
@@ -119,119 +108,6 @@ public class SignLock {
         }
 
         return set;
-    }
-
-    /**
-     * Tries to get an offline player from a line of a sign
-     * by checking if it against possible other sign lines and if it could be a username at all.
-     * If everything checks out, get the offline player from bukkit and pray to god we got the right player.
-     *
-     * @return the offline player we found or null if this wasn't a valid name after all
-     */
-    @Deprecated(forRemoval = true)
-    private static @Nullable OfflinePlayer tryGetPlayerJustFromNameComp(@NotNull Component component) {
-        String line = PlainTextComponentSerializer.plainText().serialize(component);
-
-        if (SignAccessType.isLegacyEveryOneComp(component) || SignTimer.getTimerFromComp(component) != null) {
-            return null;
-        } else if (MiscUtils.isUserName(line)) {
-            return Bukkit.getOfflinePlayer(line);
-        }
-
-        return null;
-    }
-
-    /**
-     * transfer all data (should be only members, really) of an additional sign to the main lock sign
-     * and set the legacy sign invalid.
-     * Note: this depends on UUID being enabled on the former Lockette plugin.
-     */
-    @Deprecated(forRemoval = true)
-    public static void updateSignFromAdditional(@NotNull Sign main, @NotNull Sign additional) {
-        Padlock.getPlugin().getLogger().fine("updating additional sign at " + additional.getLocation());
-        PlainTextComponentSerializer plainedText = PlainTextComponentSerializer.plainText();
-        for (int i = 1; i <= 3; i++) {
-            String line = plainedText.serialize(additional.getSide(Side.FRONT).line(i));
-
-            if (line.contains("#")) {
-                String[] splitted = line.split("#", 2);
-
-                if (splitted[1].length() == 36) { // uuid valid check
-                    try {
-                        addPlayer(main, false, Bukkit.getOfflinePlayer(UUID.fromString(splitted[1])));
-                    } catch (IllegalArgumentException ignored) {
-                    }
-                }
-            } else {
-                OfflinePlayer maybePlayer = tryGetPlayerJustFromNameComp(additional.getSide(Side.FRONT).line(i));
-
-                if (maybePlayer != null) {
-                    addPlayer(main, false, maybePlayer);
-                }
-            }
-        }
-
-        setInvalid(additional);
-    }
-
-    /**
-     * updates a legacy lock sign by reading all the owner / member uuids and storing it into
-     * the PersistentDataContainer of this sign.
-     * Will not update the Display of the sign afterwarts to not overwrite other unimported data like timers
-     */
-    @Deprecated(forRemoval = true)
-    public static void updateLegacyLock(@NotNull Sign sign) {
-        PersistentDataContainer container = sign.getPersistentDataContainer();
-
-        ListOrderedSet<String> owners = container.get(storedOwnersUUIDKey, uuidSetDataType);
-        if (owners == null) {
-            owners = new ListOrderedSet<>();
-        }
-        ListOrderedSet<String> members = container.get(storedMembersUUIDKey, uuidSetDataType);
-        if (members == null) {
-            members = new ListOrderedSet<>();
-        }
-
-        PlainTextComponentSerializer plainedText = PlainTextComponentSerializer.plainText();
-
-        for (int i = 1; i <= 3; i++) {
-            String line = plainedText.serialize(sign.getSide(Side.FRONT).line(i));
-
-            if (line.contains("#")) {
-                String[] splitted = line.split("#", 2);
-
-                if (splitted[1].length() == 36) { // uuid valid check
-                    if (i == 1) {
-                        owners.add(splitted[1]);
-                    } else {
-                        members.add(splitted[1]);
-                    }
-                }
-            } else {
-                OfflinePlayer maybePlayer = tryGetPlayerJustFromNameComp(sign.getSide(Side.FRONT).line(i));
-
-                if (maybePlayer != null) {
-                    if (i == 1) {
-                        owners.add(maybePlayer.getUniqueId().toString());
-                    } else {
-                        members.add(maybePlayer.getUniqueId().toString());
-                    }
-                }
-            }
-        }
-
-        sign.getPersistentDataContainer().set(storedOwnersUUIDKey, uuidSetDataType, owners);
-        sign.getPersistentDataContainer().set(storedMembersUUIDKey, uuidSetDataType, members);
-        sign.update();
-    }
-
-    /**
-     * checks if the sign needs an update by checking
-     * if it has the owner set stored in its getPersistentDataContainer.
-     */
-    @Deprecated(forRemoval = true)
-    public static boolean isLegacySign(@NotNull Sign sign) {
-        return !sign.getPersistentDataContainer().has(storedOwnersUUIDKey, uuidSetDataType);
     }
 
     /**

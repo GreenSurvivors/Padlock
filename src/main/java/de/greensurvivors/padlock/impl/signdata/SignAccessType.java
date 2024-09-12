@@ -1,14 +1,12 @@
 package de.greensurvivors.padlock.impl.signdata;
 
 import de.greensurvivors.padlock.Padlock;
-import de.greensurvivors.padlock.PadlockAPI;
 import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.impl.MiscUtils;
 import net.kyori.adventure.text.Component;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
-import org.bukkit.block.sign.Side;
 import org.bukkit.inventory.InventoryHolder;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -50,8 +48,6 @@ public final class SignAccessType {
             return AccessType.DISPLAY;
         } else if (manager.isSignComp(line, MessageManager.LangPath.SIGN_LINE_SUPPLY_SIGN)) {
             return AccessType.SUPPLY;
-        } else if (manager.isLegacySignComp(line, MessageManager.LangPath.LEGACY_PRIVATE_SIGN)) {
-            return AccessType.PRIVATE;
         } else {
             return null;
         }
@@ -68,12 +64,7 @@ public final class SignAccessType {
 
             AccessType accessType;
             if (accessTypeStr == null) {
-                accessType = getLegacySetting(sign);
-                if (accessType != null) {
-                    PadlockAPI.updateLegacySign(sign);
-                } else {
-                    return null;
-                }
+                return null;
             } else {
                 accessType = MiscUtils.getEnum(AccessType.class, accessTypeStr);
 
@@ -84,66 +75,6 @@ public final class SignAccessType {
             }
 
             return accessType;
-        }
-    }
-
-    /**
-     * update a legacy lockette lock sign with potential an everyone line on it.
-     * Will not update the Display of the sign afterwarts to not overwrite other unimported data like timers
-     */
-    @Deprecated(forRemoval = true)
-    public static void updateLegacyType(@NotNull Sign sign) {
-        AccessType type = getLegacySetting(sign);
-
-        if (type != null) {
-            setAccessType(sign, type, false);
-        } else {
-            Padlock.getPlugin().getLogger().warning("couldn't get an access type to update from. Using private. sign at: " + sign.getLocation());
-            setAccessType(sign, AccessType.PRIVATE, false);
-        }
-    }
-
-    /**
-     * checks if a line would be a line of an everyone sign.
-     * This is only available to make sure the line can safely interpreted as a username.
-     * Please don't use this to get data of a legacy sign.
-     * Use {@link #updateLegacyType(Sign)} and then {@link #getAccessType(Sign, boolean)}
-     */
-    @Deprecated(forRemoval = true)
-    public static boolean isLegacyEveryOneComp(@NotNull Component component) {
-        return Padlock.getPlugin().getMessageManager().isLegacySignComp(component, MessageManager.LangPath.LEGACY_EVERYONE_SIGN);
-    }
-
-    /**
-     * returns {@link AccessType#PUBLIC} if at least one sign is a legacy lockette everyone line.
-     */
-    @Deprecated(forRemoval = true)
-    private static @Nullable AccessType getLegacySetting(@NotNull Sign sign) {
-        boolean isPrivate = false;
-        for (Component line : sign.getSide(Side.FRONT).lines()) {
-            if (Padlock.getPlugin().getMessageManager().isLegacySignComp(line, MessageManager.LangPath.LEGACY_PRIVATE_SIGN)) {
-                isPrivate = true; // a lockette sign can have [Everyone] and [Private] on the same sign, and the Everyone-one overwrites
-            } else if (Padlock.getPlugin().getMessageManager().isLegacySignComp(line, MessageManager.LangPath.LEGACY_EVERYONE_SIGN)) {
-                return AccessType.PUBLIC;
-            }
-        }
-
-        if (isPrivate) {
-            return AccessType.PRIVATE;
-        } else {
-            return null;
-        }
-    }
-
-    /**
-     * update a legacy lockette additional sign with potential an everyone line on it.
-     */
-    public static void updateLegacyTypeFromAdditional(Sign lockSign, Sign additional) {
-        AccessType type = getLegacySetting(additional);
-
-        // not every additional sign has an "everyone" on it, and this is the only access type they can have
-        if (type != null) {
-            setAccessType(lockSign, type, true);
         }
     }
 

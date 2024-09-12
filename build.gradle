@@ -5,8 +5,8 @@ plugins {
     id("xyz.jpenilla.run-paper") version "2.3.0"
 }
 // Suppiled by Jenkins
-ext.majorVersion = 2
-ext.minorVersion = 16
+ext.majorVersion = 3
+ext.minorVersion = 10
 ext.minecraftVersion = "1.21"
 
 ext.buildNumber = System.env.BUILD_NUMBER == null ? "dev" : "build" + "$System.env.BUILD_NUMBER"
