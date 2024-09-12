@@ -160,7 +160,7 @@ public final class SignAccessType {
             this.isInventoryHolderOnly = isInventoryHolderOnly;
         }
 
-        public boolean doesQualifyAs(Block block) { //todo
+        public boolean doesQualifyAs(@NotNull Block block) { //todo
             return !isInventoryHolderOnly || block.getState() instanceof InventoryHolder;
         }
     }

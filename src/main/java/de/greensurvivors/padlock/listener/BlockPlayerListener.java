@@ -78,7 +78,7 @@ public class BlockPlayerListener implements Listener {
      * Quick aka automatic protect
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.NORMAL)
-    public void onQuickLock(@NotNull PlayerInteractEvent event) {
+    private void onQuickLock(@NotNull PlayerInteractEvent event) {
         Player player = event.getPlayer();
 
         // Check quick lock status
@@ -469,7 +469,7 @@ public class BlockPlayerListener implements Listener {
                                 openables.add(openableBlock);
 
                                 if (openableBlock.getType() == Material.IRON_DOOR || openableBlock.getType() == Material.IRON_TRAPDOOR) {
-                                    Openables.toggleOpenable(openableBlock);
+                                    Openables.toggleOpenable(player, openableBlock);
 
                                     // stop blocks from getting placed when opening a door.
                                     if (event.hasItem()) {
@@ -482,14 +482,14 @@ public class BlockPlayerListener implements Listener {
                                         Block relative = openableBlock.getRelative(blockface);
                                         if (relative.getType() == openableBlock.getType()) {
                                             openables.add(relative);
-                                            Openables.toggleOpenable(relative);
+                                            Openables.toggleOpenable(player, relative);
                                         } //not the same type of block
                                     } // for loop
                                 } // not connected
 
                                 Long closetime = SignTimer.getTimer(lockSign, false);
                                 if (closetime != null && closetime > 0) {
-                                    plugin.getOpenableToggleManager().toggleCancelRunning(openables, closetime);
+                                    plugin.getOpenableToggleManager().toggleCancelRunning(player, openables, closetime);
                                 } // timer disabled
                             } // not openable
                         } // not right-click
@@ -628,8 +628,7 @@ public class BlockPlayerListener implements Listener {
                     case DISPLAY, SUPPLY -> {
                         event.setResult(Event.Result.DENY);
                     }
-                    /*case null, // todo next java update */
-                    default -> {
+                    case null -> {
                     }
                 }
             }
@@ -666,8 +665,7 @@ public class BlockPlayerListener implements Listener {
                     case DISPLAY, DONATION -> {
                         event.setResult(Event.Result.DENY);
                     }
-                    /*case null, // todo next java update */
-                    default -> {
+                    case null -> {
                     }
                 }
             }
