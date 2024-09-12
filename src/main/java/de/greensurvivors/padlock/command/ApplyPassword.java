@@ -58,13 +58,6 @@ public class ApplyPassword extends SubCommand implements TabCompleter, CommandEx
             Sign sign = SignSelection.getSelectedSign(player);
 
             if (sign != null) {
-                //check for old Lockett(Pro) signs and try to update them
-                sign = MainCommand.checkAndUpdateLegacySign(sign, player);
-                if (sign == null) {
-                    Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.SIGN_NEED_RESELECT);
-                    return;
-                }
-
                 if (PadlockAPI.isLockSign(sign)) {
                     if (!SignPasswords.isOnCooldown(player.getUniqueId(), sign.getLocation())) {
                         // this will communicate if access was granted or not

@@ -3,6 +3,7 @@ package de.greensurvivors.padlock.config;
 import org.bukkit.Bukkit;
 import org.bukkit.permissions.Permission;
 import org.bukkit.permissions.PermissionDefault;
+import org.jetbrains.annotations.NotNull;
 
 import java.util.Map;
 
@@ -37,10 +38,6 @@ public enum PermissionManager {
     CMD_UPDATE_DISPLAY(new Permission("padlock.cmd.updatedisplay",
         "Owners or members of a sign may update the display, to reflect the latest language changes or the changed username.",
         PermissionDefault.OP)),
-    @Deprecated(forRemoval = true)
-    CMD_UPDATE_LEGACY(new Permission("padlock.cmd.updatelegacy",
-        "Using `/padlock updatelegacy` forces the plugin to update a lock sign from Lockette(Pro) signs.",
-            PermissionDefault.OP)),
     CMD_VERSION(new Permission("padlock.cmd.version",
             "`/padlock version` returns the version of this plugin.",
             PermissionDefault.OP)),
@@ -57,7 +54,6 @@ public enum PermissionManager {
             Map.entry(CMD_SET_PASSWORD.perm.getName(), true),
             Map.entry(CMD_SET_TIMER.perm.getName(), true),
             Map.entry(CMD_UPDATE_DISPLAY.perm.getName(), true),
-            Map.entry(CMD_UPDATE_LEGACY.perm.getName(), true),
             Map.entry(CMD_VERSION.perm.getName(), true)
             ))),
 
@@ -104,7 +100,7 @@ public enum PermissionManager {
 
     private final Permission perm;
 
-    PermissionManager(Permission perm) {
+    PermissionManager(@NotNull Permission perm) {
         this.perm = perm;
 
         Bukkit.getPluginManager().addPermission(perm);

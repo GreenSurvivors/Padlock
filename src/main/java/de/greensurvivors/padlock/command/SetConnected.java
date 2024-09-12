@@ -48,13 +48,6 @@ public class SetConnected extends SubCommand {
                     Sign sign = SignSelection.getSelectedSign(player);
 
                     if (sign != null) {
-                        //check for old Lockett(Pro) signs and try to update them
-                        sign = MainCommand.checkAndUpdateLegacySign(sign, player);
-                        if (sign == null) {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
-                            return true;
-                        }
-
                         // only admins and owners can change a signs properties
                         if (SignLock.isOwner(sign, player.getUniqueId()) ||
                                 player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm())) {
