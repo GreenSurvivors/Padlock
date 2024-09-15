@@ -39,7 +39,7 @@ public class Version extends SubCommand {
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         if (this.checkPermission(sender)) {
             //plugin.getPluginMeta().getName() + " " + plugin.getPluginMeta().getVersion();
-            plugin.getMessageManager().sendMessageWithPrefix(sender, Component.text(plugin.getDescription().getFullName())); //todo once it is worth making the jump to the paper-plugin system
+            plugin.getMessageManager().sendMessageWithPrefix(sender, Component.text(plugin.getName() + " v" + plugin.getPluginMeta().getVersion()));
         } else {
             plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
         }
