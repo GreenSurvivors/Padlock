@@ -9,8 +9,8 @@ import org.bukkit.block.Block;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Duration;
 import java.util.*;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -53,7 +53,7 @@ public class OpenableToggleManager {
      *
      * @param timeUntilToggle time to wait until all the given blocks will get toggled in milliseconds
      */
-    public void toggleCancelRunning(final @NotNull Set<@NotNull Block> blocksToToggle, final long timeUntilToggle) {
+    public void toggleCancelRunning(final @NotNull Set<@NotNull Block> blocksToToggle, Duration timeUntilToggle) {
         Set<Location> locationsToToggle = blocksToToggle.stream().map(Block::getLocation).collect(Collectors.toSet());
 
         // remove running tasks
@@ -97,7 +97,7 @@ public class OpenableToggleManager {
                 }
                 // the reason why we multiply with 20 before converting to seconds, not after (millis -> seconds --> ticks),
                 // is that with time durations smaller than one second it would always result in 0 instead of an amount of ticks.
-            }, TimeUnit.MILLISECONDS.toSeconds(timeUntilToggle * 20L));
+            }, timeUntilToggle.toSeconds() * 20L);
 
             for (Location location : locationsToToggle) {
                 toggleTasks.put(location, task);
