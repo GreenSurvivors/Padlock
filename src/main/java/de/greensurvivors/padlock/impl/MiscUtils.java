@@ -137,7 +137,7 @@ public class MiscUtils {
      * First try ISO-8601 duration, and afterward our own implementation
      * using the same time unit more than once is permitted.
      *
-     * @return the duration in milliseconds, or null if not possible
+     * @return the duration, or null if not possible
      */
     public static @Nullable Duration parsePeriod(@NotNull String period) {
 

@@ -21,7 +21,7 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * A timer on a lock determines how many milliseconds it takes until the openable,
+ * A timer on a lock determines how long it takes until the openable,
  * the sign is attached to, toggles.
  * With other words, setting a timer on a sign of a chest does nothing but display a
  * somewhat pretty number.
@@ -92,7 +92,7 @@ public class SignTimer {
     }
 
     /**
-     * get how many milliseconds it should take for an openable to toggle.
+     * get how long it should take for an openable to toggle.
      * Will start the update process if the sign was a legacy sign.
      *
      * @return might be null if no timer was configured
@@ -101,7 +101,7 @@ public class SignTimer {
         if (!ignoreCache && Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
             return Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(sign.getLocation()).getTimer();
         } else {
-            Long persistentMillis = sign.getPersistentDataContainer().get(timerKey, PersistentDataType.LONG);
+            final @Nullable Long persistentMillis = sign.getPersistentDataContainer().get(timerKey, PersistentDataType.LONG);
 
             if (persistentMillis != null) {
                 return Duration.ofMillis(persistentMillis);
@@ -119,7 +119,7 @@ public class SignTimer {
     }
 
     /**
-     * Read a timer duration in milliseconds from a component line
+     * Read a timer duration from a component line
      * used to parse timer when locking manuel, should never get used for legacy signs!
      *
      * @return might be null, if it does not fit the legacy pattern.
@@ -159,7 +159,7 @@ public class SignTimer {
     }
 
     /**
-     * get the fist legacy timer duration in milliseconds found on a sign.
+     * get the fist legacy timer duration found on a sign.
      *
      * @return might be null if no fitting timer was found.
      */
