@@ -6,7 +6,7 @@ plugins {
 }
 // Suppiled by Jenkins
 ext.majorVersion = 2
-ext.minorVersion = 14
+ext.minorVersion = 16
 ext.minecraftVersion = "1.20.4"
 
 ext.buildNumber = System.env.BUILD_NUMBER == null ? "dev" : "build" + "$System.env.BUILD_NUMBER"
@@ -53,7 +53,7 @@ dependencies {
     implementation("de.mkammerer:argon2-jvm:2.11") // native password hashing with argon2
 
     paperweight.paperDevBundle("$minecraftVersion-R0.1-SNAPSHOT")
-    compileOnly ('com.sk89q.worldguard:worldguard-bukkit:7.1.0-SNAPSHOT') { transitive = false }
+    compileOnly('com.sk89q.worldguard:worldguard-bukkit:7.0.9') { transitive = false } // 7.1.0-SNAPSHOT
     compileOnly('com.github.MilkBowl:VaultAPI:1.7') { transitive = false }
 }
 

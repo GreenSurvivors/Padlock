@@ -38,6 +38,7 @@ import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Duration;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -238,7 +239,7 @@ public class BlockPlayerListener implements Listener {
                         }
 
                         String strLine = PlainTextComponentSerializer.plainText().serialize(line);
-                        Long timer = SignTimer.getTimerFromComp(line);
+                        Duration timer = SignTimer.getTimerFromComp(line);
 
                         if (timer != null) {
                             SignTimer.setTimer(sign, timer, true);
@@ -487,8 +488,8 @@ public class BlockPlayerListener implements Listener {
                                     } // for loop
                                 } // not connected
 
-                                Long closetime = SignTimer.getTimer(lockSign, false);
-                                if (closetime != null && closetime > 0) {
+                                Duration closetime = SignTimer.getTimer(lockSign, false);
+                                if (closetime != null && closetime.toMillis() > 0) {
                                     plugin.getOpenableToggleManager().toggleCancelRunning(openables, closetime);
                                 } // timer disabled
                             } // not openable

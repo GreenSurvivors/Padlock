@@ -21,7 +21,6 @@ import java.util.HashSet;
 import java.util.Locale;
 import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -138,43 +137,45 @@ public class MiscUtils {
      * First try ISO-8601 duration, and afterward our own implementation
      * using the same time unit more than once is permitted.
      *
-     * @return the duration in milliseconds, or null if not possible
+     * @return the duration, or null if not possible
      */
-    public static @Nullable Long parsePeriod(@NotNull String period) {
+    public static @Nullable Duration parsePeriod(@NotNull String period) {
 
         try { //try Iso
-            return Duration.parse(period).toMillis();
+            return Duration.parse(period);
         } catch (DateTimeParseException e) {
             Padlock.getPlugin().getLogger().log(Level.FINE, "Couldn't get time period \"" + period + "\" as duration. Trying to parse manual next.", e);
         }
 
+        @Nullable Duration result = null;
+
         Matcher matcher = periodPattern.matcher(period);
-        Long millis = null;
 
         while (matcher.find()) {
             // we got a match.
-            if (millis == null) {
-                millis = 0L;
+            if (result == null) {
+                result = Duration.ZERO;
             }
 
             try {
                 long num = Long.parseLong(matcher.group(1));
                 String typ = matcher.group(2);
-                millis += switch (typ) { // from periodPattern
-                    case "t", "T" -> Math.round(50D * num); // ticks
-                    case "s", "S" -> TimeUnit.SECONDS.toMillis(num);
-                    case "m" -> TimeUnit.MINUTES.toMillis(num);
-                    case "h", "H" -> TimeUnit.HOURS.toMillis(num);
-                    case "d", "D" -> TimeUnit.DAYS.toMillis(num);
-                    case "w", "W" -> TimeUnit.DAYS.toMillis(Period.ofWeeks((int) num).getDays());
-                    case "M" -> TimeUnit.DAYS.toMillis(Period.ofMonths((int) num).getDays());
-                    default -> 0;
+
+                result = switch (typ) { // from periodPattern
+                    case "t", "T" -> result.plusMillis(Math.round(50D * num)); // ticks
+                    case "s", "S" -> result.plusSeconds(num);
+                    case "m" -> result.plusMinutes(num);
+                    case "h", "H" -> result.plusHours(num);
+                    case "d", "D" -> result.plusDays(num);
+                    case "w", "W" -> result.plusDays(Period.ofWeeks((int) num).getDays());
+                    case "M" -> result.plusDays(Period.ofMonths((int) num).getDays());
+                    default -> Duration.ZERO;
                 };
             } catch (NumberFormatException e) {
                 Padlock.getPlugin().getLogger().log(Level.WARNING, "Couldn't get time period for " + period, e);
             }
         }
-        return millis;
+        return result;
     }
 
     public static @NotNull String formatTimeString(final @NotNull Duration duration) {

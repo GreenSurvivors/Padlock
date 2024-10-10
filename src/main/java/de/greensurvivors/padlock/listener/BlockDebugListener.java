@@ -38,7 +38,7 @@ public class BlockDebugListener implements Listener {
                 if (clickedBlock.getState() instanceof Sign sign && PadlockAPI.isLockSign(sign)) {
                     player.sendMessage(Component.text("isSignExpired: ").append(formatBoolean(PadlockAPI.isSignExpired(sign))));
                     player.sendMessage(Component.text(" - last used: " + SignExpiration.getLastUsed(sign)));
-                    player.sendMessage(Component.text(" - now      : " + (int) (System.currentTimeMillis() / 1000)));
+                    player.sendMessage(Component.text(" - now      : " + System.currentTimeMillis()));
                 }
 
                 player.sendMessage("Block: " + clickedBlock.getType() + " " + clickedBlock.getBlockData().getAsString());

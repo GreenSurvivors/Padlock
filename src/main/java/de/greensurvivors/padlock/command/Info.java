@@ -127,11 +127,11 @@ public class Info extends SubCommand {
                         }
 
                         // timer
-                        Long timer = SignTimer.getTimer(sign, false);
+                        Duration timer = SignTimer.getTimer(sign, false);
                         if (timer != null) {
                             builder.append(Component.newline());
                             builder.append(plugin.getMessageManager().getLang(MessageManager.LangPath.INFO_TIMER)).appendSpace();
-                            builder.append(Component.text(MiscUtils.formatTimeString(Duration.ofMillis(timer))));
+                            builder.append(Component.text(MiscUtils.formatTimeString(timer)));
                         }
 
                         // expiration

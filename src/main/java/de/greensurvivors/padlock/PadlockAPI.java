@@ -16,6 +16,7 @@ import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.data.type.Chest;
 import org.bukkit.block.data.type.Door;
+import org.bukkit.inventory.BlockInventoryHolder;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -600,24 +601,54 @@ public class PadlockAPI {
     /**
      * return true, if interference is forbidden, true otherwise
      */
-    public static boolean isInterfering(@NotNull Block block, @NotNull UUID playerUUid) {
-        if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
-            return Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(block.getLocation()).isLock();
-        }
+    public static boolean isInterfering(final @NotNull Block block, final @NotNull UUID playerUUid) { // todo I'm sure this can get optimized in some way
+        // don't allow a block to get locked, by a lock on another block, if the placing player is not an owner
+        if (isLockable(block)) {
+            Sign lock = getLock(block, true);
 
-        Sign lock = getLock(block, true);
-
-        if (lock != null && !SignLock.isOwner(lock, playerUUid)) {
-            return true;
-        } else if (block.getState() instanceof Container && Padlock.getPlugin().getConfigManager().isInterferePlacementBlocked()) { // container need additional space because of hopper / minecarts
-            for (BlockFace blockface : allFaces) {
-                lock = getLock(block.getRelative(blockface), false);
-                if (lock != null && !SignLock.isOwner(lock, playerUUid)) {
-                    return true;
-                }
+            if (lock != null && !SignLock.isOwner(lock, playerUUid)) {
+                return true;
             }
         }
 
+        if (Padlock.getPlugin().getConfigManager().isInterferePlacementBlocked()) {
+            // block placing of blocks that can interact with the inventory of another locked block
+            switch (block.getType()) {
+                case HOPPER, DISPENSER, DROPPER, CRAFTER -> {
+                    for (BlockFace blockface : allFaces) {
+                        Block newblock = block.getRelative(blockface);
+
+                        if (newblock.getState() instanceof BlockInventoryHolder) {
+                            if (!isOwner(newblock, playerUUid)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // block placing of blocks, that can interacted with by another locked blocks
+            if (block.getBlockData() instanceof Container) {
+                for (BlockFace blockface : allFaces) {
+                    Block newblock = block.getRelative(blockface);
+
+                    switch (newblock.getType()) {
+                        case HOPPER, DISPENSER, DROPPER, CRAFTER -> {
+                            if (!isOwner(newblock, playerUUid)) {
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // don't allow blocking chests if the player is not the owner
+            if (block.getType().isOccluding()) {
+                Block below = block.getRelative(BlockFace.DOWN);
+
+                return below.getBlockData() instanceof Chest && !isOwner(below, playerUUid);
+            }
+        }
         return false;
     }
 
