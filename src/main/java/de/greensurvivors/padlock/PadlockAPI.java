@@ -602,7 +602,11 @@ public class PadlockAPI {
      */
     public static boolean isInterfering(@NotNull Block block, @NotNull UUID playerUUid) {
         if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
-            return Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(block.getLocation()).isLock();
+            LazySignProperties lazySignProperties = Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(block.getLocation());
+
+            if (lazySignProperties.isLock() && !(lazySignProperties.getOwnerUUIDStrs() != null && lazySignProperties.getOwnerUUIDStrs().contains(playerUUid.toString()))) {
+                return true;
+            }
         }
 
         Sign lock = getLock(block, true);
