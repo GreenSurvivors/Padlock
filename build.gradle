@@ -1,13 +1,13 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id("io.papermc.paperweight.userdev") version "1.7.1"
-    id("xyz.jpenilla.run-paper") version "2.3.0"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.13"
+    id("xyz.jpenilla.run-paper") version "2.3.1"
 }
 // Suppiled by Jenkins
 ext.majorVersion = 2
 ext.minorVersion = 16
-ext.minecraftVersion = "1.21"
+ext.minecraftVersion = "1.21.4"
 
 ext.buildNumber = System.env.BUILD_NUMBER == null ? "dev" : "build" + "$System.env.BUILD_NUMBER"
 ext.mavenDirectory = System.env.MAVEN_DIR == null ? "$projectDir/repo" : "$System.env.MAVEN_DIR"
@@ -41,15 +41,19 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.apache.commons:commons-collections4:4.5.0-M1'
+    implementation 'org.apache.commons:commons-collections4:4.5.0-M3'
     implementation 'org.jetbrains:annotations:24.1.0'
-    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8") // caches
+    implementation("com.github.ben-manes.caffeine:caffeine:3.2.0") // caches
     implementation("de.mkammerer:argon2-jvm:2.11") // native password hashing with argon2
 
     paperweight.paperDevBundle("$minecraftVersion-R0.1-SNAPSHOT")
-    compileOnly ('com.sk89q.worldguard:worldguard-bukkit:7.1.0-SNAPSHOT') { transitive = false }
-    compileOnly('com.github.MilkBowl:VaultAPI:1.7') { transitive = false }
+    compileOnly('com.sk89q.worldguard:worldguard-bukkit:7.0.13-SNAPSHOT') { transitive = false }
+    compileOnly('com.github.MilkBowl:VaultAPI:1.7.1') { transitive = false }
 }
+
+// we only work with paper and downstream!
+// todo
+//paperweight.reobfArtifactConfiguration = ReobfArtifactConfiguration.MOJANG_PRODUCTION
 
 processResources {
     expand version: project.version,

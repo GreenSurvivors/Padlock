@@ -8,9 +8,9 @@ api-version: "${mcVersion}"
 description: >
   Padlock is a chest protection plugin for Paper. It is 80% compatible with original Lockette, but delivers a lot of performance enhancements and feature options.
 libraries:
-  - org.apache.commons:commons-collections4:4.4
+  - org.apache.commons:commons-collections4:4.5.0-M3
   - org.apache.commons:commons-lang3:3.13.0
-  - com.github.ben-manes.caffeine:caffeine:3.1.8
+  - com.github.ben-manes.caffeine:caffeine:3.2.0
   - de.mkammerer:argon2-jvm:2.11
 
 commands:

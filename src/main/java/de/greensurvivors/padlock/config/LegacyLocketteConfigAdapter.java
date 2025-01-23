@@ -7,6 +7,7 @@ import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
 import java.util.Collections;
@@ -24,17 +25,17 @@ import java.util.Set;
 class LegacyLocketteConfigAdapter {
     private boolean worldguard = false;
     private boolean coreprotect = false;
-    private Set<Material> lockables = new HashSet<>();
-    private ConfigManager.QuickProtectOption enablequickprotect = null;
+    private @NotNull Set<@NotNull Material> lockables = new HashSet<>();
+    private @Nullable ConfigManager.QuickProtectOption enablequickprotect = null;
     private boolean blockinterfereplacement = true;
     private boolean blockitemtransferin = false;
     private boolean blockitemtransferout = false;
     private int cachetime = 0;
     private boolean cacheenabled = false;
-    private ConfigManager.HopperMinecartMoveItemOption blockhopperminecart = null;
+    private @Nullable ConfigManager.HopperMinecartMoveItemOption blockhopperminecart = null;
     private double lockexpiredays = 999.9D;
     private long lockdefaultcreatetime = -1L;
-    private Set<ConfigManager.ProtectionExemption> protectionexempt = new HashSet<>();
+    private @NotNull Set<ConfigManager.ProtectionExemption> protectionexempt = new HashSet<>();
 
     protected LegacyLocketteConfigAdapter() {
     }
@@ -165,7 +166,7 @@ class LegacyLocketteConfigAdapter {
         return protectionexempt;
     }
 
-    protected Set<Material> getLockables() {
+    protected @NotNull Set<@NotNull Material> getLockables() {
         return lockables;
     }
 }

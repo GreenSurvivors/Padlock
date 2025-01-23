@@ -397,7 +397,7 @@ public class BlockPlayerListener implements Listener {
     // we only allow the use of blocks when we do handle the original event,
     // but it might be a good inspiration to support more block types
     @EventHandler(priority = EventPriority.LOWEST, ignoreCancelled = true)
-    private void onWorldguardUseBlockEvent(final @NotNull UseBlockEvent event) {
+    private void onWorldGuardUseBlockEvent(final @NotNull UseBlockEvent event) {
         if (event.getOriginalEvent() instanceof PlayerInteractEvent ||
             event.getOriginalEvent() instanceof InventoryOpenEvent ||
             event.getOriginalEvent() instanceof PlayerTakeLecternBookEvent) { // only care for events we handle
