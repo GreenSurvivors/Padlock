@@ -4,6 +4,7 @@ import de.greensurvivors.padlock.PadlockAPI;
 import de.greensurvivors.padlock.impl.dataTypes.DoubleBlockParts;
 import org.bukkit.Material;
 import org.bukkit.Sound;
+import org.bukkit.SoundCategory;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -14,11 +15,14 @@ import org.jetbrains.annotations.Nullable;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 /**
  * Helper class for openables
  */
 public class Openables {
+    private static final Random RANDOM = new Random();
+
     /**
      * open/closes the openable block (door, fence gate, trapdoor,...)
      * will do nothing if the block can't be opened.
@@ -29,7 +33,7 @@ public class Openables {
 
             openable.setOpen(open);
             block.setBlockData(openable);
-            block.getWorld().playSound(block.getLocation(), open ? OpenableSound.getOpenSound(block.getType()) : OpenableSound.getCloseSound(block.getType()), 1, 1);
+            block.getWorld().playSound(block.getLocation(), open ? OpenableSound.getOpenSound(block.getType()) : OpenableSound.getCloseSound(block.getType()), SoundCategory.BLOCKS, 1, RANDOM.nextFloat() * 0.1f + 0.9f);
         }
     }
 
@@ -126,7 +130,7 @@ public class Openables {
      * enum containing all the sounds to play, when an openable open/closes
      * This is here because just setting the data of a block to open/close doesn't make a sound.
      */
-    private enum OpenableSound { // todo find a way to use net.minecraft.world.level.block.state.properties.BlockSetType
+    private enum OpenableSound { // todo find a way to use net.minecraft.world.level.block.state.properties.BlockSetType; see https://github.com/PaperMC/Paper/issues/12179 won't get added to paper unless mojang makes it data driven
         OAK_DOOR(Material.OAK_DOOR),
         SPRUCE_DOOR(Material.SPRUCE_DOOR),
         BIRCH_DOOR(Material.BIRCH_DOOR),
