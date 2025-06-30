@@ -37,7 +37,7 @@ public class ConfigOption<T> {
         return Objects.requireNonNullElse(this.value, fallbackValue);
     }
 
-    protected void setValue(@NotNull T value) {
+    protected void setValue(@Nullable T value) {
         this.value = value;
     }
 }

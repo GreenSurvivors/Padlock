@@ -3,7 +3,7 @@ main: de.greensurvivors.padlock.Padlock
 authors: [ connection_lost, GreensurvivorsTeam ]
 softdepend: [ WorldGuard, LockettePro ]
 loadbefore: [ SignShop ]
-version: ${version}
+version: "${mcVersion}"
 api-version: "${mcVersion}"
 description: >
   Padlock is a chest protection plugin for Paper. It is 80% compatible with original Lockette, but delivers a lot of performance enhancements and feature options.

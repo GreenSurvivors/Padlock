@@ -156,10 +156,14 @@ public class ConfigManager {
                 if (setting != null) {
                     QUICKPROTECT_TYPE.setValue(setting);
                 } else {
-                    plugin.getLogger().warning("Couldn't get QuickProtectOption \"" + string + "\" for quick lock setting. Ignoring and using default value.");
+                    plugin.getLogger().warning("Couldn't get QuickProtectOption \"" + string + "\" for quick lock setting. Ignoring and using fallback value.");
+                    QUICKPROTECT_TYPE.setValue(null);
                 }
             }
-            default -> plugin.getLogger().warning("Couldn't get QuickProtectOption \"" + object + "\" for quick lock setting. Ignoring and using default value.");
+            default -> {
+                plugin.getLogger().warning("Couldn't get QuickProtectOption \"" + object + "\" for quick lock setting. Ignoring and using fallback value.");
+                QUICKPROTECT_TYPE.setValue(null);
+            }
         }
 
         LOCK_BLOCKS_INTERFERE.setValue(config.getBoolean(LOCK_BLOCKS_INTERFERE.getPath(), LOCK_BLOCKS_INTERFERE.getFallbackValue()));
@@ -177,10 +181,14 @@ public class ConfigManager {
                 if (setting != null) {
                     LOCK_BLOCKS_HOPPER_MINECART.setValue(setting);
                 } else {
-                    plugin.getLogger().warning("Couldn't get QuickProtectOption \"" + string + "\" for quick lock setting. Ignoring and using default value.");
+                    plugin.getLogger().warning("Couldn't get QuickProtectOption \"" + string + "\" for quick lock setting. Ignoring and using fallback value.");
+                    LOCK_BLOCKS_HOPPER_MINECART.setValue(null);
                 }
             }
-            default -> plugin.getLogger().warning("Couldn't get QuickProtectOption \"" + object + "\" for quick lock setting. Ignoring and using default value.");
+            default -> {
+                plugin.getLogger().warning("Couldn't get QuickProtectOption \"" + object + "\" for quick lock setting. Ignoring and using fallback value.");
+                LOCK_BLOCKS_HOPPER_MINECART.setValue(null);
+            }
         }
 
         // load lock exemptions
