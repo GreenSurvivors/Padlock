@@ -4,9 +4,12 @@ import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.impl.MiscUtils;
 import org.bukkit.Material;
 import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.Tag;
+import org.bukkit.block.BlockType;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 import org.jetbrains.annotations.Range;
 
 import java.util.*;
@@ -24,7 +27,7 @@ public class ConfigManager {
     private final ConfigOption<String> LANG_FILENAME = new ConfigOption<>("language-file-name", "lang/lang_en.yml");
     private final ConfigOption<Boolean> DEPENDENCY_WORLDGUARD_ENABLED = new ConfigOption<>("dependency.worldguard.enabled", true);
     private final ConfigOption<Boolean> DEPENDENCY_WORLDGUARD_OVERWRITE = new ConfigOption<>("dependency.worldguard.overwrite", false);
-    private final ConfigOption<Set<Material>> LOCKABLES = new ConfigOption<>("lockables", new HashSet<>()); //todo auto add inventory-blocks
+    private final ConfigOption<Set<BlockType>> LOCKABLES = new ConfigOption<>("lockables", new HashSet<>()); //todo auto add inventory-blocks
     private final ConfigOption<QuickProtectOption> QUICKPROTECT_TYPE = new ConfigOption<>("lock.quick-lock.type", QuickProtectOption.NOT_SNEAKING_REQUIRED);
     private final ConfigOption<Boolean> LOCK_BLOCKS_INTERFERE = new ConfigOption<>("lock.blocked.interfere", true);
     private final ConfigOption<Boolean> LOCK_BLOCKS_ITEM_TRANSFER_IN = new ConfigOption<>("lock.blocked.item-transfer.in", false);
@@ -61,24 +64,25 @@ public class ConfigManager {
         DEPENDENCY_WORLDGUARD_ENABLED.setValue(config.getBoolean(DEPENDENCY_WORLDGUARD_ENABLED.getPath(), DEPENDENCY_WORLDGUARD_ENABLED.getFallbackValue()));
         DEPENDENCY_WORLDGUARD_OVERWRITE.setValue(config.getBoolean(DEPENDENCY_WORLDGUARD_OVERWRITE.getPath(), DEPENDENCY_WORLDGUARD_OVERWRITE.getFallbackValue()));
 
-        // load Material set of lockable blocks
+        // load block type set of lockable blocks
         List<?> objects = config.getList(LOCKABLES.getPath(), new ArrayList<>(LOCKABLES.getFallbackValue()));
         /* we need two sets, in case a remove entry happens before an add entry, like in case of:
          - -STONE
          - *
         */
-        Set<Material> addSet = new HashSet<>();
-        Set<Material> removeSet = new HashSet<>();
+        Set<BlockType> addSet = new HashSet<>();
+        Set<BlockType> removeSet = new HashSet<>();
 
         Iterable<Tag<Material>> tagCache = null;
         for (Object object : objects) {
             switch (object) {
-                case Material material -> addSet.add(material);
+                case Material material -> addSet.add(material.asBlockType());
+                case BlockType blockType -> addSet.add(blockType);
                 case String string -> {
                     if (string.equals("*")) {
-                        Collections.addAll(addSet, Material.values());
+                        Registry.BLOCK.stream().forEach(addSet::add);
                         plugin.getLogger().info("All blocks are default to be lockable!");
-                        plugin.getLogger().info("Add '-<Material>' to exempt a block, such as '-STONE'!");
+                        plugin.getLogger().info("Add '-<block type>' to exempt a block, such as '-STONE'!");
                     } else {
                         boolean add = true;
 
@@ -86,17 +90,14 @@ public class ConfigManager {
                             add = false;
                             string = string.substring(1);
                         }
-                        Material material = Material.matchMaterial(string);
 
-                        if (material != null) {
-                            if (material.isBlock()) {
-                                if (add) {
-                                    addSet.add(material);
-                                } else {
-                                    removeSet.add(material);
-                                }
+                        final @Nullable BlockType blockType = Registry.BLOCK.get(NamespacedKey.fromString(string.toLowerCase(Locale.ENGLISH)));
+
+                        if (blockType != null) {
+                            if (add) {
+                                addSet.add(blockType);
                             } else {
-                                plugin.getLogger().warning("\"" + string + " in lockable block list is not a block!");
+                                removeSet.add(blockType);
                             }
                         } else { //try tags
                             // lazy initialisation
@@ -117,9 +118,9 @@ public class ConfigManager {
                                 if (tag.getKey().asString().equalsIgnoreCase(string)) {
 
                                     if (add) {
-                                        addSet.addAll(tag.getValues());
+                                        tag.getValues().forEach(mat -> addSet.add(mat.asBlockType()));
                                     } else {
-                                        removeSet.addAll(tag.getValues());
+                                        tag.getValues().forEach(mat -> removeSet.add(mat.asBlockType()));
                                     }
                                     found = true;
                                     break;
@@ -127,23 +128,23 @@ public class ConfigManager {
                             }
 
                             if (!found) {
-                                plugin.getLogger().warning("Couldn't get Material \"" + string + "\" for lockable block list. Ignoring.");
+                                plugin.getLogger().warning("Couldn't get block type \"" + string + "\" for lockable block list. Ignoring.");
                             }
                         }
                     }
                 }
                 case null ->
-                    plugin.getLogger().warning("Couldn't get empty Material for lockable block list. Ignoring.");
+                    plugin.getLogger().warning("Couldn't get empty block type for lockable block list. Ignoring.");
                 default ->
-                        plugin.getLogger().warning("Couldn't get Material \"" + object + "\" for lockable block list. Ignoring.");
+                    plugin.getLogger().warning("Couldn't get block type \"" + object + "\" for lockable block list. Ignoring.");
             }
         }
         addSet.removeAll(removeSet);
         //never allow these!
-        addSet.removeAll(Tag.ALL_SIGNS.getValues());
-        addSet.remove(Material.SCAFFOLDING);
-        addSet.remove(Material.AIR);
-        addSet.remove(Material.CAVE_AIR);
+        Tag.ALL_SIGNS.getValues().stream().map(Material::asBlockType).forEachOrdered(addSet::remove);
+        addSet.remove(BlockType.SCAFFOLDING);
+        addSet.remove(BlockType.AIR);
+        addSet.remove(BlockType.CAVE_AIR);
         LOCKABLES.setValue(addSet);
 
         Object object = config.get(QUICKPROTECT_TYPE.getPath(), QUICKPROTECT_TYPE.getFallbackValue());
@@ -237,7 +238,7 @@ public class ConfigManager {
 
         config.set(IMPORT_FROM_LOCKETTEPRO.getPath(), false);
         config.set(DEPENDENCY_WORLDGUARD_ENABLED.getPath(), adapter.workWithWorldguard());
-        config.set(LOCKABLES.getPath(), adapter.getLockables().stream().map(mat -> mat.getKey().asString()).toArray(String[]::new));
+        config.set(LOCKABLES.getPath(), adapter.getLockables().stream().map(blockType -> blockType.getKey().asString()).toArray(String[]::new));
         config.set(QUICKPROTECT_TYPE.getPath(), adapter.getQuickProtectAction().toString());
         config.set(LOCK_BLOCKS_INTERFERE.getPath(), adapter.isInterferePlacementBlocked());
         config.set(LOCK_BLOCKS_ITEM_TRANSFER_IN.getPath(), adapter.isItemTransferInBlocked());
@@ -283,8 +284,8 @@ public class ConfigManager {
         return LOCK_EXPIRE_DAYS.getValueOrFallback();
     }
 
-    public boolean isLockable(Material material) {
-        return LOCKABLES.getValueOrFallback().contains(material);
+    public boolean isLockable(@NotNull BlockType blockType) {
+        return LOCKABLES.getValueOrFallback().contains(blockType);
     }
 
     public int getCacheTimeSeconds() {

@@ -8,17 +8,20 @@ import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.dataTypes.LazySignProperties;
 import de.greensurvivors.padlock.impl.openabledata.Openables;
 import de.greensurvivors.padlock.language.LangPath;
+import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.apache.commons.collections4.set.ListOrderedSet;
 import org.bukkit.*;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockType;
 import org.bukkit.block.Sign;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
 import org.bukkit.block.sign.Side;
 import org.bukkit.entity.Player;
+import org.bukkit.inventory.ItemType;
 import org.bukkit.persistence.PersistentDataAdapterContext;
 import org.bukkit.persistence.PersistentDataContainer;
 import org.bukkit.persistence.PersistentDataType;
@@ -300,30 +303,33 @@ public class SignLock {
      *
      * @param newsign   the block where the new sign should get created in (Note: does not check for any existing blocks at this place!)
      * @param blockface the direction the new sign should face
-     * @param material  Material of the sign
+     * @param itemType Material of the sign
      * @param player    new Owner
      */
-    public static void putPrivateSignOn(@NotNull Block newsign, @NotNull BlockFace blockface, @NotNull Material material, @NotNull Player player) {
+    public static void putPrivateSignOn(@NotNull Block newsign, @NotNull BlockFace blockface, @NotNull ItemType itemType, @NotNull Player player) {
         // set type
-        Material blockType = Material.matchMaterial(material.name().replace("_SIGN", "_WALL_SIGN"));
-        if (blockType != null && Tag.WALL_SIGNS.isTagged(blockType)) {
-            newsign.setType(blockType);
+        final @NotNull NamespacedKey itemKey = itemType.getKey();
+        final @Nullable BlockType wallBlockType = Registry.BLOCK.get(Key.key(itemKey.getNamespace(), itemKey.value().replace("_sign", "_wall_sign")));
+        final @NotNull BlockData blockData;
+
+        if (wallBlockType != null && Tag.WALL_SIGNS.isTagged(wallBlockType.asMaterial())) {
+            blockData = wallBlockType.createBlockData();
         } else {
-            newsign.setType(Material.OAK_WALL_SIGN);
+            blockData = BlockType.OAK_WALL_SIGN.createBlockData();
         }
 
         //set facing
-        BlockData data = newsign.getBlockData();
-        if (data instanceof Directional directional) {
+        if (blockData instanceof Directional directional) {
             directional.setFacing(blockface);
-            newsign.setBlockData(directional, false); // physics are NOT handled by this methode to make resets possible
         }
+
+        newsign.setBlockData(blockData, false); // physics are NOT handled by this methode to make resets possible
 
         // DANGER AHEAD! We don't use a snapshot here!
         Sign sign = (Sign) newsign.getState(false);
 
         // default color is hardly visible on dark signs
-        if (sign.getType() == Material.DARK_OAK_WALL_SIGN) {
+        if (wallBlockType == BlockType.DARK_OAK_WALL_SIGN) {
             sign.getSide(Side.FRONT).setColor(DyeColor.WHITE);
         }
 

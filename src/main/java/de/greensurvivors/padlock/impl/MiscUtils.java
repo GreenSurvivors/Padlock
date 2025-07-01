@@ -3,7 +3,6 @@ package de.greensurvivors.padlock.impl;
 import de.greensurvivors.padlock.Padlock;
 import org.bukkit.Bukkit;
 import org.bukkit.GameMode;
-import org.bukkit.Material;
 import org.bukkit.OfflinePlayer;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
@@ -50,7 +49,7 @@ public class MiscUtils {
     public static void removeAItemMainHand(@NotNull Player player) {
         if (player.getGameMode() == GameMode.CREATIVE) return;
         if (player.getInventory().getItemInMainHand().getAmount() == 1) {
-            player.getInventory().setItemInMainHand(new ItemStack(Material.AIR));
+            player.getInventory().setItemInMainHand(ItemStack.empty());
         } else {
             player.getInventory().getItemInMainHand().setAmount(player.getInventory().getItemInMainHand().getAmount() - 1);
         }

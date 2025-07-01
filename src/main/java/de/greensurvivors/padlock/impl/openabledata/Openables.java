@@ -14,12 +14,12 @@ import net.minecraft.world.level.block.TrapDoorBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import org.bukkit.Location;
-import org.bukkit.Material;
 import org.bukkit.Sound;
 import org.bukkit.SoundCategory;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
 import org.bukkit.block.BlockFace;
+import org.bukkit.block.BlockType;
 import org.bukkit.block.data.Openable;
 import org.bukkit.craftbukkit.CraftWorld;
 import org.bukkit.craftbukkit.block.CraftBlockType;
@@ -112,7 +112,7 @@ public class Openables {
             // unknown, get fallback
             openable.setOpen(open);
             block.setBlockData(openable);
-            block.getWorld().playSound(block.getLocation(), open ? getOpenSound(block.getType()) : getCloseSound(block.getType()), SoundCategory.BLOCKS, 1, RANDOM.nextFloat() * 0.1f + 0.9f);
+            block.getWorld().playSound(block.getLocation(), open ? getOpenSound(block.getType().asBlockType()) : getCloseSound(block.getType().asBlockType()), SoundCategory.BLOCKS, 1, RANDOM.nextFloat() * 0.1f + 0.9f);
         }
     }
 
@@ -123,8 +123,8 @@ public class Openables {
      * @param material the material to check
      * @return true if it is a gate / trapdoor
      */
-    public static boolean isSingleOpenable(@NotNull Material material) {
-        return Tag.TRAPDOORS.isTagged(material) || Tag.FENCE_GATES.isTagged(material);
+    public static boolean isSingleOpenable(@NotNull BlockType material) {
+        return Tag.TRAPDOORS.isTagged(material.asMaterial()) || Tag.FENCE_GATES.isTagged(material.asMaterial());
     }
 
     /**
@@ -206,26 +206,26 @@ public class Openables {
                         Tag.DOORS.isTagged(block.getRelative(BlockFace.DOWN).getType());
     }
 
-    private static @NotNull Sound getCloseSound(@NotNull Material material) {
-        // fallback in case a material wasn't implemented yet
-        if (Tag.DOORS.isTagged(material)) {
+    private static @NotNull Sound getCloseSound(@NotNull BlockType blockType) {
+        // fallback in case a blockType wasn't implemented yet
+        if (Tag.DOORS.isTagged(blockType.asMaterial())) {
             return Sound.BLOCK_WOODEN_DOOR_CLOSE;
-        } else if (Tag.TRAPDOORS.isTagged(material)) {
+        } else if (Tag.TRAPDOORS.isTagged(blockType.asMaterial())) {
             return Sound.BLOCK_WOODEN_TRAPDOOR_CLOSE;
-        } else if (Tag.FENCE_GATES.isTagged(material)) {
+        } else if (Tag.FENCE_GATES.isTagged(blockType.asMaterial())) {
             return Sound.BLOCK_FENCE_GATE_CLOSE;
         } else { // I have no idea. Should never happen...
             return Sound.ENTITY_VILLAGER_NO;
         }
     }
 
-    private static @NotNull Sound getOpenSound(@NotNull Material material) {
-        // fallback in case a new material wasn't implemented yet
-        if (Tag.DOORS.isTagged(material)) {
+    private static @NotNull Sound getOpenSound(@NotNull BlockType blockType) {
+        // fallback in case a new blockType wasn't implemented yet
+        if (Tag.DOORS.isTagged(blockType.asMaterial())) {
             return Sound.BLOCK_WOODEN_DOOR_OPEN;
-        } else if (Tag.TRAPDOORS.isTagged(material)) {
+        } else if (Tag.TRAPDOORS.isTagged(blockType.asMaterial())) {
             return Sound.BLOCK_WOODEN_TRAPDOOR_OPEN;
-        } else if (Tag.FENCE_GATES.isTagged(material)) {
+        } else if (Tag.FENCE_GATES.isTagged(blockType.asMaterial())) {
             return Sound.BLOCK_FENCE_GATE_OPEN;
         } else { // I have no idea. Should never happen...
             return Sound.ENTITY_VILLAGER_YES;

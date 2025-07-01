@@ -3,7 +3,6 @@ package de.greensurvivors.padlock.listener;
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.PadlockAPI;
 import de.greensurvivors.padlock.config.ConfigManager;
-import org.bukkit.Material;
 import org.bukkit.block.BlockState;
 import org.bukkit.block.DoubleChest;
 import org.bukkit.block.Hopper;
@@ -14,7 +13,7 @@ import org.bukkit.event.Listener;
 import org.bukkit.event.inventory.InventoryMoveItemEvent;
 import org.bukkit.inventory.Inventory;
 import org.bukkit.inventory.InventoryHolder;
-import org.bukkit.inventory.ItemStack;
+import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.NotNull;
 
 /**
@@ -44,7 +43,7 @@ public class BlockInventoryMoveListener implements Listener {
                         case REMOVE -> { // Extra action - HopperMinecart removal
                             event.setCancelled(true);
                             // just removing the entity doesn't drop the minecart-item itself, so we dropping it manually
-                            hopperMinecart.getWorld().dropItemNaturally(hopperMinecart.getLocation(), new ItemStack(Material.HOPPER_MINECART));
+                            hopperMinecart.getWorld().dropItemNaturally(hopperMinecart.getLocation(), ItemType.HOPPER_MINECART.createItemStack());
                             hopperMinecart.remove();
                         }
                     }

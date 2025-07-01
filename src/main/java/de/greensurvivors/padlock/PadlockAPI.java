@@ -7,10 +7,7 @@ import de.greensurvivors.padlock.impl.openabledata.Openables;
 import de.greensurvivors.padlock.impl.signdata.*;
 import org.bukkit.Material;
 import org.bukkit.Tag;
-import org.bukkit.block.Block;
-import org.bukkit.block.BlockFace;
-import org.bukkit.block.Container;
-import org.bukkit.block.Sign;
+import org.bukkit.block.*;
 import org.bukkit.block.data.Bisected;
 import org.bukkit.block.data.BlockData;
 import org.bukkit.block.data.Directional;
@@ -575,8 +572,7 @@ public class PadlockAPI {
      * get if a block is (in)directly lockable
      */
     public static boolean isLockable(@NotNull Block block) {
-        Material material = block.getType();
-        if (Padlock.getPlugin().getConfigManager().isLockable(material)) { // Directly lockable
+        if (Padlock.getPlugin().getConfigManager().isLockable(block.getType().asBlockType())) { // Directly lockable
             return true;
         } else { // Indirectly lockable
             Block blockup = block.getRelative(BlockFace.UP);
@@ -592,9 +588,10 @@ public class PadlockAPI {
      * return true if the block above / below the lockable block is also a lockable spot
      */
     public static boolean isUpDownAlsoLockableBlock(@NotNull Block block) {
-        Material material = block.getType();
+        final Material material = block.getType();
+        final BlockType blockType = material.asBlockType();
 
-        return Padlock.getPlugin().getConfigManager().isLockable(material) && (Openables.isSingleOpenable(material) ||
+        return Padlock.getPlugin().getConfigManager().isLockable(blockType) && (Openables.isSingleOpenable(blockType) ||
             (!Tag.STAIRS.isTagged(material) && block.getBlockData() instanceof Bisected));
     }
 

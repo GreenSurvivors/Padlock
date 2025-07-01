@@ -1,8 +1,10 @@
 package de.greensurvivors.padlock.config;
 
 import de.greensurvivors.padlock.impl.MiscUtils;
-import org.bukkit.Material;
+import org.bukkit.NamespacedKey;
+import org.bukkit.Registry;
 import org.bukkit.Tag;
+import org.bukkit.block.BlockType;
 import org.bukkit.configuration.file.FileConfiguration;
 import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.plugin.Plugin;
@@ -10,9 +12,9 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.io.File;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 
 /**
@@ -25,7 +27,7 @@ import java.util.Set;
 class LegacyLocketteConfigAdapter {
     private boolean worldguard = false;
     private boolean coreprotect = false;
-    private @NotNull Set<@NotNull Material> lockables = new HashSet<>();
+    private @NotNull Set<@NotNull BlockType> lockables = new HashSet<>();
     private @Nullable ConfigManager.QuickProtectOption enablequickprotect = null;
     private boolean blockinterfereplacement = true;
     private boolean blockitemtransferin = false;
@@ -93,9 +95,9 @@ class LegacyLocketteConfigAdapter {
         lockables = new HashSet<>();
         for (String unprocesseditem : unprocesseditems) {
             if (unprocesseditem.equals("*")) {
-                Collections.addAll(lockables, Material.values());
+                Registry.BLOCK.stream().forEach(lockables::add);
                 plugin.getLogger().info("All blocks are default to be lockable!");
-                plugin.getLogger().info("Add '-<Material>' to exempt a block, such as '-STONE'!");
+                plugin.getLogger().info("Add '-<block type>' to exempt a block, such as '-STONE'!");
                 continue;
             }
             boolean add = true;
@@ -103,19 +105,26 @@ class LegacyLocketteConfigAdapter {
                 add = false;
                 unprocesseditem = unprocesseditem.substring(1);
             }
-            Material material = Material.getMaterial(unprocesseditem);
-            if (material == null || !material.isBlock()) {
-                plugin.getLogger().warning(unprocesseditem + " is not a block!");
+
+            final @Nullable NamespacedKey namespacedKey = NamespacedKey.fromString(unprocesseditem.toLowerCase(Locale.ENGLISH));
+            if (namespacedKey == null) {
+                plugin.getLogger().warning(unprocesseditem + " is an invalid NamespacedKey!");
             } else {
-                if (add) {
-                    lockables.add(material);
+                final BlockType blockType = Registry.BLOCK.get(namespacedKey);
+                if (blockType == null) {
+                    plugin.getLogger().warning(unprocesseditem + " is not a block!");
                 } else {
-                    lockables.remove(material);
+                    if (add) {
+                        lockables.add(blockType);
+                    } else {
+                        lockables.remove(blockType);
+                    }
                 }
             }
         }
-        lockables.removeAll(Tag.SIGNS.getValues());
-        lockables.remove(Material.SCAFFOLDING);
+
+        Tag.SIGNS.getValues().forEach(material -> lockables.remove(material.asBlockType()));
+        lockables.remove(BlockType.SCAFFOLDING);
     }
 
     protected ConfigManager.QuickProtectOption getQuickProtectAction() {
@@ -166,7 +175,7 @@ class LegacyLocketteConfigAdapter {
         return protectionexempt;
     }
 
-    protected @NotNull Set<@NotNull Material> getLockables() {
+    protected @NotNull Set<@NotNull BlockType> getLockables() {
         return lockables;
     }
 }

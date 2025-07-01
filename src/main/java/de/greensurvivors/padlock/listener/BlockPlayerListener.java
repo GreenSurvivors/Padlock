@@ -37,6 +37,7 @@ import org.bukkit.event.player.PlayerTakeLecternBookEvent;
 import org.bukkit.inventory.BlockInventoryHolder;
 import org.bukkit.inventory.EquipmentSlot;
 import org.bukkit.inventory.Inventory;
+import org.bukkit.inventory.ItemType;
 import org.jetbrains.annotations.NotNull;
 
 import java.time.Duration;
@@ -50,8 +51,8 @@ import java.util.Set;
  */
 public class BlockPlayerListener implements Listener {
     private final Padlock plugin;
-    private final static Set<Material> replaceableMaterials = Set.of(Material.AIR, Material.CAVE_AIR, Material.LIGHT,
-            Material.WATER, Material.LAVA, Material.VINE, Material.GLOW_LICHEN);
+    private final static Set<BlockType> replaceableBlockTypes = Set.of(BlockType.AIR, BlockType.CAVE_AIR, BlockType.LIGHT,
+        BlockType.WATER, BlockType.LAVA, BlockType.VINE, BlockType.GLOW_LICHEN);
 
     public BlockPlayerListener(Padlock plugin) {
         this.plugin = plugin;
@@ -101,10 +102,10 @@ public class BlockPlayerListener implements Listener {
             Action action = event.getAction();
 
             // Get type
-            Material signType = player.getInventory().getItemInMainHand().getType();
+            final @NotNull ItemType signType = player.getInventory().getItemInMainHand().getType().asItemType();
 
             // Check action correctness
-            if (action == Action.RIGHT_CLICK_BLOCK && Tag.SIGNS.isTagged(signType)) { // note: this does NOT include hanging signs by intention
+            if (action == Action.RIGHT_CLICK_BLOCK && Tag.SIGNS.isTagged(signType.asMaterial())) { // note: this does NOT include hanging signs by intention
                 // Check permission
                 if (player.hasPermission(PermissionManager.ACTION_LOCK.getPerm())) {
                     // Get target block to lock
@@ -119,7 +120,7 @@ public class BlockPlayerListener implements Listener {
                             // whether this block is lockable
                             // Note: we check for break, not interact here, since we want to ensure the player can break the lock!
                             if (!plugin.getDependencyManager().isProtectedFromBreak(block, player) &&
-                                    replaceableMaterials.contains(signLocBlock.getType()) &&
+                                replaceableBlockTypes.contains(signLocBlock.getType().asBlockType()) &&
                                     PadlockAPI.isLockable(block)) {
                                 // Cancel event here
                                 event.setCancelled(true);
@@ -130,7 +131,7 @@ public class BlockPlayerListener implements Listener {
                                     //copy original state
                                     BlockState replacedState = signLocBlock.getState(true);
                                     // Put sign on
-                                    SignLock.putPrivateSignOn(signLocBlock, blockface, signType, player); // no copy!
+                                    SignLock.putPrivateSignOn(signLocBlock, blockface, signType.getBlockType(), player); // no copy!
 
                                     // because of this BlockPlaceEvent we have to first change the block and if it was canceled reset later, instead
                                     // of setting the state after all checks
@@ -466,7 +467,7 @@ public class BlockPlayerListener implements Listener {
                                 Set<Block> openables = new HashSet<>();
                                 openables.add(openableBlock);
 
-                                if (openableBlock.getType() == Material.IRON_DOOR || openableBlock.getType() == Material.IRON_TRAPDOOR) {
+                                if (openableBlock.getType().asBlockType() == BlockType.IRON_DOOR || openableBlock.getType().asBlockType() == BlockType.IRON_TRAPDOOR) {
                                     Openables.toggleOpenable(player, openableBlock);
 
                                     // stop blocks from getting placed when opening a door.
@@ -523,7 +524,7 @@ public class BlockPlayerListener implements Listener {
         Block block = event.getBlock();
         Player player = event.getPlayer();
         if (player.hasPermission(PermissionManager.ACTION_LOCK.getPerm())) {
-            if (MiscUtils.shouldNotify(player) && plugin.getConfigManager().isLockable(block.getType())) {
+            if (MiscUtils.shouldNotify(player) && plugin.getConfigManager().isLockable(block.getType().asBlockType())) {
                 //notice me Senpai (o//_//o)
                 if (Objects.requireNonNull(plugin.getConfigManager().getQuickProtectAction()) == ConfigManager.QuickProtectOption.NO_QUICKLOCK) {
                     plugin.getMessageManager().sendLang(player, LangPath.NOTICE_MANUEL_LOCK);
