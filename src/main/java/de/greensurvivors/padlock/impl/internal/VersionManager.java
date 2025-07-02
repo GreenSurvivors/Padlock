@@ -1,6 +1,6 @@
 package de.greensurvivors.padlock.impl.internal;
 
-import de.greensurvivors.padlock.impl.internal.v20_6.NMSInputAnvilMenu;
+import de.greensurvivors.padlock.impl.internal.v21_7.NMSInputAnvilMenu;
 import net.kyori.adventure.text.Component;
 import org.bukkit.entity.Player;
 import org.bukkit.inventory.InventoryView;

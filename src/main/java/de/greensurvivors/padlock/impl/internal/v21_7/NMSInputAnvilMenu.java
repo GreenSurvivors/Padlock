@@ -1,5 +1,6 @@
-package de.greensurvivors.padlock.impl.internal.v20_6;
+package de.greensurvivors.padlock.impl.internal.v21_7;
 
+import de.greensurvivors.padlock.impl.internal.NMSAnvilMenu;
 import io.papermc.paper.adventure.PaperAdventure;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.network.chat.Component;
@@ -12,8 +13,7 @@ import net.minecraft.world.inventory.ContainerLevelAccess;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.state.BlockState;
 import org.bukkit.craftbukkit.entity.CraftHumanEntity;
-import org.bukkit.craftbukkit.inventory.CraftInventory;
-import org.bukkit.craftbukkit.inventory.CraftInventoryView;
+import org.bukkit.craftbukkit.inventory.view.CraftAnvilView;
 import org.bukkit.inventory.InventoryView;
 import org.jetbrains.annotations.Contract;
 import org.jetbrains.annotations.NotNull;
@@ -34,11 +34,11 @@ import org.jetbrains.annotations.Nullable;
 // I could use more official Server API,
 // but this would still build onto not API code, never could become 100% clean of mojangs code, complicate much code and slow it down.
 // so until this becomes a hassle to update I believe this should be a better option.
-public final class NMSInputAnvilMenu extends AnvilMenu {
+public final class NMSInputAnvilMenu extends AnvilMenu implements NMSAnvilMenu {
     private static final String BLURRED = "*****";
     private final @Nullable Component emptyText;
 
-    private CraftInventoryView bukkitInvView;
+    private CraftAnvilView bukkitAnvilView;
     private char @Nullable [] lastInput = null;
 
     public static InventoryView openInputAnvil(final @NotNull org.bukkit.entity.Player player, @NotNull net.kyori.adventure.text.Component title, @Nullable net.kyori.adventure.text.Component emptyText) {
@@ -140,13 +140,13 @@ public final class NMSInputAnvilMenu extends AnvilMenu {
     }
 
     @Override
-    public @NotNull CraftInventoryView getBukkitView() {
-        if (this.bukkitInvView == null) {
-            CraftInventory bukkitInv = new CraftAnvilInventory(this.access.getLocation(), this.inputSlots, this.resultSlots, this);
-            this.bukkitInvView = new CraftInventoryView(this.player.getBukkitEntity(), bukkitInv, this);
+    public @NotNull CraftAnvilView getBukkitView() {
+        if (this.bukkitAnvilView == null) {
+            final CraftAnvilInventory bukkitInv = new CraftAnvilInventory(this.access.getLocation(), this.inputSlots, this.resultSlots);
+            this.bukkitAnvilView = new CraftAnvilView(this.player.getBukkitEntity(), bukkitInv, this);
+            this.bukkitAnvilView.updateFromLegacy(bukkitInv);
         }
 
-        return this.bukkitInvView;
+        return this.bukkitAnvilView;
     }
-
 }

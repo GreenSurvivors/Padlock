@@ -1,19 +1,19 @@
 plugins {
     id 'java-library'
     id 'maven-publish'
-    id("io.papermc.paperweight.userdev") version "1.7.1"
-    id("xyz.jpenilla.run-paper") version "2.3.0"
+    id("io.papermc.paperweight.userdev") version "2.0.0-beta.17"
+    id("xyz.jpenilla.run-paper") version "2.3.1"
 }
 // Suppiled by Jenkins
 ext.majorVersion = 2
 ext.minorVersion = 12
-ext.minecraftVersion = "1.20.4"
+ext.minecraftVersion = "1.21.7"
 
 ext.buildNumber = System.env.BUILD_NUMBER == null ? "dev"              : "build" + "$System.env.BUILD_NUMBER"
 ext.mavenDirectory = System.env.MAVEN_DIR == null ? "$projectDir/repo" : "$System.env.MAVEN_DIR"
 ext.jdDirectory = System.env.JAVADOCS_DIR == null ? null               : "$System.env.JAVADOCS_DIR"
 
-// differet version convension from Nyaa plugins
+// different version convention than Nyaa plugins
 group = "de.greensurvivors"
 archivesBaseName = "Padlock"
 version = "$majorVersion.$minorVersion.$buildNumber".toString()
@@ -25,8 +25,8 @@ runServer {
  */
 
 java {
-    // Configure the java toolchain. This allows gradle to auto-provision JDK 17 on systems that only have JDK 8 installed for example.
-    toolchain.languageVersion.set(JavaLanguageVersion.of(17))
+    // Configure the java toolchain. This allows gradle to auto-provision JDK 21 on systems that only have JDK 8 installed for example.
+    toolchain.languageVersion.set(JavaLanguageVersion.of(21))
 }
 
 // extra compile warnings
@@ -36,7 +36,7 @@ compileJava {
 
     // Set the release flag. This configures what version bytecode the compiler will emit, as well as what JDK APIs are usable.
     // See https://openjdk.java.net/jeps/247 for more information.
-    options.release.set(17)
+    options.release.set(21)
 }
 
 repositories {
@@ -47,15 +47,19 @@ repositories {
 }
 
 dependencies {
-    implementation 'org.apache.commons:commons-collections4:4.4'
-    implementation 'org.jetbrains:annotations:24.1.0'
-    implementation("com.github.ben-manes.caffeine:caffeine:3.1.8") // caches
-    implementation("de.mkammerer:argon2-jvm:2.11") // native password hashing with argon2
+    implementation 'org.apache.commons:commons-collections4:4.5.0'
+    implementation 'org.jetbrains:annotations:26.0.2'
+    implementation("com.github.ben-manes.caffeine:caffeine:3.2.1") // caches
+    implementation("de.mkammerer:argon2-jvm:2.12") // native password hashing with argon2
 
     paperweight.paperDevBundle("$minecraftVersion-R0.1-SNAPSHOT")
-    compileOnly ('com.sk89q.worldguard:worldguard-bukkit:7.1.0-SNAPSHOT') { transitive = false }
-    compileOnly('com.github.MilkBowl:VaultAPI:1.7') { transitive = false }
+    compileOnly('com.sk89q.worldguard:worldguard-bukkit:7.0.14-SNAPSHOT') { transitive = false }
+    compileOnly('com.github.MilkBowl:VaultAPI:1.7.1') { transitive = false }
 }
+
+// we only work with paper and downstream!
+// todo
+//paperweight.reobfArtifactConfiguration = ReobfArtifactConfiguration.MOJANG_PRODUCTION
 
 processResources {
     expand version: project.version,
