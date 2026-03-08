@@ -1,12 +1,13 @@
 package de.greensurvivors.padlock.command;
 
 import de.greensurvivors.padlock.Padlock;
-import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
 import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.SignSelection;
 import de.greensurvivors.padlock.impl.signdata.SignLock;
 import de.greensurvivors.padlock.impl.signdata.SignTimer;
+import de.greensurvivors.padlock.language.LangPath;
+import de.greensurvivors.padlock.language.PlaceHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.block.Sign;
@@ -44,7 +45,7 @@ public class SetTimer extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_SET_TIMER);
+        return plugin.getMessageManager().getLang(LangPath.HELP_SET_TIMER);
     }
 
     @Override
@@ -58,7 +59,7 @@ public class SetTimer extends SubCommand {
                         //check for old Lockett(Pro) signs and try to update them
                         sign = MainCommand.checkAndUpdateLegacySign(sign, player);
                         if (sign == null) {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                            plugin.getMessageManager().sendLang(sender, LangPath.SIGN_NEED_RESELECT);
                             return true;
                         }
 
@@ -91,7 +92,7 @@ public class SetTimer extends SubCommand {
 
                                         timerDuration = timerDuration.plus(period);
                                     } else {
-                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_ERROR);
+                                        plugin.getMessageManager().sendLang(sender, LangPath.SET_TIMER_ERROR);
                                         return false;
                                     }
                                 }
@@ -101,28 +102,28 @@ public class SetTimer extends SubCommand {
                             SignTimer.setTimer(sign, timerDuration, true);
 
                             if (timerDuration.toMillis() > 0) {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_SUCCESS_ON,
-                                    Placeholder.unparsed(MessageManager.PlaceHolder.TIME.getPlaceholder(), MiscUtils.formatTimeString(timerDuration)));
+                                plugin.getMessageManager().sendLang(sender, LangPath.SET_TIMER_SUCCESS_ON,
+                                    Placeholder.unparsed(PlaceHolder.TIME.getPlaceholder(), MiscUtils.formatTimeString(timerDuration)));
                             } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_SUCCESS_OFF);
+                                plugin.getMessageManager().sendLang(sender, LangPath.SET_TIMER_SUCCESS_OFF);
                             }
                         } else {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_OWNER);
+                            plugin.getMessageManager().sendLang(sender, LangPath.NOT_OWNER);
                         }
                     } else {
-                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NOT_SELECTED);
+                        plugin.getMessageManager().sendLang(sender, LangPath.SIGN_NOT_SELECTED);
                     }
                 } else {
-                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_ENOUGH_ARGS);
+                    plugin.getMessageManager().sendLang(sender, LangPath.NOT_ENOUGH_ARGS);
                     return false;
                 }
             } else {
-                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
+                plugin.getMessageManager().sendLang(sender, LangPath.NO_PERMISSION);
             }
 
             return true;
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_PLAYER);
+            plugin.getMessageManager().sendLang(sender, LangPath.NOT_A_PLAYER);
             return false;
         }
     }

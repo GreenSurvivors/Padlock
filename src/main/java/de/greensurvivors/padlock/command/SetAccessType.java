@@ -1,11 +1,13 @@
 package de.greensurvivors.padlock.command;
 
 import de.greensurvivors.padlock.Padlock;
-import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
 import de.greensurvivors.padlock.impl.SignSelection;
 import de.greensurvivors.padlock.impl.signdata.SignAccessType;
 import de.greensurvivors.padlock.impl.signdata.SignLock;
+import de.greensurvivors.padlock.language.LangPath;
+import de.greensurvivors.padlock.language.MessageManager;
+import de.greensurvivors.padlock.language.PlaceHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.block.Sign;
@@ -24,15 +26,15 @@ public class SetAccessType extends SubCommand {
         super(plugin);
 
         MessageManager manager = Padlock.getPlugin().getMessageManager();
-        accessTypeStrs.put(manager.getNakedSignText(MessageManager.LangPath.SIGN_LINE_PRIVATE).toLowerCase().
+        accessTypeStrs.put(manager.getNakedSignText(LangPath.SIGN_LINE_PRIVATE).toLowerCase().
                 replace("[", "").replace("]", "").trim(), SignAccessType.AccessType.PRIVATE);
-        accessTypeStrs.put(manager.getNakedSignText(MessageManager.LangPath.SIGN_LINE_PUBLIC).toLowerCase().
+        accessTypeStrs.put(manager.getNakedSignText(LangPath.SIGN_LINE_PUBLIC).toLowerCase().
                 replace("[", "").replace("]", "").trim(), SignAccessType.AccessType.PUBLIC);
-        accessTypeStrs.put(manager.getNakedSignText(MessageManager.LangPath.SIGN_LINE_DONATION).toLowerCase().
+        accessTypeStrs.put(manager.getNakedSignText(LangPath.SIGN_LINE_DONATION).toLowerCase().
                 replace("[", "").replace("]", "").trim(), SignAccessType.AccessType.DONATION);
-        accessTypeStrs.put(manager.getNakedSignText(MessageManager.LangPath.SIGN_LINE_DISPLAY).toLowerCase().
+        accessTypeStrs.put(manager.getNakedSignText(LangPath.SIGN_LINE_DISPLAY).toLowerCase().
                 replace("[", "").replace("]", "").trim(), SignAccessType.AccessType.DISPLAY);
-        accessTypeStrs.put(manager.getNakedSignText(MessageManager.LangPath.SIGN_LINE_SUPPLY_SIGN).toLowerCase().
+        accessTypeStrs.put(manager.getNakedSignText(LangPath.SIGN_LINE_SUPPLY_SIGN).toLowerCase().
                 replace("[", "").replace("]", "").trim(), SignAccessType.AccessType.SUPPLY);
     }
 
@@ -48,7 +50,7 @@ public class SetAccessType extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_SET_ACCESS_TYPE);
+        return plugin.getMessageManager().getLang(LangPath.HELP_SET_ACCESS_TYPE);
     }
 
     @Override
@@ -62,7 +64,7 @@ public class SetAccessType extends SubCommand {
                         //check for old Lockett(Pro) signs and try to update them
                         sign = MainCommand.checkAndUpdateLegacySign(sign, player);
                         if (sign == null) {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                            plugin.getMessageManager().sendLang(sender, LangPath.SIGN_NEED_RESELECT);
                             return true;
                         }
 
@@ -75,29 +77,29 @@ public class SetAccessType extends SubCommand {
                             if (accessType != null) {
                                 // success!
                                 SignAccessType.setAccessType(sign, accessType, true);
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_ACCESS_TYPE_SUCCESS,
-                                        Placeholder.component(MessageManager.PlaceHolder.ARGUMENT.getPlaceholder(), Component.text(accessType.name().toLowerCase(Locale.ENGLISH))));
+                                plugin.getMessageManager().sendLang(sender, LangPath.SET_ACCESS_TYPE_SUCCESS,
+                                    Placeholder.component(PlaceHolder.ARGUMENT.getPlaceholder(), Component.text(accessType.name().toLowerCase(Locale.ENGLISH))));
                             } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_ACCESS_TYPE,
-                                        Placeholder.unparsed(MessageManager.PlaceHolder.ARGUMENT.getPlaceholder(), args[1]));
+                                plugin.getMessageManager().sendLang(sender, LangPath.NOT_ACCESS_TYPE,
+                                    Placeholder.unparsed(PlaceHolder.ARGUMENT.getPlaceholder(), args[1]));
                                 return false;
                             }
                         } else {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_OWNER);
+                            plugin.getMessageManager().sendLang(sender, LangPath.NOT_OWNER);
                         }
                     } else {
-                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NOT_SELECTED);
+                        plugin.getMessageManager().sendLang(sender, LangPath.SIGN_NOT_SELECTED);
                     }
                 } else {
-                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_ENOUGH_ARGS);
+                    plugin.getMessageManager().sendLang(sender, LangPath.NOT_ENOUGH_ARGS);
                     return false;
                 }
             } else {
-                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_PLAYER);
+                plugin.getMessageManager().sendLang(sender, LangPath.NOT_A_PLAYER);
                 return false;
             }
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
+            plugin.getMessageManager().sendLang(sender, LangPath.NO_PERMISSION);
         }
 
         return true;

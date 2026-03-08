@@ -4,12 +4,13 @@ import com.sk89q.worldguard.bukkit.event.block.UseBlockEvent;
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.PadlockAPI;
 import de.greensurvivors.padlock.config.ConfigManager;
-import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
 import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.SignSelection;
 import de.greensurvivors.padlock.impl.openabledata.Openables;
 import de.greensurvivors.padlock.impl.signdata.*;
+import de.greensurvivors.padlock.language.LangPath;
+import de.greensurvivors.padlock.language.PlaceHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -58,10 +59,6 @@ public class BlockPlayerListener implements Listener {
 
     /**
      * checks for vanilla spawn protection
-     *
-     * @param player
-     * @param location
-     * @return
      */
     private static boolean isSpawnProtected(@NotNull Player player, @NotNull Location location) {
         int spawnSize = Bukkit.getServer().getSpawnRadius();
@@ -151,14 +148,14 @@ public class BlockPlayerListener implements Listener {
 
                                         plugin.getLockCacheManager().removeFromCache(block.getLocation());
                                         // Send message
-                                        plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
+                                        plugin.getMessageManager().sendLang(player, LangPath.LOCK_SUCCESS);
                                     } else {
                                         // reset
                                         replacedState.update(true, false);
                                     }
                                 } else {
                                     // Cannot lock this block
-                                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.QUICK_LOCK_ERROR);
+                                    plugin.getMessageManager().sendLang(player, LangPath.QUICK_LOCK_ERROR);
                                 }
                             } // not lockable
                         } // clicked block is null
@@ -186,10 +183,10 @@ public class BlockPlayerListener implements Listener {
             if (attachedBlock != null && PadlockAPI.isLockable(attachedBlock)) {
                 if (PadlockAPI.isProtected(attachedBlock)) {
                     if (PadlockAPI.isOwner(attachedBlock, player.getUniqueId())) {
-                        plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_ERROR_ALREADY_LOCKED);
-                        event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_ERROR));
+                        plugin.getMessageManager().sendLang(player, LangPath.LOCK_ERROR_ALREADY_LOCKED);
+                        event.line(0, plugin.getMessageManager().getLang(LangPath.SIGN_LINE_ERROR));
                     } else {
-                        plugin.getMessageManager().sendLang(player, MessageManager.LangPath.NOT_OWNER);
+                        plugin.getMessageManager().sendLang(player, LangPath.NOT_OWNER);
                         event.setCancelled(true);
                     }
                 } else if (player.hasPermission(PermissionManager.ACTION_LOCK.getPerm())) { // all good
@@ -201,8 +198,8 @@ public class BlockPlayerListener implements Listener {
                     // Player with this permission can lock with another name
                     if (!player.hasPermission(PermissionManager.ACTION_LOCK_OTHERS.getPerm())) {
                         // set the player self as owner
-                        event.line(1, Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_PLAYER_NAME_ON,
-                                Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), player.getName())));
+                        event.line(1, Padlock.getPlugin().getMessageManager().getLang(LangPath.SIGN_PLAYER_NAME_ON,
+                            Placeholder.unparsed(PlaceHolder.PLAYER.getPlaceholder(), player.getName())));
 
                         SignLock.addPlayer(sign, true, player);
                     } else {
@@ -217,15 +214,15 @@ public class BlockPlayerListener implements Listener {
                             } else if (strLine.isBlank() && player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm())) { // failsafe: only allow setting a sign without owner if you could break it!
                                 SignLock.addPlayer(sign, true, null);
                             } else {
-                                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.UNKNOWN_PLAYER,
-                                        Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), strLine));
-                                event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_ERROR));
+                                plugin.getMessageManager().sendLang(player, LangPath.UNKNOWN_PLAYER,
+                                    Placeholder.unparsed(PlaceHolder.PLAYER.getPlaceholder(), strLine));
+                                event.line(0, plugin.getMessageManager().getLang(LangPath.SIGN_LINE_ERROR));
                                 return;
                             }
                         } else if (player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm())) { // failsafe: only allow setting a sign without owner if you could break it! (this event should never return null here anyway)
                             SignLock.addPlayer(sign, true, null);
                         } else {
-                            plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_ERROR_NO_OWNER);
+                            plugin.getMessageManager().sendLang(player, LangPath.LOCK_ERROR_NO_OWNER);
                             event.setCancelled(true);
                             return;
                         }
@@ -255,16 +252,16 @@ public class BlockPlayerListener implements Listener {
 
                     //update Sign after event was done
                     Bukkit.getScheduler().runTaskLater(plugin, () -> SignDisplay.updateDisplay(sign), 2);
-                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_SUCCESS);
+                    plugin.getMessageManager().sendLang(player, LangPath.LOCK_SUCCESS);
 
                     plugin.getLockCacheManager().removeFromCache(attachedBlock.getLocation());
                 } else {
-                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.NO_PERMISSION);
+                    plugin.getMessageManager().sendLang(player, LangPath.NO_PERMISSION);
                     event.setCancelled(true);
                 }
             } else {
-                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.LOCK_ERROR_NOT_LOCKABLE);
-                event.line(0, plugin.getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_ERROR));
+                plugin.getMessageManager().sendLang(player, LangPath.LOCK_ERROR_NOT_LOCKABLE);
+                event.line(0, plugin.getMessageManager().getLang(LangPath.SIGN_LINE_ERROR));
             }
         } // not a lock sign
     }
@@ -286,7 +283,7 @@ public class BlockPlayerListener implements Listener {
                     (PadlockAPI.isLockSign(sign) || PadlockAPI.isAdditionalSign(sign))) {
 
                 SignSelection.selectSign(player, clickedBlock);
-                plugin.getMessageManager().sendLang(player, MessageManager.LangPath.SELECT_SIGN);
+                plugin.getMessageManager().sendLang(player, LangPath.SELECT_SIGN);
 
                 // cancel block place when selecting a sign
                 if (event.hasItem()) {
@@ -309,10 +306,10 @@ public class BlockPlayerListener implements Listener {
         if (block.getState() instanceof Sign sign) {
             if (PadlockAPI.isValidLockSign(sign)) {
                 if (SignLock.isOwner(sign, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm())) {
-                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.BREAK_LOCK_SUCCESS);
+                    plugin.getMessageManager().sendLang(player, LangPath.BREAK_LOCK_SUCCESS);
                     plugin.getLockCacheManager().removeFromCache(sign);
                 } else { // not allowed to break
-                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.NOT_OWNER);
+                    plugin.getMessageManager().sendLang(player, LangPath.NOT_OWNER);
                     event.setCancelled(true);
                 }
             } else if (PadlockAPI.isAdditionalSign(sign)) {
@@ -326,7 +323,7 @@ public class BlockPlayerListener implements Listener {
                 } else { // not allowed to break
                     PadlockAPI.updateLegacySign(sign);
 
-                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.NOT_OWNER);
+                    plugin.getMessageManager().sendLang(player, LangPath.NOT_OWNER);
                     event.setCancelled(true);
                 }
             }
@@ -334,7 +331,7 @@ public class BlockPlayerListener implements Listener {
             Sign lock = PadlockAPI.getLock(block, false);
             if (lock != null) {
                 if (!(SignLock.isOwner(lock, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_BREAK.getPerm()))) {
-                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
+                    plugin.getMessageManager().sendLang(player, LangPath.ACTION_PREVENTED_LOCKED);
                     event.setCancelled(true);
                 } else if (!plugin.getDependencyManager().isProtectedFromBreak(block, player)) { // if the player is allowed to break the block. Note: we check for break, not interact here, since we want to ensure the player can break the lock!
                     // only break sign, if the broken block was the last protected block
@@ -360,7 +357,7 @@ public class BlockPlayerListener implements Listener {
         if (block.getState() instanceof Sign sign &&
                 (PadlockAPI.isLockSign(sign) || PadlockAPI.isAdditionalSign(sign))) {
             PadlockAPI.updateLegacySign(sign);
-            plugin.getMessageManager().sendLang(event.getPlayer(), MessageManager.LangPath.ACTION_PREVENTED_USE_CMDS);
+            plugin.getMessageManager().sendLang(event.getPlayer(), LangPath.ACTION_PREVENTED_USE_CMDS);
             sign.setWaxed(true);
             sign.update();
             event.setCancelled(true);
@@ -379,7 +376,7 @@ public class BlockPlayerListener implements Listener {
                 (block.getState() instanceof Sign sign &&
                         (PadlockAPI.isLockSign(sign) || PadlockAPI.isAdditionalSign(sign))) &&
                 event.getItem() != null && Tag.ITEMS_AXES.isTagged(event.getItem().getType())) {
-            plugin.getMessageManager().sendLang(event.getPlayer(), MessageManager.LangPath.ACTION_PREVENTED_USE_CMDS);
+            plugin.getMessageManager().sendLang(event.getPlayer(), LangPath.ACTION_PREVENTED_USE_CMDS);
             event.setCancelled(true);
         }
     }
@@ -495,7 +492,7 @@ public class BlockPlayerListener implements Listener {
                             } // not openable
                         } // not right-click
                     } else {// no permission
-                        plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
+                        plugin.getMessageManager().sendLang(player, LangPath.ACTION_PREVENTED_LOCKED);
                         event.setCancelled(true);
                     }
                 } // sign was selected. ignoring
@@ -513,7 +510,7 @@ public class BlockPlayerListener implements Listener {
 
         if (!player.hasPermission(PermissionManager.ADMIN_INTERFERE.getPerm()) && PadlockAPI.isInterfering(block, player.getUniqueId())) {
             // no permission
-            plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_INTERFERE);
+            plugin.getMessageManager().sendLang(player, LangPath.ACTION_PREVENTED_INTERFERE);
             event.setCancelled(true);
         }
     }
@@ -529,9 +526,9 @@ public class BlockPlayerListener implements Listener {
             if (MiscUtils.shouldNotify(player) && plugin.getConfigManager().isLockable(block.getType())) {
                 //notice me Senpai (o//_//o)
                 if (Objects.requireNonNull(plugin.getConfigManager().getQuickProtectAction()) == ConfigManager.QuickProtectOption.NO_QUICKLOCK) {
-                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.NOTICE_MANUEL_LOCK);
+                    plugin.getMessageManager().sendLang(player, LangPath.NOTICE_MANUEL_LOCK);
                 } else {
-                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.NOTICE_QUICK_LOCK);
+                    plugin.getMessageManager().sendLang(player, LangPath.NOTICE_QUICK_LOCK);
                 }
             } // already notified
         } // no permission
@@ -548,7 +545,7 @@ public class BlockPlayerListener implements Listener {
         if (PadlockAPI.isProtected(block) &&
             !(PadlockAPI.isOwner(block, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
 
-            plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
+            plugin.getMessageManager().sendLang(player, LangPath.ACTION_PREVENTED_LOCKED);
             event.setCancelled(true);
 
             // resync the bucket
@@ -570,7 +567,7 @@ public class BlockPlayerListener implements Listener {
 
         if (PadlockAPI.isProtected(block) &&
             !(PadlockAPI.isOwner(block, player.getUniqueId()) || player.hasPermission(PermissionManager.ADMIN_USE.getPerm()))) {
-            plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
+            plugin.getMessageManager().sendLang(player, LangPath.ACTION_PREVENTED_LOCKED);
             event.setCancelled(true);
         } // has permission or is not protected
     }
@@ -591,7 +588,7 @@ public class BlockPlayerListener implements Listener {
                 SignAccessType.AccessType accessType = SignAccessType.getAccessType(lock, false);
 
                 if (!(accessType == SignAccessType.AccessType.SUPPLY || accessType == SignAccessType.AccessType.PUBLIC)) {
-                    plugin.getMessageManager().sendLang(player, MessageManager.LangPath.ACTION_PREVENTED_LOCKED);
+                    plugin.getMessageManager().sendLang(player, LangPath.ACTION_PREVENTED_LOCKED);
                     event.setCancelled(true);
                 }
             }
@@ -674,18 +671,19 @@ public class BlockPlayerListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true)
-    private void onInventoryClick(@NotNull InventoryClickEvent event) { // todo warn people when opening what they are opening best with cache to not annoy
-        Inventory topInv = event.getView().getTopInventory();
+    private void onInventoryClick(final @NotNull InventoryClickEvent event) { // todo warn people when opening what they are opening best with cache to not annoy
+        final @NotNull Inventory topInv = event.getView().getTopInventory();
 
         switch (event.getAction()) {
             case NOTHING, DROP_ALL_CURSOR, DROP_ONE_CURSOR, UNKNOWN -> {
             } // nothing
-            case PICKUP_ALL, PICKUP_SOME, PICKUP_HALF, PICKUP_ONE, DROP_ALL_SLOT, DROP_ONE_SLOT, HOTBAR_MOVE_AND_READD -> { // may take
+            case PICKUP_ALL, PICKUP_SOME, PICKUP_HALF, PICKUP_ONE, DROP_ALL_SLOT, DROP_ONE_SLOT,
+                 PICKUP_ALL_INTO_BUNDLE, PICKUP_SOME_INTO_BUNDLE -> { // may take
                 if (event.getClickedInventory() == topInv) {
                     onTakeItem(event, topInv);
                 }
             }
-            case PLACE_ALL, PLACE_SOME, PLACE_ONE -> { // may place
+            case PLACE_ALL, PLACE_SOME, PLACE_ONE, PLACE_FROM_BUNDLE -> { // may place
                 if (event.getClickedInventory() == topInv) {
                     onPlaceItem(event, topInv);
                 }
@@ -695,6 +693,8 @@ public class BlockPlayerListener implements Listener {
                     onPlaceItem(event, topInv);
                     onTakeItem(event, topInv);
                 }
+            }
+            case CLONE_STACK, PLACE_SOME_INTO_BUNDLE, PLACE_ALL_INTO_BUNDLE, PICKUP_FROM_BUNDLE -> {
             }
             case COLLECT_TO_CURSOR -> { // may take complex
                 if (topInv.contains(event.getCursor().getType())) {

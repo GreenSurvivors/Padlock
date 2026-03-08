@@ -2,10 +2,10 @@ package de.greensurvivors.padlock.command;
 
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.PadlockAPI;
-import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
 import de.greensurvivors.padlock.impl.SignSelection;
 import de.greensurvivors.padlock.impl.signdata.SignPasswords;
+import de.greensurvivors.padlock.language.LangPath;
 import net.kyori.adventure.text.Component;
 import org.bukkit.block.Sign;
 import org.bukkit.command.Command;
@@ -61,7 +61,7 @@ public class ApplyPassword extends SubCommand implements TabCompleter, CommandEx
                 //check for old Lockett(Pro) signs and try to update them
                 sign = MainCommand.checkAndUpdateLegacySign(sign, player);
                 if (sign == null) {
-                    Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                    Padlock.getPlugin().getMessageManager().sendLang(player, LangPath.SIGN_NEED_RESELECT);
                     return;
                 }
 
@@ -70,16 +70,16 @@ public class ApplyPassword extends SubCommand implements TabCompleter, CommandEx
                         // this will communicate if access was granted or not
                         SignPasswords.checkPasswordAndGrandAccess(sign, player, password);
                     } else {
-                        Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.PASSWORD_ON_COOLDOWN);
+                        Padlock.getPlugin().getMessageManager().sendLang(player, LangPath.PASSWORD_ON_COOLDOWN);
                     }
                 } else {
-                    Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                    Padlock.getPlugin().getMessageManager().sendLang(player, LangPath.SIGN_NEED_RESELECT);
                 }
             } else {
-                Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.SIGN_NOT_SELECTED);
+                Padlock.getPlugin().getMessageManager().sendLang(player, LangPath.SIGN_NOT_SELECTED);
             }
         } else {
-            Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.NO_PERMISSION);
+            Padlock.getPlugin().getMessageManager().sendLang(player, LangPath.NO_PERMISSION);
         }
     }
 
@@ -95,16 +95,16 @@ public class ApplyPassword extends SubCommand implements TabCompleter, CommandEx
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_PASSWORD);
+        return plugin.getMessageManager().getLang(LangPath.HELP_PASSWORD);
     }
 
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         if (sender instanceof Player player) {
-            plugin.getMessageManager().sendLang(player, MessageManager.LangPath.PASSWORD_START_PROCESSING);
+            plugin.getMessageManager().sendLang(player, LangPath.PASSWORD_START_PROCESSING);
             return true;
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_PLAYER);
+            plugin.getMessageManager().sendLang(sender, LangPath.NOT_A_PLAYER);
             return false;
         }
     }
@@ -122,10 +122,10 @@ public class ApplyPassword extends SubCommand implements TabCompleter, CommandEx
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
         if (sender instanceof Player player) {
-            plugin.getMessageManager().sendLang(player, MessageManager.LangPath.PASSWORD_START_PROCESSING);
+            plugin.getMessageManager().sendLang(player, LangPath.PASSWORD_START_PROCESSING);
             return true;
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_PLAYER);
+            plugin.getMessageManager().sendLang(sender, LangPath.NOT_A_PLAYER);
             return false;
         }
     }

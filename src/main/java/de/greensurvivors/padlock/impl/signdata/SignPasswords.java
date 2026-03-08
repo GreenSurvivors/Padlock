@@ -3,11 +3,12 @@ package de.greensurvivors.padlock.impl.signdata;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import de.greensurvivors.padlock.Padlock;
-import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.impl.dataTypes.CacheSet;
+import de.greensurvivors.padlock.language.LangPath;
 import de.mkammerer.argon2.Argon2Advanced;
 import de.mkammerer.argon2.Argon2Factory;
 import de.mkammerer.argon2.Argon2Version;
+import net.kyori.adventure.text.logger.slf4j.ComponentLogger;
 import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.NamespacedKey;
@@ -23,7 +24,6 @@ import java.nio.CharBuffer;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
 public final class SignPasswords {
     private final static NamespacedKey passwordHashKey = new NamespacedKey(Padlock.getPlugin(), "passwordHash");
@@ -59,9 +59,9 @@ public final class SignPasswords {
      * @throws IllegalArgumentException if the Argon2Parameters are invalid
      */
     private static boolean matches(char[] rawPassword, String encodedOtherPassword) {
-        Logger logger = Padlock.getPlugin().getLogger();
+        final @NotNull ComponentLogger logger = Padlock.getPlugin().getComponentLogger();
 
-        String[] parts = encodedOtherPassword.split("\\$");
+        final @NotNull String @NotNull [] parts = encodedOtherPassword.split("\\$");
         if (parts.length >= 4) {
             int currentIndex = 1;
             final Argon2Advanced argon2 = switch (parts[currentIndex++]) {
@@ -71,7 +71,7 @@ public final class SignPasswords {
                 default -> null;
             };
             if (argon2 != null) {
-                String currentPart = parts[currentIndex++];
+                @NotNull String currentPart = parts[currentIndex++];
                 Argon2Version argon2Version = null;
                 if (currentPart.startsWith("v=")) {
                     int expectedVersion = Integer.parseInt(currentPart.substring(2));
@@ -108,28 +108,28 @@ public final class SignPasswords {
 
                                         return argon2.verifyAdvanced(iterations, memory, parallelism, encodedPassword, salt, null, null, expectedHash.length, argon2Version, expectedHash);
                                     } else {
-                                        logger.warning("Invalid parallelity parameter: " + performanceParams[1]);
+                                        logger.warn("Invalid parallelity parameter: " + performanceParams[1]);
                                     }
                                 } else {
-                                    logger.warning("Invalid iterations parameter: " + performanceParams[1]);
+                                    logger.warn("Invalid iterations parameter: " + performanceParams[1]);
                                 }
                             } else {
-                                logger.warning("Invalid memory parameter: " + performanceParams[0]);
+                                logger.warn("Invalid memory parameter: " + performanceParams[0]);
                             }
                         } else {
-                            logger.warning("Amount of performance parameters invalid: " + currentPart);
+                            logger.warn("Amount of performance parameters invalid: " + currentPart);
                         }
                     } else {
-                        logger.warning("invalid argon2 Version: " + currentPart);
+                        logger.warn("invalid argon2 Version: " + currentPart);
                     }
                 } else {
-                    logger.warning("invalid argon2 Version: " + currentPart);
+                    logger.warn("invalid argon2 Version: " + currentPart);
                 }
             } else {
-                logger.warning("Invalid algorithm type: " + parts[1]);
+                logger.warn("Invalid algorithm type: " + parts[1]);
             }
         } else {
-            logger.warning("Invalid encoded Argon2-hash: " + encodedOtherPassword);
+            logger.warn("Invalid encoded Argon2-hash: " + encodedOtherPassword);
         }
         return false;
     }
@@ -151,10 +151,10 @@ public final class SignPasswords {
 
     public static boolean isOnCooldown(@NotNull UUID uuid, @NotNull Location location) {
         if (waitForCmdGettingProcessed.contains(uuid)) {
-            Cache<@NotNull Location, @NotNull Integer> triesAtLocations = triesLast3Minutes.get(uuid);
+            final @Nullable Cache<@NotNull Location, @NotNull Integer> triesAtLocations = triesLast3Minutes.get(uuid);
 
             if (triesAtLocations != null) {
-                Integer tries = triesAtLocations.getIfPresent(location);
+                @Nullable Integer tries = triesAtLocations.getIfPresent(location);
 
                 if (tries != null) {
                     return tries > 10;
@@ -165,10 +165,10 @@ public final class SignPasswords {
     }
 
     public static void countTriesUp(@NotNull UUID uuid, @NotNull Location location) {
-        Cache<@NotNull Location, @NotNull Integer> triesAtLocations = triesLast3Minutes.get(uuid);
+        final @Nullable Cache<@NotNull Location, @NotNull Integer> triesAtLocations = triesLast3Minutes.get(uuid);
 
         if (triesAtLocations != null) {
-            Integer tries = triesAtLocations.getIfPresent(location);
+            @Nullable Integer tries = triesAtLocations.getIfPresent(location);
 
             if (tries != null) {
                 tries++;
@@ -183,12 +183,12 @@ public final class SignPasswords {
         }
     }
 
-    private static void cacheAccess(@NotNull UUID uuid, @NotNull Location location) {
+    private static void cacheAccess(final @NotNull UUID uuid, final @NotNull Location location) {
         accessMap.computeIfAbsent(uuid, ignored -> new CacheSet<>(Caffeine.newBuilder().expireAfterWrite(10, TimeUnit.MINUTES).maximumSize(20).build()));
         accessMap.get(uuid).add(location);
     }
 
-    public static boolean hasStillAccess(@NotNull UUID uuid, @NotNull Location location) {
+    public static boolean hasStillAccess(final @NotNull UUID uuid, final @NotNull Location location) {
         CacheSet<Location> cache = accessMap.get(uuid);
 
         if (cache != null) {
@@ -202,13 +202,13 @@ public final class SignPasswords {
         return false;
     }
 
-    public static boolean needsPasswordAccess(@NotNull Sign sign) {
+    public static boolean needsPasswordAccess(final @NotNull Sign sign) {
         final String hash = sign.getPersistentDataContainer().get(passwordHashKey, PersistentDataType.STRING);
 
         return (hash != null && !hash.isEmpty());
     }
 
-    public static void checkPasswordAndGrandAccess(@NotNull Sign sign, @NotNull Player player, char @NotNull [] password) {
+    public static void checkPasswordAndGrandAccess(final @NotNull Sign sign, final @NotNull Player player, final char @NotNull [] password) {
         final String hash = sign.getPersistentDataContainer().get(passwordHashKey, PersistentDataType.STRING);
 
         if (hash != null) {
@@ -217,14 +217,14 @@ public final class SignPasswords {
 
                 if (doesMatch) {
                     cacheAccess(player.getUniqueId(), sign.getLocation());
-                    Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.PASSWORD_ACCESS_GRANTED);
+                    Padlock.getPlugin().getMessageManager().sendLang(player, LangPath.PASSWORD_ACCESS_GRANTED);
                 } else {
                     SignPasswords.countTriesUp(player.getUniqueId(), sign.getLocation());
-                    Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.PASSWORD_WRONG_PASSWORD);
+                    Padlock.getPlugin().getMessageManager().sendLang(player, LangPath.PASSWORD_WRONG_PASSWORD);
                 }
             });
         } else { // no password was set
-            Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.PASSWORD_ACCESS_GRANTED);
+            Padlock.getPlugin().getMessageManager().sendLang(player, LangPath.PASSWORD_ACCESS_GRANTED);
         }
 
         // yes I know I invalidate the arrays at multiple places, but in terms of password safety it's better to be double and tripple safe then sorry.
@@ -232,13 +232,13 @@ public final class SignPasswords {
     }
 
     // yes I know I invalidate the arrays at multiple places, but in terms of password safety it's better to be double and tripple safe then sorry.
-    private static void clearArray(char @Nullable [] newPassword) {
+    private static void clearArray(final char @Nullable [] newPassword) {
         if (newPassword != null) {
             Arrays.fill(newPassword, '*');
         }
     }
 
-    public static void removeAccessOfLoc(@NotNull Location location) {
+    public static void removeAccessOfLoc(final @NotNull Location location) {
         for (CacheSet<Location> cache : accessMap.values()) {
             cache.remove(location);
         }
@@ -251,7 +251,7 @@ public final class SignPasswords {
             dataContainer.remove(passwordHashKey);
             sign.update();
             removeAccessOfLoc(sign.getLocation());
-            Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.SET_PASSWORD_REMOVE_SUCCESS);
+            Padlock.getPlugin().getMessageManager().sendLang(player, LangPath.SET_PASSWORD_REMOVE_SUCCESS);
             SignPasswords.stopWaiting(player.getUniqueId(), sign.getLocation());
 
             SignDisplay.updateDisplay(sign);
@@ -264,7 +264,7 @@ public final class SignPasswords {
                     dataContainer.set(passwordHashKey, PersistentDataType.STRING, newHash);
                     sign.update();
                     removeAccessOfLoc(sign.getLocation());
-                    Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.SET_PASSWORD_SUCCESS);
+                    Padlock.getPlugin().getMessageManager().sendLang(player, LangPath.SET_PASSWORD_SUCCESS);
 
                     cacheAccess(player.getUniqueId(), sign.getLocation());
                     SignPasswords.stopWaiting(player.getUniqueId(), sign.getLocation());
@@ -297,7 +297,7 @@ public final class SignPasswords {
      *                        {@link Argon2Parameters}.
      * @throws IllegalArgumentException if the encoded hash is malformed
      */
-    private static String encode(final char[] password) {
+    private static @NotNull String encode(final char[] password) {
         final Argon2Advanced argon2 = Argon2Factory.createAdvanced(Argon2Factory.Argon2Types.ARGON2id);
         final byte[] salt = argon2.generateSalt(SALT_LENGTH);
         final byte[] hash = argon2.rawHash(ITERATIONS, MEMORY, PARALLELISM, password, StandardCharsets.UTF_8, salt);

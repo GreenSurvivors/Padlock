@@ -2,11 +2,11 @@ package de.greensurvivors.padlock.command;
 
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.PadlockAPI;
-import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
 import de.greensurvivors.padlock.impl.SignSelection;
 import de.greensurvivors.padlock.impl.signdata.SignLock;
 import de.greensurvivors.padlock.impl.signdata.SignPasswords;
+import de.greensurvivors.padlock.language.LangPath;
 import net.kyori.adventure.text.Component;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
@@ -48,7 +48,7 @@ public final class SetPassword extends SubCommand {
                 //check for old Lockett(Pro) signs and try to update them
                 sign = MainCommand.checkAndUpdateLegacySign(sign, player);
                 if (sign == null) {
-                    Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                    Padlock.getPlugin().getMessageManager().sendLang(player, LangPath.SIGN_NEED_RESELECT);
                     return;
                 }
 
@@ -58,16 +58,16 @@ public final class SetPassword extends SubCommand {
                         // this will communicate if password was set or removed
                         SignPasswords.setPassword(sign, player, newPassword);
                     } else {
-                        Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.NO_PERMISSION);
+                        Padlock.getPlugin().getMessageManager().sendLang(player, LangPath.NO_PERMISSION);
                     }
                 } else {
-                    Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                    Padlock.getPlugin().getMessageManager().sendLang(player, LangPath.SIGN_NEED_RESELECT);
                 }
             } else {
-                Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.SIGN_NOT_SELECTED);
+                Padlock.getPlugin().getMessageManager().sendLang(player, LangPath.SIGN_NOT_SELECTED);
             }
         } else {
-            Padlock.getPlugin().getMessageManager().sendLang(player, MessageManager.LangPath.NO_PERMISSION);
+            Padlock.getPlugin().getMessageManager().sendLang(player, LangPath.NO_PERMISSION);
         }
 
         // yes I know I invalidate the arrays at multiple places, but in terms of password safety it's better to be double and tripple safe then sorry.
@@ -88,17 +88,17 @@ public final class SetPassword extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_SET_PASSWORD);
+        return plugin.getMessageManager().getLang(LangPath.HELP_SET_PASSWORD);
     }
 
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         if (sender instanceof Player player) {
-            plugin.getMessageManager().sendLang(player, MessageManager.LangPath.PASSWORD_SAFETY_WARNING);
-            plugin.getMessageManager().sendLang(player, MessageManager.LangPath.PASSWORD_START_PROCESSING);
+            plugin.getMessageManager().sendLang(player, LangPath.PASSWORD_SAFETY_WARNING);
+            plugin.getMessageManager().sendLang(player, LangPath.PASSWORD_START_PROCESSING);
             return true;
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_PLAYER);
+            plugin.getMessageManager().sendLang(sender, LangPath.NOT_A_PLAYER);
             return false;
         }
     }

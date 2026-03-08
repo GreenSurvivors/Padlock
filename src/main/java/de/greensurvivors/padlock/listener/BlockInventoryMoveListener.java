@@ -28,7 +28,7 @@ public class BlockInventoryMoveListener implements Listener {
     }
 
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    public void onInventoryMove(InventoryMoveItemEvent event) {
+    public void onInventoryMove(final @NotNull InventoryMoveItemEvent event) {
         if (plugin.getConfigManager().isItemTransferOutBlocked() ||
             plugin.getConfigManager().getHopperMinecartAction() != ConfigManager.HopperMinecartMoveItemOption.ALLOWED) {
             if (isInventoryLocked(event.getSource())) {
@@ -69,10 +69,6 @@ public class BlockInventoryMoveListener implements Listener {
         }
     }
 
-    /**
-     * @param inventory
-     * @return
-     */
     public boolean isInventoryLocked(@NotNull Inventory inventory) {
         // get holder
         InventoryHolder inventoryholder = inventory.getHolder();

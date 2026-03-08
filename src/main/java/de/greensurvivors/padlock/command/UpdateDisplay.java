@@ -1,11 +1,11 @@
 package de.greensurvivors.padlock.command;
 
 import de.greensurvivors.padlock.Padlock;
-import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
 import de.greensurvivors.padlock.impl.SignSelection;
 import de.greensurvivors.padlock.impl.signdata.SignDisplay;
 import de.greensurvivors.padlock.impl.signdata.SignLock;
+import de.greensurvivors.padlock.language.LangPath;
 import net.kyori.adventure.text.Component;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
@@ -39,7 +39,7 @@ public class UpdateDisplay extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_UPDATE_DISPLAY);
+        return plugin.getMessageManager().getLang(LangPath.HELP_UPDATE_DISPLAY);
     }
 
     @Override
@@ -52,25 +52,25 @@ public class UpdateDisplay extends SubCommand {
                     //check for old Lockett(Pro) signs and try to update them
                     sign = MainCommand.checkAndUpdateLegacySign(sign, player);
                     if (sign == null) {
-                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                        plugin.getMessageManager().sendLang(sender, LangPath.SIGN_NEED_RESELECT);
                         return true;
                     }
 
                     if (SignLock.isOwner(sign, player.getUniqueId()) || SignLock.isMember(sign, player.getUniqueId()) ||
                         player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm())) {
                         SignDisplay.updateDisplay(sign);
-                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UPDATE_DISPLAY_SUCCESS);
+                        plugin.getMessageManager().sendLang(sender, LangPath.UPDATE_DISPLAY_SUCCESS);
                     } else {
-                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_OWNER);
+                        plugin.getMessageManager().sendLang(sender, LangPath.NOT_OWNER);
                     }
                 }
             } else {
-                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
+                plugin.getMessageManager().sendLang(sender, LangPath.NO_PERMISSION);
             }
 
             return true;
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_PLAYER);
+            plugin.getMessageManager().sendLang(sender, LangPath.NOT_A_PLAYER);
             return false;
         }
     }

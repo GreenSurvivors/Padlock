@@ -2,8 +2,9 @@ package de.greensurvivors.padlock.impl.signdata;
 
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.PadlockAPI;
-import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.impl.MiscUtils;
+import de.greensurvivors.padlock.language.LangPath;
+import de.greensurvivors.padlock.language.MessageManager;
 import net.kyori.adventure.text.Component;
 import org.bukkit.NamespacedKey;
 import org.bukkit.block.Block;
@@ -37,20 +38,20 @@ public final class SignAccessType {
     /**
      * unless you work with player input use {@link #getAccessType(Sign, boolean)} instead!
      */
-    public static AccessType getAccessTypeFromComp(@NotNull Component line) {
-        MessageManager manager = Padlock.getPlugin().getMessageManager();
+    public static @Nullable AccessType getAccessTypeFromComp(@NotNull Component line) {
+        final @NotNull MessageManager manager = Padlock.getPlugin().getMessageManager();
 
-        if (manager.isSignComp(line, MessageManager.LangPath.SIGN_LINE_PRIVATE)) {
+        if (manager.isSignComp(line, LangPath.SIGN_LINE_PRIVATE)) {
             return AccessType.PRIVATE;
-        } else if (manager.isSignComp(line, MessageManager.LangPath.SIGN_LINE_PUBLIC)) {
+        } else if (manager.isSignComp(line, LangPath.SIGN_LINE_PUBLIC)) {
             return AccessType.PUBLIC;
-        } else if (manager.isSignComp(line, MessageManager.LangPath.SIGN_LINE_DONATION)) {
+        } else if (manager.isSignComp(line, LangPath.SIGN_LINE_DONATION)) {
             return AccessType.DONATION;
-        } else if (manager.isSignComp(line, MessageManager.LangPath.SIGN_LINE_DISPLAY)) {
+        } else if (manager.isSignComp(line, LangPath.SIGN_LINE_DISPLAY)) {
             return AccessType.DISPLAY;
-        } else if (manager.isSignComp(line, MessageManager.LangPath.SIGN_LINE_SUPPLY_SIGN)) {
+        } else if (manager.isSignComp(line, LangPath.SIGN_LINE_SUPPLY_SIGN)) {
             return AccessType.SUPPLY;
-        } else if (manager.isLegacySignComp(line, MessageManager.LangPath.LEGACY_PRIVATE_SIGN)) {
+        } else if (manager.isLegacySignComp(line, LangPath.LEGACY_PRIVATE_SIGN)) {
             return AccessType.PRIVATE;
         } else {
             return null;
@@ -111,7 +112,7 @@ public final class SignAccessType {
      */
     @Deprecated(forRemoval = true)
     public static boolean isLegacyEveryOneComp(@NotNull Component component) {
-        return Padlock.getPlugin().getMessageManager().isLegacySignComp(component, MessageManager.LangPath.LEGACY_EVERYONE_SIGN);
+        return Padlock.getPlugin().getMessageManager().isLegacySignComp(component, LangPath.LEGACY_EVERYONE_SIGN);
     }
 
     /**
@@ -121,9 +122,9 @@ public final class SignAccessType {
     private static @Nullable AccessType getLegacySetting(@NotNull Sign sign) {
         boolean isPrivate = false;
         for (Component line : sign.getSide(Side.FRONT).lines()) {
-            if (Padlock.getPlugin().getMessageManager().isLegacySignComp(line, MessageManager.LangPath.LEGACY_PRIVATE_SIGN)) {
+            if (Padlock.getPlugin().getMessageManager().isLegacySignComp(line, LangPath.LEGACY_PRIVATE_SIGN)) {
                 isPrivate = true; // a lockette sign can have [Everyone] and [Private] on the same sign, and the Everyone-one overwrites
-            } else if (Padlock.getPlugin().getMessageManager().isLegacySignComp(line, MessageManager.LangPath.LEGACY_EVERYONE_SIGN)) {
+            } else if (Padlock.getPlugin().getMessageManager().isLegacySignComp(line, LangPath.LEGACY_EVERYONE_SIGN)) {
                 return AccessType.PUBLIC;
             }
         }

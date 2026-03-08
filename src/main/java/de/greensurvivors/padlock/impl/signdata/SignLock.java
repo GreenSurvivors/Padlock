@@ -4,10 +4,10 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.PadlockAPI;
-import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.dataTypes.LazySignProperties;
 import de.greensurvivors.padlock.impl.openabledata.Openables;
+import de.greensurvivors.padlock.language.LangPath;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.apache.commons.collections4.set.ListOrderedSet;
@@ -50,7 +50,7 @@ public class SignLock {
      * @param sign sign to set invalid
      */
     public static void setInvalid(@NotNull Sign sign) {
-        sign.getSide(Side.FRONT).line(0, Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_INVALID));
+        sign.getSide(Side.FRONT).line(0, Padlock.getPlugin().getMessageManager().getLang(LangPath.SIGN_LINE_INVALID));
         sign.update();
     }
 
@@ -67,7 +67,7 @@ public class SignLock {
      */
     @Deprecated(forRemoval = true)
     public static boolean isAdditionalSign(@NotNull Sign sign) {
-        return Padlock.getPlugin().getMessageManager().isLegacySignComp(sign.getSide(Side.FRONT).line(0), MessageManager.LangPath.LEGACY_ADDITIONAL_SIGN);
+        return Padlock.getPlugin().getMessageManager().isLegacySignComp(sign.getSide(Side.FRONT).line(0), LangPath.LEGACY_ADDITIONAL_SIGN);
     }
 
     /**

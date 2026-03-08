@@ -2,11 +2,12 @@ package de.greensurvivors.padlock.command;
 
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.PadlockAPI;
-import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
 import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.SignSelection;
 import de.greensurvivors.padlock.impl.signdata.SignLock;
+import de.greensurvivors.padlock.language.LangPath;
+import de.greensurvivors.padlock.language.PlaceHolder;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
@@ -135,7 +136,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 PadlockAPI.setInvalid(sign);
                 return null;
             } else {
-                plugin.getMessageManager().sendLang(audience, MessageManager.LangPath.UPDATE_LEGACY_SUCCESS);
+                plugin.getMessageManager().sendLang(audience, LangPath.UPDATE_LEGACY_SUCCESS);
                 return otherSign;
             }
         }
@@ -227,7 +228,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                         //check for old Lockett(Pro) signs and try to update them
                         sign = checkAndUpdateLegacySign(sign, player);
                         if (sign == null) {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                            plugin.getMessageManager().sendLang(sender, LangPath.SIGN_NEED_RESELECT);
                             return true;
                         }
 
@@ -242,38 +243,38 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                                     //success!
                                     SignLock.addPlayer(sign, addOwner, offlinePlayer);
 
-                                    TagResolver tagResolver = Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(),
+                                    TagResolver tagResolver = Placeholder.unparsed(PlaceHolder.PLAYER.getPlaceholder(),
                                             offlinePlayer.getName() == null ? offlinePlayer.getUniqueId().toString() : offlinePlayer.getName());
                                     // tell the player
                                     if (addOwner) {
-                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.ADD_OWNER_SUCCESS, tagResolver);
+                                        plugin.getMessageManager().sendLang(sender, LangPath.ADD_OWNER_SUCCESS, tagResolver);
                                     } else {
-                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.ADD_MEMBER_SUCCESS, tagResolver);
+                                        plugin.getMessageManager().sendLang(sender, LangPath.ADD_MEMBER_SUCCESS, tagResolver);
                                     }
                                 } else {
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UNKNOWN_PLAYER,
-                                            Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), args[1]));
+                                    plugin.getMessageManager().sendLang(sender, LangPath.UNKNOWN_PLAYER,
+                                        Placeholder.unparsed(PlaceHolder.PLAYER.getPlaceholder(), args[1]));
                                 }
                             } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
+                                plugin.getMessageManager().sendLang(sender, LangPath.NO_PERMISSION);
                             }
                         } else {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                            plugin.getMessageManager().sendLang(sender, LangPath.SIGN_NEED_RESELECT);
                         }
                     } else {
-                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NOT_SELECTED);
+                        plugin.getMessageManager().sendLang(sender, LangPath.SIGN_NOT_SELECTED);
                     }
                 } else {
-                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_ENOUGH_ARGS);
+                    plugin.getMessageManager().sendLang(sender, LangPath.NOT_ENOUGH_ARGS);
                     return false;
                 }
             } else {
-                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
+                plugin.getMessageManager().sendLang(sender, LangPath.NO_PERMISSION);
             }
 
             return true;
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_PLAYER);
+            plugin.getMessageManager().sendLang(sender, LangPath.NOT_A_PLAYER);
             return false;
         }
     }
@@ -305,7 +306,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                         //check for old Lockett(Pro) signs and try to update them
                         sign = checkAndUpdateLegacySign(sign, player);
                         if (sign == null) {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                            plugin.getMessageManager().sendLang(sender, LangPath.SIGN_NEED_RESELECT);
                             return true;
                         }
 
@@ -318,48 +319,48 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                                 OfflinePlayer offlinePlayer = getPlayerFromArgument(args[1]);
                                 if (offlinePlayer != null) {
                                     //prepare resolber
-                                    TagResolver tagResolver = Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(),
+                                    TagResolver tagResolver = Placeholder.unparsed(PlaceHolder.PLAYER.getPlaceholder(),
                                             offlinePlayer.getName() == null ? offlinePlayer.getUniqueId().toString() : offlinePlayer.getName());
 
                                     // try to remove the member/owner, may fail if the player is not a member/owner
                                     if (SignLock.removePlayer(sign, removeOwner, offlinePlayer.getUniqueId())) {
                                         //success
                                         if (removeOwner) {
-                                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_OWNER_SUCCESS, tagResolver);
+                                            plugin.getMessageManager().sendLang(sender, LangPath.REMOVE_OWNER_SUCCESS, tagResolver);
                                         } else {
-                                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_MEMBER_SUCCESS, tagResolver);
+                                            plugin.getMessageManager().sendLang(sender, LangPath.REMOVE_MEMBER_SUCCESS, tagResolver);
                                         }
                                     } else {
                                         if (removeOwner) {
-                                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_OWNER_ERROR, tagResolver);
+                                            plugin.getMessageManager().sendLang(sender, LangPath.REMOVE_OWNER_ERROR, tagResolver);
                                         } else {
-                                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_MEMBER_ERROR, tagResolver);
+                                            plugin.getMessageManager().sendLang(sender, LangPath.REMOVE_MEMBER_ERROR, tagResolver);
                                         }
                                     }
                                 } else {
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UNKNOWN_PLAYER,
-                                            Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), args[1]));
+                                    plugin.getMessageManager().sendLang(sender, LangPath.UNKNOWN_PLAYER,
+                                        Placeholder.unparsed(PlaceHolder.PLAYER.getPlaceholder(), args[1]));
                                 }
                             } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
+                                plugin.getMessageManager().sendLang(sender, LangPath.NO_PERMISSION);
                             }
                         } else {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                            plugin.getMessageManager().sendLang(sender, LangPath.SIGN_NEED_RESELECT);
                         }
                     } else {
-                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NOT_SELECTED);
+                        plugin.getMessageManager().sendLang(sender, LangPath.SIGN_NOT_SELECTED);
                     }
                 } else {
-                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_ENOUGH_ARGS);
+                    plugin.getMessageManager().sendLang(sender, LangPath.NOT_ENOUGH_ARGS);
                     return false;
                 }
             } else {
-                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
+                plugin.getMessageManager().sendLang(sender, LangPath.NO_PERMISSION);
             }
 
             return true;
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_PLAYER);
+            plugin.getMessageManager().sendLang(sender, LangPath.NOT_A_PLAYER);
             return false;
         }
     }
@@ -433,7 +434,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
      */
     public boolean onCommand(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command, @NotNull String commandLabel, final String[] args) {
         if (args.length == 0) {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.CMD_USAGE);
+            plugin.getMessageManager().sendLang(sender, LangPath.CMD_USAGE);
             return true;
         } else {
             SubCommand subCommand = getSubCommandFromString(sender, args[0]);
@@ -446,7 +447,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.CMD_USAGE);
+            plugin.getMessageManager().sendLang(sender, LangPath.CMD_USAGE);
             return false;
         }
     }

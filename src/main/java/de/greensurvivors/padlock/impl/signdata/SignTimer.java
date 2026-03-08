@@ -2,8 +2,9 @@ package de.greensurvivors.padlock.impl.signdata;
 
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.PadlockAPI;
-import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.impl.MiscUtils;
+import de.greensurvivors.padlock.language.LangPath;
+import de.greensurvivors.padlock.language.PlaceHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
@@ -38,7 +39,7 @@ public class SignTimer {
      */
     @Deprecated(forRemoval = true)
     private final static Set<Pattern> legacyPatterns = Padlock.getPlugin().getMessageManager().
-        getNakedLegacyText(MessageManager.LangPath.LEGACY_TIMER_SIGN).stream().
+        getNakedLegacyText(LangPath.LEGACY_TIMER_SIGN).stream().
         map(s -> Pattern.compile(s.replace("[", "\\[(?i)").
             replace("<time>", "(-?[0-9]+)"))).collect(Collectors.toSet());
     // pretty complex stuff [timer:<timer>] and timer can be any number of digits with their timeunit (t, s, h, d, w or M)
@@ -46,8 +47,8 @@ public class SignTimer {
     // valid lines would be "[timer:2h]", "[TIMER:2D, 3w2t 555s]", "[tiMeR: 100W,,,  -8t]", "[timer:2h5h99h]"
     // invalid lines would be "timer:3d]", "[timer24w]", "[time:0x77Q]", "[banana]", "[timer:34ttt]"
     private final static Pattern modernPattern = Pattern.compile(Padlock.getPlugin().getMessageManager().
-        getNakedSignText(MessageManager.LangPath.SIGN_LINE_TIMER_SIGN).replace("[", "\\[(?i)").
-        replace("<" + MessageManager.PlaceHolder.TIME.getPlaceholder() + ">",
+        getNakedSignText(LangPath.SIGN_LINE_TIMER_SIGN).replace("[", "\\[(?i)").
+        replace("<" + PlaceHolder.TIME.getPlaceholder() + ">",
             "\\s?((" + MiscUtils.getPeriodPattern().pattern() + "[\\s,]*?)+)"));
     private final static NamespacedKey timerKey = new NamespacedKey(Padlock.getPlugin(), "timer");
 
@@ -65,8 +66,8 @@ public class SignTimer {
         if (timerDuration != null && timerDuration.toMillis() > 0) {
             final String timeStr = MiscUtils.formatTimeString(timerDuration);
 
-            return Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_TIMER_SIGN,
-                Placeholder.unparsed(MessageManager.PlaceHolder.TIME.getPlaceholder(), timeStr));
+            return Padlock.getPlugin().getMessageManager().getLang(LangPath.SIGN_LINE_TIMER_SIGN,
+                Placeholder.unparsed(PlaceHolder.TIME.getPlaceholder(), timeStr));
         } else {
             return null;
         }

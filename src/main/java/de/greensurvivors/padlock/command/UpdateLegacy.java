@@ -2,9 +2,9 @@ package de.greensurvivors.padlock.command;
 
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.PadlockAPI;
-import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
 import de.greensurvivors.padlock.impl.SignSelection;
+import de.greensurvivors.padlock.language.LangPath;
 import net.kyori.adventure.text.Component;
 import org.bukkit.block.Sign;
 import org.bukkit.command.CommandSender;
@@ -37,7 +37,7 @@ public class UpdateLegacy extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_UPDATE_LEGACY);
+        return plugin.getMessageManager().getLang(LangPath.HELP_UPDATE_LEGACY);
     }
 
     @Override
@@ -47,19 +47,19 @@ public class UpdateLegacy extends SubCommand {
                 Sign sign = SignSelection.getSelectedSign(player);
                 if (sign != null) {
                     if (PadlockAPI.updateLegacySign(sign) != null) {
-                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UPDATE_LEGACY_SUCCESS);
+                        plugin.getMessageManager().sendLang(sender, LangPath.UPDATE_LEGACY_SUCCESS);
                     } else {
-                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                        plugin.getMessageManager().sendLang(sender, LangPath.SIGN_NEED_RESELECT);
                     }
                 } else {
-                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NOT_SELECTED);
+                    plugin.getMessageManager().sendLang(sender, LangPath.SIGN_NOT_SELECTED);
                 }
             } else {
-                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_PLAYER);
+                plugin.getMessageManager().sendLang(sender, LangPath.NOT_A_PLAYER);
                 return false;
             }
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
+            plugin.getMessageManager().sendLang(sender, LangPath.NO_PERMISSION);
         }
 
         return true;
