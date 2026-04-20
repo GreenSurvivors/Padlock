@@ -47,7 +47,7 @@ dependencies {
     implementation("de.mkammerer:argon2-jvm:2.11") // native password hashing with argon2
 
     paperweight.paperDevBundle("$minecraftVersion-R0.1-SNAPSHOT")
-    compileOnly('com.sk89q.worldguard:worldguard-bukkit:7.0.13-SNAPSHOT') { transitive = false }
+    compileOnly ('com.sk89q.worldguard:worldguard-bukkit:7.0.13-SNAPSHOT') { transitive = false } // 7.1.0-SNAPSHOT
     compileOnly('com.github.MilkBowl:VaultAPI:1.7.1') { transitive = false }
 }
 

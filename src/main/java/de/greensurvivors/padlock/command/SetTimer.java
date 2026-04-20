@@ -16,6 +16,7 @@ import org.bukkit.permissions.Permissible;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -68,12 +69,12 @@ public class SetTimer extends SubCommand {
                             // note: writing every time element in one argument,
                             // would have the same effect as spreading them across multiple arguments.
                             // using the same time unit more than once is permitted.
-                            Long timerDuration = null;
+                            Duration timerDuration = null;
 
                             if (args.length == 2) {
                                 try {
                                     if (Integer.parseInt(args[1]) <= 0) {
-                                        timerDuration = -1L;
+                                        timerDuration = Duration.ofSeconds(-1);
                                     }
                                 } catch (NumberFormatException ignored) {
                                 }
@@ -81,14 +82,14 @@ public class SetTimer extends SubCommand {
 
                             if (timerDuration == null) {
                                 for (int i = 1; i < args.length; i++) {
-                                    Long period = MiscUtils.parsePeriod(args[i]);
+                                    Duration period = MiscUtils.parsePeriod(args[i]);
 
                                     if (period != null) {
                                         if (timerDuration == null) {
-                                            timerDuration = 0L;
+                                            timerDuration = Duration.ZERO;
                                         }
 
-                                        timerDuration += period;
+                                        timerDuration = timerDuration.plus(period);
                                     } else {
                                         plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_ERROR);
                                         return false;
@@ -99,9 +100,9 @@ public class SetTimer extends SubCommand {
                             // success
                             SignTimer.setTimer(sign, timerDuration, true);
 
-                            if (timerDuration > 0) {
+                            if (timerDuration.toMillis() > 0) {
                                 plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_SUCCESS_ON,
-                                        Placeholder.component(MessageManager.PlaceHolder.TIME.getPlaceholder(), Component.text(timerDuration)));
+                                    Placeholder.unparsed(MessageManager.PlaceHolder.TIME.getPlaceholder(), MiscUtils.formatTimeString(timerDuration)));
                             } else {
                                 plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SET_TIMER_SUCCESS_OFF);
                             }

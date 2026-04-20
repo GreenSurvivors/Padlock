@@ -25,7 +25,7 @@ import java.util.concurrent.TimeUnit;
  * Normally not, no. But with many Inventory movement attempts like big hopper contraptions or
  * heavy redstone wire use might be.
  */
-public class LockCacheManager {
+public class LockCacheManager { // todo check Persistent data container use
     // cache has a maximum size to not grow unlimited
     private final Map<Location, LazySignProperties> lockLazyProps = new HashMap<>();
     private final @NotNull Cache<@NotNull Location, @NotNull LockWrapper> lockStateCache = Caffeine.newBuilder().
@@ -44,7 +44,7 @@ public class LockCacheManager {
         policy.ifPresent(expiration -> expiration.setExpiresAfter(duration, unit));
     }
 
-    public @NotNull LazySignProperties getProtectedFromCache(@NotNull Location location) {
+    public @NotNull LazySignProperties getProtectedFromCache(final @NotNull Location location) {
         LockWrapper lockWrapper = lockStateCache.getIfPresent(location);
 
         if (lockWrapper != null) {

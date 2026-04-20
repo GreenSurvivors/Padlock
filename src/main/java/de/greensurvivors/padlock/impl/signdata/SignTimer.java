@@ -16,13 +16,12 @@ import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 /**
- * A timer on a lock determines how many milliseconds it takes until the openable,
+ * A timer on a lock determines how long it takes until the openable,
  * the sign is attached to, toggles.
  * With other words, setting a timer on a sign of a chest does nothing but display a
  * somewhat pretty number.
@@ -61,12 +60,10 @@ public class SignTimer {
      * @return might be null if no timer was configured
      */
     public static @Nullable Component getTimerComponent(@NotNull Sign sign) {
-        Long timerDuration = getTimer(sign, false);
+        Duration timerDuration = getTimer(sign, false);
 
-        if (timerDuration != null && timerDuration > 0) {
-            Duration duration = Duration.ofMillis(timerDuration);
-
-            final String timeStr = MiscUtils.formatTimeString(duration);
+        if (timerDuration != null && timerDuration.toMillis() > 0) {
+            final String timeStr = MiscUtils.formatTimeString(timerDuration);
 
             return Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_TIMER_SIGN,
                 Placeholder.unparsed(MessageManager.PlaceHolder.TIME.getPlaceholder(), timeStr));
@@ -78,15 +75,15 @@ public class SignTimer {
     /**
      * set the timer to toggle
      *
-     * @param timerDuration       time duration in milliseconds
+     * @param timerDuration       time duration
      * @param shouldUpdateDisplay if the display should get updated. is important to set to false for updating a lock sign from legacy
      */
-    public static void setTimer(@NotNull Sign sign, long timerDuration, boolean shouldUpdateDisplay) {
+    public static void setTimer(@NotNull Sign sign, final @NotNull Duration timerDuration, boolean shouldUpdateDisplay) {
         if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
             Padlock.getPlugin().getLockCacheManager().removeFromCache(sign);
         }
 
-        sign.getPersistentDataContainer().set(timerKey, PersistentDataType.LONG, timerDuration);
+        sign.getPersistentDataContainer().set(timerKey, PersistentDataType.LONG, timerDuration.toMillis());
         sign.update();
 
         if (shouldUpdateDisplay) {
@@ -95,21 +92,21 @@ public class SignTimer {
     }
 
     /**
-     * get how many milliseconds it should take for an openable to toggle.
+     * get how long it should take for an openable to toggle.
      * Will start the update process if the sign was a legacy sign.
      *
      * @return might be null if no timer was configured
      */
-    public static @Nullable Long getTimer(@NotNull Sign sign, boolean ignoreCache) {
+    public static @Nullable Duration getTimer(@NotNull Sign sign, boolean ignoreCache) {
         if (!ignoreCache && Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
             return Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(sign.getLocation()).getTimer();
         } else {
-            Long timerDuration = sign.getPersistentDataContainer().get(timerKey, PersistentDataType.LONG);
+            final @Nullable Long persistentMillis = sign.getPersistentDataContainer().get(timerKey, PersistentDataType.LONG);
 
-            if (timerDuration != null) {
-                return timerDuration;
+            if (persistentMillis != null) {
+                return Duration.ofMillis(persistentMillis);
             } else {
-                timerDuration = getLegacyTimer(sign);
+                Duration timerDuration = getLegacyTimer(sign);
 
                 if (timerDuration != null) {
                     PadlockAPI.updateLegacySign(sign);
@@ -122,12 +119,12 @@ public class SignTimer {
     }
 
     /**
-     * Read a timer duration in milliseconds from a component line
+     * Read a timer duration from a component line
      * used to parse timer when locking manuel, should never get used for legacy signs!
      *
      * @return might be null, if it does not fit the legacy pattern.
      */
-    public static @Nullable Long getTimerFromComp(@NotNull Component line) {
+    public static @Nullable Duration getTimerFromComp(@NotNull Component line) {
         String strToTest = PlainTextComponentSerializer.plainText().serialize(line).trim();
         Matcher matcher;
 
@@ -135,7 +132,7 @@ public class SignTimer {
             matcher = legacyPattern.matcher(strToTest);
 
             if (matcher.matches()) {
-                return Long.parseLong(matcher.group(1));
+                return Duration.ofSeconds(Long.parseLong(matcher.group(1)));
             }
         }
 
@@ -154,7 +151,7 @@ public class SignTimer {
      */
     @Deprecated(forRemoval = true)
     public static void updateLegacyTimer(@NotNull Sign sign) {
-        @Nullable Long legacyTimer = getLegacyTimer(sign);
+        @Nullable Duration legacyTimer = getLegacyTimer(sign);
 
         if (legacyTimer != null) {
             setTimer(sign, legacyTimer, false);
@@ -162,17 +159,17 @@ public class SignTimer {
     }
 
     /**
-     * get the fist legacy timer duration in milliseconds found on a sign.
+     * get the fist legacy timer duration found on a sign.
      *
      * @return might be null if no fitting timer was found.
      */
     @Deprecated(forRemoval = true)
-    private static @Nullable Long getLegacyTimer(@NotNull Sign sign) {
+    private static @Nullable Duration getLegacyTimer(@NotNull Sign sign) {
         for (Component line : sign.getSide(Side.FRONT).lines()) {
-            Long timer = getTimerFromComp(line);
+            Duration timer = getTimerFromComp(line);
 
             if (timer != null) {
-                return TimeUnit.SECONDS.toMillis(timer);
+                return timer;
             }
         }
 
@@ -182,8 +179,8 @@ public class SignTimer {
     /**
      * update from a legacy timer, purely written on the lock sign to one in the getPersistentDataContainer.
      */
-    public static void updateLegacyTimerFromAdditional(Sign lockSign, Sign additional) {
-        Long legacyTimer = getLegacyTimer(additional);
+    public static void updateLegacyTimerFromAdditional(@NotNull Sign lockSign, @NotNull Sign additional) {
+        Duration legacyTimer = getLegacyTimer(additional);
 
         if (legacyTimer != null) {
             setTimer(lockSign, legacyTimer, true);
