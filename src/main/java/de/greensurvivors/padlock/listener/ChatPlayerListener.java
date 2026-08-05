@@ -3,7 +3,7 @@ package de.greensurvivors.padlock.listener;
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.command.ApplyPassword;
 import de.greensurvivors.padlock.command.SetPassword;
-import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Marker;
@@ -111,9 +111,9 @@ public final class ChatPlayerListener implements Listener {
         for (String cmdToCheck : removePwCmdStrings) {
             if (text.regionMatches(true, 1, cmdToCheck, 0, cmdToCheck.length())) {
                 // make room so chat event can roll through, we can wait until next circle
-                Bukkit.getScheduler().runTask(plugin, () -> {
-                    SetPassword.onExternalCommand(null, event.getPlayer());
-                });
+                Bukkit.getScheduler().runTask(plugin, () ->
+                    SetPassword.onExternalCommand(null, event.getPlayer())
+                );
 
                 plugin.getLogger().info(event.getPlayer().getName() + " issued sub command: setpassword to remove a password.");
                 return;
@@ -180,7 +180,7 @@ public final class ChatPlayerListener implements Listener {
 
         public Result logResult(String text) {
             for (String cmdToCheck : setPwCmdStrings) {
-                int index = StringUtils.indexOfIgnoreCase(text, cmdToCheck);
+                int index = Strings.CI.indexOf(text, cmdToCheck);
 
                 if (index > 0) {
                     return Result.DENY;
@@ -188,7 +188,7 @@ public final class ChatPlayerListener implements Listener {
             }
 
             for (String cmdToCheck : applyPwCmdStrings) {
-                int index = StringUtils.indexOfIgnoreCase(text, cmdToCheck);
+                int index = Strings.CI.indexOf(text, cmdToCheck);
 
                 if (index > 0) {
                     return Result.DENY;

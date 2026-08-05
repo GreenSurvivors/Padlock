@@ -206,8 +206,8 @@ public class ConfigManager {
                         plugin.getLogger().warning("Couldn't get exemtion \"" + string + "\" for lock exemtion list. Ignoring.");
                     }
                 }
-                default ->
-                        plugin.getLogger().warning("Couldn't get exemtion \"" + exemptionObj + "\" for lock exemtion list. Ignoring.");
+                case null, default ->
+                    plugin.getLogger().warning("Couldn't get exemtion \"" + exemptionObj + "\" for lock exemtion list. Ignoring.");
             }
 
         }

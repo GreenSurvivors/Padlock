@@ -382,7 +382,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
      * to default to the command executor
      */
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command, @NotNull String label, @NotNull String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command, @NotNull String label, @NotNull String @NotNull [] args) {
         List<String> suggestionList = null;
 
         if (args.length == 1) {

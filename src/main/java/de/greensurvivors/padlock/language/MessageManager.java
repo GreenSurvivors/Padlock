@@ -4,13 +4,10 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import de.greensurvivors.padlock.Padlock;
 import net.kyori.adventure.audience.Audience;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.MiniMessage;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
-import net.kyori.adventure.text.minimessage.translation.MiniMessageTranslator;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
-import net.kyori.adventure.util.UTF8ResourceBundleControl;
 import org.apache.commons.io.FileUtils;
 import org.bukkit.NamespacedKey;
 import org.bukkit.plugin.Plugin;
@@ -33,7 +30,7 @@ import java.util.zip.ZipInputStream;
 /**
  * manages all translatable and placeholders used by this plugin.
  */
-public class MessageManager extends MiniMessageTranslator {
+public class MessageManager /*extends MiniMessageTranslator*/ {
     protected static final @NotNull NamespacedKey TRANSLATOR_KEY = new NamespacedKey(Padlock.getPlugin(), "MessageManager");
     protected final @NotNull String BUNDLE_NAME = "lang";
     protected final @NotNull Pattern BUNDLE_FILE_NAME_PATTERN = Pattern.compile(BUNDLE_NAME + "(?:_.*)?.properties");
@@ -79,7 +76,7 @@ public class MessageManager extends MiniMessageTranslator {
     /**
      * reload language file.
      */
-    protected void reload(String langfilename) {
+    public void reload(String langfilename) {
         lang = null; // reset last bundle
 
         // save all missing keys
@@ -92,17 +89,17 @@ public class MessageManager extends MiniMessageTranslator {
         URL[] urls;
         try {
             urls = new URL[]{langDictionary.toURI().toURL()};
-            lang = ResourceBundle.getBundle(BUNDLE_NAME, locale, new URLClassLoader(urls), UTF8ResourceBundleControl.get());
+            lang = ResourceBundle.getBundle(BUNDLE_NAME, locale, new URLClassLoader(urls));
 
         } catch (SecurityException | MalformedURLException e) {
             plugin.getLogger().log(Level.WARNING, "Exception while reading lang bundle. Using internal", e);
         } catch (MissingResourceException ignored) { // how? missing write access?
-            plugin.getLogger().log(Level.WARNING, "No translation file for " + UTF8ResourceBundleControl.get().toBundleName(BUNDLE_NAME, locale) + " found on disc. Using internal");
+            plugin.getLogger().log(Level.WARNING, "No translation file for " + locale.toLanguageTag() + " found on disc. Using internal");
         }
 
         if (lang == null) { // fallback, since we are always trying to save defaults this never should happen
             try {
-                lang = PropertyResourceBundle.getBundle(BUNDLE_NAME, locale, plugin.getClass().getClassLoader(), new UTF8ResourceBundleControl());
+                lang = PropertyResourceBundle.getBundle(BUNDLE_NAME, locale, plugin.getClass().getClassLoader());
             } catch (MissingResourceException e) {
                 plugin.getLogger().log(Level.SEVERE, "Couldn't get Ressource bundle \"lang\" for locale \"" + locale.toLanguageTag() + "\". Messages WILL be broken!", e);
             }
@@ -331,13 +328,14 @@ public class MessageManager extends MiniMessageTranslator {
         return nakedLegacySignLines.get(langPath);
     }
 
+    /*
     @Override
     protected @Nullable String getMiniMessageString(final @NotNull String key, final @NotNull Locale locale) {
-        return;
+        return null; // todo
     }
 
     @Override
     public @NotNull Key name() {
         return TRANSLATOR_KEY;
-    }
+    }*/
 }

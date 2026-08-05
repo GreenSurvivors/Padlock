@@ -63,7 +63,7 @@ public class BlockPlayerListener implements Listener {
     private static boolean isSpawnProtected(@NotNull Player player, @NotNull Location location) {
         int spawnSize = Bukkit.getServer().getSpawnRadius();
 
-        if (Bukkit.getServer().getWorlds().get(0).getEnvironment() == World.Environment.NORMAL &&
+        if (Bukkit.getServer().getWorlds().getFirst().getEnvironment() == World.Environment.NORMAL &&
                 spawnSize > 0 && !player.isOp()) {
             Location spawnLocation = player.getWorld().getSpawnLocation();
             return Math.abs(location.x() - spawnLocation.z()) > spawnSize ||

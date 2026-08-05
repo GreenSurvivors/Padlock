@@ -115,12 +115,12 @@ public class ApplyPassword extends SubCommand implements TabCompleter, CommandEx
     }
 
     @Override
-    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public @Nullable List<String> onTabComplete(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
         return onTabComplete(sender, args);
     }
 
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String[] args) {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, @NotNull String @NotNull [] args) {
         if (sender instanceof Player player) {
             plugin.getMessageManager().sendLang(player, LangPath.PASSWORD_START_PROCESSING);
             return true;
