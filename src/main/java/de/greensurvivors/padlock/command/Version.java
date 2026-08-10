@@ -1,8 +1,8 @@
 package de.greensurvivors.padlock.command;
 
 import de.greensurvivors.padlock.Padlock;
-import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
+import de.greensurvivors.padlock.language.LangPath;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permissible;
@@ -32,16 +32,16 @@ public class Version extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_VERSION);
+        return plugin.getMessageManager().getLang(LangPath.HELP_VERSION);
     }
 
     @Override
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) {
         if (this.checkPermission(sender)) {
             //plugin.getPluginMeta().getName() + " " + plugin.getPluginMeta().getVersion();
-            plugin.getMessageManager().sendMessageWithPrefix(sender, Component.text(plugin.getDescription().getFullName())); //todo once it is worth making the jump to the paper-plugin system
+            plugin.getMessageManager().sendMessageWithPrefix(sender, Component.text(plugin.getName() + " v" + plugin.getPluginMeta().getVersion()));
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
+            plugin.getMessageManager().sendLang(sender, LangPath.NO_PERMISSION);
         }
         return true;
     }

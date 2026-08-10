@@ -3,10 +3,10 @@ package de.greensurvivors.padlock;
 import de.greensurvivors.padlock.command.ApplyPassword;
 import de.greensurvivors.padlock.command.MainCommand;
 import de.greensurvivors.padlock.config.ConfigManager;
-import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.impl.DependencyManager;
 import de.greensurvivors.padlock.impl.LockCacheManager;
 import de.greensurvivors.padlock.impl.openabledata.OpenableToggleManager;
+import de.greensurvivors.padlock.language.MessageManager;
 import de.greensurvivors.padlock.listener.*;
 import org.bukkit.Bukkit;
 import org.bukkit.command.PluginCommand;
@@ -42,10 +42,6 @@ public class Padlock extends JavaPlugin {
         final @Nullable Plugin lockettePro = Bukkit.getPluginManager().getPlugin("LockettePro");
         if (lockettePro != null) {
             plugin.getLogger().warning("I found LockettePro and disabled it. Please remove LockettePro from your Plugin list!");
-
-            // unregister lockette cmds
-            Bukkit.getCommandMap().getKnownCommands().entrySet().removeIf(
-                entry -> entry.getValue() instanceof PluginCommand cmd && cmd.getPlugin() == lockettePro);
 
             Bukkit.getPluginManager().disablePlugin(lockettePro);
         }

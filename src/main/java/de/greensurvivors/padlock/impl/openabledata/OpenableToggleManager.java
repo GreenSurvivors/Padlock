@@ -6,9 +6,11 @@ import org.bukkit.Bukkit;
 import org.bukkit.Location;
 import org.bukkit.Tag;
 import org.bukkit.block.Block;
+import org.bukkit.entity.Player;
 import org.bukkit.scheduler.BukkitTask;
 import org.jetbrains.annotations.NotNull;
 
+import java.time.Duration;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -51,9 +53,9 @@ public class OpenableToggleManager {
      * If at least one of the blocks already as a task for it running the task will be canceled and no new
      * task will get created. That's because the block was already closed, and we would open it running any task at this point.
      *
-     * @param timeUntilToggle time to wait until all the given blocks will get toggled in milliseconds
+     * @param timeUntilToggle time to wait until all the given blocks will get toggled
      */
-    public void toggleCancelRunning(final @NotNull Set<@NotNull Block> blocksToToggle, final long timeUntilToggle) {
+    public void toggleCancelRunning(final @NotNull Player player, final @NotNull Set<@NotNull Block> blocksToToggle, Duration timeUntilToggle) {
         Set<Location> locationsToToggle = blocksToToggle.stream().map(Block::getLocation).collect(Collectors.toSet());
 
         // remove running tasks
@@ -88,16 +90,17 @@ public class OpenableToggleManager {
                         }
                     }
 
-                    Openables.toggleOpenable(openableBlock);
+                    Openables.toggleOpenable(player, openableBlock);
 
                     if (taskToClearUp != null) {
                         final BukkitTask finalTaskToClearUp = taskToClearUp; // just Java being Java and needing a final variable, even if this can't change at this point.
                         toggleTasks.entrySet().removeIf(entry -> entry.getValue().equals(finalTaskToClearUp));
                     }
                 }
-                // the reason why we multiply with 20 before converting to seconds, not after (millis -> seconds --> ticks),
-                // is that with time durations smaller than one second it would always result in 0 instead of an amount of ticks.
-            }, TimeUnit.MILLISECONDS.toSeconds(timeUntilToggle * 20L));
+
+                // the reason why we multiply with the rick rate (20 per default) before we convert to TimeUnit seconds, is because of accuracy of decimal places.
+                // like in cases where it was set to below 999ms we would get 0 ticks instead of 20 you would expect (with default tick rate)
+            }, TimeUnit.MILLISECONDS.toSeconds(Math.round(timeUntilToggle.toMillis() * (double) plugin.getServer().getServerTickManager().getTickRate())));
 
             for (Location location : locationsToToggle) {
                 toggleTasks.put(location, task);

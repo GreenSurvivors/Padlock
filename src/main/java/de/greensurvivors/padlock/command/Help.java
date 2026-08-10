@@ -1,8 +1,9 @@
 package de.greensurvivors.padlock.command;
 
 import de.greensurvivors.padlock.Padlock;
-import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
+import de.greensurvivors.padlock.language.LangPath;
+import de.greensurvivors.padlock.language.PlaceHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.minimessage.MiniMessage;
@@ -37,7 +38,7 @@ public class Help extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_HELP);
+        return plugin.getMessageManager().getLang(LangPath.HELP_HELP);
     }
 
     @Override
@@ -48,20 +49,20 @@ public class Help extends SubCommand {
 
                 if (command != null) {
                     TextComponent.Builder builder = Component.text();
-                    builder.append(plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_HEADER));
+                    builder.append(plugin.getMessageManager().getLang(LangPath.HELP_HEADER));
                     builder.append(Component.newline());
                     builder.append(command.getHelpText());
 
                     sender.sendMessage(builder);
                 } else { // didn't type a valid subcommand.
-                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.CMD_NOT_A_SUBCOMMAND,
-                            Placeholder.unparsed(MessageManager.PlaceHolder.ARGUMENT.getPlaceholder(), args[1]));
+                    plugin.getMessageManager().sendLang(sender, LangPath.CMD_NOT_A_SUBCOMMAND,
+                        Placeholder.unparsed(PlaceHolder.ARGUMENT.getPlaceholder(), args[1]));
                     return false;
                 }
             } else { //todo maybe pages
-                Component component = plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_HEADER)
+                Component component = plugin.getMessageManager().getLang(LangPath.HELP_HEADER)
                         .append(Component.newline())
-                        .append(plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_DESCRIPTION)
+                    .append(plugin.getMessageManager().getLang(LangPath.HELP_DESCRIPTION)
                         .append(Component.newline()));
                 // list all subcommands alias per line
                 component = component.append(MiniMessage.miniMessage().deserialize(

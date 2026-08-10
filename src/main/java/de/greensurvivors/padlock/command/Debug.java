@@ -1,8 +1,8 @@
 package de.greensurvivors.padlock.command;
 
 import de.greensurvivors.padlock.Padlock;
-import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
+import de.greensurvivors.padlock.language.LangPath;
 import net.kyori.adventure.text.Component;
 import org.bukkit.Bukkit;
 import org.bukkit.command.CommandSender;
@@ -33,7 +33,7 @@ public class Debug extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_DEBUG);
+        return plugin.getMessageManager().getLang(LangPath.HELP_DEBUG);
     }
 
     @Override
@@ -62,7 +62,7 @@ public class Debug extends SubCommand {
                 sender.sendMessage(" - none");
             }
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
+            plugin.getMessageManager().sendLang(sender, LangPath.NO_PERMISSION);
         }
 
         return true;

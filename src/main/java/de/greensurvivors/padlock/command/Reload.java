@@ -1,8 +1,8 @@
 package de.greensurvivors.padlock.command;
 
 import de.greensurvivors.padlock.Padlock;
-import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
+import de.greensurvivors.padlock.language.LangPath;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.permissions.Permissible;
@@ -32,7 +32,7 @@ public class Reload extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_RELOAD);
+        return plugin.getMessageManager().getLang(LangPath.HELP_RELOAD);
     }
 
     @Override
@@ -40,9 +40,9 @@ public class Reload extends SubCommand {
         if (this.checkPermission(sender)) {
             plugin.getConfigManager().reload();
 
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.RELOAD_SUCCESS);
+            plugin.getMessageManager().sendLang(sender, LangPath.RELOAD_SUCCESS);
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
+            plugin.getMessageManager().sendLang(sender, LangPath.NO_PERMISSION);
         }
 
         return true;

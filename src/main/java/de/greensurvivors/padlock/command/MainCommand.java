@@ -2,12 +2,12 @@ package de.greensurvivors.padlock.command;
 
 import de.greensurvivors.padlock.Padlock;
 import de.greensurvivors.padlock.PadlockAPI;
-import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
 import de.greensurvivors.padlock.impl.MiscUtils;
 import de.greensurvivors.padlock.impl.SignSelection;
 import de.greensurvivors.padlock.impl.signdata.SignLock;
-import net.kyori.adventure.audience.Audience;
+import de.greensurvivors.padlock.language.LangPath;
+import de.greensurvivors.padlock.language.PlaceHolder;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import net.kyori.adventure.text.minimessage.tag.resolver.TagResolver;
 import org.apache.commons.collections4.set.ListOrderedSet;
@@ -55,7 +55,6 @@ public class MainCommand implements CommandExecutor, TabCompleter {
         SUBCOMMANDS.add(new AddOwner(plugin));
         SUBCOMMANDS.add(new RemoveOwner(plugin));
         SUBCOMMANDS.add(new UpdateDisplay(plugin));
-        SUBCOMMANDS.add(new UpdateLegacy(plugin));
         SUBCOMMANDS.add(new Version(plugin));
         SUBCOMMANDS.add(new Debug(plugin));
         SUBCOMMANDS.add(new Reload(plugin));
@@ -120,30 +119,6 @@ public class MainCommand implements CommandExecutor, TabCompleter {
     }
 
     /**
-     * Checks if a sign is a legacy or an additional sign and starts the update process.
-     *
-     * @return the main lock sign if found or null else
-     */
-    @Deprecated(forRemoval = true)
-    protected static @Nullable Sign checkAndUpdateLegacySign(@NotNull Sign sign, @NotNull Audience audience) {
-        //check for old Lockett(Pro) signs and try to update them
-        if (PadlockAPI.isAdditionalSign(sign) || SignLock.isLegacySign(sign)) {
-            Sign otherSign = PadlockAPI.updateLegacySign(sign); //get main sign
-
-            if (otherSign == null) { // couldn't find the main sign of the block.
-                //the calling function will return feedback to the player, since this may also get called on tabCompletable
-                PadlockAPI.setInvalid(sign);
-                return null;
-            } else {
-                plugin.getMessageManager().sendLang(audience, MessageManager.LangPath.UPDATE_LEGACY_SUCCESS);
-                return otherSign;
-            }
-        }
-
-        return sign;
-    }
-
-    /**
      * Since removing a member or an owner share most of their code,
      * Both of it gets dealt here in a common place instead of in the subcommands
      * calling thins method
@@ -165,12 +140,6 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 Sign sign = SignSelection.getSelectedSign(player);
 
                 if (sign != null) {
-                    //check for old Lockett(Pro) signs and try to update them
-                    sign = checkAndUpdateLegacySign(sign, player);
-                    if (sign == null) {
-                        return null;
-                    }
-
                     if (PadlockAPI.isLockSign(sign)) {
                         // check sign or admin permission, since only admins can mess with owners
                         if (sender.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()) || // /lock removeowner
@@ -224,13 +193,6 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     Sign sign = SignSelection.getSelectedSign(player);
 
                     if (sign != null) {
-                        //check for old Lockett(Pro) signs and try to update them
-                        sign = checkAndUpdateLegacySign(sign, player);
-                        if (sign == null) {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
-                            return true;
-                        }
-
                         if (PadlockAPI.isLockSign(sign)) {
                             // check sign or admin permission, since only admins can mess with owners
                             if (player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()) || // /lock addowner
@@ -242,38 +204,38 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                                     //success!
                                     SignLock.addPlayer(sign, addOwner, offlinePlayer);
 
-                                    TagResolver tagResolver = Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(),
+                                    TagResolver tagResolver = Placeholder.unparsed(PlaceHolder.PLAYER.getPlaceholder(),
                                             offlinePlayer.getName() == null ? offlinePlayer.getUniqueId().toString() : offlinePlayer.getName());
                                     // tell the player
                                     if (addOwner) {
-                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.ADD_OWNER_SUCCESS, tagResolver);
+                                        plugin.getMessageManager().sendLang(sender, LangPath.ADD_OWNER_SUCCESS, tagResolver);
                                     } else {
-                                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.ADD_MEMBER_SUCCESS, tagResolver);
+                                        plugin.getMessageManager().sendLang(sender, LangPath.ADD_MEMBER_SUCCESS, tagResolver);
                                     }
                                 } else {
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UNKNOWN_PLAYER,
-                                            Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), args[1]));
+                                    plugin.getMessageManager().sendLang(sender, LangPath.UNKNOWN_PLAYER,
+                                        Placeholder.unparsed(PlaceHolder.PLAYER.getPlaceholder(), args[1]));
                                 }
                             } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
+                                plugin.getMessageManager().sendLang(sender, LangPath.NO_PERMISSION);
                             }
                         } else {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                            plugin.getMessageManager().sendLang(sender, LangPath.SIGN_NEED_RESELECT);
                         }
                     } else {
-                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NOT_SELECTED);
+                        plugin.getMessageManager().sendLang(sender, LangPath.SIGN_NOT_SELECTED);
                     }
                 } else {
-                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_ENOUGH_ARGS);
+                    plugin.getMessageManager().sendLang(sender, LangPath.NOT_ENOUGH_ARGS);
                     return false;
                 }
             } else {
-                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
+                plugin.getMessageManager().sendLang(sender, LangPath.NO_PERMISSION);
             }
 
             return true;
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_PLAYER);
+            plugin.getMessageManager().sendLang(sender, LangPath.NOT_A_PLAYER);
             return false;
         }
     }
@@ -302,13 +264,6 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                     Sign sign = SignSelection.getSelectedSign(player);
 
                     if (sign != null) {
-                        //check for old Lockett(Pro) signs and try to update them
-                        sign = checkAndUpdateLegacySign(sign, player);
-                        if (sign == null) {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
-                            return true;
-                        }
-
                         if (PadlockAPI.isLockSign(sign)) {
                             // check sign or admin permission, since only admins can mess with owners
                             if (player.hasPermission(PermissionManager.ADMIN_EDIT.getPerm()) || // /lock removeowner
@@ -318,48 +273,48 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                                 OfflinePlayer offlinePlayer = getPlayerFromArgument(args[1]);
                                 if (offlinePlayer != null) {
                                     //prepare resolber
-                                    TagResolver tagResolver = Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(),
+                                    TagResolver tagResolver = Placeholder.unparsed(PlaceHolder.PLAYER.getPlaceholder(),
                                             offlinePlayer.getName() == null ? offlinePlayer.getUniqueId().toString() : offlinePlayer.getName());
 
                                     // try to remove the member/owner, may fail if the player is not a member/owner
                                     if (SignLock.removePlayer(sign, removeOwner, offlinePlayer.getUniqueId())) {
                                         //success
                                         if (removeOwner) {
-                                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_OWNER_SUCCESS, tagResolver);
+                                            plugin.getMessageManager().sendLang(sender, LangPath.REMOVE_OWNER_SUCCESS, tagResolver);
                                         } else {
-                                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_MEMBER_SUCCESS, tagResolver);
+                                            plugin.getMessageManager().sendLang(sender, LangPath.REMOVE_MEMBER_SUCCESS, tagResolver);
                                         }
                                     } else {
                                         if (removeOwner) {
-                                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_OWNER_ERROR, tagResolver);
+                                            plugin.getMessageManager().sendLang(sender, LangPath.REMOVE_OWNER_ERROR, tagResolver);
                                         } else {
-                                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.REMOVE_MEMBER_ERROR, tagResolver);
+                                            plugin.getMessageManager().sendLang(sender, LangPath.REMOVE_MEMBER_ERROR, tagResolver);
                                         }
                                     }
                                 } else {
-                                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.UNKNOWN_PLAYER,
-                                            Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), args[1]));
+                                    plugin.getMessageManager().sendLang(sender, LangPath.UNKNOWN_PLAYER,
+                                        Placeholder.unparsed(PlaceHolder.PLAYER.getPlaceholder(), args[1]));
                                 }
                             } else {
-                                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
+                                plugin.getMessageManager().sendLang(sender, LangPath.NO_PERMISSION);
                             }
                         } else {
-                            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NEED_RESELECT);
+                            plugin.getMessageManager().sendLang(sender, LangPath.SIGN_NEED_RESELECT);
                         }
                     } else {
-                        plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.SIGN_NOT_SELECTED);
+                        plugin.getMessageManager().sendLang(sender, LangPath.SIGN_NOT_SELECTED);
                     }
                 } else {
-                    plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_ENOUGH_ARGS);
+                    plugin.getMessageManager().sendLang(sender, LangPath.NOT_ENOUGH_ARGS);
                     return false;
                 }
             } else {
-                plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NO_PERMISSION);
+                plugin.getMessageManager().sendLang(sender, LangPath.NO_PERMISSION);
             }
 
             return true;
         } else {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.NOT_A_PLAYER);
+            plugin.getMessageManager().sendLang(sender, LangPath.NOT_A_PLAYER);
             return false;
         }
     }
@@ -381,7 +336,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
      * to default to the command executor
      */
     @Override
-    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command, @NotNull String label, @NotNull String[] args) {
+    public List<String> onTabComplete(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command, @NotNull String label, @NotNull String @NotNull [] args) {
         List<String> suggestionList = null;
 
         if (args.length == 1) {
@@ -433,7 +388,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
      */
     public boolean onCommand(@NotNull CommandSender sender, @NotNull org.bukkit.command.Command command, @NotNull String commandLabel, final String[] args) {
         if (args.length == 0) {
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.CMD_USAGE);
+            plugin.getMessageManager().sendLang(sender, LangPath.CMD_USAGE);
             return true;
         } else {
             SubCommand subCommand = getSubCommandFromString(sender, args[0]);
@@ -446,7 +401,7 @@ public class MainCommand implements CommandExecutor, TabCompleter {
                 return true;
             }
 
-            plugin.getMessageManager().sendLang(sender, MessageManager.LangPath.CMD_USAGE);
+            plugin.getMessageManager().sendLang(sender, LangPath.CMD_USAGE);
             return false;
         }
     }

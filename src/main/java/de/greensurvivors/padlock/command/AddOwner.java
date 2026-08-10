@@ -1,8 +1,8 @@
 package de.greensurvivors.padlock.command;
 
 import de.greensurvivors.padlock.Padlock;
-import de.greensurvivors.padlock.config.MessageManager;
 import de.greensurvivors.padlock.config.PermissionManager;
+import de.greensurvivors.padlock.language.LangPath;
 import net.kyori.adventure.text.Component;
 import org.bukkit.command.CommandSender;
 import org.bukkit.entity.Player;
@@ -33,7 +33,7 @@ public class AddOwner extends SubCommand {
 
     @Override
     protected @NotNull Component getHelpText() {
-        return plugin.getMessageManager().getLang(MessageManager.LangPath.HELP_ADD_OWNER);
+        return plugin.getMessageManager().getLang(LangPath.HELP_ADD_OWNER);
     }
 
     /**

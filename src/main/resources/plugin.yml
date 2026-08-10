@@ -3,15 +3,13 @@ main: de.greensurvivors.padlock.Padlock
 authors: [ connection_lost, GreensurvivorsTeam ]
 softdepend: [ WorldGuard, LockettePro ]
 loadbefore: [ SignShop ]
-version: ${version}
-api-version: "${mcVersion}"
-description: >
-  Padlock is a chest protection plugin for Paper. It is 80% compatible with original Lockette, but delivers a lot of performance enhancements and feature options.
+version: "${version}"
+api-version: "${minecraft_version}"
+description: ${description}
 libraries:
-  - org.apache.commons:commons-collections4:4.4
-  - org.apache.commons:commons-lang3:3.13.0
-  - com.github.ben-manes.caffeine:caffeine:3.1.8
-  - de.mkammerer:argon2-jvm:2.11
+  - org.apache.commons:commons-collections4:${commons_collections_version}
+  - com.github.ben-manes.caffeine:caffeine:${caffeine_version}
+  - de.mkammerer:argon2-jvm:${argon_version}
 
 commands:
   padlock:

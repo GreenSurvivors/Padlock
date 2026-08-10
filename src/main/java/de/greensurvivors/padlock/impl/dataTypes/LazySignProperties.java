@@ -7,13 +7,15 @@ import org.apache.commons.collections4.set.ListOrderedSet;
 import org.bukkit.block.Sign;
 import org.jetbrains.annotations.Nullable;
 
+import java.time.Duration;
+
 public class LazySignProperties {
     private final @Nullable Sign lock;
     private final boolean isLock;
 
     private ListOrderedSet<String> ownerUUIDStrs;
     private ListOrderedSet<String> memberUUIDStrs;
-    private Long timer;
+    private Duration timer;
     private SignAccessType.AccessType accessType;
 
     public LazySignProperties(@Nullable Sign lockSign) {
@@ -46,7 +48,7 @@ public class LazySignProperties {
         return memberUUIDStrs;
     }
 
-    public @Nullable Long getTimer() {
+    public @Nullable Duration getTimer() {
         if (isLock && timer == null) {
             timer = SignTimer.getTimer(lock, true);
         }

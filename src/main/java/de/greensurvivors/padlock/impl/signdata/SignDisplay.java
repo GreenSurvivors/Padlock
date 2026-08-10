@@ -1,7 +1,8 @@
 package de.greensurvivors.padlock.impl.signdata;
 
 import de.greensurvivors.padlock.Padlock;
-import de.greensurvivors.padlock.config.MessageManager;
+import de.greensurvivors.padlock.language.LangPath;
+import de.greensurvivors.padlock.language.PlaceHolder;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.minimessage.tag.resolver.Placeholder;
 import org.bukkit.Bukkit;
@@ -52,8 +53,8 @@ public class SignDisplay {
                             OfflinePlayer player = Bukkit.getOfflinePlayer(UUID.fromString(uuidStr));
 
                             if (player.getName() != null) {
-                                toFill[i] = Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_PLAYER_NAME_ON,
-                                        Placeholder.unparsed(MessageManager.PlaceHolder.PLAYER.getPlaceholder(), player.getName()));
+                                toFill[i] = Padlock.getPlugin().getMessageManager().getLang(LangPath.SIGN_PLAYER_NAME_ON,
+                                    Placeholder.unparsed(PlaceHolder.PLAYER.getPlaceholder(), player.getName()));
 
                                 //we have written a line; back to main loop to get the next one!
                                 continue mainLoop;
@@ -100,15 +101,12 @@ public class SignDisplay {
         // first line is always just the lock line
         SignAccessType.AccessType accessType = SignAccessType.getAccessType(sign, false);
         linesToUpdate[0] = switch (accessType) {
-            case PRIVATE -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_PRIVATE);
-            case PUBLIC -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_PUBLIC);
-            case DONATION ->
-                    Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_DONATION);
-            case DISPLAY -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_DISPLAY);
-            case SUPPLY ->
-                    Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_SUPPLY_SIGN);
-            /*case null, // todo next java version*/
-            default -> Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_LINE_ERROR);
+            case PRIVATE -> Padlock.getPlugin().getMessageManager().getLang(LangPath.SIGN_LINE_PRIVATE);
+            case PUBLIC -> Padlock.getPlugin().getMessageManager().getLang(LangPath.SIGN_LINE_PUBLIC);
+            case DONATION -> Padlock.getPlugin().getMessageManager().getLang(LangPath.SIGN_LINE_DONATION);
+            case DISPLAY -> Padlock.getPlugin().getMessageManager().getLang(LangPath.SIGN_LINE_DISPLAY);
+            case SUPPLY -> Padlock.getPlugin().getMessageManager().getLang(LangPath.SIGN_LINE_SUPPLY_SIGN);
+            case null -> Padlock.getPlugin().getMessageManager().getLang(LangPath.SIGN_LINE_ERROR);
         };
 
         //special settings
@@ -119,7 +117,7 @@ public class SignDisplay {
         }
 
         if (SignPasswords.needsPasswordAccess(sign)) {
-            linesToUpdate[lastIndex] = Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SING_LINE_HAS_PASSWORD);
+            linesToUpdate[lastIndex] = Padlock.getPlugin().getMessageManager().getLang(LangPath.SING_LINE_HAS_PASSWORD);
             lastIndex--;
         }
 
@@ -130,7 +128,7 @@ public class SignDisplay {
         }
 
         if (shouldAddMoreUsers) { // this might overwrite the last name
-            linesToUpdate[lastIndex] = Padlock.getPlugin().getMessageManager().getLang(MessageManager.LangPath.SIGN_MORE_USERS);
+            linesToUpdate[lastIndex] = Padlock.getPlugin().getMessageManager().getLang(LangPath.SIGN_MORE_USERS);
         }
 
         //got everything. Update.
