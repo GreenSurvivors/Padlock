@@ -72,7 +72,7 @@ public class Info extends SubCommand {
     protected boolean onCommand(@NotNull CommandSender sender, @NotNull String[] args) { //todo this needs formatting and general glow up; connected info; payers seem to be broken
         if (this.checkPermission(sender)) {
             if (sender instanceof Player player) {
-                Sign sign = SignSelection.getSelectedSign(player);
+                @Nullable Sign sign = SignSelection.getSelectedSign(player);
                 if (sign != null) {
                     //check for old Lockett(Pro) signs and try to update them
                     sign = MainCommand.checkAndUpdateLegacySign(sign, player);

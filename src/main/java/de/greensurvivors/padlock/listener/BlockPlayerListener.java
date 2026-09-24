@@ -504,9 +504,9 @@ public class BlockPlayerListener implements Listener {
      * Protect block from interfere block
      */
     @EventHandler(ignoreCancelled = true, priority = EventPriority.HIGH)
-    private void onAttemptPlaceInterfereBlocks(@NotNull BlockPlaceEvent event) {
-        Block block = event.getBlock();
-        Player player = event.getPlayer();
+    private void onAttemptPlaceInterfereBlocks(final @NotNull BlockPlaceEvent event) {
+        final @NotNull Block block = event.getBlock();
+        final @NotNull Player player = event.getPlayer();
 
         if (!player.hasPermission(PermissionManager.ADMIN_INTERFERE.getPerm()) && PadlockAPI.isInterfering(block, player.getUniqueId())) {
             // no permission

@@ -530,7 +530,7 @@ public class PadlockAPI {
      *
      * @return will also true if the block is not protected
      */
-    public static boolean isOwner(@NotNull Block block, @NotNull UUID playerUUid) {
+    public static boolean isOwner(final @NotNull Block block, final @NotNull UUID playerUUid) {
         if (Padlock.getPlugin().getConfigManager().isCacheEnabled()) {
             Set<String> ownerUUIDStrs = Padlock.getPlugin().getLockCacheManager().getProtectedFromCache(block.getLocation()).getOwnerUUIDStrs();
             String playerUUIDStr = playerUUid.toString();
@@ -538,7 +538,7 @@ public class PadlockAPI {
             return ownerUUIDStrs != null && ownerUUIDStrs.contains(playerUUIDStr);
         } else {
             Sign lock = getLock(block, true);
-            return lock != null && SignLock.isOwner(lock, playerUUid);
+            return lock == null || SignLock.isOwner(lock, playerUUid);
         }
     }
 
@@ -618,7 +618,7 @@ public class PadlockAPI {
                     for (BlockFace blockface : allFaces) {
                         Block newblock = block.getRelative(blockface);
 
-                        if (newblock.getState() instanceof BlockInventoryHolder) {
+                        if (newblock.getState(false) instanceof BlockInventoryHolder) {
                             if (!isOwner(newblock, playerUUid)) {
                                 return true;
                             }
